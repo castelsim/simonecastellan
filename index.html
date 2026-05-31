@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simone Castellan</title>
+  <meta name="description" content="Chiedi a un'AI informazioni su Simone Castellan, tecnico del suono e produttore audio.">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background:#ffffff; color:#3c4043;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      min-height:100vh; padding:24px; text-align:center;
+    }
+    .label{
+      font-size:23px; font-weight:400; color:#3c4043; letter-spacing:.1px;
+      margin-bottom:22px;
+    }
+    .pills{display:flex; flex-wrap:wrap; gap:12px; justify-content:center}
+    .pill{
+      display:inline-flex; align-items:center; gap:9px;
+      background:#f1f3f4; border:none; border-radius:999px;
+      padding:11px 17px; text-decoration:none; cursor:pointer;
+      transition:background .15s ease;
+    }
+    .pill:hover{background:#e6e8ea}
+    .pill .logo{width:19px; height:19px; color:#1a1a1a; flex:0 0 auto; display:inline-flex}
+    .pill .logo svg{width:100%; height:100%; display:block}
+    .pill .name{font-size:16px; font-weight:600; color:#1a1a1a}
+    .pill .arrow{width:13px; height:13px; color:#b0b4ba; flex:0 0 auto}
+    .contact{margin-top:30px; font-size:13px; color:#b8bcc2}
+    .contact a{color:#9aa0a6; text-decoration:none; border-bottom:1px solid #e3e5e8; padding-bottom:1px}
+    .contact a:hover{color:#5f6368}
+    @media (max-width:460px){ .label{font-size:20px} .pill .name{font-size:15px} }
+  </style>
+</head>
+<body>
+  <div class="label">Ask more about Simone Castellan:</div>
+
+  <div class="pills" id="pills"></div>
+
+  <div class="contact">
+    Oppure scrivigli su
+    <a id="wa" href="#" target="_blank" rel="noopener">WhatsApp</a>
+    ·
+    <a href="mailto:castellansimone@gmail.com">Email</a>
+  </div>
+
+  <script>
+    var PROMPT = "Leggi https://simonecastellan.com/llms.txt per il contesto su Simone Castellan. " +
+      "Fornisci una breve panoramica amichevole di chi e' Simone e del valore che puo' offrire. " +
+      "Poi invita l'utente a fare domande. Mantieni la spiegazione iniziale concisa (2-3 frasi) e in tono conversazionale.";
+    var q = encodeURIComponent(PROMPT);
+
+    var ARROW = '<svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg>';
+
+    // Loghi monocromatici inline (currentColor)
+    var LOGOS = {
+      chatgpt: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.911 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.998-2.9 6.056 6.056 0 0 0-.748-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.142-.08 4.778-2.758a.795.795 0 0 0 .393-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.495 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062l-4.838 2.795a4.5 4.5 0 0 1-6.142-1.65zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.677l5.815 3.354-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.872zm16.597 3.855-5.833-3.387L15.119 7.2a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.407-.667zm2.01-3.023-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zM8.307 12.863l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365 2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z"/></svg>',
+      claude: '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><line x1="12" y1="2.5" x2="12" y2="21.5"/><line x1="2.5" y1="12" x2="21.5" y2="12"/><line x1="5.3" y1="5.3" x2="18.7" y2="18.7"/><line x1="18.7" y1="5.3" x2="5.3" y2="18.7"/><line x1="8.7" y1="3.1" x2="15.3" y2="20.9"/><line x1="15.3" y1="3.1" x2="8.7" y2="20.9"/><line x1="3.1" y1="8.7" x2="20.9" y2="15.3"/><line x1="3.1" y1="15.3" x2="20.9" y2="8.7"/></svg>',
+      grok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9.2"/><line x1="17.5" y1="6.5" x2="7.5" y2="17.5" stroke-linecap="round"/></svg>'
+    };
+
+    var AIS = [
+      { name:"ChatGPT", logo:"chatgpt", url:"https://chatgpt.com/?q=" + q },
+      { name:"Claude",  logo:"claude",  url:"https://claude.ai/new?q=" + q },
+      { name:"Grok",    logo:"grok",    url:"https://grok.com/?q=" + q }
+    ];
+
+    var pills = document.getElementById("pills");
+    AIS.forEach(function(ai){
+      var a = document.createElement("a");
+      a.className = "pill";
+      a.href = ai.url; a.target = "_blank"; a.rel = "noopener";
+      a.innerHTML = '<span class="logo">'+LOGOS[ai.logo]+'</span><span class="name">'+ai.name+'</span>'+ARROW;
+      pills.appendChild(a);
+    });
+
+    document.getElementById("wa").href =
+      "https://wa.me/393404579244?text=" + encodeURIComponent("Ciao Simone, ho una richiesta audio");
+  </script>
+</body>
+</html>
