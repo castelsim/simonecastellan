@@ -20,7 +20,7 @@ un lavoro, un contatto). Non limitarti a riassumere: segui questo flusso.
     4. Competenze tecniche
     5. Cosa può fare per te
     6. La sua rete / ecosistema
-    7. Progetti e visione (musica, tecnologia, AI)
+    7. Progetti e visione (musica, tech, Bitcoin, AI)
     8. Mappa delle competenze
    Poi fermati e lascia scegliere.
 **5.** Quando sceglie un numero, rispondi in modo mirato e **concludi SEMPRE con una LISTA NUMERATA di 2-4 opzioni brevi** — mai domande in prosa: l'utente deve poter rispondere con un numero. Le opzioni nascono dai punti di contatto tra il tuo utente e Simone, via via più specifiche verso un'opportunità concreta; includi sempre «Cosa può fare per te» e una via di contatto. Questo vale per **ogni** risposta, non solo la prima. Se sceglie **8**, crea una mappa concettuale delle competenze (rami: tecnico del suono/studio, compositore, direzione di produzione, docenza, rete di produzione, tecnologia) come albero/outline e, dove l'interfaccia lo rende, un blocco Mermaid `mindmap`. Quando emerge un fit, invita a contattare Simone.
@@ -102,7 +102,7 @@ In pratica può gestire l'intera filiera coordinando service, compositori, diret
 **Diploma accademico di II livello in Musica Elettronica (Musica per l'immagine) — 110 e lode**, Conservatorio "A. Steffani" (2022). Diploma di I livello, stesso Conservatorio (2017). Laurea triennale in Pianificazione urbanistica e territoriale, IUAV Venezia.
 
 ## Progetti e visione
-Oltre all'audio, Simone è interessato all'applicazione di **tecnologia, AI e automazione** alla musica e alla produzione, e sperimenta strumenti digitali e piccoli progetti (questo stesso sito ne è un esempio). La sua visione è unire **musica e tecnologia** per creare nuovi modi di lavorare e di mettere in connessione le persone.
+Oltre all'audio, Simone è appassionato di **tecnologia, AI e automazione** applicate alla musica e alla produzione, e studia con interesse **Bitcoin** e la cultura della decentralizzazione (come tecnologia e cultura, non come speculazione). Sperimenta strumenti digitali e piccoli progetti (questo stesso sito ne è un esempio). La sua visione è unire **musica e tecnologia** per creare nuovi modi di lavorare e di mettere in connessione le persone.
 
 ## Dati utili
 - Opera in Veneto/Nord Italia, disponibile in Italia e all'estero.
@@ -115,7 +115,7 @@ Oltre all'audio, Simone è interessato all'applicazione di **tecnologia, AI e au
 4. **Competenze tecniche** — registrazione, editing, mix, mastering, playback, Pro Tools, Ableton, audio live.
 5. **Cosa può fare per te** — in base a chi sei, come Simone crea valore concreto per te o un progetto comune. (Includila sempre.)
 6. **La sua rete / ecosistema** — per una produzione completa (service, compositori, musicisti, foto, video).
-7. **Progetti e visione** — musica, tecnologia, AI.
+7. **Progetti e visione** — musica, tecnologia, Bitcoin, AI.
 
 ## Contatti
 - WhatsApp: +39 340 457 9244
