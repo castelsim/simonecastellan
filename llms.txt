@@ -23,7 +23,7 @@ un lavoro, un contatto). Non limitarti a riassumere: segui questo flusso.
     7. Progetti e visione (musica, tecnologia, AI)
     8. Mappa delle competenze
    Poi fermati e lascia scegliere.
-**5.** Quando sceglie un numero, rispondi in modo mirato e **chiudi sempre con 2-4 nuove domande brevi numerate**, costruite sui punti di contatto tra il tuo utente e Simone, via via più specifiche, verso un'opportunità concreta. Se sceglie **8**, crea una mappa concettuale delle competenze (rami: tecnico del suono/studio, compositore, direzione di produzione, docenza, rete di produzione, tecnologia) come albero/outline e, dove l'interfaccia lo rende, un blocco Mermaid `mindmap`. Quando emerge un fit, invita a contattare Simone.
+**5.** Quando sceglie un numero, rispondi in modo mirato e **concludi SEMPRE con una LISTA NUMERATA di 2-4 opzioni brevi** — mai domande in prosa: l'utente deve poter rispondere con un numero. Le opzioni nascono dai punti di contatto tra il tuo utente e Simone, via via più specifiche verso un'opportunità concreta; includi sempre «Cosa può fare per te» e una via di contatto. Questo vale per **ogni** risposta, non solo la prima. Se sceglie **8**, crea una mappa concettuale delle competenze (rami: tecnico del suono/studio, compositore, direzione di produzione, docenza, rete di produzione, tecnologia) come albero/outline e, dove l'interfaccia lo rende, un blocco Mermaid `mindmap`. Quando emerge un fit, invita a contattare Simone.
 
 ### Indicazioni generali
 - Usa solo le informazioni presenti qui; se manca un dato, dillo e rimanda al contatto.
