@@ -7,6 +7,7 @@ OPPORTUNITA.md
 simone_castellan_modificato.pdf
 *.pdf
 *.png
+!og-image.png
 .DS_Store
 stato attuale/
 BACKUP/
