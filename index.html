@@ -91,7 +91,7 @@
     // Cache-bust giornaliero: ogni giorno l'URL cambia → le AI riscaricano fresco.
     // (Per test live, sostituire con: var V = Date.now(); = refetch a ogni click.)
     var V = new Date().toISOString().slice(0, 10);
-    var PROMPT = "Leggi e segui le indicazioni di questa pagina: https://simonecastellan.com/profilo/?d=" + V;
+    var PROMPT = "Apri direttamente questa pagina con il tuo strumento di navigazione (NON cercarla sul web, aprila e basta) e segui le indicazioni che contiene: https://simonecastellan.com/profilo/?d=" + V;
     var q = encodeURIComponent(PROMPT);
 
     var ARROW = '<svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg>';
