@@ -29,7 +29,7 @@
   <meta property="og:title" content="Simone Castellan">
   <meta property="og:description" content="Un profilo dinamico leggibile dall'intelligenza artificiale: chiedi a ChatGPT, Claude, Grok o Perplexity chi è Simone Castellan e come potreste creare valore insieme.">
   <meta property="og:url" content="https://simonecastellan.com/">
-  <meta property="og:image" content="https://simonecastellan.com/og-image.png">
+  <meta property="og:image" content="https://simonecastellan.com/og-image.png?v=2">
   <meta name="twitter:card" content="summary_large_image">
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
@@ -82,9 +82,9 @@
   <footer class="credit">Designed and built by Simone Castellan.</footer>
 
   <script>
-    // MODALITÀ TEST: cache-bust per-click (timestamp unico a ogni apertura) → l'AI riscarica sempre l'ultima versione.
-    // Per tornare al cache-bust giornaliero: var V = new Date().toISOString().slice(0, 10);
-    var V = Date.now();
+    // Cache-bust giornaliero: ogni giorno l'URL cambia → le AI riscaricano fresco.
+    // (Per test live, sostituire con: var V = Date.now(); = refetch a ogni click.)
+    var V = new Date().toISOString().slice(0, 10);
     var PROMPT = "Leggi e segui le indicazioni di questa pagina: https://simonecastellan.com/profilo/?d=" + V;
     var q = encodeURIComponent(PROMPT);
 
