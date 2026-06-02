@@ -82,8 +82,9 @@
   <footer class="credit">Designed and built by Simone Castellan.</footer>
 
   <script>
-    // versioning per data: ogni giorno l'URL cambia → le AI riscaricano fresco (cache-bust)
-    var V = new Date().toISOString().slice(0, 10);
+    // MODALITÀ TEST: cache-bust per-click (timestamp unico a ogni apertura) → l'AI riscarica sempre l'ultima versione.
+    // Per tornare al cache-bust giornaliero: var V = new Date().toISOString().slice(0, 10);
+    var V = Date.now();
     var PROMPT = "Leggi e segui le indicazioni di questa pagina: https://simonecastellan.com/profilo/?d=" + V;
     var q = encodeURIComponent(PROMPT);
 
