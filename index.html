@@ -96,7 +96,7 @@
     Oppure scrivigli su
     <a id="wa" href="#" target="_blank" rel="noopener" aria-label="Scrivi su WhatsApp — apri in una nuova scheda">WhatsApp</a>
     ·
-    <a href="mailto:castellansimone@gmail.com">Email</a>
+    <a id="email" href="mailto:castellansimone@gmail.com">Email</a>
   </div>
 
   <footer class="credit">Designed and built by Simone Castellan.</footer>
@@ -156,6 +156,11 @@ PROFILO. Simone Castellan (1991): tecnico del suono, sound designer e compositor
 
     document.getElementById("wa").href =
       "https://wa.me/393404579244?text=" + encodeURIComponent("Ciao Simone");
+
+    document.getElementById("email").href =
+      "mailto:castellansimone@gmail.com" +
+      "?subject=" + encodeURIComponent("Ciao Simone — dal tuo sito") +
+      "&body=" + encodeURIComponent("Ciao Simone,\n\nho visto il tuo sito e mi piacerebbe parlarti di una possibile collaborazione.\n\nDue righe su di me:\n");
 
     // ===== Flusso Gemini: copia profilo completo + riquadro guida + fallback =====
     function copyText(text){
