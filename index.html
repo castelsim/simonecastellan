@@ -143,6 +143,31 @@ PROFILO. Simone Castellan (1991): tecnico del suono, sound designer e compositor
       { name:"Gemini",     logo:"gemini",     url:"https://gemini.google.com/app", clipboard:true }
     ];
 
+    // ===== Analytics anonimi (beacon → Apps Script → Foglio Google). Incolla l'URL dopo il deploy. =====
+    var ANALYTICS_URL = "https://script.google.com/macros/s/AKfycbw2b2lcSidmlfcv-sPn8bDSTX7DbwoanhVypGuBoMmJ2yooRQQNaGp9D-gzVc6wIuof3Q/exec";
+    function track(event, target){
+      if (!ANALYTICS_URL) return;
+      try {
+        var p = new URLSearchParams(location.search);
+        var data = {
+          event: event,
+          target: target || "",
+          src: p.get("utm_source") || p.get("src") || "",
+          ref: document.referrer || "",
+          lang: navigator.language || "",
+          screen: window.innerWidth + "x" + window.innerHeight,
+          path: location.pathname,
+          ua: navigator.userAgent || ""
+        };
+        var body = JSON.stringify(data);
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(ANALYTICS_URL, new Blob([body], { type: "text/plain;charset=UTF-8" }));
+        } else {
+          fetch(ANALYTICS_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=UTF-8" }, body: body, keepalive: true });
+        }
+      } catch (e) {}
+    }
+
     var pills = document.getElementById("pills");
     AIS.forEach(function(ai){
       var a = document.createElement("a");
@@ -150,6 +175,7 @@ PROFILO. Simone Castellan (1991): tecnico del suono, sound designer e compositor
       a.href = ai.url; a.target = "_blank"; a.rel = "noopener";
       a.setAttribute("aria-label", ai.clipboard ? ("Chiedi a " + ai.name + " — copia il prompt e apri Gemini") : ("Chiedi a " + ai.name + " — apri in una nuova scheda"));
       a.innerHTML = '<span class="logo" aria-hidden="true">'+(LOGOS[ai.logo]||'')+'</span><span class="name">'+ai.name+'</span>'+ARROW;
+      a.addEventListener("click", function(){ track("click", ai.name); });
       if (ai.clipboard) { a.addEventListener("click", function(e){ e.preventDefault(); openGeminiFlow(ai.url); }); }
       pills.appendChild(a);
     });
@@ -161,6 +187,11 @@ PROFILO. Simone Castellan (1991): tecnico del suono, sound designer e compositor
       "mailto:castellansimone@gmail.com" +
       "?subject=" + encodeURIComponent("Ciao Simone — dal tuo sito") +
       "&body=" + encodeURIComponent("Ciao Simone,\n\nho visto il tuo sito e mi piacerebbe parlarti di una possibile collaborazione.\n\nDue righe su di me:\n");
+
+    document.getElementById("wa").addEventListener("click", function(){ track("click", "WhatsApp"); });
+    document.getElementById("email").addEventListener("click", function(){ track("click", "Email"); });
+
+    track("pageview");
 
     // ===== Flusso Gemini: copia profilo completo + riquadro guida + fallback =====
     function copyText(text){
