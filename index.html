@@ -136,10 +136,10 @@ PROFILO. Simone Castellan (1991): tecnico del suono, sound designer e compositor
     var GEMINI_PROMPT = "Segui le indicazioni contenute in questo testo e comportati di conseguenza (è il curriculum dinamico di Simone Castellan).\n\n" + GEMINI_TEXT;
 
     var AIS = [
-      { name:"ChatGPT",    logo:"chatgpt",    url:"https://chatgpt.com/?q=" + q,   copy: GEMINI_PROMPT },
+      { name:"ChatGPT",    logo:"chatgpt",    url:"https://chatgpt.com/?q=" + q,   directApp:true, copy: GEMINI_PROMPT },
       { name:"Claude",     logo:"claude",     url:"https://claude.ai/new?q=" + q,  copy: GEMINI_PROMPT },
       { name:"Grok",       logo:"grok",       url:"https://grok.com/?q=" + q,      copy: GEMINI_PROMPT },
-      { name:"Perplexity", logo:"perplexity", url:PPLX_URL,                        copy: GEMINI_PROMPT },
+      { name:"Perplexity", logo:"perplexity", url:PPLX_URL,                        directApp:true, copy: GEMINI_PROMPT },
       { name:"Gemini",     logo:"gemini",     url:"https://gemini.google.com/app", clipboard:true }
     ];
 
@@ -169,21 +169,29 @@ PROFILO. Simone Castellan (1991): tecnico del suono, sound designer e compositor
     }
 
     var pills = document.getElementById("pills");
-    // Su smartphone l'app nativa si apre SENZA il prompt (il ?q= viene ignorato dentro le app):
-    // copiamo negli appunti il profilo COMPLETO self-contained (GEMINI_PROMPT, non serve che
-    // l'app navighi il link) e guidiamo all'incolla. Il bottone "Apri" naviga in stessa scheda
-    // su mobile → iOS/Android aprono l'app via universal/app link (in nuova scheda spesso no).
+    // Comportamento mobile per-app (verificato sul campo 05/06):
+    // - ChatGPT/Perplexity (directApp): l'universal link apre l'app COL prompt → apri diretto, no popup.
+    // - Claude/Grok/Gemini: le app NON agganciano il link col prompt → copia negli appunti il profilo
+    //   COMPLETO self-contained (GEMINI_PROMPT) + modale che guida all'incolla (fallback).
     var IS_MOBILE = (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
     AIS.forEach(function(ai){
       var a = document.createElement("a");
       a.className = "pill";
       a.href = ai.url; a.target = "_blank"; a.rel = "noopener";
-      var copyFlow = ai.clipboard || (IS_MOBILE && ai.copy);
-      a.setAttribute("aria-label", copyFlow ? ("Chiedi a " + ai.name + " — copia il prompt e apri " + ai.name) : ("Chiedi a " + ai.name + " — apri in una nuova scheda"));
+      // ChatGPT/Perplexity: su mobile l'universal link apre l'app COL prompt → apri diretto (no popup).
+      // Claude/Grok/Gemini: le app non agganciano il link col prompt → copia-prompt + apri (fallback).
+      var directMobile = IS_MOBILE && ai.directApp;
+      var modalFlow = ai.clipboard || (IS_MOBILE && ai.copy && !ai.directApp);
+      a.setAttribute("aria-label",
+        modalFlow ? ("Chiedi a " + ai.name + " — copia il prompt e apri " + ai.name) :
+        directMobile ? ("Chiedi a " + ai.name + " — apri l'app") :
+        ("Chiedi a " + ai.name + " — apri in una nuova scheda"));
       a.innerHTML = '<span class="logo" aria-hidden="true">'+(LOGOS[ai.logo]||'')+'</span><span class="name">'+ai.name+'</span>'+ARROW;
       a.addEventListener("click", function(){ track("click", ai.name); });
       if (ai.clipboard) {
         a.addEventListener("click", function(e){ e.preventDefault(); openGeminiFlow(ai.url); });
+      } else if (directMobile) {
+        a.target = "_self";   // stessa scheda → l'app si apre via universal link col prompt
       } else if (IS_MOBILE && ai.copy) {
         a.addEventListener("click", function(e){ e.preventDefault(); showCopyModal(ai.name, ai.copy, ai.url); });
       }
