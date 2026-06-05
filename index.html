@@ -169,32 +169,21 @@ PROFILO. Simone Castellan (1991): tecnico del suono, sound designer e compositor
     }
 
     var pills = document.getElementById("pills");
-    // Comportamento mobile per-app (verificato sul campo 05/06):
-    // - ChatGPT/Perplexity (directApp): l'universal link apre l'app COL prompt → apri diretto, no popup.
-    // - Claude/Grok/Gemini: le app NON agganciano il link col prompt → copia negli appunti il profilo
-    //   COMPLETO self-contained (GEMINI_PROMPT) + modale che guida all'incolla (fallback).
+    // Mobile: NESSUN popup. Al tap copiamo SEMPRE il prompt completo negli appunti e lasciamo
+    // navigare l'<a> in stessa scheda → ChatGPT/Perplexity aprono l'app col prompt; gli altri
+    // aprono il web (Claude/Grok ricevono il prompt dal ?q=, Gemini lo trova già negli appunti).
     var IS_MOBILE = (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
     AIS.forEach(function(ai){
       var a = document.createElement("a");
       a.className = "pill";
-      a.href = ai.url; a.target = "_blank"; a.rel = "noopener";
-      // ChatGPT/Perplexity: su mobile l'universal link apre l'app COL prompt → apri diretto (no popup).
-      // Claude/Grok/Gemini: le app non agganciano il link col prompt → copia-prompt + apri (fallback).
-      var directMobile = IS_MOBILE && ai.directApp;
-      var modalFlow = ai.clipboard || (IS_MOBILE && ai.copy && !ai.directApp);
-      a.setAttribute("aria-label",
-        modalFlow ? ("Chiedi a " + ai.name + " — copia il prompt e apri " + ai.name) :
-        directMobile ? ("Chiedi a " + ai.name + " — apri l'app") :
-        ("Chiedi a " + ai.name + " — apri in una nuova scheda"));
+      a.href = ai.url; a.rel = "noopener";
+      a.target = IS_MOBILE ? "_self" : "_blank";   // mobile stessa scheda (universal link → app); desktop nuova scheda
+      a.setAttribute("aria-label", "Chiedi a " + ai.name + (IS_MOBILE ? " — apri l'app (prompt copiato)" : " — apri in una nuova scheda"));
       a.innerHTML = '<span class="logo" aria-hidden="true">'+(LOGOS[ai.logo]||'')+'</span><span class="name">'+ai.name+'</span>'+ARROW;
-      a.addEventListener("click", function(){ track("click", ai.name); });
-      if (ai.clipboard) {
-        a.addEventListener("click", function(e){ e.preventDefault(); openGeminiFlow(ai.url); });
-      } else if (directMobile) {
-        a.target = "_self";   // stessa scheda → l'app si apre via universal link col prompt
-      } else if (IS_MOBILE && ai.copy) {
-        a.addEventListener("click", function(e){ e.preventDefault(); showCopyModal(ai.name, ai.copy, ai.url); });
-      }
+      a.addEventListener("click", function(){
+        track("click", ai.name);
+        if (IS_MOBILE) copyText(GEMINI_PROMPT);   // copia da TUTTI; l'<a> poi naviga (no preventDefault → universal link apre l'app)
+      });
       pills.appendChild(a);
     });
 
@@ -211,59 +200,17 @@ PROFILO. Simone Castellan (1991): tecnico del suono, sound designer e compositor
 
     track("pageview");
 
-    // ===== Flusso Gemini: copia profilo completo + riquadro guida + fallback =====
+    // Copia il prompt negli appunti: sync (execCommand, affidabile prima di navigare) + async best-effort.
     function copyText(text){
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        try { navigator.clipboard.writeText(text); return true; } catch (e) {}
-      }
+      var ok = false;
       try {
         var ta = document.createElement("textarea");
         ta.value = text; ta.style.position = "fixed"; ta.style.top = "-1000px"; ta.style.opacity = "0";
         document.body.appendChild(ta); ta.focus(); ta.select();
-        var r = document.execCommand("copy"); document.body.removeChild(ta); return r;
-      } catch (e) { return false; }
-    }
-    function openGeminiFlow(url){ showCopyModal("Gemini", GEMINI_PROMPT, url); }
-    // Modale generico "copia il prompt + apri l'app": usato da Gemini (sempre) e dalle
-    // altre AI su smartphone (dove l'app non riceve il ?q=).
-    function showCopyModal(name, text, url){
-      var copied = copyText(text);
-      var ov = document.createElement("div");
-      ov.className = "gm-overlay";
-      ov.setAttribute("role", "dialog");
-      ov.setAttribute("aria-modal", "true");
-      ov.setAttribute("aria-label", "Come usare " + name);
-      var box = document.createElement("div");
-      box.className = "gm-box";
-      box.innerHTML =
-        '<button class="gm-x" type="button" aria-label="Chiudi">×</button>' +
-        '<h2>' + (copied ? '✓ Prompt copiato' : 'Copia il prompt') + '</h2>' +
-        '<p>' + name + ' non riceve il testo in automatico. Bastano 3 passi:</p>' +
-        '<ol>' +
-          '<li>Apri ' + name + ' col pulsante qui sotto.</li>' +
-          '<li>Tocca la barra del messaggio e <strong>incolla</strong> (⌘/Ctrl+V o tieni premuto → Incolla).</li>' +
-          '<li>Invia: ti risponderà come assistente di Simone.</li>' +
-        '</ol>' +
-        '<textarea class="gm-ta" readonly aria-label="Testo del prompt copiato"></textarea>' +
-        '<div class="gm-actions">' +
-          '<a class="gm-open" href="' + url + '"' + (IS_MOBILE ? '' : ' target="_blank" rel="noopener"') + '>Apri ' + name + ' →</a>' +
-          '<button class="gm-copy" type="button">Copia di nuovo</button>' +
-        '</div>';
-      ov.appendChild(box);
-      document.body.appendChild(ov);
-      box.querySelector(".gm-ta").value = text;
-      function close(){ if (ov.parentNode){ ov.parentNode.removeChild(ov); document.removeEventListener("keydown", onKey); } }
-      function onKey(e){ if (e.key === "Escape") close(); }
-      box.querySelector(".gm-x").addEventListener("click", close);
-      ov.addEventListener("click", function(e){ if (e.target === ov) close(); });
-      box.querySelector(".gm-copy").addEventListener("click", function(){
-        var ok = copyText(text);
-        this.textContent = ok ? "Copiato ✓" : "Seleziona e copia";
-        var self = this; setTimeout(function(){ self.textContent = "Copia di nuovo"; }, 1600);
-      });
-      box.querySelector(".gm-open").addEventListener("click", function(){ setTimeout(close, 400); });
-      document.addEventListener("keydown", onKey);
-      box.querySelector(".gm-open").focus();
+        ok = document.execCommand("copy"); document.body.removeChild(ta);
+      } catch (e) {}
+      if (navigator.clipboard && navigator.clipboard.writeText) { try { navigator.clipboard.writeText(text); } catch (e) {} }
+      return ok;
     }
   </script>
 </body>
