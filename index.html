@@ -136,10 +136,10 @@ PROFILO. Simone Castellan (1991): tecnico del suono, sound designer e compositor
     var GEMINI_PROMPT = "Segui le indicazioni contenute in questo testo e comportati di conseguenza (è il curriculum dinamico di Simone Castellan).\n\n" + GEMINI_TEXT;
 
     var AIS = [
-      { name:"ChatGPT",    logo:"chatgpt",    url:"https://chatgpt.com/?q=" + q },
-      { name:"Claude",     logo:"claude",     url:"https://claude.ai/new?q=" + q },
-      { name:"Grok",       logo:"grok",       url:"https://grok.com/?q=" + q },
-      { name:"Perplexity", logo:"perplexity", url:PPLX_URL },
+      { name:"ChatGPT",    logo:"chatgpt",    url:"https://chatgpt.com/?q=" + q,   copy: PROMPT },
+      { name:"Claude",     logo:"claude",     url:"https://claude.ai/new?q=" + q,  copy: PROMPT },
+      { name:"Grok",       logo:"grok",       url:"https://grok.com/?q=" + q,      copy: PROMPT },
+      { name:"Perplexity", logo:"perplexity", url:PPLX_URL,                        copy: GEMINI_TEXT },
       { name:"Gemini",     logo:"gemini",     url:"https://gemini.google.com/app", clipboard:true }
     ];
 
@@ -169,14 +169,22 @@ PROFILO. Simone Castellan (1991): tecnico del suono, sound designer e compositor
     }
 
     var pills = document.getElementById("pills");
+    // Su smartphone l'app nativa si apre SENZA il prompt (il parametro ?q= viene ignorato
+    // dentro le app): copiamo il testo e guidiamo all'incolla, con fallback al web.
+    var IS_MOBILE = (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
     AIS.forEach(function(ai){
       var a = document.createElement("a");
       a.className = "pill";
       a.href = ai.url; a.target = "_blank"; a.rel = "noopener";
-      a.setAttribute("aria-label", ai.clipboard ? ("Chiedi a " + ai.name + " — copia il prompt e apri Gemini") : ("Chiedi a " + ai.name + " — apri in una nuova scheda"));
+      var copyFlow = ai.clipboard || (IS_MOBILE && ai.copy);
+      a.setAttribute("aria-label", copyFlow ? ("Chiedi a " + ai.name + " — copia il prompt e apri " + ai.name) : ("Chiedi a " + ai.name + " — apri in una nuova scheda"));
       a.innerHTML = '<span class="logo" aria-hidden="true">'+(LOGOS[ai.logo]||'')+'</span><span class="name">'+ai.name+'</span>'+ARROW;
       a.addEventListener("click", function(){ track("click", ai.name); });
-      if (ai.clipboard) { a.addEventListener("click", function(e){ e.preventDefault(); openGeminiFlow(ai.url); }); }
+      if (ai.clipboard) {
+        a.addEventListener("click", function(e){ e.preventDefault(); openGeminiFlow(ai.url); });
+      } else if (IS_MOBILE && ai.copy) {
+        a.addEventListener("click", function(e){ e.preventDefault(); showCopyModal(ai.name, ai.copy, ai.url); });
+      }
       pills.appendChild(a);
     });
 
@@ -205,41 +213,41 @@ PROFILO. Simone Castellan (1991): tecnico del suono, sound designer e compositor
         var r = document.execCommand("copy"); document.body.removeChild(ta); return r;
       } catch (e) { return false; }
     }
-    function openGeminiFlow(url){
-      var ok = copyText(GEMINI_PROMPT);
-      showGeminiModal(ok, url);
-    }
-    function showGeminiModal(copied, url){
+    function openGeminiFlow(url){ showCopyModal("Gemini", GEMINI_PROMPT, url); }
+    // Modale generico "copia il prompt + apri l'app": usato da Gemini (sempre) e dalle
+    // altre AI su smartphone (dove l'app non riceve il ?q=).
+    function showCopyModal(name, text, url){
+      var copied = copyText(text);
       var ov = document.createElement("div");
       ov.className = "gm-overlay";
       ov.setAttribute("role", "dialog");
       ov.setAttribute("aria-modal", "true");
-      ov.setAttribute("aria-label", "Come usare Gemini");
+      ov.setAttribute("aria-label", "Come usare " + name);
       var box = document.createElement("div");
       box.className = "gm-box";
       box.innerHTML =
         '<button class="gm-x" type="button" aria-label="Chiudi">×</button>' +
         '<h2>' + (copied ? '✓ Prompt copiato' : 'Copia il prompt') + '</h2>' +
-        '<p>Gemini non riceve il testo in automatico. Bastano 3 passi:</p>' +
+        '<p>' + name + ' non riceve il testo in automatico. Bastano 3 passi:</p>' +
         '<ol>' +
-          '<li>Apri Gemini col pulsante qui sotto.</li>' +
-          '<li>Tocca la barra del messaggio e <strong>incolla</strong> (⌘/Ctrl+V, oppure tieni premuto → Incolla).</li>' +
+          '<li>Apri ' + name + ' col pulsante qui sotto.</li>' +
+          '<li>Tocca la barra del messaggio e <strong>incolla</strong> (⌘/Ctrl+V o tieni premuto → Incolla).</li>' +
           '<li>Invia: ti risponderà come assistente di Simone.</li>' +
         '</ol>' +
         '<textarea class="gm-ta" readonly aria-label="Testo del prompt copiato"></textarea>' +
         '<div class="gm-actions">' +
-          '<a class="gm-open" href="' + url + '" target="_blank" rel="noopener">Apri Gemini →</a>' +
+          '<a class="gm-open" href="' + url + '" target="_blank" rel="noopener">Apri ' + name + ' →</a>' +
           '<button class="gm-copy" type="button">Copia di nuovo</button>' +
         '</div>';
       ov.appendChild(box);
       document.body.appendChild(ov);
-      box.querySelector(".gm-ta").value = GEMINI_PROMPT;
+      box.querySelector(".gm-ta").value = text;
       function close(){ if (ov.parentNode){ ov.parentNode.removeChild(ov); document.removeEventListener("keydown", onKey); } }
       function onKey(e){ if (e.key === "Escape") close(); }
       box.querySelector(".gm-x").addEventListener("click", close);
       ov.addEventListener("click", function(e){ if (e.target === ov) close(); });
       box.querySelector(".gm-copy").addEventListener("click", function(){
-        var ok = copyText(GEMINI_PROMPT);
+        var ok = copyText(text);
         this.textContent = ok ? "Copiato ✓" : "Seleziona e copia";
         var self = this; setTimeout(function(){ self.textContent = "Copia di nuovo"; }, 1600);
       });
