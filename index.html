@@ -136,10 +136,10 @@ PROFILO. Simone Castellan (1991): tecnico del suono, sound designer e compositor
     var GEMINI_PROMPT = "Segui le indicazioni contenute in questo testo e comportati di conseguenza (è il curriculum dinamico di Simone Castellan).\n\n" + GEMINI_TEXT;
 
     var AIS = [
-      { name:"ChatGPT",    logo:"chatgpt",    url:"https://chatgpt.com/?q=" + q,   copy: PROMPT },
-      { name:"Claude",     logo:"claude",     url:"https://claude.ai/new?q=" + q,  copy: PROMPT },
-      { name:"Grok",       logo:"grok",       url:"https://grok.com/?q=" + q,      copy: PROMPT },
-      { name:"Perplexity", logo:"perplexity", url:PPLX_URL,                        copy: GEMINI_TEXT },
+      { name:"ChatGPT",    logo:"chatgpt",    url:"https://chatgpt.com/?q=" + q,   copy: GEMINI_PROMPT },
+      { name:"Claude",     logo:"claude",     url:"https://claude.ai/new?q=" + q,  copy: GEMINI_PROMPT },
+      { name:"Grok",       logo:"grok",       url:"https://grok.com/?q=" + q,      copy: GEMINI_PROMPT },
+      { name:"Perplexity", logo:"perplexity", url:PPLX_URL,                        copy: GEMINI_PROMPT },
       { name:"Gemini",     logo:"gemini",     url:"https://gemini.google.com/app", clipboard:true }
     ];
 
@@ -169,8 +169,10 @@ PROFILO. Simone Castellan (1991): tecnico del suono, sound designer e compositor
     }
 
     var pills = document.getElementById("pills");
-    // Su smartphone l'app nativa si apre SENZA il prompt (il parametro ?q= viene ignorato
-    // dentro le app): copiamo il testo e guidiamo all'incolla, con fallback al web.
+    // Su smartphone l'app nativa si apre SENZA il prompt (il ?q= viene ignorato dentro le app):
+    // copiamo negli appunti il profilo COMPLETO self-contained (GEMINI_PROMPT, non serve che
+    // l'app navighi il link) e guidiamo all'incolla. Il bottone "Apri" naviga in stessa scheda
+    // su mobile → iOS/Android aprono l'app via universal/app link (in nuova scheda spesso no).
     var IS_MOBILE = (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
     AIS.forEach(function(ai){
       var a = document.createElement("a");
@@ -236,7 +238,7 @@ PROFILO. Simone Castellan (1991): tecnico del suono, sound designer e compositor
         '</ol>' +
         '<textarea class="gm-ta" readonly aria-label="Testo del prompt copiato"></textarea>' +
         '<div class="gm-actions">' +
-          '<a class="gm-open" href="' + url + '" target="_blank" rel="noopener">Apri ' + name + ' →</a>' +
+          '<a class="gm-open" href="' + url + '"' + (IS_MOBILE ? '' : ' target="_blank" rel="noopener"') + '>Apri ' + name + ' →</a>' +
           '<button class="gm-copy" type="button">Copia di nuovo</button>' +
         '</div>';
       ov.appendChild(box);
