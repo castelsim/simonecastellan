@@ -66,6 +66,9 @@
     .contact a{color:#5f6368; text-decoration:none; border-bottom:1px solid #c2c6cc; padding-bottom:1px}
     .contact a:hover{color:#1a1a1a}
     .credit{position:fixed; left:0; right:0; bottom:16px; text-align:center; font-size:12px; color:#6b7075; letter-spacing:.2px}
+    .escape{display:none; position:fixed; top:0; left:0; right:0; background:#f1f3f4; color:#5f6368;
+      font-size:13px; line-height:1.5; padding:10px 16px; text-align:center; z-index:10}
+    .escape a{color:#1a1a1a; font-weight:600; text-decoration:underline}
     @media (max-width:680px){
       .pills{flex-direction:column; align-items:center; width:100%}
       .pill{width:240px; max-width:82%; justify-content:center}
@@ -74,6 +77,12 @@
   </style>
 </head>
 <body>
+  <div class="escape" id="escape" role="note">
+    Sei in un browser interno: i pulsanti non possono aprire le app.
+    <a id="escape-link" href="#">Apri questa pagina nel browser</a>
+    <span id="escape-hint"> (oppure menu ⋯ → «Apri nel browser»)</span>
+  </div>
+
   <div class="label">Ask more about Simone Castellan:</div>
 
   <div class="pills" id="pills"></div>
@@ -159,6 +168,28 @@ PROFILO. Simone Castellan (1991): tecnico del suono, sound designer e compositor
     // navigare l'<a> in stessa scheda → ChatGPT/Perplexity aprono l'app col prompt; gli altri
     // aprono il web (Claude/Grok ricevono il prompt dal ?q=, Gemini lo trova già negli appunti).
     var IS_MOBILE = (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
+
+    // ===== Browser in-app (WhatsApp/Instagram/FB/Telegram…): gli universal link NON scattano nei
+    // webview, quindi i pulsanti aprirebbero sempre il web. Rileviamo il webview e offriamo il
+    // salto al browser vero (iOS: x-safari-https → Safari; Android: intent → Chrome/browser default).
+    // Euristica iOS: WKWebView non ha il token "Safari/" nello UA. Android webview ha "; wv)".
+    var UA = navigator.userAgent || "";
+    var IS_IOS = /iPhone|iPad|iPod/i.test(UA);
+    var IS_ANDROID = /Android/i.test(UA);
+    var IS_INAPP = /FBAN|FBAV|FB_IAB|Instagram|Line\/|MicroMessenger|LinkedInApp|Snapchat|Twitter/i.test(UA)
+      || (IS_IOS && /AppleWebKit/i.test(UA) && !/Safari\//i.test(UA))
+      || (IS_ANDROID && /;\s*wv\)/i.test(UA));
+    if (IS_INAPP && (IS_IOS || IS_ANDROID)) {
+      var SELF = "simonecastellan.com" + location.pathname + location.search;
+      var escLink = document.getElementById("escape-link");
+      escLink.href = IS_IOS
+        ? "x-safari-https://" + SELF
+        : "intent://" + SELF + "#Intent;scheme=https;S.browser_fallback_url=" + encodeURIComponent("https://" + SELF) + ";end";
+      escLink.textContent = IS_IOS ? "Apri questa pagina in Safari" : "Apri questa pagina in Chrome";
+      escLink.addEventListener("click", function(){ track("click", "EscapeWebview"); });
+      document.getElementById("escape").style.display = "block";
+      track("inapp_webview");
+    }
     AIS.forEach(function(ai){
       var a = document.createElement("a");
       a.className = "pill";
