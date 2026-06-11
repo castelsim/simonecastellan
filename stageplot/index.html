@@ -1408,23 +1408,45 @@ function buildOrchCoroOut(){
 
 /* ============ CHANNEL LIST (input / output per i fonici) ============ */
 /* mic/DI suggeriti per tipo (auto input list); valore = etichetta mic. multi = più canali per un solo elemento */
-/* mic/DI generici per tipo (pulsante Auto su palchi ad hoc). multi = elemento che genera più canali. */
+/* MIC/DI di default per OGNI elemento che produce suono (pulsante "Auto" da palco).
+   Singolo canale qui in IN_SRC; elementi stereo/multipli in IN_MULTI. Convenzioni live PA. */
 var IN_SRC = {
+  /* voci e microfoni */
   astamic:"SM58", giraffa:"e906", wireless:"Beta 58A", headset:"DPA 4066", podiosp:"SM58",
-  dimono:"DI", distereo:"DI", /* distereo gestito a parte (L+R) */
-  comboamp:"SM57", stack:"SM57/e906", keysamp:"DI", leslie:"SM57+MD421",
-  pianoverticale:"KM184", stagepiano:"DI", doppiatastiera:"DI", celesta:"KM184",
-  gtstand:"DI", gtacustica:"DI", bassstand:"DI", djset:"DI",
-  contrabbasso:"DPA 4099", violoncello:"DPA 4099", arpa:"DPA 4099",
-  rullante:"SM57", percussioni:"overhead", grancassa:"D6", piatto:"overhead", timpani:"KM184"
+  /* archi (mic a clip) */
+  vlnpost:"DPA 4099", violapost:"DPA 4099", violoncello:"DPA 4099", contrabbasso:"DPA 4099", arpa:"DPA 4099",
+  /* legni (mic a clip) */
+  flauto:"DPA 4099", oboe:"DPA 4099", clarinetto:"DPA 4099", fagotto:"DPA 4099",
+  /* ottoni */
+  corno:"MD421", tromba:"e906", trombone:"MD421", tuba:"MD421",
+  /* percussioni a microfono singolo */
+  rullante:"SM57", grancassa:"D6", timpani:"KM184", piatto:"overhead", piatticoppia:"overhead",
+  campane:"KM184", tamtam:"KM184", glockenspiel:"KM184",
+  /* backline / tastiere a mic o DI singolo */
+  comboamp:"SM57", stack:"SM57/e906", keysamp:"DI", celesta:"KM184",
+  /* chitarre/basso su stand (DI) */
+  gtstand:"DI", gtacustica:"DI", bassstand:"DI",
+  /* tecnica */
+  dimono:"DI", distereo:"DI"   /* distereo gestito come L+R in autoInputs */
 };
-/* elementi che generano canali MULTIPLI (mantenuti realistici) */
+/* elementi che generano PIÙ canali (stereo o multi-mic) */
 var IN_MULTI = {
   batteria: [["Kick","D6"],["Rullante top","SM57"],["Rullante btm","e904"],["Hi-Hat","SM81"],
              ["Tom 1","e904"],["Tom floor","e904"],["Overhead L","KM184"],["Overhead R","KM184"]],
-  bassamp: [["Basso DI","DI"],["Basso ampli","MD421"]],
+  edrums:   [["E-drums L","DI"],["E-drums R","DI"]],
+  bassamp:  [["Basso DI","DI"],["Basso ampli","MD421"]],
   grancoda: [["Pianoforte L","KM184"],["Pianoforte R","KM184"]],
-  mezzacoda: [["Pianoforte L","KM184"],["Pianoforte R","KM184"]]
+  mezzacoda:[["Pianoforte L","KM184"],["Pianoforte R","KM184"]],
+  pianoverticale:[["Piano vert. L","KM184"],["Piano vert. R","KM184"]],
+  stagepiano:[["Tastiere L","DI"],["Tastiere R","DI"]],
+  doppiatastiera:[["Tastiera sup.","DI st"],["Tastiera inf.","DI st"]],
+  djset:    [["DJ L","DI"],["DJ R","DI"]],
+  laptop:   [["Playback L","DI"],["Playback R","DI"]],
+  leslie:   [["Leslie horn","SM57"],["Leslie bass","MD421"]],
+  percussioni:[["Congas","e904"],["Bongos","e904"]],
+  vibrafono:[["Vibrafono L","KM184"],["Vibrafono R","KM184"]],
+  marimba:  [["Marimba L","KM184"],["Marimba R","KM184"]],
+  xilofono: [["Xilofono L","KM184"],["Xilofono R","KM184"]]
 };
 var DRUM_KIT = IN_MULTI.batteria;
 var OUT_SET = { wedge:"wedge", sidefill:"side fill", drumfill:"drum fill", iem:"IEM", iemant:"IEM", monmix:"console mon" };
@@ -1744,6 +1766,11 @@ if(qForm){
 }
 document.getElementById("titolo").value = state.titolo||"";
 normalizeState(state); renderChannels();
+if(location.search.indexOf("inputaudit=1")>-1){   /* QA: un esemplare di ogni sorgente + Auto */
+  state.items=[];
+  Object.keys(IN_SRC).concat(Object.keys(IN_MULTI)).forEach(function(k){ if(TYPES[k]) addItem(k); });
+  autoInputs();
+}
 if(location.search.indexOf("icone=1")>-1){ gallery(); }
 else if(location.search.indexOf("export=1")>-1){   /* QA: anteprima del PNG esportato (planimetria + channel list) */
   var ex=buildExportSvg();
