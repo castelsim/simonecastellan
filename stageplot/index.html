@@ -20,7 +20,7 @@
   html,body{height:100%}
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     color:#1f2937;background:#fff;display:grid;
-    grid-template-rows:52px 1fr 26px;grid-template-columns:236px 1fr 300px;
+    grid-template-rows:52px 1fr 26px;grid-template-columns:250px 1fr 360px;
     grid-template-areas:"top top top" "cat main props" "foot foot foot";overflow:hidden}
   header{grid-area:top;display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid #e5e7eb}
   header .brand{font-weight:700;font-size:15px;letter-spacing:.2px;margin-right:4px}
@@ -82,6 +82,8 @@
   .grid line.m{stroke:#dde0e3}
   .cl{stroke:#cbd5e1;stroke-width:1.5;stroke-dasharray:22 16}
   .zone-lbl{fill:#9ca3af;font-size:16px;letter-spacing:2px}
+  .dim-lbl{fill:#6b7280;font-size:15px;font-weight:700}
+  .dim-line{stroke:#6b7280;stroke-width:1.5;stroke-dasharray:8 7}
   /* SVG — tratti base */
   .ic{fill:#fff;stroke:#1f2937;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
   .ic.fill{fill:#1f2937;stroke:none}
@@ -130,28 +132,35 @@
   /* menu formazioni (Organico) */
   header{position:relative}
   .menu-pop{position:absolute;top:46px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;
-    box-shadow:0 8px 28px rgba(0,0,0,.16);padding:6px;z-index:40;min-width:248px}
+    box-shadow:0 8px 28px rgba(0,0,0,.16);padding:8px;z-index:40;width:min(430px,calc(100vw - 20px));max-height:calc(100vh - 82px);
+    overflow-y:auto}
   .menu-pop[hidden]{display:none}
-  .menu-pop button{display:block;width:100%;text-align:left;background:#fff;border:none;border-radius:7px;
-    padding:9px 12px;font-size:13px;font-weight:600;color:#1f2937;cursor:pointer}
-  .menu-pop button:hover{background:#f1f3f4}
-  .menu-pop button small{display:block;color:#9ca3af;font-size:11px;font-weight:400;margin-top:1px}
+  .menu-pop .org-group{font-size:10px;text-transform:uppercase;letter-spacing:.75px;color:#6b7280;font-weight:800;
+    padding:8px 8px 5px}
+  .menu-pop button{display:grid;grid-template-columns:1fr auto;gap:3px 8px;width:100%;text-align:left;background:#fff;
+    border:1px solid transparent;border-radius:8px;padding:9px 10px;font-size:13px;font-weight:700;color:#1f2937;cursor:pointer}
+  .menu-pop button:hover{background:#f8fafc;border-color:#e5e7eb}
+  .menu-pop button small{grid-column:1 / 3;display:block;color:#6b7280;font-size:11px;font-weight:400;margin-top:1px;line-height:1.25}
+  .menu-pop button .tag{align-self:start;border:1px solid #e5e7eb;border-radius:999px;padding:2px 7px;
+    font-size:10px;color:#6b7280;font-weight:700;background:#f9fafb;white-space:nowrap}
   .menu-pop .sep{height:1px;background:#eef0f2;margin:4px 6px}
   /* channel list (input/output) nel pannello destro */
   #props .clhead{display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px}
   #props .clhead:first-child{margin-top:2px}
   #props .clhead h3{margin:0}
   #props .clhead .btn{padding:4px 9px;font-size:11px}
-  .clrow{display:flex;gap:4px;align-items:center;margin-bottom:4px}
-  .clrow .n{flex:0 0 20px;font-size:11px;color:#9ca3af;text-align:center;border-radius:4px}
+  .clrow{display:grid;grid-template-columns:22px 1fr 86px 72px 36px 18px;gap:4px;align-items:center;margin-bottom:6px}
+  .clrow .n{font-size:11px;color:#9ca3af;text-align:center;border-radius:4px}
   .clrow .n.grip{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
   .clrow .n.grip:hover{background:#eef0f2;color:#6b7280}
   .clrow .n.grip:active{cursor:grabbing}
   .clrow.dragging{opacity:.55;background:#eef2ff;border-radius:6px}
   #props .clrow input{padding:4px 6px;font-size:12px}
-  .clrow .src{flex:1;min-width:0}
-  .clrow .mic{flex:0 0 70px}
-  .clrow .del{flex:0 0 18px;border:none;background:none;color:#cbd0d6;cursor:pointer;font-size:15px;line-height:1;padding:0}
+  .clrow .src,.clrow .mic,.clrow .stand,.clrow .notes{min-width:0}
+  .clrow .notes{grid-column:2 / 6}
+  .clrow .p48{display:flex;align-items:center;justify-content:center;font-size:10px;color:#6b7280;border:1px solid #e5e7eb;border-radius:7px;height:26px}
+  .clrow .p48 input{width:auto;margin:0}
+  .clrow .del{border:none;background:none;color:#cbd0d6;cursor:pointer;font-size:15px;line-height:1;padding:0}
   .clrow .del:hover{color:#b91c1c}
   .clactions{display:flex;gap:6px;margin:5px 0 4px}
   .clactions .btn{padding:5px 9px;font-size:11.5px}
@@ -172,13 +181,24 @@
   <button class="btn danger" id="bNew">Nuovo</button>
   <input type="file" id="fileImport" accept=".json" hidden>
   <div class="menu-pop" id="orgMenu" hidden>
-    <button data-f="band">Band<small>batteria, ampli, voci, monitor</small></button>
-    <button data-f="coro">Coro<small>gradoni SATB, microfoni d'insieme, direttore, piano</small></button>
-    <button data-f="sinfonica">Orchestra sinfonica<small>organico standard completo, per sezioni</small></button>
-    <button data-f="orchband">Orchestra + band<small>archi e fiati + sezione ritmica davanti</small></button>
-    <button data-f="orchcoro">Orchestra sinfonica + coro<small>orchestra con gradoni del coro dietro</small></button>
+    <div class="org-group">Live / Pop</div>
+    <button data-f="band"><span>Pop/Rock band 5</span><span class="tag">15 in</span><small>voce, cori, chitarra, basso, keys, batteria · wedge + IEM · stagebox e corrente</small></button>
+    <button data-f="acoustic"><span>Acoustic trio</span><span class="tag">7 in</span><small>voce, chitarra acustica, piano, cajon · setup compatto per club/teatro</small></button>
+    <div class="org-group">Classica / Archi</div>
+    <button data-f="quartetto"><span>Quartetto archi</span><span class="tag">3 in</span><small>2 violini, viola, cello, tappeto, coppia stereo, direttore/cue opzionale</small></button>
+    <button data-f="camera"><span>Orchestra da camera</span><span class="tag">area mic</span><small>archi piccoli, legni a 1, 2 corni · layout compatto con spot realistici</small></button>
+    <button data-f="sinfonica_ridotta"><span>Sinfonica ridotta</span><span class="tag">spot</span><small>archi medi, legni a 2, ottoni essenziali, timpani e arpa</small></button>
+    <button data-f="sinfonica"><span>Sinfonica completa</span><span class="tag">full</span><small>organico standard completo, archi a ventaglio, legni/ottoni/percussioni per sezioni</small></button>
+    <div class="org-group">Coro / Teatro</div>
+    <button data-f="coro"><span>Coro SATB + piano</span><span class="tag">8 in</span><small>gradoni, direttore vicino al coro, 3 mic d'insieme, solisti, side fill</small></button>
+    <button data-f="orchcoro"><span>Orchestra + coro</span><span class="tag">15 in</span><small>sinfonica ridotta, coro su gradoni dietro, spot orchestra + coro L/C/R</small></button>
+    <div class="org-group">Jazz / Fiati</div>
+    <button data-f="jazzcombo"><span>Jazz quintet</span><span class="tag">10 in</span><small>piano, contrabbasso, batteria, sax, voce · palco club/teatro</small></button>
+    <button data-f="bigband"><span>Big band 5/4/4 + ritmica</span><span class="tag">16 in</span><small>sax, tromboni, trombe su file/pedane, ritmica laterale, voce frontale</small></button>
+    <div class="org-group">Produzioni ibride</div>
+    <button data-f="orchband"><span>Orchestra da camera + band</span><span class="tag">22 in</span><small>camera orchestra + sezione ritmica davanti, lead vocal e side fill</small></button>
     <div class="sep"></div>
-    <button data-f="custom">Personalizza organico…<small>scegli tu i numeri per sezione</small></button>
+    <button data-f="custom"><span>Personalizza orchestra</span><span class="tag">manuale</span><small>scegli numeri per sezione, poi genera palco e patch list</small></button>
   </div>
 </header>
 
@@ -226,10 +246,10 @@
     <button class="btn" id="bResume" style="margin-top:12px" hidden>↩ Riprendi ultima sessione</button>
   </div>
   <div class="sec" id="chanlist" style="border-top:1px solid #e5e7eb;padding-top:6px;margin-top:8px">
-    <div class="clhead"><h3>Input list</h3><button class="btn" id="inAuto" title="Genera i canali dai mic/DI presenti sul palco">Auto</button></div>
+    <div class="clhead"><h3>Input patch</h3><button class="btn" id="inAuto" title="Genera i canali dai mic/DI presenti sul palco">Auto</button></div>
     <div id="inRows"></div>
     <div class="clactions"><button class="btn" id="inAdd">+ canale</button><button class="btn" id="inClear">Svuota</button></div>
-    <div class="clhead"><h3>Output / Mix</h3><button class="btn" id="outAuto" title="Genera i mix dai monitor presenti sul palco">Auto</button></div>
+    <div class="clhead"><h3>Monitor / Output</h3><button class="btn" id="outAuto" title="Genera i mix dai monitor presenti sul palco">Auto</button></div>
     <div id="outRows"></div>
     <div class="clactions"><button class="btn" id="outAdd">+ mix</button><button class="btn" id="outClear">Svuota</button></div>
   </div>
@@ -352,6 +372,15 @@ function gTrombone(){ return '<g transform="translate(12,10) rotate(8)">'+bar(-3
   lin(-5.5,22,-10,34,'ic thin')+lin(-1.5,22,3,34,'ic thin')+'<ellipse class="ic thin fBrass" cx="-3.5" cy="35" rx="7" ry="2.6"/></g>'; }
 function gTuba(){ return '<g transform="translate(2,-15)"><ellipse class="ic fBrass" cx="0" cy="0" rx="17" ry="22"/>'+
   circ(-2,-7,10,'ic thin fBrass')+'<path class="ic thin" fill="none" d="M 12,14 Q 18,2 12,-10"/></g>'; }
+function gSax(scale){
+  var s=scale||1;
+  return '<g transform="translate(8,-6) scale('+s+') rotate(12)">'+
+    '<path class="ic fBrass" d="M -4,-28 C 6,-25 10,-15 5,-4 L -5,18 C -8,25 -2,31 6,28 C 15,25 15,12 7,9"/>'+
+    '<path class="ic thin" fill="none" d="M -1,-24 C 9,-12 3,-2 0,6"/>'+
+    '<ellipse class="ic thin fBrass" cx="10" cy="22" rx="11" ry="7"/>'+
+    circ(1,-11,1.5,'ic fill')+circ(-1,-3,1.5,'ic fill')+circ(-3,5,1.5,'ic fill')+
+  '</g>';
+}
 
 /* Corpo violino/cello/contrabbasso (scala s: 1 = cello) + manico */
 function violino(s,woodCls){
@@ -370,23 +399,32 @@ function violino(s,woodCls){
     '<path class="fhole" d="M '+n(7)+','+n(-3)+' q '+n(2.5)+','+n(7)+' 0,'+n(13)+'"/>'+
     lin(0,n(30),0,n(38),'ic thin');
 }
-/* Piano a coda parametrico: lato bassi dritto a sx, coda arrotondata, ansa a S al cheek */
+/* Piano a coda parametrico — pianta reale: fascia (spine) DRITTA a sx, coda arrotondata
+   al fondo, bentside a destra con ansa a S verso il blocchetto tastiera. Ancore normalizzate
+   prese dalla pianta Steinway. Tastiera a tutta larghezza sul fronte (+y). */
 function pianoCoda(it){
   var w2=it.w/2, d2=it.d/2;
-  var p='M '+(-w2)+','+d2+
-    ' L '+(-w2)+','+(-d2+46)+
-    ' Q '+(-w2)+','+(-d2)+' '+(-w2+50)+','+(-d2)+
-    ' Q '+(-w2*0.04)+','+(-d2)+' '+(w2*0.34)+','+(-d2*0.83)+
-    ' C '+(w2*0.64)+','+(-d2*0.66)+' '+(w2*0.86)+','+(-d2*0.45)+' '+(w2*0.93)+','+(-d2*0.24)+
-    ' C '+(w2*0.975)+','+(-d2*0.1)+' '+(w2*0.875)+','+(-d2*0.02)+' '+(w2*0.875)+','+(d2*0.09)+
-    ' C '+(w2*0.875)+','+(d2*0.19)+' '+(w2*0.96)+','+(d2*0.23)+' '+w2+','+(d2*0.31)+
-    ' L '+w2+','+d2+' Z';
-  var s=shadow(w2*0.92,d2*0.82,0,10);
-  s+='<path class="ic fBlack" d="'+p+'"/>';                                                  // cassa nera lucida
-  s+='<g transform="scale(0.84)"><path d="'+p+'" fill="url(#gBoard)" stroke="#2a2c30" stroke-width="1.5"/></g>'; // tavola armonica aperta
-  for(var i=-3;i<=3;i++){ s+=lin(i*11,-d2*0.55,i*11,d2*0.12,'pstr'); }                       // corde
-  s+='<path class="hilite" d="M '+(-w2+6)+','+(d2-34)+' L '+(-w2+6)+','+(-d2+54)+'"/>';        // riflesso sul fianco
-  s+=bar(0,d2-13,it.w-16,14,'ic thin',2)+bar(0,d2-17.5,it.w-16,5,'ic fill',1);                // tastiera
+  function P(x,y){ return (x*w2).toFixed(1)+','+(y*d2).toFixed(1); }
+  var p='M '+P(-1,1)+
+    ' L '+P(-1,-0.66)+                                          /* fascia dritta (lato bassi) */
+    ' C '+P(-1,-0.90)+' '+P(-0.82,-1)+' '+P(-0.50,-1)+          /* spalla coda sx */
+    ' C '+P(-0.20,-1)+' '+P(0.10,-0.93)+' '+P(0.34,-0.79)+      /* coda → inizio bentside */
+    ' C '+P(0.60,-0.63)+' '+P(0.79,-0.40)+' '+P(0.875,-0.18)+   /* curva grande */
+    ' C '+P(0.94,-0.01)+' '+P(0.965,0.10)+' '+P(0.945,0.215)+   /* rientro ansa */
+    ' C '+P(0.935,0.30)+' '+P(0.962,0.365)+' '+P(1,0.44)+       /* ansa a S → blocchetto */
+    ' L '+P(1,1)+' Z';
+  var s='<path class="ic fBlack" d="'+p+'"/>';                                               // cassa nera lucida
+  s+='<g transform="scale(0.93)"><path d="'+p+'" fill="url(#gBoard)" stroke="#2a2c30" stroke-width="1.2"/></g>'; // tavola armonica
+  for(var i=0;i<7;i++){                                                                       // corde a ventaglio (bassi più lunghi)
+    var x=(-0.60+i*0.125)*w2, top=-(0.84-i*0.052)*d2;
+    s+='<line class="pstr" x1="'+(x-0.04*w2)+'" y1="'+top+'" x2="'+x+'" y2="'+(d2*0.52)+'"/>';
+  }
+  s+=lin(-0.72*w2,0.30*d2,0.80*w2,0.30*d2,'pstr');                                            // barra smorzatori
+  s+=lin(-0.55*w2,-0.30*d2,-0.10*w2,0.30*d2,'pstr')+lin(0.15*w2,-0.52*d2,0.45*w2,0.05*d2,'pstr'); // crociere piastra
+  s+='<path class="hilite" d="M '+(-w2+5)+','+(d2-30)+' L '+(-w2+5)+','+(-d2*0.62)+'"/>';      // riflesso fascia
+  s+=lin(-w2*0.35,d2-27,w2*0.35,d2-27,'ic thin');                                              // leggio
+  s+=bar(0,d2-17.5,it.w-14,5,'ic fill',1)+bar(0,d2-9,it.w-14,14,'ic thin',2);                  // ciglio + tastiera
+  for(var k=-2;k<=2;k++){ s+=bar(k*0.31*it.w*0.5,d2-9,9,7,'ic fill',1); }                      // gruppi tasti neri
   return s;
 }
 /* Tastiera a barre graduate (xilofono/marimba): cornice trapezia + barre */
@@ -414,6 +452,27 @@ var TYPES = {
              draw:function(it){ var s=rectSvg(it.w,it.d,'ic fFloor',2);
                for(var i=1;i<5;i++){ s+=lin(-it.w/2,-it.d/2+i*it.d/5,it.w/2,-it.d/2+i*it.d/5,'ic thin'); }
                s+=lin(0,30,0,-22,'ic thin')+'<path class="ic thin" fill="none" d="M -6,-14 L 0,-22 L 6,-14"/>';
+               return s; }},
+  rampa:    {nome:"Rampa accesso", dim:"120×240", cat:"Pedane e strutture", w:120,d:240, resizable:true, z:1,
+             draw:function(it){ return '<path class="ic fFloor" d="M '+(-it.w/2)+','+(it.d/2)+' L '+(it.w/2)+','+(it.d/2)+' L '+(it.w/2-18)+','+(-it.d/2)+' L '+(-it.w/2+18)+','+(-it.d/2)+' Z"/>'+
+               lin(-it.w/2+16,-it.d/2,it.w/2-16,-it.d/2,'ic thin')+lin(-it.w/2+30,-it.d/2+45,it.w/2-30,-it.d/2+45,'ic thin'); }},
+  parapetto:{nome:"Parapetto pedana", dim:"200×8", cat:"Pedane e strutture", w:200,d:8, resizable:true, z:2,
+             draw:function(it){ var s=bar(0,0,it.w,8,'ic fGrey',2);
+               for(var x=-it.w/2+18;x<it.w/2;x+=36) s+=lin(x,-12,x,12,'ic thin');
+               return s; }},
+  fondale:  {nome:"Fondale / backdrop", dim:"600×20", cat:"Pedane e strutture", w:600,d:20, resizable:true, z:1,
+             draw:function(it){ return bar(0,0,it.w,it.d,'ic fBlack',2)+
+               '<path class="ic thin" fill="none" d="M '+(-it.w/2+16)+',0 C '+(-it.w/2+60)+',-10 '+(-it.w/2+100)+',10 '+(-it.w/2+144)+',0" />'+
+               '<text class="lbl sub" y="28">BACKDROP</text>'; }},
+  quinta:   {nome:"Quinta / laterale", dim:"120×20", cat:"Pedane e strutture", w:120,d:20, resizable:true, z:1,
+             draw:function(it){ return bar(0,0,it.w,it.d,'ic fBlack',2)+lin(-it.w/2+12,0,it.w/2-12,0,'sil'); }},
+  truss:    {nome:"Truss a terra", dim:"200×30", cat:"Pedane e strutture", w:200,d:30, resizable:true, z:1,
+             draw:function(it){ var s=bar(0,0,it.w,it.d,'ic dash',2);
+               for(var x=-it.w/2+18;x<it.w/2;x+=36){ s+=lin(x,-it.d/2,x+18,it.d/2,'ic thin'); s+=lin(x,it.d/2,x+18,-it.d/2,'ic thin'); }
+               return s; }},
+  transenna:{nome:"Transenna", dim:"200×25", cat:"Pedane e strutture", w:200,d:25, resizable:true, z:2,
+             draw:function(it){ var s=bar(0,0,it.w,it.d,'ic fGrey',2);
+               for(var x=-it.w/2+20;x<it.w/2;x+=20) s+=lin(x,-it.d/2+3,x,it.d/2-3,'sil');
                return s; }},
   tappeto:  {nome:"Tappeto", dim:"2×1,6 m", cat:"Pedane e strutture", w:200,d:160, resizable:true, z:0,
              draw:function(it){ return rectSvg(it.w,it.d,'rug',8); }},
@@ -462,21 +521,37 @@ var TYPES = {
              draw:function(){ return postaz(gClar()); }},
   fagotto:  {nome:"Fagotto", dim:"postazione", cat:"Legni", w:95,d:110,
              draw:function(){ return postaz(gFag()); }},
+  saxalto:  {nome:"Sax alto", dim:"postazione", cat:"Legni", w:95,d:105,
+             draw:function(){ return postaz(gSax(1)); }},
+  saxtenore:{nome:"Sax tenore", dim:"postazione", cat:"Legni", w:100,d:108,
+             draw:function(){ return postaz(gSax(1.13)); }},
+  saxbaritono:{nome:"Sax baritono", dim:"postazione", cat:"Legni", w:105,d:112,
+             draw:function(){ return postaz(gSax(1.25)); }},
   /* --- ritmica: batteria e percussioni --- */
   batteria: {nome:"Batteria 5 pezzi", dim:"180×150", cat:"Ritmica", sub:"Batteria e percussioni", w:180,d:150,
              draw:function(){
-               return shadow(92,82,0,6)+circ(0,-62,17,'ic fBlack') +
-                 bar(0,28,56,42,'ic fBlack',7)+lin(-26,44,26,44,'sil') +
-                 drum(-32,-16,18) + drum(-15,1,15)+drum(16,1,16) + drum(52,8,20) +
-                 cym(-63,-28,18)+cym(-55,26,20)+cym(62,36,23);
+               /* pianta reale: sgabello in fondo (-y), cassa Ø56 al centro-fronte, rullante a sx,
+                  tom 12/13 sopra la cassa, timpano 16 a dx, hi-hat oltre il rullante, crash sx / ride dx */
+               return circ(0,-58,16,'ic fBlack')+circ(0,-58,5,'dotS') +                    /* sgabello */
+                 circ(0,16,28,'ic fBlack')+circ(0,16,23,'ic thin fHead')+rimlight(0,16,27)+ /* cassa Ø56 */
+                 drum(-36,2,18) +                                                           /* rullante Ø36 */
+                 drum(-15,-21,14)+drum(16,-21,15) +                                         /* tom 12"/13" */
+                 drum(50,10,20) +                                                           /* floor tom 16" */
+                 cym(-64,-2,17)+sring(-64,-2,11,'lathe') +                                  /* hi-hat Ø34 */
+                 cym(-52,-40,20) +                                                          /* crash Ø40 */
+                 cym(56,-36,25);                                                            /* ride Ø50 */
              }},
   edrums:   {nome:"E-drums", dim:"140×120", cat:"Ritmica", sub:"Batteria e percussioni", w:140,d:120,
              draw:function(){
+               /* sgabello in fondo (-y) come la batteria acustica; pad mesh + pad piatti su rack */
                function pad(x,y,r){ return circ(x,y,r,'ic fGrey')+circ(x,y,r-3.5,'ic thin fBlack'); }
-               return circ(0,48,15,'ic fBlack')+bar(0,14,24,20,'ic fBlack',4)+
-                 pad(-40,-6,12)+pad(-14,-14,12)+pad(14,-14,12)+pad(40,-6,12)+
-                 pad(-52,-34,13)+pad(0,-42,13)+pad(52,-34,13)+
-                 bar(-58,12,16,12,'ic fRed',2); }},
+               return circ(0,-46,14,'ic fBlack')+circ(0,-46,4,'dotS') +        /* sgabello */
+                 lin(-54,-6,48,-6,'sil') +                                      /* tubo rack */
+                 pad(-28,6,12) +                                                /* pad rullante */
+                 pad(-8,-16,10)+pad(14,-16,10)+pad(34,2,10) +                   /* 3 pad tom */
+                 pad(-50,-12,11)+pad(-24,-36,11)+pad(28,-36,12) +               /* hh / crash / ride */
+                 circ(2,26,8,'ic fGrey')+bar(2,38,16,5,'ic fBlack',2) +         /* kick pad + pedale */
+                 bar(-52,14,16,11,'ic fRed',2); }},                             /* modulo */
   drumshield:{nome:"Drum shield", dim:"~250", cat:"Ritmica", sub:"Batteria e percussioni", w:250,d:110,
              draw:function(){ var s='<polyline class="plex" points="-125,52 -125,-22 -62,-52 62,-52 125,-22 125,52"/>';
                [[-125,-22],[-62,-52],[62,-52],[125,-22]].forEach(function(p){ s+=circ(p[0],p[1],2.5,'ic fill'); });
@@ -485,12 +560,23 @@ var TYPES = {
              draw:function(){ return drum(0,0,18)+circ(0,21,2.5,'ic fill')+circ(-18,-11,2.5,'ic fill')+circ(18,-11,2.5,'ic fill'); }},
   percussioni:{nome:"Congas + bongos", dim:"165×75", cat:"Ritmica", sub:"Batteria e percussioni", w:165,d:75,
              draw:function(){
-               function conga(x,y,r){ return circ(x,y,r,'ic fWood')+circ(x,y,r-3.5,'ic thin fHead'); }
-               return conga(-58,2,17)+conga(-24,2,16)+conga(10,-4,11)+conga(30,-4,9.5)+
-                 bar(62,4,44,34,'ic fWoodL',4)+bar(62,4,32,22,'ic thin',2); }},
+               /* tumba Ø30 + conga Ø29 + quinto Ø28 in linea; coppia bongos Ø18/Ø21 su stand a dx */
+               function fusto(x,y,r,wood){ return circ(x,y,r,'ic '+wood)+circ(x,y,r-3.5,'ic thin fHead'); }
+               return fusto(-58,4,15,'fWood')+fusto(-26,4,14.5,'fWood')+fusto(4,0,14,'fWoodD')+
+                 bar(44,-4,12,5,'ic fill',2)+lin(44,2,44,24,'ic thin')+          /* ponte + stand bongos */
+                 fusto(35,-5,9,'fWoodL')+fusto(54,-3,10.5,'fWoodL'); }},
+  cajon:    {nome:"Cajon", dim:"30×30", cat:"Ritmica", sub:"Batteria e percussioni", w:34,d:34,
+             draw:function(){ return bar(0,0,30,30,'ic fWoodL',3)+circ(0,0,7,'ic thin fWoodD')+circ(-9,-9,1.8,'dotS')+circ(9,-9,1.8,'dotS'); }},
+  timbales: {nome:"Timbales", dim:"110×60", cat:"Ritmica", sub:"Batteria e percussioni", w:115,d:65,
+             draw:function(){
+               /* macho 13" + hembra 14" su stand, campanaccio montato al centro */
+               return lin(-22,2,-38,28,'ic thin')+lin(-22,2,-6,28,'ic thin')+lin(20,0,38,26,'ic thin')+ /* gambe */
+                 drum(-23,0,19)+drum(21,-1,17.5)+
+                 lin(30,-6,42,-15,'ic thin')+                                   /* attacco campanaccio */
+                 '<path class="ic fBrass" d="M 36,-23 L 54,-20 L 51,-9 L 38,-12 Z"/>'; }},
   timpani:  {nome:"Timpani ×4", dim:"Ø81/74/66/58", cat:"Ritmica", sub:"Batteria e percussioni", w:280,d:185,
              draw:function(){
-               var s=circ(0,-85,15,'ic fBlack');
+               var s=circ(0,-85,15,'ic fBlack')+circ(0,-85,5,'dotS');   /* sgabello timpanista */
                [[-95,-9,40],[-36,34,37],[36,34,33],[95,-9,29]].forEach(function(t){
                  s+=tdrum(t[0],t[1],t[2]);
                });
@@ -501,8 +587,12 @@ var TYPES = {
                return s; }},
   piatto:   {nome:"Piatto sospeso", dim:"Ø45", cat:"Ritmica", sub:"Batteria e percussioni", w:55,d:55,
              draw:function(){ return cym(0,0,23)+lin(0,8,0,22,'ic thin')+lin(-7,-4,-19,-11,'ic thin')+lin(7,-4,19,-11,'ic thin'); }},
-  piatticoppia:{nome:"Piatti a coppia", dim:"Ø50", cat:"Ritmica", sub:"Batteria e percussioni", w:62,d:50,
-             draw:function(){ return bar(0,2,56,42,'ic fWoodL',4)+circ(-9,0,16,'ic thin fCym')+circ(9,0,16,'ic thin fCym')+circ(-9,0,2,'ic fill')+circ(9,0,2,'ic fill'); }},
+  piatticoppia:{nome:"Piatti a coppia", dim:"Ø50", cat:"Ritmica", sub:"Batteria e percussioni", w:62,d:48,
+             draw:function(){
+               /* coppia sovrapposta con cinghie in cuoio (niente tavolo: stanno in mano o su gancio) */
+               return cym(-11,2,16)+cym(12,-3,16)+
+                 '<path class="ic thin" fill="none" d="M -15,-2 Q -11,-9 -7,-2"/>'+
+                 '<path class="ic thin" fill="none" d="M 8,-7 Q 12,-14 16,-7"/>'; }},
   campane:  {nome:"Campane tubolari", dim:"~100×35", cat:"Ritmica", sub:"Batteria e percussioni", w:105,d:40,
              draw:function(){ var s=bar(0,0,100,32,'ic fGrey',3);
                for(var i=0;i<9;i++){ s+=circ(-40+i*10, i%2?6:-6, 4,'ic thin fBrass'); }
@@ -563,10 +653,11 @@ var TYPES = {
                [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(function(c){ s+=circ(c[0]*30,c[1]*10.5,1.8,'dotS'); });
                return s; }},
   /* --- ritmica: chitarre --- */
-  gtstand:  {nome:"Chitarra elettrica su stand", dim:"~40×100", cat:"Ritmica", sub:"Chitarre", w:42,d:100,
-             draw:function(){ return bar(0,-43,9,14,'ic fBlack',2)+bar(0,-15,5,44,'ic thin fWoodD',1)+
-               '<path class="ic fRed" d="M 0,7 C 12,5 19,12 16,22 C 14,29 17,32 15,38 C 12,47 5,49 0,49 C -5,49 -12,47 -15,38 C -17,32 -14,29 -16,22 C -19,12 -12,5 0,7 Z"/>'+
-               bar(0,18,12,3.5,'ic thin',1)+bar(0,27,12,3.5,'ic thin',1)+bar(0,38,11,3,'ic fill',1); }},
+  gtstand:  {nome:"Chitarra elettrica su stand", dim:"~40×100", cat:"Ritmica", sub:"Chitarre", w:44,d:104,
+             draw:function(){ return bar(0,-44,9,14,'ic fBlack',2)+bar(0,-17,5,42,'ic thin fWoodD',1)+
+               /* corpo double-cutaway in proporzione reale (33×46) */
+               '<path class="ic fRed" d="M -6,6 C -13,2 -20,7 -20,15 C -20,23 -16,26 -17,32 C -19,42 -11,50 0,50 C 11,50 19,42 17,32 C 16,26 20,23 20,15 C 20,7 13,2 6,6 C 3,8 -3,8 -6,6 Z"/>'+
+               bar(0,20,13,4,'ic thin',1)+bar(0,29,13,4,'ic thin',1)+bar(0,40,12,3.5,'ic fill',1); }},
   gtacustica:{nome:"Chitarra acustica su stand", dim:"~42×105", cat:"Ritmica", sub:"Chitarre", w:46,d:110,
              draw:function(){ return bar(0,-45,9,14,'ic fBlack',2)+bar(0,-17,5,44,'ic thin fWoodD',1)+
                '<path class="ic fWoodL" d="M 0,5 C 11,5 16,11 15,19 C 14,25 11,27 12,32 C 14,39 19,42 18,49 C 16,57 7,59 0,59 C -7,59 -16,57 -18,49 C -19,42 -14,39 -12,32 C -11,27 -14,25 -15,19 C -16,11 -11,5 0,5 Z"/>'+
@@ -597,12 +688,22 @@ var TYPES = {
                lin(-16,-18,-3,50,'sil')+lin(-5,-21,0,54,'sil')+lin(5,-21,3,53,'sil')+lin(16,-18,6,49,'sil')+
                circ(0,62,4.5,'ic fBrass'); }},
   /* --- voci / microfoni --- */
-  astamic:  {nome:"Asta microfono", dim:"base Ø32", cat:"Voci e microfoni", w:36,d:36,
-             draw:function(){ return circ(0,0,16,'ic fBlack')+circ(0,0,11,'ic thin fBlack')+circ(0,0,4.5,'dotS'); }},
+  astamic:  {nome:"Asta microfono", dim:"base Ø32", cat:"Voci e microfoni", w:38,d:52,
+             draw:function(){
+               /* base tonda + stelo + capsula verso il pubblico (ruotabile) */
+               return circ(0,-8,15,'ic fBlack')+circ(0,-8,10,'ic thin fBlack')+circ(0,-8,4,'dotS')+
+                 lin(0,-8,0,13,'ic')+bar(0,19,8,13,'ic fGrey',4); }},
   giraffa:  {nome:"Asta giraffa", dim:"~60", cat:"Voci e microfoni", w:62,d:62,
              draw:function(){ return lin(-12,14,-27,22,'ic thin')+lin(-12,14,-3,27,'ic thin')+lin(-12,14,-17,-1,'ic thin')+
                circ(-12,14,4,'ic fill')+lin(-12,14,20,-19,'ic')+
                '<g transform="translate(24,-23) rotate(45)">'+bar(0,0,15,8,'ic fGrey',3)+'</g>'; }},
+  astabassa:{nome:"Asta microfono bassa", dim:"~45", cat:"Voci e microfoni", w:50,d:42,
+             draw:function(){ return circ(-13,12,12,'ic fBlack')+lin(-13,12,12,-8,'ic')+
+               '<g transform="translate(16,-11) rotate(38)">'+bar(0,0,15,8,'ic fGrey',3)+'</g>'; }},
+  coppiast:{nome:"Coppia stereo", dim:"barra 70", cat:"Voci e microfoni", w:78,d:38, defLabel:"ST L/R",
+             draw:function(){ return lin(-32,0,32,0,'ic')+lin(0,0,0,24,'ic thin')+circ(0,24,3,'ic fill')+
+               '<g transform="translate(-32,0) rotate(-20)">'+bar(0,0,16,8,'ic fGrey',3)+'</g>'+
+               '<g transform="translate(32,0) rotate(20)">'+bar(0,0,16,8,'ic fGrey',3)+'</g>'; }},
   wireless: {nome:"Mic wireless", dim:"", cat:"Voci e microfoni", w:34,d:34, defLabel:"WL",
              draw:function(){ return circ(0,0,13,'ic fBlack')+circ(0,0,5,'dotS')+
                '<path class="ic thin" fill="none" d="M 11,-11 A 16 16 0 0 1 15,-6"/><path class="ic thin" fill="none" d="M 14,-15 A 21 21 0 0 1 19,-9"/>'; }},
@@ -638,10 +739,20 @@ var TYPES = {
              draw:function(){ var s=bar(0,0,54,40,'ic tec fGrey',3);
                for(var r=0;r<2;r++)for(var c=0;c<4;c++){ s+=circ(-15+c*10,-5+r*11,2,'tec fill'); }
                return s; }},
+  splitter: {nome:"Splitter audio", dim:"rack 3U", cat:"Tecnica", w:70,d:46, defLabel:"SPLIT",
+             draw:function(){ var s=bar(0,0,66,40,'ic tec fGrey',3);
+               for(var r=0;r<3;r++)for(var c=0;c<6;c++){ s+=circ(-24+c*9,-10+r*10,1.8,'tec fill'); }
+               return s; }},
+  multicore:{nome:"Multicore / sub-snake", dim:"box+cavo", cat:"Tecnica", w:70,d:50, defLabel:"SUB",
+             draw:function(){ return bar(-12,0,40,30,'ic tec fGrey',3)+
+               '<path class="ic thin" fill="none" d="M 8,0 C 26,-22 42,-10 32,10 C 22,30 46,28 50,8"/>'; }},
   corrente: {nome:"Corrente 220V", dim:"simbolo", cat:"Tecnica", w:30,d:30, defLabel:"220V",
              draw:function(){ return bar(0,0,27,27,'ic pow',5)+'<path class="pow fill" d="M 3,-11 L -7,2 L -1,2 L -3,11 L 7,-2 L 1,-2 Z"/>'; }},
   ciabatta: {nome:"Ciabatta", dim:"simbolo", cat:"Tecnica", w:44,d:17,
              draw:function(){ return bar(0,0,40,13,'ic pow',3)+circ(-13.5,0,2.2,'pow fill')+circ(-4.5,0,2.2,'pow fill')+circ(4.5,0,2.2,'pow fill')+circ(13.5,0,2.2,'pow fill'); }},
+  quadro:   {nome:"Quadro elettrico", dim:"80×60", cat:"Tecnica", w:82,d:62, defLabel:"POWER",
+             draw:function(){ return bar(0,0,78,58,'ic pow',4)+bar(0,-10,56,12,'ic thin',2)+
+               '<path class="pow fill" d="M 5,-2 L -7,14 L 0,14 L -4,28 L 12,8 L 3,8 Z"/>'; }},
   foh:      {nome:"Postazione FOH", dim:"zona 2×1,2 m", cat:"Tecnica", w:200,d:120, resizable:true, z:1, defLabel:"FOH",
              draw:function(it){ var s=rectSvg(it.w,it.d,'ic dash',3)+bar(0,10,96,44,'ic tec fGrey',3);
                for(var i=0;i<6;i++){ s+=lin(-30+i*12,2,-30+i*12,26,'sil'); }
@@ -657,9 +768,17 @@ var TYPES = {
              draw:function(){ return bar(0,0,38,24,'ic tec fGrey',3)+
                circ(-11,0,5,'ic thin fBlack')+circ(11,0,5,'ic thin fBlack')+
                circ(-16,-9,1.8,'tec fill')+circ(-9,-9,1.8,'tec fill')+circ(4,-9,1.8,'dotS')+circ(12,-9,1.8,'dotS')+
-               lin(-11,12,-18,20,'sil')+lin(11,12,18,20,'sil'); }}
+               lin(-11,12,-18,20,'sil')+lin(11,12,18,20,'sil'); }},
+  schermo:  {nome:"Schermo / LED wall", dim:"400×30", cat:"Video", w:400,d:30, resizable:true, z:1, defLabel:"SCREEN",
+             draw:function(it){ return bar(0,0,it.w,it.d,'ic fBlack',2)+bar(0,0,it.w-18,Math.max(8,it.d-10),'ic thin fGrey',1); }},
+  proiettore:{nome:"Proiettore", dim:"45×35", cat:"Video", w:48,d:38, defLabel:"PJ",
+             draw:function(){ return bar(0,0,44,32,'ic fGrey',4)+circ(11,0,8,'ic thin fBlack')+
+               '<path class="ic dash" d="M 23,-7 L 62,-22 M 23,7 L 62,22"/>'; }},
+  camera:   {nome:"Camera su treppiede", dim:"70×70", cat:"Video", w:72,d:72, defLabel:"CAM",
+             draw:function(){ return bar(0,-10,34,20,'ic fBlack',3)+bar(25,-10,16,12,'ic fGrey',2)+
+               lin(0,2,-22,28,'ic thin')+lin(0,2,22,28,'ic thin')+lin(0,2,0,32,'ic thin')+circ(0,2,3,'ic fill'); }}
 };
-var CAT_ORDER = ["Pedane e strutture","Ottoni","Legni","Ritmica","Archi","Voci e microfoni","Monitoraggio","Tecnica"];
+var CAT_ORDER = ["Pedane e strutture","Ottoni","Legni","Ritmica","Archi","Voci e microfoni","Monitoraggio","Tecnica","Video"];
 
 /* ============ STATO ============ */
 var LS_KEY = "stageplot_v1";
@@ -670,7 +789,16 @@ var svg = document.getElementById("svg");
 
 function uid(){ return "i"+(nextId++); }
 function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
-function normalizeState(s){ s.items=s.items||[]; s.inputs=s.inputs||[]; s.outputs=s.outputs||[]; return s; }
+function normalizeChannelRow(r){
+  r=r||{};
+  return {src:r.src||"", mic:r.mic||"", stand:r.stand||"", p48:!!r.p48, notes:r.notes||""};
+}
+function normalizeState(s){
+  s.items=s.items||[];
+  s.inputs=(s.inputs||[]).map(normalizeChannelRow);
+  s.outputs=(s.outputs||[]).map(normalizeChannelRow);
+  return s;
+}
 function load(){
   try{
     var raw = localStorage.getItem(LS_KEY);
@@ -701,11 +829,16 @@ function itemMarkup(it){
   return s;
 }
 function esc(x){ return String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function fmtM(cm){ return (cm/100).toLocaleString("it-IT",{maximumFractionDigits:1})+" m"; }
 function sceneMarkup(){
   var W=state.stage.w, D=state.stage.d;
   var s = '<rect class="stage-floor" x="0" y="0" width="'+W+'" height="'+D+'"/>' + gridMarkup();
   s += '<line class="cl" x1="'+(W/2)+'" y1="0" x2="'+(W/2)+'" y2="'+D+'"/>';
   s += '<text class="zone-lbl" style="font-size:12px" x="'+(W/2+8)+'" y="16">CL</text>';
+  s += '<line class="dim-line" x1="0" y1="-54" x2="'+W+'" y2="-54"/>'+
+       '<line class="dim-line" x1="-54" y1="0" x2="-54" y2="'+D+'"/>'+
+       '<text class="dim-lbl" x="'+(W/2)+'" y="-64" text-anchor="middle">'+fmtM(W)+'</text>'+
+       '<text class="dim-lbl" transform="translate(-66 '+(D/2)+') rotate(-90)" text-anchor="middle">'+fmtM(D)+'</text>';
   s += '<text class="zone-lbl" x="'+(W/2)+'" y="-22" text-anchor="middle">FONDO PALCO</text>';
   s += '<text class="zone-lbl" x="'+(W/2)+'" y="'+(D+38)+'" text-anchor="middle">PUBBLICO</text>';
   s += '<text class="zone-lbl" x="-16" y="'+(D/2)+'" text-anchor="end">DX palco</text>';
@@ -994,10 +1127,11 @@ var ORCH_DEF = [
 
 var pendingOut = null;
 var ORCH_PRESETS = [
-  {id:"archi_compatto", nome:"Palco piccolo - archi compatti", hint:"Ensemble archi compatto per palchi piccoli. Buona base da allargare a mano.", counts:{v1:2,v2:2,vle:1,vc:1}},
-  {id:"camera", nome:"Palco medio - orchestra da camera", hint:"Orchestra da camera: archi piccoli, legni a uno, due corni.", counts:{v1:4,v2:4,vle:3,vc:2,cb:1,fl:1,ob:1,cl:1,fg:1,cor:2}},
-  {id:"ridotta", nome:"Palco grande - sinfonica ridotta", hint:"Sinfonica ridotta per palco grande: archi medi, legni a due, ottoni essenziali e timpani.", counts:{v1:6,v2:5,vle:4,vc:3,cb:2,fl:2,ob:2,cl:2,fg:2,cor:3,tr:2,tbn:1,arp:1,tim:1}},
-  {id:"standard", nome:"Sinfonica standard", hint:"Organico standard completo. Di solito richiede un palco ampio o l'opzione di adattamento palco.", counts:null}
+  {id:"quartetto", nome:"Quartetto archi — 2.0.1.1", hint:"Quartetto classico: 2 violini, viola e violoncello. Ideale per piccoli palchi o cerimonie.", counts:{v1:2,v2:0,vle:1,vc:1}},
+  {id:"archi_compatto", nome:"Ensemble archi compatto — 2.2.1.1", hint:"Piccolo ensemble archi per palchi ridotti; buona base per eventi cameristici.", counts:{v1:2,v2:2,vle:1,vc:1}},
+  {id:"camera", nome:"Orchestra da camera — archi 4.4.3.2.1", hint:"Camera orchestra: archi piccoli, legni a uno, due corni; patch list a spot/area.", counts:{v1:4,v2:4,vle:3,vc:2,cb:1,fl:1,ob:1,cl:1,fg:1,cor:2}},
+  {id:"ridotta", nome:"Sinfonica ridotta — archi 6.5.4.3.2", hint:"Sinfonica ridotta per teatro/piazza: legni a due, ottoni essenziali, arpa e timpani.", counts:{v1:6,v2:5,vle:4,vc:3,cb:2,fl:2,ob:2,cl:2,fg:2,cor:3,tr:2,tbn:1,arp:1,tim:1}},
+  {id:"standard", nome:"Sinfonica completa — archi 12.10.8.6.4", hint:"Organico standard completo. Richiede un palco ampio o l'adattamento automatico del palco.", counts:null}
 ];
 function defaultOrchCounts(){
   var c={}; ORCH_DEF.forEach(function(s){ c[s.id]=s.def; }); return c;
@@ -1290,6 +1424,25 @@ function buildBandOut(){
     {type:"corrente", x:580, y:-340, label:""}
   ];
 }
+function buildAcousticOut(){
+  return [
+    {type:"tappeto", x:0, y:-150, w:650, d:360, label:""},
+    {type:"stagepiano", x:-260, y:-150, rot:18, label:"Piano"},
+    {type:"distereo", x:-330, y:-60, label:"DI Piano"},
+    {type:"gtacustica", x:140, y:-145, rot:-8, label:"Ac. guitar"},
+    {type:"dimono", x:205, y:-65, label:"DI Gtr"},
+    {type:"cajon", x:330, y:-170, label:"Cajon"},
+    {type:"astabassa", x:330, y:-95, rot:160, label:"Cajon"},
+    {type:"astamic", x:0, y:-55, label:"Voce"},
+    {type:"coppiast", x:0, y:-225, label:"Amb L/R"},
+    {type:"wedge", x:0, y:42, label:"MIX VOX"},
+    {type:"wedge", x:-245, y:25, rot:15, label:"MIX PNO"},
+    {type:"wedge", x:210, y:30, rot:-15, label:"MIX GTR"},
+    {type:"stagebox", x:430, y:-70, label:"STAGEBOX"},
+    {type:"corrente", x:-390, y:-115, label:""},
+    {type:"corrente", x:255, y:-85, label:""}
+  ];
+}
 function buildCoroOut(){
   return [
     /* gradoni del coro in fondo (4 file: S/C davanti, T/B dietro) */
@@ -1313,6 +1466,58 @@ function buildCoroOut(){
     /* side fill */
     {type:"sidefill", x:-600, y:10, rot:35, label:"SIDE DX"},
     {type:"sidefill", x:600, y:10, rot:-35, label:"SIDE SX"}
+  ];
+}
+function buildQuartettoOut(){
+  return [
+    {type:"tappeto", x:0, y:-170, w:420, d:300, label:""},
+    {type:"vlnpost", x:-150, y:-180, rot:-25, label:"Violino I"},
+    {type:"vlnpost", x:-50, y:-245, rot:-10, label:"Violino II"},
+    {type:"violapost", x:70, y:-245, rot:10, label:"Viola"},
+    {type:"violoncello", x:170, y:-170, rot:25, label:"Cello"},
+    {type:"coppiast", x:0, y:-60, rot:0, label:"ST L/R"},
+    {type:"podio", x:0, y:20, label:"Direttore"}
+  ];
+}
+function buildBigBandOut(){
+  var out=[
+    {type:"pedana", x:0, y:-470, w:760, d:130, h:40, label:"Trombe"},
+    {type:"pedana", x:0, y:-330, w:760, d:130, h:20, label:"Tromboni"},
+    {type:"pedana", x:0, y:-190, w:980, d:120, h:0, label:"Sax"},
+    {type:"stagebox", x:540, y:-120, label:"STAGEBOX"},
+    {type:"astamic", x:0, y:10, label:"Voce"},
+    {type:"wedge", x:0, y:105, label:"MIX VOX"},
+    {type:"batteria", x:520, y:-410, label:""},
+    {type:"bassamp", x:670, y:-240, label:"Bass amp"},
+    {type:"stack", x:-670, y:-240, label:"Guitar amp"},
+    {type:"stagepiano", x:-520, y:-80, rot:-15, label:"Piano"},
+    {type:"wedge", x:-500, y:35, label:"MIX RH"},
+    {type:"wedge", x:500, y:35, label:"MIX RH"}
+  ];
+  [-360,-180,0,180,360].forEach(function(x,i){
+    var types=["saxalto","saxtenore","saxbaritono","saxtenore","saxalto"];
+    out.push({type:types[i], x:x, y:-190, rot:0, label:["A1","T1","Bari","T2","A2"][i]});
+  });
+  [-255,-85,85,255].forEach(function(x,i){ out.push({type:"trombone", x:x, y:-330, rot:0, label:"Tbn "+(i+1)}); });
+  [-255,-85,85,255].forEach(function(x,i){ out.push({type:"tromba", x:x, y:-470, rot:0, label:"Trp "+(i+1)}); });
+  return out;
+}
+function buildJazzComboOut(){
+  return [
+    {type:"tappeto", x:0, y:-210, w:860, d:500, label:""},
+    {type:"batteria", x:300, y:-330, label:""},
+    {type:"grancoda", x:-300, y:-265, rot:28, label:"Piano"},
+    {type:"panchetta", x:-210, y:-155, rot:28, label:""},
+    {type:"contrabbasso", x:250, y:-120, rot:-20, label:"Upright"},
+    {type:"bassamp", x:410, y:-145, label:"Bass amp"},
+    {type:"saxalto", x:60, y:-90, rot:0, label:"Sax"},
+    {type:"astamic", x:-100, y:-60, label:"Voce"},
+    {type:"wedge", x:-100, y:42, label:"MIX VOX"},
+    {type:"wedge", x:-300, y:12, rot:18, label:"MIX PNO"},
+    {type:"wedge", x:160, y:35, rot:-12, label:"MIX SAX"},
+    {type:"stagebox", x:455, y:-35, label:"STAGEBOX"},
+    {type:"corrente", x:-455, y:-195, label:""},
+    {type:"corrente", x:460, y:-150, label:""}
   ];
 }
 function buildOrchBandOut(){
@@ -1375,6 +1580,13 @@ function buildOrchCoroOut(){
   });
 })();
 
+var FORM_TITLES = {
+  band:"Pop/Rock band 5", acoustic:"Acoustic trio", coro:"Coro SATB + piano",
+  quartetto:"Quartetto archi", camera:"Orchestra da camera", sinfonica_ridotta:"Sinfonica ridotta",
+  sinfonica:"Sinfonica completa", orchband:"Orchestra da camera + band", orchcoro:"Orchestra + coro",
+  jazzcombo:"Jazz quintet", bigband:"Big band 5/4/4 + ritmica"
+};
+
 /* ============ MENU FORMAZIONI (pulsante "Organico ▾") ============ */
 (function(){
   var btn=document.getElementById("bOrch"), menu=document.getElementById("orgMenu");
@@ -1382,7 +1594,11 @@ function buildOrchCoroOut(){
   function closeMenu(){ menu.hidden=true; }
   btn.addEventListener("click", function(e){
     e.stopPropagation();
-    if(menu.hidden){ menu.style.left=btn.offsetLeft+"px"; menu.hidden=false; }
+    if(menu.hidden){
+      menu.hidden=false;
+      var maxLeft=Math.max(8, window.innerWidth-menu.offsetWidth-8);
+      menu.style.left=Math.min(btn.offsetLeft, maxLeft)+"px";
+    }
     else closeMenu();
   });
   document.addEventListener("click", function(e){ if(!menu.hidden && !menu.contains(e.target)) closeMenu(); });
@@ -1394,14 +1610,12 @@ function buildOrchCoroOut(){
   function runFormation(f){
     if(f==="custom"){ applySuggestedOrchestra(); orchModal.hidden=false; return; }
     var data=formationData(f); if(!data) return;
-    var titoli={band:"Band", coro:"Coro", sinfonica:"Orchestra sinfonica",
-      orchband:"Orchestra + band", orchcoro:"Orchestra sinfonica + coro"};
     if((state.items.length||state.inputs.length||state.outputs.length) &&
-       !confirm("Generare la formazione \""+titoli[f]+"\"? Palco e channel list attuali verranno sostituiti.")) return;
+       !confirm("Generare la formazione \""+FORM_TITLES[f]+"\"? Palco e channel list attuali verranno sostituiti.")) return;
     placeOut(data.out, true, true, true);
-    state.inputs=data.inp.map(function(r){ return ch(r.src,r.mic); });
-    state.outputs=data.outp.map(function(r){ return ch(r.src,r.mic); });
-    if(!state.titolo){ state.titolo=titoli[f]; document.getElementById("titolo").value=titoli[f]; }
+    state.inputs=data.inp.map(normalizeChannelRow);
+    state.outputs=data.outp.map(normalizeChannelRow);
+    if(!state.titolo){ state.titolo=FORM_TITLES[f]; document.getElementById("titolo").value=FORM_TITLES[f]; }
     save(); fit(); renderChannels();
   }
 })();
@@ -1412,16 +1626,17 @@ function buildOrchCoroOut(){
    Singolo canale qui in IN_SRC; elementi stereo/multipli in IN_MULTI. Convenzioni live PA. */
 var IN_SRC = {
   /* voci e microfoni */
-  astamic:"SM58", giraffa:"e906", wireless:"Beta 58A", headset:"DPA 4066", podiosp:"SM58",
+  astamic:"SM58", giraffa:"KM184", astabassa:"SM57", wireless:"Beta 58A", headset:"DPA 4066", podiosp:"SM58",
   /* archi (mic a clip) */
   vlnpost:"DPA 4099", violapost:"DPA 4099", violoncello:"DPA 4099", contrabbasso:"DPA 4099", arpa:"DPA 4099",
   /* legni (mic a clip) */
   flauto:"DPA 4099", oboe:"DPA 4099", clarinetto:"DPA 4099", fagotto:"DPA 4099",
+  saxalto:"DPA 4099", saxtenore:"DPA 4099", saxbaritono:"DPA 4099",
   /* ottoni */
   corno:"MD421", tromba:"e906", trombone:"MD421", tuba:"MD421",
   /* percussioni a microfono singolo */
-  rullante:"SM57", grancassa:"D6", timpani:"KM184", piatto:"overhead", piatticoppia:"overhead",
-  campane:"KM184", tamtam:"KM184", glockenspiel:"KM184",
+  rullante:"SM57", grancassa:"D6", piatto:"KM184", piatticoppia:"KM184",
+  campane:"KM184", tamtam:"KM184", glockenspiel:"KM184", cajon:"Beta 91A",
   /* backline / tastiere a mic o DI singolo */
   comboamp:"SM57", stack:"SM57/e906", keysamp:"DI", celesta:"KM184",
   /* chitarre/basso su stand (DI) */
@@ -1435,24 +1650,52 @@ var IN_MULTI = {
              ["Tom 1","e904"],["Tom floor","e904"],["Overhead L","KM184"],["Overhead R","KM184"]],
   edrums:   [["E-drums L","DI"],["E-drums R","DI"]],
   bassamp:  [["Basso DI","DI"],["Basso ampli","MD421"]],
+  timpani:  [["Timpani L","KM184"],["Timpani R","KM184"]],
   grancoda: [["Pianoforte L","KM184"],["Pianoforte R","KM184"]],
   mezzacoda:[["Pianoforte L","KM184"],["Pianoforte R","KM184"]],
   pianoverticale:[["Piano vert. L","KM184"],["Piano vert. R","KM184"]],
   stagepiano:[["Tastiere L","DI"],["Tastiere R","DI"]],
-  doppiatastiera:[["Tastiera sup.","DI st"],["Tastiera inf.","DI st"]],
+  doppiatastiera:[["Tastiera sup. L","DI"],["Tastiera sup. R","DI"],["Tastiera inf. L","DI"],["Tastiera inf. R","DI"]],
   djset:    [["DJ L","DI"],["DJ R","DI"]],
   laptop:   [["Playback L","DI"],["Playback R","DI"]],
   leslie:   [["Leslie horn","SM57"],["Leslie bass","MD421"]],
   percussioni:[["Congas","e904"],["Bongos","e904"]],
+  timbales: [["Timbales L","e904"],["Timbales R","e904"]],
   vibrafono:[["Vibrafono L","KM184"],["Vibrafono R","KM184"]],
   marimba:  [["Marimba L","KM184"],["Marimba R","KM184"]],
-  xilofono: [["Xilofono L","KM184"],["Xilofono R","KM184"]]
+  xilofono: [["Xilofono L","KM184"],["Xilofono R","KM184"]],
+  coppiast: [["Stereo L","KM184"],["Stereo R","KM184"]]
 };
 var DRUM_KIT = IN_MULTI.batteria;
 var OUT_SET = { wedge:"wedge", sidefill:"side fill", drumfill:"drum fill", iem:"IEM", iemant:"IEM", monmix:"console mon" };
 
 /* ---- Channel list realistiche per formazione (contesto LIVE PA, monitor misto wedge+IEM) ---- */
-function ch(src,mic){ return {src:src, mic:mic}; }
+var MIC_DEFAULTS = {
+  "DI":{stand:"",p48:false}, "DI st":{stand:"2 DI",p48:false},
+  "SM58":{stand:"asta dritta",p48:false}, "Beta 58A":{stand:"asta dritta",p48:false},
+  "SM57":{stand:"asta bassa",p48:false}, "SM57/e906":{stand:"asta bassa",p48:false},
+  "e906":{stand:"clip/asta bassa",p48:false}, "e904":{stand:"clip",p48:false},
+  "D6":{stand:"asta bassa",p48:false}, "Beta 91A":{stand:"interno/terra",p48:true},
+  "MD421":{stand:"asta bassa/clip",p48:false}, "SM81":{stand:"asta giraffa",p48:true},
+  "KM184":{stand:"asta giraffa",p48:true}, "C414":{stand:"asta giraffa",p48:true},
+  "DPA 4099":{stand:"clip strumento",p48:true}, "DPA 4066":{stand:"headset",p48:true}
+};
+function micInfo(mic){
+  if(MIC_DEFAULTS[mic]) return MIC_DEFAULTS[mic];
+  if(String(mic).indexOf("DI")>-1) return {stand:"",p48:false};
+  return {stand:"",p48:false};
+}
+function ch(src,mic,stand,p48,notes){
+  var info=micInfo(mic);
+  return {src:src, mic:mic, stand:stand!=null?stand:info.stand, p48:p48!=null?!!p48:info.p48, notes:notes||""};
+}
+function outch(src,type,dest,notes){ return {src:src, mic:type, stand:dest||"", p48:false, notes:notes||""}; }
+function labelPrefix(it, src){
+  var base=(it.label||"").trim(), def=(TYPES[it.type].defLabel||"").trim();
+  if(!base || base===def || base===src) return src;
+  if(src.toLowerCase().indexOf(base.toLowerCase())===0) return src;
+  return base+" - "+src;
+}
 function bandInputs(){
   return [
     ch("Kick","D6"), ch("Rullante top","SM57"), ch("Rullante btm","e904"), ch("Hi-Hat","SM81"),
@@ -1465,9 +1708,26 @@ function bandInputs(){
 }
 function bandOutputs(){
   return [
-    ch("Voce lead","IEM"), ch("Batteria","IEM"),
-    ch("Basso","wedge"), ch("Chitarra","wedge"), ch("Tastiere","wedge"), ch("Cori","wedge"),
-    ch("Side fill L","side fill"), ch("Side fill R","side fill")
+    outch("Voce lead","IEM","beltpack", "mix personale"), outch("Batteria","IEM","beltpack", "click/cue se necessario"),
+    outch("Basso","wedge","DS bass"), outch("Chitarra","wedge","DS guitar"), outch("Tastiere","wedge","DS keys"), outch("Cori","wedge","DS BV"),
+    outch("Side fill L","side fill","lato DX palco"), outch("Side fill R","side fill","lato SX palco")
+  ];
+}
+function acousticInputs(){
+  return [
+    ch("Voce","Beta 58A"),
+    ch("Chitarra acustica","DI"),
+    ch("Piano L","DI"), ch("Piano R","DI"),
+    ch("Cajon","Beta 91A"),
+    ch("Ambiente L","KM184","coppia stereo",true,"opzionale / recording"),
+    ch("Ambiente R","KM184","coppia stereo",true,"opzionale / recording")
+  ];
+}
+function acousticOutputs(){
+  return [
+    outch("Voce","wedge","fronte palco"),
+    outch("Piano","wedge","lato piano"),
+    outch("Chitarra/Cajon","wedge","lato chitarra")
   ];
 }
 function choirInputs(){ return [ ch("Coro L","KM184"), ch("Coro C","KM184"), ch("Coro R","KM184") ]; }
@@ -1479,8 +1739,54 @@ function coroInputs(){
   ]);
 }
 function coroOutputs(){
-  return [ ch("Direttore","wedge"), ch("Solisti","wedge"), ch("Piano","wedge"),
-    ch("Side fill L","side fill"), ch("Side fill R","side fill") ];
+  return [ outch("Direttore","wedge","podio"), outch("Solisti","wedge","fronte palco"), outch("Piano","wedge","lato DX"),
+    outch("Side fill L","side fill","lato DX palco"), outch("Side fill R","side fill","lato SX palco") ];
+}
+function quartettoInputs(){
+  return [
+    ch("Quartetto L","KM184","coppia stereo",true,"spot/ORTF davanti al tappeto"),
+    ch("Quartetto R","KM184","coppia stereo",true,"spot/ORTF davanti al tappeto"),
+    ch("Talkback/direttore","SM58")
+  ];
+}
+function quartettoOutputs(){
+  return [ outch("Direttore (cue)","IEM","beltpack") ];
+}
+function bigbandInputs(){
+  return [
+    ch("Kick","D6"), ch("Rullante","SM57"), ch("Overhead L","KM184"), ch("Overhead R","KM184"),
+    ch("Basso DI","DI"), ch("Basso ampli","MD421"),
+    ch("Chitarra","SM57/e906"),
+    ch("Piano L","DI"), ch("Piano R","DI"),
+    ch("Sax L","KM184","asta alta",true), ch("Sax R","KM184","asta alta",true),
+    ch("Tromboni L","MD421","asta bassa/clip"), ch("Tromboni R","MD421","asta bassa/clip"),
+    ch("Trombe L","e906","clip/asta bassa"), ch("Trombe R","e906","clip/asta bassa"),
+    ch("Voce","Beta 58A")
+  ];
+}
+function bigbandOutputs(){
+  return [
+    outch("Voce","wedge","fronte palco"), outch("Ritmica L","wedge","lato piano/chitarra"),
+    outch("Ritmica R","wedge","lato basso/batteria"), outch("Fiati","side fill","centro retro")
+  ];
+}
+function jazzComboInputs(){
+  return [
+    ch("Kick","D6"), ch("Rullante","SM57"), ch("Overhead L","KM184"), ch("Overhead R","KM184"),
+    ch("Contrabbasso","DPA 4099"),
+    ch("Piano L","KM184"), ch("Piano R","KM184"),
+    ch("Sax","DPA 4099"),
+    ch("Voce","Beta 58A"),
+    ch("Talkback","SM58")
+  ];
+}
+function jazzComboOutputs(){
+  return [
+    outch("Voce","wedge","fronte palco"),
+    outch("Piano","wedge","lato piano"),
+    outch("Sax","wedge","centro"),
+    outch("Contrabbasso/Batteria","wedge","ritmica")
+  ];
 }
 /* Orchestra (LIVE PA): area/spot in base a cosa è presente, NON un mic per leggio */
 function orchInputs(c){
@@ -1492,7 +1798,7 @@ function orchInputs(c){
   if(n("cor")) ins.push(ch("Corni","MD421"));
   if(n("tr")+n("tbn")+n("tba")) ins.push(ch("Ottoni","MD421"));
   if(n("tim")) ins.push(ch("Timpani","KM184"));
-  if(n("gc")+n("pia")+n("rul")+n("cmp")+n("tam")) ins.push(ch("Percussioni","overhead"));
+  if(n("gc")+n("pia")+n("rul")+n("cmp")+n("tam")) ins.push(ch("Percussioni","KM184","coppia alta",true));
   if(n("arp")) ins.push(ch("Arpa","DPA 4099"));
   if(n("pf")){ ins.push(ch("Pianoforte L","KM184")); ins.push(ch("Pianoforte R","KM184")); }
   if(n("cel")) ins.push(ch("Celesta","KM184"));
@@ -1500,19 +1806,25 @@ function orchInputs(c){
   return ins;
 }
 function orchOutputs(){
-  return [ ch("Direttore (cue)","IEM"), ch("Side fill L","side fill"), ch("Side fill R","side fill") ];
+  return [ outch("Direttore (cue)","IEM","beltpack"), outch("Side fill L","side fill","lato DX palco"), outch("Side fill R","side fill","lato SX palco") ];
 }
 /* dispatch: per ogni voce del menu, layout + channel list coerenti */
 function formationData(f){
   if(f==="band")  return { out:buildBandOut(),  inp:bandInputs(), outp:bandOutputs() };
+  if(f==="acoustic") return { out:buildAcousticOut(), inp:acousticInputs(), outp:acousticOutputs() };
   if(f==="coro")  return { out:buildCoroOut(),  inp:coroInputs(), outp:coroOutputs() };
+  if(f==="quartetto") return { out:buildQuartettoOut(), inp:quartettoInputs(), outp:quartettoOutputs() };
+  if(f==="camera"){ var ca=presetCounts("camera"); return { out:buildOrchestraOut(ca), inp:orchInputs(ca), outp:orchOutputs() }; }
+  if(f==="sinfonica_ridotta"){ var sr=presetCounts("ridotta"); return { out:buildOrchestraOut(sr), inp:orchInputs(sr), outp:orchOutputs() }; }
+  if(f==="jazzcombo") return { out:buildJazzComboOut(), inp:jazzComboInputs(), outp:jazzComboOutputs() };
+  if(f==="bigband") return { out:buildBigBandOut(), inp:bigbandInputs(), outp:bigbandOutputs() };
   if(f==="sinfonica"){ var cs=presetCounts("standard"); return { out:buildOrchestraOut(cs), inp:orchInputs(cs), outp:orchOutputs() }; }
   if(f==="orchband"){ var cb=presetCounts("camera"); return { out:buildOrchBandOut(),
       inp:orchInputs(cb).concat(bandInputs()),
-      outp:[ch("Direttore (cue)","IEM")].concat(bandOutputs()) }; }
+      outp:[outch("Direttore (cue)","IEM","beltpack")].concat(bandOutputs()) }; }
   if(f==="orchcoro"){ var cc=presetCounts("ridotta"); return { out:buildOrchCoroOut(),
       inp:orchInputs(cc).concat(choirInputs()).concat([ch("Solista 1","SM58"),ch("Solista 2","SM58")]),
-      outp:[ch("Direttore (cue)","IEM"),ch("Solisti","wedge"),ch("Side fill L","side fill"),ch("Side fill R","side fill")] }; }
+      outp:[outch("Direttore (cue)","IEM","beltpack"),outch("Solisti","wedge","fronte palco"),outch("Side fill L","side fill","lato DX palco"),outch("Side fill R","side fill","lato SX palco")] }; }
   return null;
 }
 
@@ -1556,17 +1868,29 @@ function chanRow(kind, row, i){
   n.title="Trascina per riordinare"; d.appendChild(n);
   attachReorder(n, d, kind);
   var src=document.createElement("input"); src.className="src"; src.value=row.src||"";
-  src.placeholder = kind==="in" ? "sorgente" : "mix";
+  src.placeholder = kind==="in" ? "sorgente" : "mix/destinazione";
   src.addEventListener("input", function(){ row.src=src.value; save(); });
   d.appendChild(src);
   var mic=document.createElement("input"); mic.className="mic"; mic.value=row.mic||"";
   mic.placeholder = kind==="in" ? "mic/DI" : "tipo";
   mic.addEventListener("input", function(){ row.mic=mic.value; save(); });
   d.appendChild(mic);
+  var stand=document.createElement("input"); stand.className="stand"; stand.value=row.stand||"";
+  stand.placeholder = kind==="in" ? "stand" : "patch";
+  stand.addEventListener("input", function(){ row.stand=stand.value; save(); });
+  d.appendChild(stand);
+  var p48=document.createElement("label"); p48.className="p48"; p48.title=kind==="in" ? "Richiede phantom +48V" : "Non usato per output";
+  var p48box=document.createElement("input"); p48box.type="checkbox"; p48box.checked=!!row.p48; p48box.disabled=kind!=="in";
+  p48box.addEventListener("change", function(){ row.p48=p48box.checked; save(); });
+  p48.appendChild(p48box); d.appendChild(p48);
   var del=document.createElement("button"); del.className="del"; del.type="button"; del.innerHTML="&times;";
   del.title="Elimina riga";
   del.addEventListener("click", function(){ arr.splice(i,1); save(); renderChannels(); });
   d.appendChild(del);
+  var notes=document.createElement("input"); notes.className="notes"; notes.value=row.notes||"";
+  notes.placeholder = kind==="in" ? "note, insert, FX, patch, posizione" : "note monitor, mix content, amplificazione";
+  notes.addEventListener("input", function(){ row.notes=notes.value; save(); });
+  d.appendChild(notes);
   return d;
 }
 function renderChannels(){
@@ -1578,14 +1902,24 @@ function renderChannels(){
   if(!state.outputs.length){ outR.innerHTML='<div class="clempty">Nessun mix. Usa "+ mix" o "Auto" dai monitor.</div>'; }
   else state.outputs.forEach(function(r,i){ outR.appendChild(chanRow("out",r,i)); });
 }
+function rowFromMic(src, mic, stand, p48, notes){ return ch(src, mic, stand, p48, notes); }
 function autoInputs(){
   if(state.inputs.some(function(r){return r.src||r.mic;}) && !confirm("Rigenerare la input list dai mic/DI sul palco? Sostituisce quella attuale.")) return;
   var rows=[];
   state.items.forEach(function(it){
     var t=TYPES[it.type]; if(!t) return;
-    if(IN_MULTI[it.type]){ IN_MULTI[it.type].forEach(function(k){ rows.push({src:k[0],mic:k[1]}); }); return; }
-    if(it.type==="distereo"){ rows.push({src:(it.label||"Stereo")+" L",mic:"DI"}); rows.push({src:(it.label||"Stereo")+" R",mic:"DI"}); return; }
-    if(IN_SRC[it.type]!=null){ rows.push({src: it.label || t.nome, mic: IN_SRC[it.type]}); }
+    if(IN_MULTI[it.type]){
+      IN_MULTI[it.type].forEach(function(k){
+        rows.push(rowFromMic(labelPrefix(it,k[0]), k[1], k[2], k[3], k[4]));
+      });
+      return;
+    }
+    if(it.type==="distereo"){
+      rows.push(rowFromMic(labelPrefix(it,"L"),"DI"));
+      rows.push(rowFromMic(labelPrefix(it,"R"),"DI"));
+      return;
+    }
+    if(IN_SRC[it.type]!=null){ rows.push(rowFromMic(it.label || t.nome, IN_SRC[it.type])); }
   });
   state.inputs=rows; save(); renderChannels();
 }
@@ -1593,12 +1927,12 @@ function autoOutputs(){
   if(state.outputs.some(function(r){return r.src||r.mic;}) && !confirm("Rigenerare la output list dai monitor sul palco? Sostituisce quella attuale.")) return;
   var rows=[];
   state.items.forEach(function(it){
-    if(OUT_SET[it.type]!=null) rows.push({src: it.label || TYPES[it.type].nome, mic: OUT_SET[it.type]});
+    if(OUT_SET[it.type]!=null) rows.push(outch(it.label || TYPES[it.type].nome, OUT_SET[it.type], "stage"));
   });
   state.outputs=rows; save(); renderChannels();
 }
-document.getElementById("inAdd").addEventListener("click", function(){ state.inputs.push({src:"",mic:""}); save(); renderChannels(); });
-document.getElementById("outAdd").addEventListener("click", function(){ state.outputs.push({src:"",mic:""}); save(); renderChannels(); });
+document.getElementById("inAdd").addEventListener("click", function(){ state.inputs.push(normalizeChannelRow({})); save(); renderChannels(); });
+document.getElementById("outAdd").addEventListener("click", function(){ state.outputs.push(normalizeChannelRow({})); save(); renderChannels(); });
 document.getElementById("inClear").addEventListener("click", function(){ if(state.inputs.length && confirm("Svuotare la input list?")){ state.inputs=[]; save(); renderChannels(); } });
 document.getElementById("outClear").addEventListener("click", function(){ if(state.outputs.length && confirm("Svuotare la output list?")){ state.outputs=[]; save(); renderChannels(); } });
 document.getElementById("inAuto").addEventListener("click", autoInputs);
@@ -1632,28 +1966,41 @@ function dl(href,name){ var a=document.createElement("a"); a.href=href; a.downlo
 /* tabella input/output a lato della planimetria (coord. SVG dell'export) */
 function channelTableSvg(x, top, w){
   var lh=34, s='';
+  function short(x,n){ x=String(x||""); return x.length>n ? x.slice(0,n-3)+"..." : x; }
   function section(title, rows, sy){
     var t='<text x="'+x+'" y="'+sy+'" font-size="26" font-weight="700" fill="#111827">'+esc(title)+'</text>'+
           '<line x1="'+x+'" y1="'+(sy+11)+'" x2="'+(x+w)+'" y2="'+(sy+11)+'" stroke="#111827" stroke-width="2"/>';
     var ry=sy+11+lh;
+    if(rows.length){
+      t+='<text x="'+x+'" y="'+(ry-4)+'" font-size="13" fill="#6b7280">CH</text>'+
+         '<text x="'+(x+44)+'" y="'+(ry-4)+'" font-size="13" fill="#6b7280">SORGENTE / MIX</text>'+
+         '<text x="'+(x+270)+'" y="'+(ry-4)+'" font-size="13" fill="#6b7280">MIC / TIPO</text>'+
+         '<text x="'+(x+420)+'" y="'+(ry-4)+'" font-size="13" fill="#6b7280">STAND / PATCH</text>'+
+         '<text x="'+(x+585)+'" y="'+(ry-4)+'" font-size="13" fill="#6b7280">48V</text>'+
+         '<text x="'+(x+640)+'" y="'+(ry-4)+'" font-size="13" fill="#6b7280">NOTE</text>';
+      ry+=20;
+    }
     rows.forEach(function(r,i){
       if(i%2===1) t+='<rect x="'+(x-6)+'" y="'+(ry-24)+'" width="'+(w+12)+'" height="'+lh+'" fill="#f4f5f7"/>';
       t+='<text x="'+x+'" y="'+ry+'" font-size="22" fill="#6b7280">'+(i+1)+'</text>'+
-         '<text x="'+(x+46)+'" y="'+ry+'" font-size="22" fill="#111827">'+esc(r.src||"")+'</text>'+
-         '<text x="'+(x+w)+'" y="'+ry+'" font-size="22" fill="#374151" text-anchor="end">'+esc(r.mic||"")+'</text>';
+         '<text x="'+(x+44)+'" y="'+ry+'" font-size="20" fill="#111827">'+esc(short(r.src,25))+'</text>'+
+         '<text x="'+(x+270)+'" y="'+ry+'" font-size="20" fill="#374151">'+esc(short(r.mic,14))+'</text>'+
+         '<text x="'+(x+420)+'" y="'+ry+'" font-size="18" fill="#374151">'+esc(short(r.stand,16))+'</text>'+
+         '<text x="'+(x+596)+'" y="'+ry+'" font-size="18" fill="#374151" text-anchor="middle">'+(r.p48?"yes":"")+'</text>'+
+         '<text x="'+(x+640)+'" y="'+ry+'" font-size="18" fill="#6b7280">'+esc(short(r.notes,26))+'</text>';
       ry+=lh;
     });
     return {svg:t, endY:ry};
   }
-  var sec1=section("INPUT LIST", state.inputs, top+30); s+=sec1.svg;
-  if(state.outputs.length){ var sec2=section("OUTPUT / MIX", state.outputs, sec1.endY+34); s+=sec2.svg; }
+  var sec1=section("INPUT PATCH", state.inputs, top+30); s+=sec1.svg;
+  if(state.outputs.length){ var sec2=section("MONITOR / OUTPUT", state.outputs, sec1.endY+34); s+=sec2.svg; }
   return s;
 }
 function buildExportSvg(){
   var keep=sel; sel=null;
   var m=130, W=state.stage.w, D=state.stage.d, head=70;
   var hasCL = state.inputs.length || state.outputs.length;
-  var tableW = hasCL ? 720 : 0;
+  var tableW = hasCL ? 940 : 0;
   var inner = sceneMarkup(); sel=keep;
   var css = document.querySelector("style").textContent;
   var titolo = esc(state.titolo||"Stage plot");
@@ -1756,13 +2103,13 @@ if(location.search.indexOf("orch=1")>-1){     /* QA: organico standard completo 
   state.titolo="Orchestra sinfonica — organico standard";
   genOrchestra(c, true, true, true);
 }
-/* QA formazioni: ?form=band|coro|orchband|orchcoro  (+ &auto=1 popola la channel list) */
+/* QA formazioni: ?form=band|acoustic|coro|quartetto|camera|sinfonica_ridotta|sinfonica|jazzcombo|bigband|orchband|orchcoro */
 var qForm=(location.search.match(/form=(\w+)/)||[])[1];
 if(qForm){
   var qd=formationData(qForm);
-  if(qd){ state.titolo=qForm; placeOut(qd.out, true, true, true);
-    state.inputs=qd.inp.map(function(r){ return ch(r.src,r.mic); });
-    state.outputs=qd.outp.map(function(r){ return ch(r.src,r.mic); }); }
+  if(qd){ state.titolo=FORM_TITLES[qForm]||qForm; placeOut(qd.out, true, true, true);
+    state.inputs=qd.inp.map(normalizeChannelRow);
+    state.outputs=qd.outp.map(normalizeChannelRow); }
 }
 document.getElementById("titolo").value = state.titolo||"";
 normalizeState(state); renderChannels();
