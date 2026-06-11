@@ -35,6 +35,10 @@
   #catalog .cat-head .count{margin-left:auto;font-size:10px;font-weight:600;color:#b6bbc2;letter-spacing:0}
   #catalog .cat-body{display:none;padding:6px 0 4px}
   #catalog .cat-body.open{display:block}
+  #catSearch{width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:7px 10px;font-size:13px;margin-bottom:8px}
+  #catSearch:focus{outline:none;border-color:#9aa3ad}
+  #catResults{display:none}
+  #catResults .nores{font-size:12px;color:#9ca3af;padding:8px 4px}
   #catalog h4{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:#9ca3af;margin:8px 4px 4px}
   #catalog button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:#fff;
     border:1px solid #e5e7eb;border-radius:8px;padding:4px 8px;font-size:12.5px;color:#1f2937;
@@ -669,16 +673,27 @@ function miniSvg(k, over){
     b.addEventListener("click", function(){ addItem(k, over?JSON.parse(JSON.stringify(over)):undefined); });
     return b;
   }
-  CAT_ORDER.forEach(function(c, ci){
+
+  // campo di ricerca + contenitori (accordion / risultati)
+  var search=document.createElement("input");
+  search.type="search"; search.id="catSearch"; search.placeholder="Cerca elemento…";
+  search.setAttribute("aria-label","Cerca elemento nel catalogo");
+  el.appendChild(search);
+  var wrap=document.createElement("div"); wrap.id="catWrap"; el.appendChild(wrap);
+  var results=document.createElement("div"); results.id="catResults"; el.appendChild(results);
+
+  var entries=[];                 // lista piatta per la ricerca
+  var sections=[];                // per chiudere tutte (una categoria aperta per volta)
+
+  CAT_ORDER.forEach(function(c){
     var head=document.createElement("button"); head.className="cat-head";
     var body=document.createElement("div"); body.className="cat-body";
     var n=0;
     if(c==="Pedane e strutture"){
       [["2×1 m",200,100],["1×1 m",100,100],["2×0,5 m",200,50]].forEach(function(p){
-        var b=document.createElement("button");
-        b.innerHTML = miniSvg("pedana",{w:p[1],d:p[2]})+'<span>Pedana '+p[0]+'</span>';
-        b.addEventListener("click", function(){ addItem("pedana",{w:p[1],d:p[2]}); });
-        body.appendChild(b); n++;
+        var nome="Pedana "+p[0], over={w:p[1],d:p[2]};
+        body.appendChild(makeBtn("pedana",nome,over)); n++;
+        entries.push({k:"pedana",nome:nome,over:over});
       });
     }
     var lastSub=null;
@@ -688,13 +703,27 @@ function miniSvg(k, over){
       if(sub && sub!==lastSub){ var h4=document.createElement("h4"); h4.textContent=sub; body.appendChild(h4); }
       lastSub=sub;
       body.appendChild(makeBtn(k, TYPES[k].nome)); n++;
+      entries.push({k:k,nome:TYPES[k].nome,over:null});
     });
     head.innerHTML='<span class="caret">▸</span><span>'+esc(c)+'</span><span class="count">'+n+'</span>';
     head.addEventListener("click", function(){
-      var open=body.classList.toggle("open"); head.classList.toggle("open", open);
+      var willOpen = !body.classList.contains("open");
+      sections.forEach(function(s){ s.head.classList.remove("open"); s.body.classList.remove("open"); });
+      if(willOpen){ body.classList.add("open"); head.classList.add("open"); }
     });
-    if(ci===0){ body.classList.add("open"); head.classList.add("open"); }   // prima categoria aperta
-    el.appendChild(head); el.appendChild(body);
+    sections.push({head:head, body:body});
+    wrap.appendChild(head); wrap.appendChild(body);
+  });
+  // tutte le categorie chiuse di default (nessuna .open)
+
+  search.addEventListener("input", function(){
+    var q=this.value.trim().toLowerCase();
+    results.innerHTML="";
+    if(!q){ wrap.style.display=""; results.style.display="none"; return; }
+    wrap.style.display="none"; results.style.display="block";
+    var matched=entries.filter(function(e){ return e.nome.toLowerCase().indexOf(q)>-1; });
+    if(!matched.length){ results.innerHTML='<div class="nores">Nessun elemento trovato</div>'; return; }
+    matched.forEach(function(e){ results.appendChild(makeBtn(e.k, e.nome, e.over)); });
   });
 })();
 function addItem(type, over){
@@ -1026,7 +1055,8 @@ function gallery(){
 }
 
 /* ============ AVVIO ============ */
-load();
+/* Nuovo progetto a OGNI apertura: non ripristiniamo la sessione precedente.
+   Per conservare un lavoro usare "Salva .json" / "Apri .json". */
 if(location.search.indexOf("demo=1")>-1) demo();
 if(location.search.indexOf("orch=1")>-1){     /* QA: organico standard completo */
   var c={}; ORCH_DEF.forEach(function(s){ c[s.id]=s.def; });
