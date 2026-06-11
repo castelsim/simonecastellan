@@ -143,7 +143,11 @@
   #props .clhead h3{margin:0}
   #props .clhead .btn{padding:4px 9px;font-size:11px}
   .clrow{display:flex;gap:4px;align-items:center;margin-bottom:4px}
-  .clrow .n{flex:0 0 16px;font-size:11px;color:#9ca3af;text-align:right}
+  .clrow .n{flex:0 0 20px;font-size:11px;color:#9ca3af;text-align:center;border-radius:4px}
+  .clrow .n.grip{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+  .clrow .n.grip:hover{background:#eef0f2;color:#6b7280}
+  .clrow .n.grip:active{cursor:grabbing}
+  .clrow.dragging{opacity:.55;background:#eef2ff;border-radius:6px}
   #props .clrow input{padding:4px 6px;font-size:12px}
   .clrow .src{flex:1;min-width:0}
   .clrow .mic{flex:0 0 70px}
@@ -1098,6 +1102,7 @@ function buildOrchestraOut(counts){
     backs.forEach(function(b){ maxD=Math.max(maxD,TYPES[b.type].d); totW+=TYPES[b.type].w; });
     totW+=70*(backs.length-1);
     var backY=-(windBase+DR*(maxWindRow+1)+25+maxD/2), cx=-totW/2;
+    out.push({type:"pedana", x:0, y:backY, w:Math.max(500,totW+150), d:maxD+90, h:20, label:""});  /* riser percussioni */
     backs.forEach(function(b){
       var w=TYPES[b.type].w;
       out.push({type:b.type, x:cx+w/2, y:backY, rot:0, label:b.nome});
@@ -1258,7 +1263,7 @@ function buildBandOut(){
     /* batteria su pedana, centro fondo */
     {type:"pedana", x:0, y:-310, w:300, d:200, h:40, label:"Drum riser"},
     {type:"batteria", x:0, y:-310, label:""},
-    {type:"wedge", x:170, y:-215, rot:0, label:"DRUM"},
+    {type:"iem", x:150, y:-360, label:"IEM Drum"},      /* batterista in-ear */
     /* lato DX palco (sx pubblico): basso + ampli basso */
     {type:"bassamp", x:-490, y:-290, label:"Bass amp"},
     {type:"astamic", x:-460, y:-95, label:"Basso"},
@@ -1273,15 +1278,16 @@ function buildBandOut(){
     /* corista, lato SX interno */
     {type:"astamic", x:220, y:-70, label:"Cori"},
     {type:"wedge", x:220, y:32, rot:0, label:"MIX CORI"},
-    /* voce lead, centro fronte */
+    /* voce lead, centro fronte: in-ear */
     {type:"astamic", x:0, y:-70, label:"Voce lead"},
-    {type:"wedge", x:0, y:35, rot:0, label:"MIX LEAD"},
+    {type:"iem", x:48, y:-70, label:"IEM Lead"},
     /* side fill + tecnica */
     {type:"sidefill", x:-660, y:30, rot:35, label:"SIDE DX"},
     {type:"sidefill", x:660, y:30, rot:-35, label:"SIDE SX"},
-    {type:"stagebox", x:580, y:-260, label:"STAGEBOX"},
-    {type:"corrente", x:-580, y:-330, label:""},
-    {type:"corrente", x:580, y:-330, label:""}
+    {type:"iemant", x:-590, y:-260, label:"TX IEM"},
+    {type:"stagebox", x:590, y:-260, label:"STAGEBOX"},
+    {type:"corrente", x:-580, y:-340, label:""},
+    {type:"corrente", x:580, y:-340, label:""}
   ];
 }
 function buildCoroOut(){
@@ -1387,41 +1393,146 @@ function buildOrchCoroOut(){
   });
   function runFormation(f){
     if(f==="custom"){ applySuggestedOrchestra(); orchModal.hidden=false; return; }
-    var build={
-      band:buildBandOut, coro:buildCoroOut,
-      sinfonica:function(){ return buildOrchestraOut(presetCounts("standard")); },
-      orchband:buildOrchBandOut, orchcoro:buildOrchCoroOut
-    }[f];
+    var data=formationData(f); if(!data) return;
     var titoli={band:"Band", coro:"Coro", sinfonica:"Orchestra sinfonica",
       orchband:"Orchestra + band", orchcoro:"Orchestra sinfonica + coro"};
-    if(!build) return;
-    if(state.items.length && !confirm("Generare la formazione \""+titoli[f]+"\"? Gli elementi attuali sul palco verranno sostituiti.")) return;
-    placeOut(build(), true, true, true);
+    if((state.items.length||state.inputs.length||state.outputs.length) &&
+       !confirm("Generare la formazione \""+titoli[f]+"\"? Palco e channel list attuali verranno sostituiti.")) return;
+    placeOut(data.out, true, true, true);
+    state.inputs=data.inp.map(function(r){ return ch(r.src,r.mic); });
+    state.outputs=data.outp.map(function(r){ return ch(r.src,r.mic); });
     if(!state.titolo){ state.titolo=titoli[f]; document.getElementById("titolo").value=titoli[f]; }
-    fit();
+    save(); fit(); renderChannels();
   }
 })();
 
 /* ============ CHANNEL LIST (input / output per i fonici) ============ */
 /* mic/DI suggeriti per tipo (auto input list); valore = etichetta mic. multi = più canali per un solo elemento */
+/* mic/DI generici per tipo (pulsante Auto su palchi ad hoc). multi = elemento che genera più canali. */
 var IN_SRC = {
-  astamic:"SM58", giraffa:"e906", wireless:"WL", headset:"HS", podiosp:"SM58",
-  dimono:"DI", distereo:"DI st",
-  comboamp:"e906", stack:"e906/421", bassamp:"DI+mic", keysamp:"DI st", leslie:"57+421",
-  grancoda:"coppia cond", mezzacoda:"coppia cond", pianoverticale:"coppia", stagepiano:"DI st",
-  doppiatastiera:"DI st", celesta:"coppia",
-  gtstand:"DI", gtacustica:"DI", bassstand:"DI", djset:"DI st",
-  contrabbasso:"DPA", violoncello:"DPA", arpa:"DPA",
-  rullante:"SM57", percussioni:"coppia", grancassa:"D6", piatto:"cond", timpani:"2x cond"
+  astamic:"SM58", giraffa:"e906", wireless:"Beta 58A", headset:"DPA 4066", podiosp:"SM58",
+  dimono:"DI", distereo:"DI", /* distereo gestito a parte (L+R) */
+  comboamp:"SM57", stack:"SM57/e906", keysamp:"DI", leslie:"SM57+MD421",
+  pianoverticale:"KM184", stagepiano:"DI", doppiatastiera:"DI", celesta:"KM184",
+  gtstand:"DI", gtacustica:"DI", bassstand:"DI", djset:"DI",
+  contrabbasso:"DPA 4099", violoncello:"DPA 4099", arpa:"DPA 4099",
+  rullante:"SM57", percussioni:"overhead", grancassa:"D6", piatto:"overhead", timpani:"KM184"
 };
-var DRUM_KIT = [["Kick","D6"],["Snare top","SM57"],["Snare btm","e604"],["HiHat","SM81"],
-  ["Tom","e604"],["Floor","e604"],["OH DX","KM184"],["OH SX","KM184"]];
+/* elementi che generano canali MULTIPLI (mantenuti realistici) */
+var IN_MULTI = {
+  batteria: [["Kick","D6"],["Rullante top","SM57"],["Rullante btm","e904"],["Hi-Hat","SM81"],
+             ["Tom 1","e904"],["Tom floor","e904"],["Overhead L","KM184"],["Overhead R","KM184"]],
+  bassamp: [["Basso DI","DI"],["Basso ampli","MD421"]],
+  grancoda: [["Pianoforte L","KM184"],["Pianoforte R","KM184"]],
+  mezzacoda: [["Pianoforte L","KM184"],["Pianoforte R","KM184"]]
+};
+var DRUM_KIT = IN_MULTI.batteria;
 var OUT_SET = { wedge:"wedge", sidefill:"side fill", drumfill:"drum fill", iem:"IEM", iemant:"IEM", monmix:"console mon" };
 
+/* ---- Channel list realistiche per formazione (contesto LIVE PA, monitor misto wedge+IEM) ---- */
+function ch(src,mic){ return {src:src, mic:mic}; }
+function bandInputs(){
+  return [
+    ch("Kick","D6"), ch("Rullante top","SM57"), ch("Rullante btm","e904"), ch("Hi-Hat","SM81"),
+    ch("Tom 1","e904"), ch("Tom floor","e904"), ch("Overhead L","KM184"), ch("Overhead R","KM184"),
+    ch("Basso DI","DI"), ch("Basso ampli","MD421"),
+    ch("Chitarra","SM57/e906"),
+    ch("Tastiere L","DI"), ch("Tastiere R","DI"),
+    ch("Voce lead","Beta 58A"), ch("Cori","SM58")
+  ];
+}
+function bandOutputs(){
+  return [
+    ch("Voce lead","IEM"), ch("Batteria","IEM"),
+    ch("Basso","wedge"), ch("Chitarra","wedge"), ch("Tastiere","wedge"), ch("Cori","wedge"),
+    ch("Side fill L","side fill"), ch("Side fill R","side fill")
+  ];
+}
+function choirInputs(){ return [ ch("Coro L","KM184"), ch("Coro C","KM184"), ch("Coro R","KM184") ]; }
+function coroInputs(){
+  return choirInputs().concat([
+    ch("Piano L","KM184"), ch("Piano R","KM184"),
+    ch("Solista 1","SM58"), ch("Solista 2","SM58"),
+    ch("Talkback dir.","SM58")
+  ]);
+}
+function coroOutputs(){
+  return [ ch("Direttore","wedge"), ch("Solisti","wedge"), ch("Piano","wedge"),
+    ch("Side fill L","side fill"), ch("Side fill R","side fill") ];
+}
+/* Orchestra (LIVE PA): area/spot in base a cosa è presente, NON un mic per leggio */
+function orchInputs(c){
+  var n=function(id){ return c[id]||0; }, ins=[];
+  if(n("v1")+n("v2")+n("vle")+n("vc")>0){ ins.push(ch("Archi spot L (V1/V2)","KM184")); ins.push(ch("Archi spot R (Vle/Vc)","KM184")); }
+  if(n("cb")) ins.push(ch("Contrabbassi","DPA 4099"));
+  if(n("fl")+n("ob")) ins.push(ch("Legni spot L","KM184"));
+  if(n("cl")+n("fg")) ins.push(ch("Legni spot R","KM184"));
+  if(n("cor")) ins.push(ch("Corni","MD421"));
+  if(n("tr")+n("tbn")+n("tba")) ins.push(ch("Ottoni","MD421"));
+  if(n("tim")) ins.push(ch("Timpani","KM184"));
+  if(n("gc")+n("pia")+n("rul")+n("cmp")+n("tam")) ins.push(ch("Percussioni","overhead"));
+  if(n("arp")) ins.push(ch("Arpa","DPA 4099"));
+  if(n("pf")){ ins.push(ch("Pianoforte L","KM184")); ins.push(ch("Pianoforte R","KM184")); }
+  if(n("cel")) ins.push(ch("Celesta","KM184"));
+  ins.push(ch("Talkback direttore","SM58"));
+  return ins;
+}
+function orchOutputs(){
+  return [ ch("Direttore (cue)","IEM"), ch("Side fill L","side fill"), ch("Side fill R","side fill") ];
+}
+/* dispatch: per ogni voce del menu, layout + channel list coerenti */
+function formationData(f){
+  if(f==="band")  return { out:buildBandOut(),  inp:bandInputs(), outp:bandOutputs() };
+  if(f==="coro")  return { out:buildCoroOut(),  inp:coroInputs(), outp:coroOutputs() };
+  if(f==="sinfonica"){ var cs=presetCounts("standard"); return { out:buildOrchestraOut(cs), inp:orchInputs(cs), outp:orchOutputs() }; }
+  if(f==="orchband"){ var cb=presetCounts("camera"); return { out:buildOrchBandOut(),
+      inp:orchInputs(cb).concat(bandInputs()),
+      outp:[ch("Direttore (cue)","IEM")].concat(bandOutputs()) }; }
+  if(f==="orchcoro"){ var cc=presetCounts("ridotta"); return { out:buildOrchCoroOut(),
+      inp:orchInputs(cc).concat(choirInputs()).concat([ch("Solista 1","SM58"),ch("Solista 2","SM58")]),
+      outp:[ch("Direttore (cue)","IEM"),ch("Solisti","wedge"),ch("Side fill L","side fill"),ch("Side fill R","side fill")] }; }
+  return null;
+}
+
+/* riordino righe via trascinamento del numero (funziona anche su touch/iPhone) */
+function attachReorder(handle, rowEl, kind){
+  handle.addEventListener("pointerdown", function(e){
+    e.preventDefault();
+    var container = document.getElementById(kind==="in" ? "inRows" : "outRows");
+    handle.setPointerCapture(e.pointerId);
+    rowEl.classList.add("dragging");
+    function onMove(ev){
+      var rows=[].slice.call(container.querySelectorAll(".clrow")), after=null;
+      for(var k=0;k<rows.length;k++){
+        if(rows[k]===rowEl) continue;
+        var r=rows[k].getBoundingClientRect();
+        if(ev.clientY < r.top + r.height/2){ after=rows[k]; break; }
+      }
+      if(after){ if(after!==rowEl.nextSibling) container.insertBefore(rowEl, after); }
+      else if(rowEl!==container.lastChild) container.appendChild(rowEl);
+    }
+    function onUp(){
+      try{ handle.releasePointerCapture(e.pointerId); }catch(_){}
+      rowEl.classList.remove("dragging");
+      handle.removeEventListener("pointermove", onMove);
+      handle.removeEventListener("pointerup", onUp);
+      handle.removeEventListener("pointercancel", onUp);
+      var arr = kind==="in" ? state.inputs : state.outputs;
+      var order=[].slice.call(container.querySelectorAll(".clrow")).map(function(el){ return el.__row; });
+      arr.length=0; order.forEach(function(r){ arr.push(r); });
+      save(); renderChannels();
+    }
+    handle.addEventListener("pointermove", onMove);
+    handle.addEventListener("pointerup", onUp);
+    handle.addEventListener("pointercancel", onUp);
+  });
+}
 function chanRow(kind, row, i){
   var arr = kind==="in" ? state.inputs : state.outputs;
-  var d=document.createElement("div"); d.className="clrow";
-  var n=document.createElement("span"); n.className="n"; n.textContent=(i+1); d.appendChild(n);
+  var d=document.createElement("div"); d.className="clrow"; d.__row=row;
+  var n=document.createElement("span"); n.className="n grip"; n.textContent=(i+1);
+  n.title="Trascina per riordinare"; d.appendChild(n);
+  attachReorder(n, d, kind);
   var src=document.createElement("input"); src.className="src"; src.value=row.src||"";
   src.placeholder = kind==="in" ? "sorgente" : "mix";
   src.addEventListener("input", function(){ row.src=src.value; save(); });
@@ -1450,7 +1561,7 @@ function autoInputs(){
   var rows=[];
   state.items.forEach(function(it){
     var t=TYPES[it.type]; if(!t) return;
-    if(it.type==="batteria"){ DRUM_KIT.forEach(function(k){ rows.push({src:k[0],mic:k[1]}); }); return; }
+    if(IN_MULTI[it.type]){ IN_MULTI[it.type].forEach(function(k){ rows.push({src:k[0],mic:k[1]}); }); return; }
     if(it.type==="distereo"){ rows.push({src:(it.label||"Stereo")+" L",mic:"DI"}); rows.push({src:(it.label||"Stereo")+" R",mic:"DI"}); return; }
     if(IN_SRC[it.type]!=null){ rows.push({src: it.label || t.nome, mic: IN_SRC[it.type]}); }
   });
@@ -1632,11 +1743,10 @@ if(location.search.indexOf("orch=1")>-1){     /* QA: organico standard completo 
 /* QA formazioni: ?form=band|coro|orchband|orchcoro  (+ &auto=1 popola la channel list) */
 var qForm=(location.search.match(/form=(\w+)/)||[])[1];
 if(qForm){
-  var qb={band:buildBandOut, coro:buildCoroOut,
-    sinfonica:function(){ return buildOrchestraOut(presetCounts("standard")); },
-    orchband:buildOrchBandOut, orchcoro:buildOrchCoroOut}[qForm];
-  if(qb){ state.titolo=qForm; placeOut(qb(), true, true, true);
-    if(location.search.indexOf("auto=1")>-1){ autoInputs(); autoOutputs(); } }
+  var qd=formationData(qForm);
+  if(qd){ state.titolo=qForm; placeOut(qd.out, true, true, true);
+    state.inputs=qd.inp.map(function(r){ return ch(r.src,r.mic); });
+    state.outputs=qd.outp.map(function(r){ return ch(r.src,r.mic); }); }
 }
 document.getElementById("titolo").value = state.titolo||"";
 normalizeState(state); renderChannels();
