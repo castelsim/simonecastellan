@@ -176,8 +176,7 @@
   <button class="btn" id="bOrch" title="Genera una formazione tipo">Organico ▾</button>
   <button class="btn" id="bJson">Salva .json</button>
   <button class="btn" id="bImport">Apri .json</button>
-  <button class="btn primary" id="bPng">Esporta PNG</button>
-  <button class="btn" id="bShare" title="Scarica PNG + .json e apre la mail già indirizzata a Simone (allega i 2 file)">✉ Invia a Simone</button>
+  <button class="btn primary" id="bR3d" title="Genera un render 3D fotorealistico del palco con ChatGPT">✨ Render 3D</button>
   <button class="btn danger" id="bNew">Nuovo</button>
   <input type="file" id="fileImport" accept=".json" hidden>
   <div class="menu-pop" id="orgMenu" hidden>
@@ -287,6 +286,27 @@
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
       <button class="btn" id="orchWarnReview">Rivedi organico</button>
       <button class="btn primary" id="orchWarnContinue">Continua</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="r3dModal" hidden>
+  <div class="mcard" style="width:520px">
+    <h2>✨ Render 3D con ChatGPT</h2>
+    <p class="hint" style="margin-bottom:8px">Premendo <b>Apri ChatGPT</b> succede questo, in automatico:</p>
+    <ol class="hint" style="margin:0 0 10px 18px;line-height:1.5">
+      <li>scarico sul dispositivo <b>2 file</b>: la planimetria <b>PNG</b> (con channel list) e il progetto <b>.json</b> (coordinate e misure esatte di ogni elemento, pensato per il 3D);</li>
+      <li>copio negli appunti il <b>prompt professionale</b> per il render;</li>
+      <li>apro <b>ChatGPT</b> con il prompt già precompilato.</li>
+    </ol>
+    <p class="hint" style="margin-bottom:8px">Tu devi solo <b>allegare i 2 file scaricati</b> alla chat (trascinali o usa la graffetta) e inviare. <i>ChatGPT non permette di allegare file in automatico dall'esterno.</i></p>
+    <p class="hint" style="background:#f0f7ff;border:1px solid #d4e4f7;border-radius:8px;padding:8px 10px">
+      💡 <b>Consiglio:</b> allega anche una <b>foto reale del palco/locale</b> — il render verrà
+      ambientato lì e sarà molto più preciso e realistico.</p>
+    <div class="mstatus" id="r3dStatus" style="font-size:12.5px;min-height:16px;margin-top:4px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn" id="r3dCancel">Annulla</button>
+      <button class="btn primary" id="r3dGo">Apri ChatGPT</button>
     </div>
   </div>
 </div>
@@ -1944,8 +1964,33 @@ document.getElementById("bNew").addEventListener("click", function(){
   state={titolo:"",stage:{w:1200,d:800},items:[],inputs:[],outputs:[]}; sel=null; save(); fit();
   document.getElementById("titolo").value=""; renderChannels();
 });
+/* JSON di progetto COMPLETO: stato + metadati per ricostruzione/render 3D.
+   Contiene unità, sistema di assi, e una legenda con nome/categoria/ingombro reale
+   di ogni tipo usato → un software 3D (o un'AI) può ricostruire la scena senza l'app. */
+function buildProjectJson(){
+  var legend={};
+  state.items.forEach(function(it){
+    var t=TYPES[it.type]; if(!t || legend[it.type]) return;
+    legend[it.type]={ nome:t.nome, categoria:t.cat+(t.sub?" / "+t.sub:""),
+      ingombro_cm:{w:t.w, d:t.d}, dimensioni_dichiarate:t.dim||"",
+      altezza_regolabile: !!t.riser, livello: (t.z||2)<=1 ? "a pavimento (sotto gli altri)" : "elemento in piedi" };
+  });
+  return {
+    meta:{ app:"Stage Plot — https://simonecastellan.com/stageplot/", formato:2,
+      esportato:new Date().toISOString(), unita:"centimetri", angoli:"gradi",
+      scopo:"stage plot 2D in scala reale + dati per render 3D" },
+    assi:{ origine:"angolo tra FONDO PALCO e lato DESTRO del palco (stage right, visto dai musicisti)",
+      x:"cresce verso il lato sinistro del palco (stage left)",
+      y:"cresce verso il PUBBLICO (fronte palco)",
+      rotazione:"in gradi, senso orario; 0 = elemento rivolto verso il pubblico",
+      posizione_elementi:"items[].x/y = centro dell'elemento in cm; items[].w/d = ingombro reale in cm; items[].h = altezza pedana in cm (solo pedane)" },
+    titolo:state.titolo, stage:{w:state.stage.w, d:state.stage.d, unita:"cm"},
+    items:state.items, inputs:state.inputs, outputs:state.outputs,
+    legenda_tipi:legend
+  };
+}
 document.getElementById("bJson").addEventListener("click", function(){
-  var blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  var blob=new Blob([JSON.stringify(buildProjectJson(),null,2)],{type:"application/json"});
   dl(URL.createObjectURL(blob), fileName()+".json");
 });
 document.getElementById("bImport").addEventListener("click", function(){ document.getElementById("fileImport").click(); });
@@ -1953,7 +1998,10 @@ document.getElementById("fileImport").addEventListener("change", function(){
   var f=this.files[0]; if(!f) return;
   var fr=new FileReader();
   fr.onload=function(){ try{
-      state=normalizeState(JSON.parse(fr.result)); sel=null;
+      var j=JSON.parse(fr.result);   /* accetta sia il formato 2 (con meta) sia i vecchi salvataggi */
+      state=normalizeState({ titolo:j.titolo||"", stage:(j.stage&&j.stage.w)?{w:j.stage.w,d:j.stage.d}:{w:1200,d:800},
+        items:j.items||[], inputs:j.inputs||[], outputs:j.outputs||[] });
+      sel=null;
       state.items.forEach(function(it){ var n=parseInt(it.id.slice(1),10); if(n>=nextId) nextId=n+1; });
       document.getElementById("titolo").value=state.titolo||"";
       save(); fit(); renderChannels();
@@ -2032,27 +2080,65 @@ function renderPng(scale){
     img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(ex.svgStr);
   });
 }
-document.getElementById("bPng").addEventListener("click", function(){
-  renderPng().then(function(b){ dl(URL.createObjectURL(b), fileName()+".png"); })
-             .catch(function(){ alert("Export PNG fallito."); });
-});
-
-/* ============ INVIA (scarica PNG + .json e apre la mail verso Simone; allegati a mano) ============ */
-var DEST_MAIL = "castellansimone@gmail.com";   /* destinatario fisso */
-document.getElementById("bShare").addEventListener("click", function(){
-  var base=fileName(), title=state.titolo||"Stage plot";
-  var jsonBlob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
-  renderPng().then(function(png){
-    dl(URL.createObjectURL(png), base+".png");
-    dl(URL.createObjectURL(jsonBlob), base+".json");
-    var body=encodeURIComponent(
-      "Ciao Simone,\nin allegato il mio stage plot \""+title+"\".\n\n"+
-      "Ho scaricato 2 file da allegare a questa mail prima di inviarla:\n"+
-      "• "+base+".png — planimetria + channel list\n"+
-      "• "+base+".json — sorgente editabile su simonecastellan.com/stageplot\n");
-    window.location.href="mailto:"+DEST_MAIL+"?subject="+encodeURIComponent("Stage plot — "+title)+"&body="+body;
-  }).catch(function(){ alert("Generazione file fallita."); });
-});
+/* ============ RENDER 3D (ChatGPT: file scaricati + prompt precompilato) ============ */
+/* Nota tecnica: ChatGPT NON accetta allegati automatici da siti esterni; il massimo
+   possibile è precompilare il prompt via chatgpt.com/?q=… (apre anche l'app su mobile)
+   e copiare il prompt negli appunti. I 2 file vengono scaricati e l'utente li trascina in chat. */
+function r3dPrompt(){
+  var counts={}, ordered=[];
+  state.items.forEach(function(it){
+    var t=TYPES[it.type]; if(!t || it.type==="testo") return;
+    if(!counts[t.nome]){ counts[t.nome]=0; ordered.push(t.nome); }
+    counts[t.nome]++;
+  });
+  var lista=ordered.map(function(n){ return counts[n]+"× "+n; }).join(", ");
+  var titolo=state.titolo||"senza titolo";
+  return "Agisci come visualizzatore 3D professionista specializzato in produzioni live (concert & stage design). "+
+"Devo ottenere un RENDER 3D FOTOREALISTICO del palco allestito secondo il mio stage plot.\n\n"+
+"TI ALLEGO IN QUESTA CHAT (caricali prima di generare):\n"+
+"1) PNG — planimetria 2D in scala con input patch e monitor list: riferimento visivo principale;\n"+
+"2) JSON — progetto completo: unità in cm; origine assi = angolo tra fondo palco e lato destro (stage right); "+
+"x cresce verso stage left, y verso il pubblico; rotazioni in gradi orari (0 = elemento rivolto al pubblico); "+
+"items[].x/y = centro elemento, w/d = ingombro reale; legenda dei tipi inclusa nel file.\n\n"+
+"PROGETTO: \""+titolo+"\" — palco "+(state.stage.w/100)+"×"+(state.stage.d/100)+" m.\n"+
+"ELEMENTI ("+state.items.length+"): "+lista+".\n\n"+
+"REQUISITI DEL RENDER:\n"+
+"- Fedeltà ASSOLUTA a scala, posizioni e rotazioni del JSON; non aggiungere né togliere elementi.\n"+
+"- Vista prospettica 3/4 dal lato pubblico, camera a ~8-10 m, elevazione ~25°, orientamento orizzontale.\n"+
+"- Piano palco in legno scuro opaco; pedane con frontalini neri e altezze come da JSON (campo h in cm).\n"+
+"- Materiali realistici: legni degli strumenti, ottoni, pelli dei tamburi, griglie degli ampli, monitor wedge neri con cono visibile, aste microfoniche nere.\n"+
+"- Illuminazione da concerto: lavata frontale calda + controluce blu/ambra, haze leggero, fondo scuro.\n"+
+"- Nessuna persona; nessuna etichetta o testo flottante nel render.\n"+
+"- Massima risoluzione disponibile.\n\n"+
+"SE TI ALLEGO ANCHE UNA FOTO DEL PALCO/LOCALE REALE: integra l'allestimento in quell'ambiente, rispettandone prospettiva, materiali e luci.\n\n"+
+"Se qualcosa nel JSON ti è ambiguo, chiedimelo PRIMA di generare.";
+}
+(function(){
+  var modal=document.getElementById("r3dModal");
+  function status(msg){ document.getElementById("r3dStatus").innerHTML=msg||""; }
+  document.getElementById("bR3d").addEventListener("click", function(){ status(""); modal.hidden=false; });
+  document.getElementById("r3dCancel").addEventListener("click", function(){ modal.hidden=true; });
+  modal.addEventListener("click", function(e){ if(e.target===modal) modal.hidden=true; });
+  document.addEventListener("keydown", function(e){ if(!modal.hidden && e.key==="Escape") modal.hidden=true; });
+  document.getElementById("r3dGo").addEventListener("click", function(){
+    if(!state.items.length){ status("⚠ Il palco è vuoto: aggiungi elementi prima del render."); return; }
+    var win=window.open("","_blank");                       /* aperta SUBITO (sincrona) per evitare il popup blocker */
+    var base=fileName(), prompt=r3dPrompt();
+    var jsonBlob=new Blob([JSON.stringify(buildProjectJson(),null,2)],{type:"application/json"});
+    status("Preparo i file…");
+    renderPng().then(function(png){
+      dl(URL.createObjectURL(png), base+".png");
+      dl(URL.createObjectURL(jsonBlob), base+".json");
+      try{ navigator.clipboard && navigator.clipboard.writeText(prompt); }catch(e){}
+      var url="https://chatgpt.com/?q="+encodeURIComponent(prompt);
+      if(win && !win.closed){ win.location=url; } else { window.location.href=url; }
+      status("✓ Scaricati <b>"+base+".png</b> e <b>"+base+".json</b> · prompt copiato negli appunti · ChatGPT aperto.<br>Ora <b>allega i 2 file</b> (e la foto del palco, se la hai) alla chat e invia.");
+    }).catch(function(){
+      if(win) win.close();
+      status("⚠ Generazione file fallita. Riprova.");
+    });
+  });
+})();
 
 /* ============ DEMO (?demo=1) ============ */
 function demo(){
@@ -2118,11 +2204,17 @@ if(location.search.indexOf("inputaudit=1")>-1){   /* QA: un esemplare di ogni so
   Object.keys(IN_SRC).concat(Object.keys(IN_MULTI)).forEach(function(k){ if(TYPES[k]) addItem(k); });
   autoInputs();
 }
+if(location.search.indexOf("r3d=1")>-1){ document.getElementById("r3dModal").hidden=false; }  /* QA modale render 3D */
 if(location.search.indexOf("icone=1")>-1){ gallery(); }
 else if(location.search.indexOf("export=1")>-1){   /* QA: anteprima del PNG esportato (planimetria + channel list) */
   var ex=buildExportSvg();
   document.body.style.cssText="display:block;margin:0;background:#888";
   document.body.innerHTML='<div style="padding:16px">'+ex.svgStr.replace('<svg ','<svg style="width:100%;height:auto;background:#fff" ')+'</div>';
+}
+else if(location.search.indexOf("json=1")>-1){   /* QA: anteprima del JSON di progetto (formato 2, per il 3D) */
+  document.body.style.cssText="display:block;margin:0";
+  document.body.innerHTML='<pre style="font:11px/1.45 Menlo,monospace;padding:14px;white-space:pre-wrap">'+
+    esc(JSON.stringify(buildProjectJson(),null,2))+'</pre>';
 }
 else { window.addEventListener("resize", render); fit(); }
 </script>
