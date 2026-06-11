@@ -80,6 +80,10 @@
   .tec.fill{fill:#b45309;stroke:none}
   .sil{stroke:#aab2bb;stroke-width:1.4;fill:none}
   .fb{stroke:#191a1d;stroke-width:3;stroke-linecap:round}
+  .hilite{fill:none;stroke:rgba(255,255,255,.5);stroke-width:2;stroke-linecap:round}
+  .lathe{fill:none;stroke:rgba(90,68,18,.4);stroke-width:1}
+  .fhole{fill:none;stroke:rgba(40,25,10,.7);stroke-width:1.4;stroke-linecap:round}
+  .pstr{stroke:rgba(60,55,45,.4);stroke-width:1}
   /* SVG — riempimenti realistici (gradienti in DEFS) */
   .fWood{fill:url(#gWood)}   .fWoodD{fill:url(#gWoodD)} .fWoodL{fill:url(#gWoodL)}
   .fBrass{fill:url(#gBrass)} .fSilver{fill:url(#gSilver)} .fBlack{fill:url(#gBlack)}
@@ -107,6 +111,7 @@
 </style>
 </head>
 <body>
+<svg id="defs-master" width="0" height="0" style="position:absolute" aria-hidden="true"></svg>
 <header>
   <span class="brand">STAGE PLOT</span>
   <input type="text" id="titolo" placeholder="Titolo evento / band (compare nell'export)">
@@ -199,7 +204,13 @@ var DEFS='<defs>'+
 '<radialGradient id="gCopper" cx="0.45" cy="0.4" r="0.9"><stop offset="0" stop-color="#d29a5d"/><stop offset="1" stop-color="#8a5a28"/></radialGradient>'+
 '<linearGradient id="gFloor" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6f7f8"/><stop offset="1" stop-color="#e2e5e9"/></linearGradient>'+
 '<linearGradient id="gRed" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d24a43"/><stop offset="1" stop-color="#8e2b26"/></linearGradient>'+
+'<linearGradient id="gBoard" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e9e2d2"/><stop offset="1" stop-color="#cdbfa3"/></linearGradient>'+
+'<radialGradient id="gBrassR" cx="0.4" cy="0.4" r="0.8"><stop offset="0" stop-color="#f8e09a"/><stop offset="1" stop-color="#a9781c"/></radialGradient>'+
+'<radialGradient id="gShadow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#1b1d22" stop-opacity="0.30"/><stop offset="0.65" stop-color="#1b1d22" stop-opacity="0.16"/><stop offset="1" stop-color="#1b1d22" stop-opacity="0"/></radialGradient>'+
 '</defs>';
+/* DEFS UNICO nel documento: iniettato in un SVG nascosto.
+   Tutti gli altri SVG (editor, tavola, anteprime) referenziano questi ID — niente più ID duplicati. */
+(function(){ var m=document.getElementById("defs-master"); if(m) m.innerHTML=DEFS; })();
 
 /* ============ HELPER GRAFICI (unità = cm, vista dall'alto, origine al centro, fronte palco = giù) ============ */
 function riserSvg(w,d){
@@ -213,9 +224,12 @@ function bar(cx,cy,w,d,cls,rx){ return '<rect class="'+(cls||'ic')+'" x="'+(cx-w
 function rectSvg(w,d,cls,rx){ return bar(0,0,w,d,cls,rx); }
 function circ(x,y,r,cls){ return '<circle class="'+(cls||'ic')+'" cx="'+x+'" cy="'+y+'" r="'+r+'"/>'; }
 function lin(x1,y1,x2,y2,cls){ return '<line class="'+(cls||'ic')+'" x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"/>'; }
-function drum(x,y,r){ return circ(x,y,r,'ic fSilver')+circ(x,y,r-3.5,'ic thin fHead'); }       /* cerchio cromato + pelle */
-function tdrum(x,y,r){ return circ(x,y,r,'ic fCopper')+circ(x,y,r-7,'ic thin fHead'); }        /* caldaia rame + pelle */
-function cym(x,y,r){ return circ(x,y,r,'ic thin fCym')+circ(x,y,2.5,'ic fill'); }              /* piatto bronzo + perno */
+function sring(x,y,r,cls){ return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" class="'+cls+'"/>'; }
+function rimlight(x,y,r){ var rr=r-2; return '<path class="hilite" d="M '+(x-rr*0.72)+','+(y-rr*0.42)+' A '+rr+' '+rr+' 0 0 1 '+(x+rr*0.42)+','+(y-rr*0.72)+'"/>'; }
+function shadow(rx,ry,cx,cy){ return '<ellipse cx="'+(cx||0)+'" cy="'+(cy||0)+'" rx="'+rx+'" ry="'+ry+'" fill="url(#gShadow)"/>'; }   /* ombra morbida sotto l'oggetto */
+function drum(x,y,r){ return circ(x,y,r,'ic fSilver')+circ(x,y,r-3.5,'ic thin fHead')+rimlight(x,y,r); }   /* cromo + pelle + glint */
+function tdrum(x,y,r){ return circ(x,y,r,'ic fCopper')+circ(x,y,r-7,'ic thin fHead')+rimlight(x,y,r); }    /* rame + pelle + glint */
+function cym(x,y,r){ return circ(x,y,r,'ic thin fCym')+sring(x,y,r*0.62,'lathe')+sring(x,y,r*0.34,'lathe')+circ(x,y,2.5,'ic fill'); } /* bronzo + tornitura */
 function kn(x0,y,n,st,cls){ var s=''; for(var i=0;i<n;i++) s+=circ(x0+i*st,y,1.9,cls||'dotS'); return s; } /* manopole */
 
 /* Postazione orchestrale: sedia nera + leggio nero (+ glifo strumento) */
@@ -235,11 +249,11 @@ function gClar(){ return '<g transform="translate(9,1) rotate(12)">'+bar(0,-5,6,
   circ(0,-13,1.4,'dotS')+circ(0,-6,1.4,'dotS')+circ(0,1,1.4,'dotS')+'</g>'; }
 function gFag(){ return '<g transform="translate(18,-4) rotate(10)">'+bar(-5,0,5,88,'ic fWoodD',2.5)+bar(4.5,-12,5,80,'ic fWoodD',2.5)+
   '<path class="ic thin" fill="none" d="M -7.5,44 A 8 8 0 0 0 7,28"/>'+lin(-5,-44,-13,-50,'sil')+'</g>'; }
-function gCorno(){ return '<g transform="translate(0,-18)">'+circ(0,0,15,'ic fBrass')+circ(0,0,8.5,'ic thin fBrass')+
-  circ(9,7,5.5,'ic thin fBrass')+lin(-13,-7,-19,-13,'ic thin')+'</g>'; }
+function gCorno(){ return '<g transform="translate(0,-18)"><circle class="ic" fill="url(#gBrassR)" cx="0" cy="0" r="15"/>'+circ(0,0,8.5,'ic thin fBrass')+
+  circ(9,7,5.5,'ic thin fBrass')+'<circle cx="-5" cy="-5" r="3.2" fill="rgba(255,255,255,.5)"/>'+lin(-13,-7,-19,-13,'ic thin')+'</g>'; }
 function gTromba(){ return '<g transform="translate(7,4)">'+bar(0,-6,5,40,'ic fBrass',2.5)+
   circ(0,-13,1.6,'ic fill')+circ(0,-8,1.6,'ic fill')+circ(0,-3,1.6,'ic fill')+
-  lin(-2.5,14,-7,26,'ic thin')+lin(2.5,14,7,26,'ic thin')+'<ellipse class="ic thin fBrass" cx="0" cy="27" rx="7.5" ry="2.8"/></g>'; }
+  lin(-2.5,14,-7,26,'ic thin')+lin(2.5,14,7,26,'ic thin')+'<ellipse class="ic thin" fill="url(#gBrassR)" cx="0" cy="27" rx="7.5" ry="2.8"/></g>'; }
 function gTrombone(){ return '<g transform="translate(12,10) rotate(8)">'+bar(-3.5,-14,4,72,'ic fBrass',2)+bar(3.5,-26,4,48,'ic fBrass',2)+
   '<path class="ic thin" fill="none" d="M -5.5,-50 A 5.5 5.5 0 0 1 5.5,-50"/>'+
   lin(-5.5,22,-10,34,'ic thin')+lin(-1.5,22,3,34,'ic thin')+'<ellipse class="ic thin fBrass" cx="-3.5" cy="35" rx="7" ry="2.6"/></g>'; }
@@ -259,7 +273,8 @@ function violino(s,woodCls){
     ' C '+n(-20)+','+n(-31)+' '+n(-14)+','+n(-40)+' 0,'+n(-40)+' Z"/>'+
     lin(0,n(-40),0,n(-56),'fb')+circ(0,n(-58),n(3),'ic fill')+
     bar(0,n(8),n(15),n(3),'ic fill',1)+
-    lin(n(-8),n(0),n(-6),n(12),'ic thin')+lin(n(8),n(0),n(6),n(12),'ic thin')+
+    '<path class="fhole" d="M '+n(-7)+','+n(-3)+' q '+n(-2.5)+','+n(7)+' 0,'+n(13)+'"/>'+
+    '<path class="fhole" d="M '+n(7)+','+n(-3)+' q '+n(2.5)+','+n(7)+' 0,'+n(13)+'"/>'+
     lin(0,n(30),0,n(38),'ic thin');
 }
 /* Piano a coda parametrico: lato bassi dritto a sx, coda arrotondata, ansa a S al cheek */
@@ -273,10 +288,13 @@ function pianoCoda(it){
     ' C '+(w2*0.975)+','+(-d2*0.1)+' '+(w2*0.875)+','+(-d2*0.02)+' '+(w2*0.875)+','+(d2*0.09)+
     ' C '+(w2*0.875)+','+(d2*0.19)+' '+(w2*0.96)+','+(d2*0.23)+' '+w2+','+(d2*0.31)+
     ' L '+w2+','+d2+' Z';
-  return '<path class="ic fBlack" d="'+p+'"/>'+
-    bar(0,d2-13,it.w-16,14,'ic thin',2)+
-    bar(0,d2-17.5,it.w-16,5,'ic fill',1)+
-    lin(-w2+10,d2-26,w2-10,d2-26,'sil');
+  var s=shadow(w2*0.92,d2*0.82,0,10);
+  s+='<path class="ic fBlack" d="'+p+'"/>';                                                  // cassa nera lucida
+  s+='<g transform="scale(0.84)"><path d="'+p+'" fill="url(#gBoard)" stroke="#2a2c30" stroke-width="1.5"/></g>'; // tavola armonica aperta
+  for(var i=-3;i<=3;i++){ s+=lin(i*11,-d2*0.55,i*11,d2*0.12,'pstr'); }                       // corde
+  s+='<path class="hilite" d="M '+(-w2+6)+','+(d2-34)+' L '+(-w2+6)+','+(-d2+54)+'"/>';        // riflesso sul fianco
+  s+=bar(0,d2-13,it.w-16,14,'ic thin',2)+bar(0,d2-17.5,it.w-16,5,'ic fill',1);                // tastiera
+  return s;
 }
 /* Tastiera a barre graduate (xilofono/marimba): cornice trapezia + barre */
 function tavBarre(w2,dL,dR,n,frameCls,barCls){
@@ -354,7 +372,7 @@ var TYPES = {
   /* --- ritmica: batteria e percussioni --- */
   batteria: {nome:"Batteria 5 pezzi", dim:"180×150", cat:"Ritmica", sub:"Batteria e percussioni", w:180,d:150,
              draw:function(){
-               return circ(0,-62,17,'ic fBlack') +
+               return shadow(92,82,0,6)+circ(0,-62,17,'ic fBlack') +
                  bar(0,28,56,42,'ic fBlack',7)+lin(-26,44,26,44,'sil') +
                  drum(-32,-16,18) + drum(-15,1,15)+drum(16,1,16) + drum(52,8,20) +
                  cym(-63,-28,18)+cym(-55,26,20)+cym(62,36,23);
@@ -469,10 +487,10 @@ var TYPES = {
   violapost:{nome:"Viola", dim:"postazione", cat:"Archi", w:100,d:105,
              draw:function(){ return postaz(gVln(0.53)); }},
   violoncello:{nome:"Violoncello (con sedia)", dim:"corpo 76", cat:"Archi", w:85,d:130,
-             draw:function(){ return bar(0,-36,44,44,'ic fBlack',9)+bar(0,-60,44,8,'ic fill',4)+
+             draw:function(){ return shadow(42,58,0,8)+bar(0,-36,44,44,'ic fBlack',9)+bar(0,-60,44,8,'ic fill',4)+
                '<g transform="translate(0,22) rotate(-24)">'+violino(1.0,'fWood')+'</g>'; }},
   contrabbasso:{nome:"Contrabbasso (con sgabello)", dim:"corpo 112", cat:"Archi", w:115,d:135,
-             draw:function(){ return circ(-42,-42,16,'ic fBlack')+
+             draw:function(){ return shadow(54,60,0,6)+circ(-42,-42,16,'ic fBlack')+
                '<g transform="translate(6,14) rotate(-12)">'+violino(1.45,'fWoodD')+'</g>'; }},
   arpa:     {nome:"Arpa da concerto", dim:"55×120 +panca", cat:"Archi", w:75,d:140,
              draw:function(){ return bar(0,-50,48,26,'ic fBlack',5)+
@@ -595,7 +613,7 @@ function sceneMarkup(){
 }
 function render(){
   svg.setAttribute("viewBox", vb.x+" "+vb.y+" "+vb.w+" "+vb.h);
-  svg.innerHTML = DEFS + sceneMarkup();
+  svg.innerHTML = sceneMarkup();
   renderProps();
   var ppm = svg.clientWidth / vb.w * 100;
   document.getElementById("scaleInfo").textContent =
@@ -661,7 +679,7 @@ function miniSvg(k, over){
   var t=TYPES[k];
   var it={type:k, w:(over&&over.w)||t.w, d:(over&&over.d)||t.d, h:(over&&over.h)||t.h||40};
   var ext=Math.max(it.w,it.d)+26;
-  return '<svg class="mini" viewBox="'+(-ext/2)+' '+(-ext/2)+' '+ext+' '+ext+'" width="32" height="32" aria-hidden="true">'+DEFS+t.draw(it)+'</svg>';
+  return '<svg class="mini" viewBox="'+(-ext/2)+' '+(-ext/2)+' '+ext+' '+ext+'" width="32" height="32" aria-hidden="true">'+t.draw(it)+'</svg>';
 }
 (function buildCatalog(){
   var el = document.getElementById("catalog"), cats={};
@@ -1051,7 +1069,7 @@ function gallery(){
   });
   var H=y+rowH+60;
   svg.setAttribute("viewBox","0 0 "+maxW+" "+H);
-  svg.innerHTML='<rect x="0" y="0" width="'+maxW+'" height="'+H+'" fill="#fff"/>'+DEFS+s;
+  svg.innerHTML='<rect x="0" y="0" width="'+maxW+'" height="'+H+'" fill="#fff"/>'+s;
 }
 
 /* ============ AVVIO ============ */
