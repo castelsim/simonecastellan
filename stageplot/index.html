@@ -168,7 +168,7 @@
   <button class="btn" id="bJson">Salva .json</button>
   <button class="btn" id="bImport">Apri .json</button>
   <button class="btn primary" id="bPng">Esporta PNG</button>
-  <button class="btn" id="bShare" title="Invia via mail / condividi: allega PNG + sorgente .json">✉ Invia</button>
+  <button class="btn" id="bShare" title="Scarica PNG + .json e apre la mail già indirizzata a Simone (allega i 2 file)">✉ Invia a Simone</button>
   <button class="btn danger" id="bNew">Nuovo</button>
   <input type="file" id="fileImport" accept=".json" hidden>
   <div class="menu-pop" id="orgMenu" hidden>
@@ -1651,9 +1651,9 @@ function buildExportSvg(){
   render();
   return {svgStr:svgStr, vbW:vbW, vbH:vbH};
 }
-function renderPng(){
+function renderPng(scale){
   return new Promise(function(resolve, reject){
-    var ex=buildExportSvg(), img=new Image(), k=2;
+    var ex=buildExportSvg(), img=new Image(), k=scale||2;
     img.onload=function(){
       var c=document.createElement("canvas"); c.width=ex.vbW*k; c.height=ex.vbH*k;
       c.getContext("2d").drawImage(img,0,0,c.width,c.height);
@@ -1668,28 +1668,22 @@ document.getElementById("bPng").addEventListener("click", function(){
              .catch(function(){ alert("Export PNG fallito."); });
 });
 
-/* ============ INVIA (Web Share con allegati, fallback download + mailto) ============ */
+/* ============ INVIA (scarica PNG + .json e apre la mail verso Simone; allegati a mano) ============ */
+var DEST_MAIL = "castellansimone@gmail.com";   /* destinatario fisso */
 document.getElementById("bShare").addEventListener("click", function(){
   var base=fileName(), title=state.titolo||"Stage plot";
   var jsonBlob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
-  var text="Stage plot \""+title+"\" — creato con simonecastellan.com/stageplot";
   renderPng().then(function(png){
-    var pngFile=new File([png], base+".png", {type:"image/png"});
-    var jsonFile=new File([jsonBlob], base+".json", {type:"application/json"});
-    if(navigator.canShare && navigator.canShare({files:[pngFile,jsonFile]})){
-      navigator.share({files:[pngFile,jsonFile], title:title, text:text})
-        .catch(function(e){ if(e && e.name!=="AbortError") shareFallback(png, jsonBlob, base, title, text); });
-      return;
-    }
-    shareFallback(png, jsonBlob, base, title, text);
-  }).catch(function(){ alert("Generazione allegati fallita."); });
+    dl(URL.createObjectURL(png), base+".png");
+    dl(URL.createObjectURL(jsonBlob), base+".json");
+    var body=encodeURIComponent(
+      "Ciao Simone,\nin allegato il mio stage plot \""+title+"\".\n\n"+
+      "Ho scaricato 2 file da allegare a questa mail prima di inviarla:\n"+
+      "• "+base+".png — planimetria + channel list\n"+
+      "• "+base+".json — sorgente editabile su simonecastellan.com/stageplot\n");
+    window.location.href="mailto:"+DEST_MAIL+"?subject="+encodeURIComponent("Stage plot — "+title)+"&body="+body;
+  }).catch(function(){ alert("Generazione file fallita."); });
 });
-function shareFallback(png, jsonBlob, base, title, text){
-  dl(URL.createObjectURL(png), base+".png");
-  dl(URL.createObjectURL(jsonBlob), base+".json");
-  var body=encodeURIComponent(text+"\n\nIn allegato:\n• "+base+".png — planimetria + channel list\n• "+base+".json — sorgente editabile su simonecastellan.com/stageplot\n\nI due file sono stati scaricati sul dispositivo: allegali a questa mail prima di inviarla.");
-  window.location.href="mailto:?subject="+encodeURIComponent("Stage plot — "+title)+"&body="+body;
-}
 
 /* ============ DEMO (?demo=1) ============ */
 function demo(){
