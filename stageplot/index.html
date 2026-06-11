@@ -169,11 +169,12 @@
   <input type="file" id="fileImport" accept=".json" hidden>
   <div class="menu-pop" id="orgMenu" hidden>
     <button data-f="band">Band<small>batteria, ampli, voci, monitor</small></button>
-    <button data-f="coro">Coro<small>gradoni, microfoni d'insieme, direttore</small></button>
-    <button data-f="sinfonica">Orchestra sinfonica<small>apre l'organico dettagliato per sezioni</small></button>
-    <div class="sep"></div>
+    <button data-f="coro">Coro<small>gradoni SATB, microfoni d'insieme, direttore, piano</small></button>
+    <button data-f="sinfonica">Orchestra sinfonica<small>organico standard completo, per sezioni</small></button>
     <button data-f="orchband">Orchestra + band<small>archi e fiati + sezione ritmica davanti</small></button>
     <button data-f="orchcoro">Orchestra sinfonica + coro<small>orchestra con gradoni del coro dietro</small></button>
+    <div class="sep"></div>
+    <button data-f="custom">Personalizza organico…<small>scegli tu i numeri per sezione</small></button>
   </div>
 </header>
 
@@ -1010,32 +1011,64 @@ function presetCounts(id){
   var p=presetById(id);
   return p.counts ? cloneCounts(p.counts) : defaultOrchCounts();
 }
+/* ARCHI: file concentriche CONTINUE attorno al podio, partizionate per sezione.
+   Ogni fila è un arco unico (V1 a sx del direttore → V2 → Viole → Vc a dx); passo angolare
+   costante = posti affiancati lungo la curva, tutti rivolti al podio. Cb dietro i Vc, a destra.
+   Restituisce il raggio esterno (per posizionare legni/ottoni dietro). */
+var STR_R0=290, STR_DR=150;
+function layoutStrings(counts, out){
+  var secs=[["v1","Violini I","vlnpost"],["v2","Violini II","vlnpost"],
+            ["vle","Viole","violapost"],["vc","Violoncelli","violoncello"]];
+  var sizes=secs.map(function(s){ return counts[s[0]]||0; });
+  var total=sizes.reduce(function(a,b){ return a+b; },0);
+  if(!total) return STR_R0;
+  var rows = total<=8 ? 1 : (total<=20 ? 2 : 3);
+  /* ripartizione di ogni sezione sulle file (file davanti ≥ dietro) */
+  var split=sizes.map(function(n){
+    var base=Math.floor(n/rows), extra=n-base*rows, a=[];
+    for(var r=0;r<rows;r++) a.push(base+(r<extra?1:0));
+    return a;
+  });
+  var P=2*Math.asin(Math.min(0.5, 56/STR_R0));   /* passo angolare ~ corda 112 cm */
+  var m0=split.reduce(function(a,s){ return a+s[0]; },0);   /* posti in prima fila */
+  for(var r=0;r<rows;r++){
+    var rowSeats=[];
+    secs.forEach(function(s,i){
+      var k=split[i][r], mid=Math.floor(k/2);
+      for(var j=0;j<k;j++) rowSeats.push({type:s[2], lbl:(r===0&&j===mid)?s[1]+" ("+sizes[i]+")":""});
+    });
+    var m=rowSeats.length; if(!m) continue;
+    var R=STR_R0+STR_DR*r;
+    for(var idx=0; idx<m; idx++){
+      var a=(idx-(m-1)/2)*P, x=R*Math.sin(a), y=-R*Math.cos(a);
+      out.push({type:rowSeats[idx].type, x:Math.round(x), y:Math.round(y),
+        rot:Math.round(a*180/Math.PI), label:rowSeats[idx].lbl});
+    }
+  }
+  /* Contrabbassi: arco corto dietro/destra dei violoncelli */
+  var nb=counts.cb||0, outerRows=rows;
+  if(nb){
+    var R=STR_R0+STR_DR*rows, a0=(m0-1)/2*P*0.55, midb=Math.floor(nb/2);
+    for(var j=0;j<nb;j++){
+      var a=a0+j*P, x=R*Math.sin(a), y=-R*Math.cos(a);
+      out.push({type:"contrabbasso", x:Math.round(x), y:Math.round(y),
+        rot:Math.round(a*180/Math.PI), label:j===midb?"Contrabbassi ("+nb+")":""});
+    }
+    outerRows=rows+1;
+  }
+  return STR_R0+STR_DR*outerRows;
+}
+
 function buildOrchestraOut(counts){
-  var R0=300, DR=165, out=[];   /* posizioni relative al podio (0,0); -y = verso il fondo */
+  var out=[];
   function rad(g){ return g*Math.PI/180; }
   function rotTo(x,y){ return Math.atan2(x,-y)*180/Math.PI; }  /* postazione rivolta al podio */
 
-  /* 1. archi ad arco, per sezione, file concentriche con passo costante (ordinato) */
-  var maxStringRow=0;
-  ORCH_DEF.forEach(function(sec){
-    var n=counts[sec.id]||0; if(!n || !sec.arc) return;
-    var a1=rad(sec.arc[0]), a2=rad(sec.arc[1]), mid=(a1+a2)/2, span=a2-a1;
-    var row=sec.rowStart||0, left=n, first=true;
-    while(left>0){
-      var r=R0+DR*row, cap=Math.max(1, Math.floor(span*r/sec.sp)+1), k=Math.min(left,cap);
-      var step=sec.sp/r, start=mid-step*(k-1)/2;
-      for(var i=0;i<k;i++){
-        var a=start+step*i, x=r*Math.sin(a), y=-r*Math.cos(a);
-        out.push({type:sec.type, x:x, y:y, rot:rotTo(x,y),
-          label:(first && i===Math.floor((k-1)/2)) ? sec.nome+" ("+n+")" : ""});
-      }
-      left-=k; row++; first=false;
-    }
-    maxStringRow=Math.max(maxStringRow,row);
-  });
+  /* 1. archi: file concentriche continue attorno al podio */
+  var stringOuter=layoutStrings(counts, out);
 
   /* 2. legni e ottoni: file diritte dietro gli archi, gruppi affiancati */
-  var windBase=R0+DR*Math.max(maxStringRow,2)+15, rows={}, maxWindRow=-1;
+  var DR=175, windBase=stringOuter+40, rows={}, maxWindRow=-1;
   ORCH_DEF.forEach(function(sec){
     var n=counts[sec.id]||0;
     if(n && sec.row!=null){ (rows[sec.row]=rows[sec.row]||[]).push(sec); maxWindRow=Math.max(maxWindRow,sec.row); }
@@ -1222,40 +1255,59 @@ function genOrchestra(counts, fitStage, clearFirst, force){
    -x = lato DX palco, +x = lato SX palco (come la scena). */
 function buildBandOut(){
   return [
-    {type:"pedana", x:0, y:-300, w:300, d:200, h:40, label:"Drum riser"},
-    {type:"batteria", x:0, y:-300, label:""},
-    {type:"wedge", x:185, y:-205, rot:160, label:"DRUM"},
-    {type:"bassamp", x:-360, y:-300, label:"Bass amp"},
-    {type:"stack", x:360, y:-300, label:"GT amp"},
-    {type:"stagepiano", x:-330, y:-120, rot:18, label:"Keys"},
-    {type:"wedge", x:-330, y:-15, rot:0, label:"MIX KEYS"},
-    {type:"astamic", x:-150, y:-70, label:"Chitarra"},
-    {type:"wedge", x:-150, y:30, rot:0, label:"MIX GT"},
-    {type:"astamic", x:0, y:-40, label:"Voce lead"},
-    {type:"wedge", x:0, y:65, rot:0, label:"MIX LEAD"},
-    {type:"astamic", x:170, y:-70, label:"Basso"},
-    {type:"wedge", x:170, y:30, rot:0, label:"MIX BASS"},
-    {type:"sidefill", x:-630, y:35, rot:35, label:"SIDE DX"},
-    {type:"sidefill", x:630, y:35, rot:-35, label:"SIDE SX"},
-    {type:"stagebox", x:560, y:-250, label:"STAGEBOX"},
-    {type:"corrente", x:-500, y:-330, label:""},
-    {type:"corrente", x:500, y:-330, label:""}
+    /* batteria su pedana, centro fondo */
+    {type:"pedana", x:0, y:-310, w:300, d:200, h:40, label:"Drum riser"},
+    {type:"batteria", x:0, y:-310, label:""},
+    {type:"wedge", x:170, y:-215, rot:0, label:"DRUM"},
+    /* lato DX palco (sx pubblico): basso + ampli basso */
+    {type:"bassamp", x:-490, y:-290, label:"Bass amp"},
+    {type:"astamic", x:-460, y:-95, label:"Basso"},
+    {type:"wedge", x:-460, y:5, rot:0, label:"MIX BASS"},
+    /* keys, lato DX interno */
+    {type:"stagepiano", x:-250, y:-150, rot:12, label:"Keys"},
+    {type:"wedge", x:-250, y:-42, rot:0, label:"MIX KEYS"},
+    /* lato SX palco (dx pubblico): chitarra + ampli */
+    {type:"stack", x:490, y:-290, label:"GT amp"},
+    {type:"astamic", x:450, y:-95, label:"Chitarra"},
+    {type:"wedge", x:450, y:5, rot:0, label:"MIX GT"},
+    /* corista, lato SX interno */
+    {type:"astamic", x:220, y:-70, label:"Cori"},
+    {type:"wedge", x:220, y:32, rot:0, label:"MIX CORI"},
+    /* voce lead, centro fronte */
+    {type:"astamic", x:0, y:-70, label:"Voce lead"},
+    {type:"wedge", x:0, y:35, rot:0, label:"MIX LEAD"},
+    /* side fill + tecnica */
+    {type:"sidefill", x:-660, y:30, rot:35, label:"SIDE DX"},
+    {type:"sidefill", x:660, y:30, rot:-35, label:"SIDE SX"},
+    {type:"stagebox", x:580, y:-260, label:"STAGEBOX"},
+    {type:"corrente", x:-580, y:-330, label:""},
+    {type:"corrente", x:580, y:-330, label:""}
   ];
 }
 function buildCoroOut(){
-  var out=[];
-  out.push({type:"pedanacoro", x:0, y:-560, w:760, d:150, label:"Soprani / Contralti"});
-  out.push({type:"pedanacoro", x:0, y:-710, w:760, d:150, label:"Tenori / Bassi"});
-  [-240,0,240].forEach(function(x){ out.push({type:"giraffa", x:x, y:-430, rot:180, label:"Coro"}); });
-  out.push({type:"podio", x:0, y:-150, label:"Direttore"});
-  out.push({type:"leggio", x:0, y:-205, rot:180, label:""});
-  out.push({type:"astamic", x:-150, y:-70, label:"Solista"});
-  out.push({type:"astamic", x:150, y:-70, label:"Solista"});
-  out.push({type:"wedge", x:-150, y:25, rot:0, label:"MIX 1"});
-  out.push({type:"wedge", x:150, y:25, rot:0, label:"MIX 2"});
-  out.push({type:"sidefill", x:-600, y:-40, rot:35, label:"SIDE DX"});
-  out.push({type:"sidefill", x:600, y:-40, rot:-35, label:"SIDE SX"});
-  return out;
+  return [
+    /* gradoni del coro in fondo (4 file: S/C davanti, T/B dietro) */
+    {type:"pedanacoro", x:0, y:-450, w:780, d:120, label:"Tenori / Bassi"},
+    {type:"pedanacoro", x:0, y:-330, w:780, d:120, label:"Soprani / Contralti"},
+    /* microfoni d'insieme sospesi davanti al coro */
+    {type:"giraffa", x:-250, y:-240, rot:180, label:"Coro"},
+    {type:"giraffa", x:0, y:-240, rot:180, label:"Coro"},
+    {type:"giraffa", x:250, y:-240, rot:180, label:"Coro"},
+    /* direttore davanti al coro */
+    {type:"podio", x:0, y:-140, label:"Direttore"},
+    /* pianoforte d'accompagnamento, lato DX */
+    {type:"grancoda", x:-380, y:-190, rot:35, label:"Piano"},
+    {type:"panchetta", x:-300, y:-110, rot:35, label:""},
+    {type:"wedge", x:-330, y:-30, rot:20, label:"MIX DIR"},
+    /* solisti fronte palco */
+    {type:"astamic", x:-130, y:-55, label:"Solista"},
+    {type:"astamic", x:130, y:-55, label:"Solista"},
+    {type:"wedge", x:-130, y:45, rot:0, label:"MIX 1"},
+    {type:"wedge", x:130, y:45, rot:0, label:"MIX 2"},
+    /* side fill */
+    {type:"sidefill", x:-600, y:10, rot:35, label:"SIDE DX"},
+    {type:"sidefill", x:600, y:10, rot:-35, label:"SIDE SX"}
+  ];
 }
 function buildOrchBandOut(){
   var out=buildOrchestraOut(presetCounts("camera"));
@@ -1334,9 +1386,14 @@ function buildOrchCoroOut(){
     closeMenu(); runFormation(b.getAttribute("data-f"));
   });
   function runFormation(f){
-    if(f==="sinfonica"){ applySuggestedOrchestra(); orchModal.hidden=false; return; }
-    var build={band:buildBandOut, coro:buildCoroOut, orchband:buildOrchBandOut, orchcoro:buildOrchCoroOut}[f];
-    var titoli={band:"Band", coro:"Coro", orchband:"Orchestra + band", orchcoro:"Orchestra sinfonica + coro"};
+    if(f==="custom"){ applySuggestedOrchestra(); orchModal.hidden=false; return; }
+    var build={
+      band:buildBandOut, coro:buildCoroOut,
+      sinfonica:function(){ return buildOrchestraOut(presetCounts("standard")); },
+      orchband:buildOrchBandOut, orchcoro:buildOrchCoroOut
+    }[f];
+    var titoli={band:"Band", coro:"Coro", sinfonica:"Orchestra sinfonica",
+      orchband:"Orchestra + band", orchcoro:"Orchestra sinfonica + coro"};
     if(!build) return;
     if(state.items.length && !confirm("Generare la formazione \""+titoli[f]+"\"? Gli elementi attuali sul palco verranno sostituiti.")) return;
     placeOut(build(), true, true, true);
@@ -1575,7 +1632,9 @@ if(location.search.indexOf("orch=1")>-1){     /* QA: organico standard completo 
 /* QA formazioni: ?form=band|coro|orchband|orchcoro  (+ &auto=1 popola la channel list) */
 var qForm=(location.search.match(/form=(\w+)/)||[])[1];
 if(qForm){
-  var qb={band:buildBandOut, coro:buildCoroOut, orchband:buildOrchBandOut, orchcoro:buildOrchCoroOut}[qForm];
+  var qb={band:buildBandOut, coro:buildCoroOut,
+    sinfonica:function(){ return buildOrchestraOut(presetCounts("standard")); },
+    orchband:buildOrchBandOut, orchcoro:buildOrchCoroOut}[qForm];
   if(qb){ state.titolo=qForm; placeOut(qb(), true, true, true);
     if(location.search.indexOf("auto=1")>-1){ autoInputs(); autoOutputs(); } }
 }
