@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stage Plot — editor</title>
+<!-- Stage Plot · © 2026 Simone Castellan · simonecastellan.com · uso libero, paternità riservata -->
+<meta name="author" content="Simone Castellan">
+<meta name="description" content="Editor di stage plot in scala per spettacoli dal vivo: palco modulabile, organico orchestrale completo, icone realistiche. Di Simone Castellan.">
+<link rel="canonical" href="https://simonecastellan.com/stageplot/">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:#1f2937;background:#fff;display:grid;
+    grid-template-rows:52px 1fr 26px;grid-template-columns:236px 1fr 240px;
+    grid-template-areas:"top top top" "cat main props" "foot foot foot";overflow:hidden}
+  header{grid-area:top;display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid #e5e7eb}
+  header .brand{font-weight:700;font-size:15px;letter-spacing:.2px;margin-right:4px}
+  header input[type=text]{flex:1;max-width:340px;border:1px solid #e5e7eb;border-radius:8px;padding:7px 10px;font-size:14px}
+  .btn{background:#f1f3f4;border:none;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600;
+    color:#1a1a1a;cursor:pointer;white-space:nowrap}
+  .btn:hover{background:#e6e8ea}
+  .btn.primary{background:#1f2937;color:#fff}
+  .btn.primary:hover{background:#374151}
+  .btn.danger{background:#fee2e2;color:#b91c1c}
+  #catalog{grid-area:cat;overflow-y:auto;border-right:1px solid #e5e7eb;padding:10px}
+  #catalog h3{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#374151;margin:14px 4px 6px;
+    border-bottom:1px solid #e5e7eb;padding-bottom:4px}
+  #catalog h3:first-child{margin-top:2px}
+  #catalog h4{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:#9ca3af;margin:8px 4px 4px}
+  #catalog button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:#fff;
+    border:1px solid #e5e7eb;border-radius:8px;padding:4px 8px;font-size:12.5px;color:#1f2937;
+    cursor:pointer;margin-bottom:4px;line-height:1.25}
+  #catalog button:hover{background:#f1f3f4;border-color:#d1d5db}
+  #catalog button small{color:#9ca3af;font-size:10.5px;display:block}
+  #catalog .mini{flex:0 0 auto;display:block;width:34px;height:34px}
+  main{grid-area:main;position:relative;background:#fafafa;overflow:hidden}
+  svg{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+  svg.dragging{cursor:grabbing}
+  #props{grid-area:props;border-left:1px solid #e5e7eb;padding:12px;overflow-y:auto}
+  #props h3{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;margin:0 0 8px}
+  #props .sec{margin-bottom:18px}
+  #props label{display:block;font-size:12px;color:#6b7280;margin:8px 0 3px}
+  #props input,#props select{width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:6px 8px;font-size:13px}
+  #props .row{display:flex;gap:6px}
+  #props .row>*{flex:1}
+  #props .btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  #props .btns .btn{padding:6px 10px;font-size:12px}
+  footer{grid-area:foot;display:flex;align-items:center;gap:18px;padding:0 14px;border-top:1px solid #e5e7eb;
+    font-size:11.5px;color:#6b7280;white-space:nowrap;overflow:hidden}
+  /* SVG — palco */
+  .stage-floor{fill:#fff;stroke:#1f2937;stroke-width:3}
+  .grid line{stroke:#eceef0;stroke-width:1}
+  .grid line.m{stroke:#dde0e3}
+  .cl{stroke:#cbd5e1;stroke-width:1.5;stroke-dasharray:22 16}
+  .zone-lbl{fill:#9ca3af;font-size:16px;letter-spacing:2px}
+  /* SVG — tratti base */
+  .ic{fill:#fff;stroke:#1f2937;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+  .ic.fill{fill:#1f2937;stroke:none}
+  .ic.soft{fill:#f3f4f6}
+  .ic.dash{stroke-dasharray:7 5;fill:none}
+  .ic.thin{stroke-width:1.2}
+  .mon{stroke:#2563eb}
+  .mon.fill{fill:#2563eb;stroke:none}
+  .pow{stroke:#dc2626}
+  .pow.fill{fill:#dc2626;stroke:none}
+  .tec{stroke:#b45309}
+  .tec.fill{fill:#b45309;stroke:none}
+  .sil{stroke:#aab2bb;stroke-width:1.4;fill:none}
+  .fb{stroke:#191a1d;stroke-width:3;stroke-linecap:round}
+  /* SVG — riempimenti realistici (gradienti in DEFS) */
+  .fWood{fill:url(#gWood)}   .fWoodD{fill:url(#gWoodD)} .fWoodL{fill:url(#gWoodL)}
+  .fBrass{fill:url(#gBrass)} .fSilver{fill:url(#gSilver)} .fBlack{fill:url(#gBlack)}
+  .fHead{fill:url(#gHead)}   .fCym{fill:url(#gCym)}       .fCopper{fill:url(#gCopper)}
+  .fFloor{fill:url(#gFloor)} .fRed{fill:url(#gRed)}       .fGrey{fill:#494d54}
+  .fMon{fill:#33363b}
+  .dotS{fill:#cfd4da}
+  .rug{fill:rgba(176,58,58,.16);stroke:#8e2b26;stroke-width:2;stroke-dasharray:10 7}
+  .plex{fill:rgba(165,196,222,.18);stroke:#7f96a8;stroke-width:2;stroke-linejoin:round}
+  .lbl{font-size:14px;fill:#111827;text-anchor:middle;font-weight:600}
+  .lbl.sub{font-weight:400;fill:#6b7280;font-size:12px}
+  .hit{fill:rgba(0,0,0,0);stroke:none}
+  .item{cursor:move}
+  .item.selected .hit{stroke:#2563eb;stroke-width:1.5;stroke-dasharray:7 5;fill:rgba(37,99,235,.04)}
+  /* modale organico orchestra */
+  .modal{position:fixed;inset:0;background:rgba(17,24,39,.45);display:flex;align-items:center;justify-content:center;z-index:50}
+  .modal[hidden]{display:none}
+  .mcard{background:#fff;border-radius:14px;padding:18px 20px;width:600px;max-height:88vh;overflow:auto;box-shadow:0 10px 40px rgba(0,0,0,.18)}
+  .mcard h2{font-size:16px;margin-bottom:4px}
+  .mcard .hint{font-size:12px;color:#6b7280;margin-bottom:12px}
+  .ogrid{display:grid;grid-template-columns:1fr 1fr;gap:5px 22px}
+  .ogrid label{display:flex;justify-content:space-between;align-items:center;font-size:13px}
+  .ogrid input{width:58px;border:1px solid #e5e7eb;border-radius:6px;padding:4px 6px;font-size:13px}
+  .ochk{display:block;font-size:12.5px;color:#374151;margin-top:10px}
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">STAGE PLOT</span>
+  <input type="text" id="titolo" placeholder="Titolo evento / band (compare nell'export)">
+  <button class="btn" id="bFit" title="Adatta lo zoom al palco">⤢ Adatta</button>
+  <button class="btn" id="bOrch" title="Genera l'organico orchestrale completo, per sezioni">Organico orchestra</button>
+  <button class="btn" id="bJson">Salva .json</button>
+  <button class="btn" id="bImport">Apri .json</button>
+  <button class="btn primary" id="bPng">Esporta PNG</button>
+  <button class="btn danger" id="bNew">Nuovo</button>
+  <input type="file" id="fileImport" accept=".json" hidden>
+</header>
+
+<aside id="catalog"></aside>
+
+<main><svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg></main>
+
+<aside id="props">
+  <div class="sec">
+    <h3>Palco</h3>
+    <div class="row">
+      <span><label>Larghezza (m)</label><input type="number" id="stW" min="2" max="40" step="0.5"></span>
+      <span><label>Profondità (m)</label><input type="number" id="stD" min="2" max="30" step="0.5"></span>
+    </div>
+    <label>Snap griglia</label>
+    <select id="snap">
+      <option value="0">libero</option>
+      <option value="25" selected>25 cm</option>
+      <option value="50">50 cm</option>
+      <option value="100">1 m</option>
+    </select>
+  </div>
+  <div class="sec" id="selProps" hidden>
+    <h3 id="selNome">Elemento</h3>
+    <label>Etichetta</label><input type="text" id="pLabel">
+    <div class="row" id="pDims">
+      <span><label>L (cm)</label><input type="number" id="pW" min="10" step="5"></span>
+      <span><label>P (cm)</label><input type="number" id="pD" min="10" step="5"></span>
+      <span id="pHwrap"><label>h (cm)</label><input type="number" id="pH" min="0" step="10"></span>
+    </div>
+    <label>Rotazione (°)</label>
+    <div class="row">
+      <input type="number" id="pRot" step="5">
+      <button class="btn" id="pRotL">⟲ 15</button>
+      <button class="btn" id="pRotR">⟳ 15</button>
+    </div>
+    <div class="btns">
+      <button class="btn" id="pDup">Duplica</button>
+      <button class="btn danger" id="pDel">Elimina</button>
+    </div>
+  </div>
+  <div class="sec" id="noSel" style="font-size:12.5px;color:#9ca3af">
+    Clicca un elemento del catalogo per aggiungerlo, poi trascinalo sul palco.
+    Tutti gli elementi sono disegnati con le <b>dimensioni reali</b> in scala.
+  </div>
+</aside>
+
+<footer>
+  <span><b>R</b> ruota · <b>⇧R</b> ruota indietro · <b>frecce</b> sposta · <b>⌫</b> elimina · <b>D</b> duplica · <b>Esc</b> deseleziona</span>
+  <span>rotella = zoom · trascina lo sfondo = sposta vista</span>
+  <span id="scaleInfo"></span>
+</footer>
+
+<div class="modal" id="orchModal" hidden>
+  <div class="mcard">
+    <h2>Organico orchestra</h2>
+    <p class="hint">Postazioni per sezione (0 = assente). Disposizione standard: archi ad arco attorno al podio,
+    legni e ottoni in file, percussioni in fondo, arpa/tastiere a sinistra. Ogni postazione ha sedia + leggio + strumento.</p>
+    <div class="ogrid" id="orchGrid"></div>
+    <label class="ochk"><input type="checkbox" id="orchFit" checked> Adatta le dimensioni del palco all'organico</label>
+    <label class="ochk"><input type="checkbox" id="orchClear" checked> Svuota il palco prima di generare</label>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+      <button class="btn" id="orchCancel">Annulla</button>
+      <button class="btn primary" id="orchGo">Genera</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============ GRADIENTI CONDIVISI (materiali realistici) ============ */
+var DEFS='<defs>'+
+'<linearGradient id="gWood" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b07a42"/><stop offset="1" stop-color="#6e4423"/></linearGradient>'+
+'<linearGradient id="gWoodD" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7d4a26"/><stop offset="1" stop-color="#4d2c14"/></linearGradient>'+
+'<linearGradient id="gWoodL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d3a26a"/><stop offset="1" stop-color="#a4712f"/></linearGradient>'+
+'<linearGradient id="gBrass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4d57f"/><stop offset="1" stop-color="#b07f1f"/></linearGradient>'+
+'<linearGradient id="gSilver" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eceef1"/><stop offset="1" stop-color="#a7afb8"/></linearGradient>'+
+'<linearGradient id="gBlack" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#45484f"/><stop offset="1" stop-color="#17181b"/></linearGradient>'+
+'<radialGradient id="gHead" cx="0.4" cy="0.4" r="0.85"><stop offset="0" stop-color="#fdfcf7"/><stop offset="1" stop-color="#e6dfcb"/></radialGradient>'+
+'<radialGradient id="gCym" cx="0.4" cy="0.4" r="0.85"><stop offset="0" stop-color="#f0d98c"/><stop offset="1" stop-color="#bb9233"/></radialGradient>'+
+'<radialGradient id="gCopper" cx="0.45" cy="0.4" r="0.9"><stop offset="0" stop-color="#d29a5d"/><stop offset="1" stop-color="#8a5a28"/></radialGradient>'+
+'<linearGradient id="gFloor" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6f7f8"/><stop offset="1" stop-color="#e2e5e9"/></linearGradient>'+
+'<linearGradient id="gRed" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d24a43"/><stop offset="1" stop-color="#8e2b26"/></linearGradient>'+
+'</defs>';
+
+/* ============ HELPER GRAFICI (unità = cm, vista dall'alto, origine al centro, fronte palco = giù) ============ */
+function riserSvg(w,d){
+  var w2=w/2,d2=d/2;
+  var s='<rect class="ic fFloor" x="'+(-w2)+'" y="'+(-d2)+'" width="'+w+'" height="'+d+'" rx="2"/>'+
+        '<rect class="ic thin" fill="none" x="'+(-w2+7)+'" y="'+(-d2+7)+'" width="'+(w-14)+'" height="'+(d-14)+'"/>';
+  [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(function(c){ s+=bar(c[0]*(w2-8),c[1]*(d2-8),7,7,'ic fill',1); });
+  return s;
+}
+function bar(cx,cy,w,d,cls,rx){ return '<rect class="'+(cls||'ic')+'" x="'+(cx-w/2)+'" y="'+(cy-d/2)+'" width="'+w+'" height="'+d+'" rx="'+(rx==null?3:rx)+'"/>'; }
+function rectSvg(w,d,cls,rx){ return bar(0,0,w,d,cls,rx); }
+function circ(x,y,r,cls){ return '<circle class="'+(cls||'ic')+'" cx="'+x+'" cy="'+y+'" r="'+r+'"/>'; }
+function lin(x1,y1,x2,y2,cls){ return '<line class="'+(cls||'ic')+'" x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"/>'; }
+function drum(x,y,r){ return circ(x,y,r,'ic fSilver')+circ(x,y,r-3.5,'ic thin fHead'); }       /* cerchio cromato + pelle */
+function tdrum(x,y,r){ return circ(x,y,r,'ic fCopper')+circ(x,y,r-7,'ic thin fHead'); }        /* caldaia rame + pelle */
+function cym(x,y,r){ return circ(x,y,r,'ic thin fCym')+circ(x,y,2.5,'ic fill'); }              /* piatto bronzo + perno */
+function kn(x0,y,n,st,cls){ var s=''; for(var i=0;i<n;i++) s+=circ(x0+i*st,y,1.9,cls||'dotS'); return s; } /* manopole */
+
+/* Postazione orchestrale: sedia nera + leggio nero (+ glifo strumento) */
+function postaz(glyph){
+  return bar(0,-22,46,46,'ic fBlack',9)+bar(0,-48,46,9,'ic fill',4)+
+    lin(0,26,-9,17,'ic thin')+lin(0,26,9,17,'ic thin')+circ(0,26,2.8,'ic fill')+
+    bar(0,38,48,15,'ic fBlack',2)+(glyph||'');
+}
+/* Glifi strumento in scala (cm reali) */
+function gVln(s){ return '<g transform="translate(28,-14) rotate(38)">'+violino(s,'fWood')+'</g>'; }
+function gFlauto(){ return '<g transform="translate(5,-1) rotate(73)">'+bar(0,0,5,66,'ic fSilver',2.5)+
+  circ(0,-24,1.5,'ic fill')+circ(0,-16,1.5,'ic fill')+circ(0,-8,1.5,'ic fill')+'</g>'; }
+function gOboe(){ return '<g transform="translate(9,1) rotate(14)"><path class="ic fBlack" d="M -2.5,-30 L 2.5,-30 L 4.5,24 Q 0,29 -4.5,24 Z"/>'+
+  circ(0,-6,1.4,'dotS')+circ(0,0,1.4,'dotS')+circ(0,6,1.4,'dotS')+'</g>'; }
+function gClar(){ return '<g transform="translate(9,1) rotate(12)">'+bar(0,-5,6,50,'ic fBlack',3)+
+  '<path class="ic fBlack" d="M -3,20 L 3,20 L 6.5,29 L -6.5,29 Z"/>'+
+  circ(0,-13,1.4,'dotS')+circ(0,-6,1.4,'dotS')+circ(0,1,1.4,'dotS')+'</g>'; }
+function gFag(){ return '<g transform="translate(18,-4) rotate(10)">'+bar(-5,0,5,88,'ic fWoodD',2.5)+bar(4.5,-12,5,80,'ic fWoodD',2.5)+
+  '<path class="ic thin" fill="none" d="M -7.5,44 A 8 8 0 0 0 7,28"/>'+lin(-5,-44,-13,-50,'sil')+'</g>'; }
+function gCorno(){ return '<g transform="translate(0,-18)">'+circ(0,0,15,'ic fBrass')+circ(0,0,8.5,'ic thin fBrass')+
+  circ(9,7,5.5,'ic thin fBrass')+lin(-13,-7,-19,-13,'ic thin')+'</g>'; }
+function gTromba(){ return '<g transform="translate(7,4)">'+bar(0,-6,5,40,'ic fBrass',2.5)+
+  circ(0,-13,1.6,'ic fill')+circ(0,-8,1.6,'ic fill')+circ(0,-3,1.6,'ic fill')+
+  lin(-2.5,14,-7,26,'ic thin')+lin(2.5,14,7,26,'ic thin')+'<ellipse class="ic thin fBrass" cx="0" cy="27" rx="7.5" ry="2.8"/></g>'; }
+function gTrombone(){ return '<g transform="translate(12,10) rotate(8)">'+bar(-3.5,-14,4,72,'ic fBrass',2)+bar(3.5,-26,4,48,'ic fBrass',2)+
+  '<path class="ic thin" fill="none" d="M -5.5,-50 A 5.5 5.5 0 0 1 5.5,-50"/>'+
+  lin(-5.5,22,-10,34,'ic thin')+lin(-1.5,22,3,34,'ic thin')+'<ellipse class="ic thin fBrass" cx="-3.5" cy="35" rx="7" ry="2.6"/></g>'; }
+function gTuba(){ return '<g transform="translate(2,-15)"><ellipse class="ic fBrass" cx="0" cy="0" rx="17" ry="22"/>'+
+  circ(-2,-7,10,'ic thin fBrass')+'<path class="ic thin" fill="none" d="M 12,14 Q 18,2 12,-10"/></g>'; }
+
+/* Corpo violino/cello/contrabbasso (scala s: 1 = cello) + manico */
+function violino(s,woodCls){
+  function n(v){ return Math.round(v*s*10)/10; }
+  return '<path class="ic '+(woodCls||'fWood')+'" d="M 0,'+n(-40)+' C '+n(14)+','+n(-40)+' '+n(20)+','+n(-31)+' '+n(18)+','+n(-22)+
+    ' C '+n(17)+','+n(-15)+' '+n(11)+','+n(-13)+' '+n(12)+','+n(-7)+
+    ' C '+n(14)+','+n(-1)+' '+n(21)+','+n(2)+' '+n(22)+','+n(11)+
+    ' C '+n(23)+','+n(24)+' '+n(12)+','+n(30)+' 0,'+n(30)+
+    ' C '+n(-12)+','+n(30)+' '+n(-23)+','+n(24)+' '+n(-22)+','+n(11)+
+    ' C '+n(-21)+','+n(2)+' '+n(-14)+','+n(-1)+' '+n(-12)+','+n(-7)+
+    ' C '+n(-11)+','+n(-13)+' '+n(-17)+','+n(-15)+' '+n(-18)+','+n(-22)+
+    ' C '+n(-20)+','+n(-31)+' '+n(-14)+','+n(-40)+' 0,'+n(-40)+' Z"/>'+
+    lin(0,n(-40),0,n(-56),'fb')+circ(0,n(-58),n(3),'ic fill')+
+    bar(0,n(8),n(15),n(3),'ic fill',1)+
+    lin(n(-8),n(0),n(-6),n(12),'ic thin')+lin(n(8),n(0),n(6),n(12),'ic thin')+
+    lin(0,n(30),0,n(38),'ic thin');
+}
+/* Piano a coda parametrico: lato bassi dritto a sx, coda arrotondata, ansa a S al cheek */
+function pianoCoda(it){
+  var w2=it.w/2, d2=it.d/2;
+  var p='M '+(-w2)+','+d2+
+    ' L '+(-w2)+','+(-d2+46)+
+    ' Q '+(-w2)+','+(-d2)+' '+(-w2+50)+','+(-d2)+
+    ' Q '+(-w2*0.04)+','+(-d2)+' '+(w2*0.34)+','+(-d2*0.83)+
+    ' C '+(w2*0.64)+','+(-d2*0.66)+' '+(w2*0.86)+','+(-d2*0.45)+' '+(w2*0.93)+','+(-d2*0.24)+
+    ' C '+(w2*0.975)+','+(-d2*0.1)+' '+(w2*0.875)+','+(-d2*0.02)+' '+(w2*0.875)+','+(d2*0.09)+
+    ' C '+(w2*0.875)+','+(d2*0.19)+' '+(w2*0.96)+','+(d2*0.23)+' '+w2+','+(d2*0.31)+
+    ' L '+w2+','+d2+' Z';
+  return '<path class="ic fBlack" d="'+p+'"/>'+
+    bar(0,d2-13,it.w-16,14,'ic thin',2)+
+    bar(0,d2-17.5,it.w-16,5,'ic fill',1)+
+    lin(-w2+10,d2-26,w2-10,d2-26,'sil');
+}
+/* Tastiera a barre graduate (xilofono/marimba): cornice trapezia + barre */
+function tavBarre(w2,dL,dR,n,frameCls,barCls){
+  var s='<path class="ic '+frameCls+'" d="M '+(-w2)+','+(-dL)+' L '+w2+','+(-dR)+' L '+w2+','+dR+' L '+(-w2)+','+dL+' Z"/>';
+  s+='<path class="ic thin '+barCls+'" d="M '+(-w2+8)+','+(-dL+8)+' L '+(w2-8)+','+(-dR+8)+' L '+(w2-8)+','+(dR-8)+' L '+(-w2+8)+','+(dL-8)+' Z"/>';
+  for(var i=1;i<n;i++){ var x=-w2+8+i*(2*w2-16)/n, t=(x+w2)/(2*w2), dy=dL+(dR-dL)*t-8;
+    s+=lin(x,-dy,x,dy,'ic thin'); }
+  s+=circ(-w2+6,dL+4,3.5,'ic fill')+circ(w2-6,dR+4,3.5,'ic fill')+circ(-w2+6,-dL-4,3.5,'ic fill')+circ(w2-6,-dR-4,3.5,'ic fill');
+  return s;
+}
+function tavBarreInner(w2,dL,dR,n,barCls){
+  var s='<path class="ic thin '+barCls+'" d="M '+(-w2)+','+(-dL)+' L '+w2+','+(-dR)+' L '+w2+','+dR+' L '+(-w2)+','+dL+' Z"/>';
+  for(var i=1;i<n;i++){ var x=-w2+i*2*w2/n, t=(x+w2)/(2*w2), dy=dL+(dR-dL)*t;
+    s+=lin(x,-dy,x,dy,'ic thin'); }
+  return s;
+}
+
+/* ============ CATALOGO (dimensioni REALI in cm, verificate — vedi RICERCA.md) ============ */
+var TYPES = {
+  /* --- pedane / strutture --- */
+  pedana:   {nome:"Pedana", dim:"2×1 m", cat:"Pedane e strutture", w:200,d:100,h:40, resizable:true, z:1, riser:true,
+             draw:function(it){ return riserSvg(it.w,it.d); }},
+  scala:    {nome:"Scala accesso", dim:"60×90", cat:"Pedane e strutture", w:60,d:90, z:1,
+             draw:function(it){ var s=rectSvg(it.w,it.d,'ic fFloor',2);
+               for(var i=1;i<5;i++){ s+=lin(-it.w/2,-it.d/2+i*it.d/5,it.w/2,-it.d/2+i*it.d/5,'ic thin'); }
+               s+=lin(0,30,0,-22,'ic thin')+'<path class="ic thin" fill="none" d="M -6,-14 L 0,-22 L 6,-14"/>';
+               return s; }},
+  tappeto:  {nome:"Tappeto", dim:"2×1,6 m", cat:"Pedane e strutture", w:200,d:160, resizable:true, z:0,
+             draw:function(it){ return rectSvg(it.w,it.d,'rug',8); }},
+  tavolo:   {nome:"Tavolo", dim:"120×60", cat:"Pedane e strutture", w:120,d:60, resizable:true, z:1,
+             draw:function(it){ return rectSvg(it.w,it.d,'ic fWoodL',5)+
+               '<rect class="ic thin" fill="none" x="'+(-it.w/2+7)+'" y="'+(-it.d/2+7)+'" width="'+(it.w-14)+'" height="'+(it.d-14)+'" rx="3"/>'; }},
+  sedia:    {nome:"Sedia", dim:"46×46", cat:"Pedane e strutture", w:50,d:55,
+             draw:function(){ return bar(0,3,46,46,'ic fBlack',9)+bar(0,-22,46,9,'ic fill',4); }},
+  sedialeggio:{nome:"Sedia + leggio", dim:"postazione", cat:"Pedane e strutture", w:75,d:105,
+             draw:function(){ return postaz(''); }},
+  leggio:   {nome:"Leggio", dim:"48×35", cat:"Pedane e strutture", w:50,d:35,
+             draw:function(){ return lin(0,-6,-9,14,'ic thin')+lin(0,-6,9,14,'ic thin')+circ(0,-6,2.8,'ic fill')+
+               bar(0,2,48,15,'ic fBlack',2); }},
+  podio:    {nome:"Podio direttore", dim:"100×100", cat:"Pedane e strutture", w:100,d:100,
+             draw:function(){ return bar(0,0,100,100,'ic fFloor',3)+bar(0,0,84,84,'ic thin',2)+
+               bar(0,-38,52,13,'ic fBlack',2)+circ(0,-27,2.5,'ic fill'); }},
+  pedanacoro:{nome:"Pedana coro 3 gradoni", dim:"4×1,2 m", cat:"Pedane e strutture", w:400,d:120, resizable:true, z:1,
+             draw:function(it){ var s=bar(0,0,it.w,it.d,'ic fFloor',2), n=3, step=it.d/n;
+               for(var i=1;i<n;i++){ s+=lin(-it.w/2,-it.d/2+i*step,it.w/2,-it.d/2+i*step,'ic'); }
+               return s; }},
+  sgabello: {nome:"Sgabello", dim:"Ø38", cat:"Pedane e strutture", w:40,d:40,
+             draw:function(){ var s=circ(0,0,19,'ic fBlack')+circ(0,0,13,'ic thin fBlack');
+               [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(function(c){ s+=circ(c[0]*11.5,c[1]*11.5,1.8,'dotS'); });
+               return s; }},
+  ventilatore:{nome:"Ventilatore", dim:"Ø45", cat:"Pedane e strutture", w:48,d:48,
+             draw:function(){ var s=circ(0,0,22,'ic fGrey')+circ(0,0,4.5,'dotS');
+               [0,120,240].forEach(function(a){ s+='<ellipse class="ic thin fSilver" cx="0" cy="-12" rx="5.5" ry="11" transform="rotate('+a+')"/>'; });
+               return s; }},
+  testo:    {nome:"Testo libero", cat:"Pedane e strutture", w:10,d:10, z:3, defLabel:"Testo…",
+             draw:function(){ return ''; }},
+  /* --- ottoni --- */
+  corno:    {nome:"Corno", dim:"postazione", cat:"Ottoni", w:95,d:105,
+             draw:function(){ return postaz(gCorno()); }},
+  tromba:   {nome:"Tromba", dim:"postazione", cat:"Ottoni", w:95,d:105,
+             draw:function(){ return postaz(gTromba()); }},
+  trombone: {nome:"Trombone", dim:"postazione", cat:"Ottoni", w:95,d:112,
+             draw:function(){ return postaz(gTrombone()); }},
+  tuba:     {nome:"Tuba", dim:"postazione", cat:"Ottoni", w:95,d:105,
+             draw:function(){ return postaz(gTuba()); }},
+  /* --- legni --- */
+  flauto:   {nome:"Flauto", dim:"postazione", cat:"Legni", w:95,d:105,
+             draw:function(){ return postaz(gFlauto()); }},
+  oboe:     {nome:"Oboe", dim:"postazione", cat:"Legni", w:95,d:105,
+             draw:function(){ return postaz(gOboe()); }},
+  clarinetto:{nome:"Clarinetto", dim:"postazione", cat:"Legni", w:95,d:105,
+             draw:function(){ return postaz(gClar()); }},
+  fagotto:  {nome:"Fagotto", dim:"postazione", cat:"Legni", w:95,d:110,
+             draw:function(){ return postaz(gFag()); }},
+  /* --- ritmica: batteria e percussioni --- */
+  batteria: {nome:"Batteria 5 pezzi", dim:"180×150", cat:"Ritmica", sub:"Batteria e percussioni", w:180,d:150,
+             draw:function(){
+               return circ(0,-62,17,'ic fBlack') +
+                 bar(0,28,56,42,'ic fBlack',7)+lin(-26,44,26,44,'sil') +
+                 drum(-32,-16,18) + drum(-15,1,15)+drum(16,1,16) + drum(52,8,20) +
+                 cym(-63,-28,18)+cym(-55,26,20)+cym(62,36,23);
+             }},
+  edrums:   {nome:"E-drums", dim:"140×120", cat:"Ritmica", sub:"Batteria e percussioni", w:140,d:120,
+             draw:function(){
+               function pad(x,y,r){ return circ(x,y,r,'ic fGrey')+circ(x,y,r-3.5,'ic thin fBlack'); }
+               return circ(0,48,15,'ic fBlack')+bar(0,14,24,20,'ic fBlack',4)+
+                 pad(-40,-6,12)+pad(-14,-14,12)+pad(14,-14,12)+pad(40,-6,12)+
+                 pad(-52,-34,13)+pad(0,-42,13)+pad(52,-34,13)+
+                 bar(-58,12,16,12,'ic fRed',2); }},
+  drumshield:{nome:"Drum shield", dim:"~250", cat:"Ritmica", sub:"Batteria e percussioni", w:250,d:110,
+             draw:function(){ var s='<polyline class="plex" points="-125,52 -125,-22 -62,-52 62,-52 125,-22 125,52"/>';
+               [[-125,-22],[-62,-52],[62,-52],[125,-22]].forEach(function(p){ s+=circ(p[0],p[1],2.5,'ic fill'); });
+               return s; }},
+  rullante: {nome:"Rullante su stand", dim:"Ø36", cat:"Ritmica", sub:"Batteria e percussioni", w:46,d:46,
+             draw:function(){ return drum(0,0,18)+circ(0,21,2.5,'ic fill')+circ(-18,-11,2.5,'ic fill')+circ(18,-11,2.5,'ic fill'); }},
+  percussioni:{nome:"Congas + bongos", dim:"165×75", cat:"Ritmica", sub:"Batteria e percussioni", w:165,d:75,
+             draw:function(){
+               function conga(x,y,r){ return circ(x,y,r,'ic fWood')+circ(x,y,r-3.5,'ic thin fHead'); }
+               return conga(-58,2,17)+conga(-24,2,16)+conga(10,-4,11)+conga(30,-4,9.5)+
+                 bar(62,4,44,34,'ic fWoodL',4)+bar(62,4,32,22,'ic thin',2); }},
+  timpani:  {nome:"Timpani ×4", dim:"Ø81/74/66/58", cat:"Ritmica", sub:"Batteria e percussioni", w:280,d:185,
+             draw:function(){
+               var s=circ(0,-85,15,'ic fBlack');
+               [[-95,-9,40],[-36,34,37],[36,34,33],[95,-9,29]].forEach(function(t){
+                 s+=tdrum(t[0],t[1],t[2]);
+               });
+               return s; }},
+  grancassa:{nome:"Gran cassa sinfonica", dim:"Ø100", cat:"Ritmica", sub:"Batteria e percussioni", w:110,d:55,
+             draw:function(){ var s=bar(0,0,100,38,'ic fWoodD',19)+lin(-38,-19,-38,19,'sil')+lin(38,-19,38,19,'sil');
+               [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(function(c){ s+=circ(c[0]*44,c[1]*23,3,'ic fill'); });
+               return s; }},
+  piatto:   {nome:"Piatto sospeso", dim:"Ø45", cat:"Ritmica", sub:"Batteria e percussioni", w:55,d:55,
+             draw:function(){ return cym(0,0,23)+lin(0,8,0,22,'ic thin')+lin(-7,-4,-19,-11,'ic thin')+lin(7,-4,19,-11,'ic thin'); }},
+  piatticoppia:{nome:"Piatti a coppia", dim:"Ø50", cat:"Ritmica", sub:"Batteria e percussioni", w:62,d:50,
+             draw:function(){ return bar(0,2,56,42,'ic fWoodL',4)+circ(-9,0,16,'ic thin fCym')+circ(9,0,16,'ic thin fCym')+circ(-9,0,2,'ic fill')+circ(9,0,2,'ic fill'); }},
+  campane:  {nome:"Campane tubolari", dim:"~100×35", cat:"Ritmica", sub:"Batteria e percussioni", w:105,d:40,
+             draw:function(){ var s=bar(0,0,100,32,'ic fGrey',3);
+               for(var i=0;i<9;i++){ s+=circ(-40+i*10, i%2?6:-6, 4,'ic thin fBrass'); }
+               return s; }},
+  tamtam:   {nome:"Tam-tam (gong)", dim:"Ø95", cat:"Ritmica", sub:"Batteria e percussioni", w:115,d:45,
+             draw:function(){ return circ(-54,0,4,'ic fill')+circ(54,0,4,'ic fill')+lin(-54,-2,54,-2,'ic thin')+
+               '<ellipse class="ic fCym" cx="0" cy="8" rx="46" ry="9"/><ellipse class="ic thin" fill="none" cx="0" cy="8" rx="20" ry="4"/>'; }},
+  glockenspiel:{nome:"Glockenspiel", dim:"62×42", cat:"Ritmica", sub:"Batteria e percussioni", w:65,d:48,
+             draw:function(){ var s=bar(0,0,62,42,'ic fBlack',3)+'<path class="ic thin fSilver" d="M -25,-15 L 25,-9 L 25,9 L -25,15 Z"/>';
+               for(var i=1;i<8;i++){ var x=-25+i*6.25, t=(x+25)/50, dy=15-6*t; s+=lin(x,-dy,x,dy,'ic thin'); }
+               return s; }},
+  xilofono: {nome:"Xilofono", dim:"148×80", cat:"Ritmica", sub:"Batteria e percussioni", w:150,d:85,
+             draw:function(){ return tavBarre(72,39,27,10,'fWood','fWoodL'); }},
+  vibrafono:{nome:"Vibrafono", dim:"152×90", cat:"Ritmica", sub:"Batteria e percussioni", w:155,d:95,
+             draw:function(){ return bar(0,0,150,88,'ic fGrey',5)+tavBarreInner(65,30,17,11,'fSilver')+
+               bar(0,40,28,7,'ic fill',2)+circ(-70,40,3.5,'ic fill')+circ(70,40,3.5,'ic fill')+circ(-70,-40,3.5,'ic fill')+circ(70,-40,3.5,'ic fill'); }},
+  marimba:  {nome:"Marimba 5 ottave", dim:"250×100", cat:"Ritmica", sub:"Batteria e percussioni", w:255,d:105,
+             draw:function(){ return tavBarre(125,50,32,13,'fWoodD','fWood'); }},
+  /* --- ritmica: ampli e backline --- */
+  comboamp: {nome:"Combo chitarra", dim:"64×26", cat:"Ritmica", sub:"Ampli e backline", w:66,d:28,
+             draw:function(){ return bar(0,0,64,26,'ic fMon',3)+bar(0,3,24,6,'ic fill',3)+kn(-15,-8.5,6,6); }},
+  stack:    {nome:"Stack testata + 4×12", dim:"77×37", cat:"Ritmica", sub:"Ampli e backline", w:78,d:38,
+             draw:function(){ return bar(0,0,77,37,'ic fGrey',3)+bar(0,1,66,26,'ic fMon',3)+kn(-21,-6,7,7); }},
+  bassamp:  {nome:"Ampli basso 8×10", dim:"66×41", cat:"Ritmica", sub:"Ampli e backline", w:68,d:43,
+             draw:function(){ return bar(0,0,66,41,'ic fMon',3)+bar(0,2,52,28,'ic thin fGrey',2)+kn(-15,-13,5,7.5); }},
+  keysamp:  {nome:"Ampli keys", dim:"55×36", cat:"Ritmica", sub:"Ampli e backline", w:57,d:38,
+             draw:function(){ return bar(0,0,55,36,'ic fMon',3)+bar(0,3,40,22,'ic thin fGrey',2)+kn(-12,-11,4,8); }},
+  leslie:   {nome:"Leslie", dim:"74×52", cat:"Ritmica", sub:"Ampli e backline", w:76,d:54,
+             draw:function(){ return bar(0,0,74,52,'ic fWoodL',4)+circ(0,3,17,'ic thin fWood')+
+               lin(-30,-18,-13,-18,'ic thin')+lin(13,-18,30,-18,'ic thin'); }},
+  /* --- ritmica: tastiere --- */
+  grancoda: {nome:"Piano gran coda", dim:"156×274", cat:"Ritmica", sub:"Tastiere", w:156,d:274,
+             draw:function(it){ return pianoCoda(it); }},
+  mezzacoda:{nome:"Piano mezzacoda", dim:"150×190", cat:"Ritmica", sub:"Tastiere", w:150,d:190,
+             draw:function(it){ return pianoCoda(it); }},
+  pianoverticale:{nome:"Piano verticale", dim:"150×62", cat:"Ritmica", sub:"Tastiere", w:152,d:64,
+             draw:function(){ return bar(0,-13,150,36,'ic fBlack',3)+bar(0,16,146,22,'ic',2)+bar(0,9.5,146,5,'ic fill',1)+
+               circ(-62,-27,2.5,'dotS')+circ(62,-27,2.5,'dotS'); }},
+  stagepiano:{nome:"Stage piano 88 tasti", dim:"135×38", cat:"Ritmica", sub:"Tastiere", w:138,d:42,
+             draw:function(){ var s=bar(0,0,135,38,'ic fBlack',3)+bar(0,-12,125,9,'ic fGrey',2)+kn(-52,-12,8,10)+
+               bar(0,5.5,125,19,'ic thin',2)+bar(0,-1.5,125,5,'ic fill',1);
+               for(var i=1;i<10;i++){ s+=lin(-62.5+i*12.5,2,-62.5+i*12.5,15,'ic thin'); }
+               return s; }},
+  doppiatastiera:{nome:"Doppia tastiera", dim:"120×75", cat:"Ritmica", sub:"Tastiere", w:125,d:78,
+             draw:function(){ return lin(-40,6,-46,-12,'ic thin')+lin(40,6,46,-12,'ic thin')+
+               bar(0,-24,105,28,'ic fBlack',3)+bar(0,-29,95,10,'ic thin',1)+bar(0,-33,95,4,'ic fill',1)+
+               bar(0,20,120,32,'ic fBlack',3)+bar(0,14,110,11,'ic thin',1)+bar(0,9.5,110,4,'ic fill',1); }},
+  celesta:  {nome:"Celesta", dim:"105×62", cat:"Ritmica", sub:"Tastiere", w:107,d:64,
+             draw:function(){ return bar(0,-13,105,34,'ic fWoodD',3)+bar(0,13,100,22,'ic',2)+bar(0,6.5,100,4.5,'ic fill',1); }},
+  panchetta:{nome:"Panchetta piano", dim:"75×35", cat:"Ritmica", sub:"Tastiere", w:75,d:35,
+             draw:function(){ var s=bar(0,0,73,33,'ic fBlack',6);
+               [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(function(c){ s+=circ(c[0]*30,c[1]*10.5,1.8,'dotS'); });
+               return s; }},
+  /* --- ritmica: chitarre e DJ --- */
+  gtstand:  {nome:"Chitarra elettrica su stand", dim:"~40×100", cat:"Ritmica", sub:"Chitarre e DJ", w:42,d:100,
+             draw:function(){ return bar(0,-43,9,14,'ic fBlack',2)+bar(0,-15,5,44,'ic thin fWoodD',1)+
+               '<path class="ic fRed" d="M 0,7 C 12,5 19,12 16,22 C 14,29 17,32 15,38 C 12,47 5,49 0,49 C -5,49 -12,47 -15,38 C -17,32 -14,29 -16,22 C -19,12 -12,5 0,7 Z"/>'+
+               bar(0,18,12,3.5,'ic thin',1)+bar(0,27,12,3.5,'ic thin',1)+bar(0,38,11,3,'ic fill',1); }},
+  gtacustica:{nome:"Chitarra acustica su stand", dim:"~42×105", cat:"Ritmica", sub:"Chitarre e DJ", w:46,d:110,
+             draw:function(){ return bar(0,-45,9,14,'ic fBlack',2)+bar(0,-17,5,44,'ic thin fWoodD',1)+
+               '<path class="ic fWoodL" d="M 0,5 C 11,5 16,11 15,19 C 14,25 11,27 12,32 C 14,39 19,42 18,49 C 16,57 7,59 0,59 C -7,59 -16,57 -18,49 C -19,42 -14,39 -12,32 C -11,27 -14,25 -15,19 C -16,11 -11,5 0,5 Z"/>'+
+               circ(0,24,7,'ic thin fBlack')+bar(0,44,16,4,'ic fill',1); }},
+  bassstand:{nome:"Basso su stand", dim:"~42×118", cat:"Ritmica", sub:"Chitarre e DJ", w:46,d:120,
+             draw:function(){ return bar(0,-52,9,15,'ic fBlack',2)+bar(0,-21,5,50,'ic thin fWoodD',1)+
+               '<path class="ic fWood" d="M 0,11 C 11,9 17,16 15,25 C 13,31 16,34 14,40 C 12,48 5,50 0,50 C -5,50 -12,48 -14,40 C -16,34 -13,31 -15,25 C -17,16 -11,9 0,11 Z"/>'+
+               bar(0,24,11,3.5,'ic thin',1)+bar(0,33,11,3.5,'ic thin',1)+bar(0,42,10,3,'ic fill',1); }},
+  djset:    {nome:"DJ set su tavolo", dim:"180×60", cat:"Ritmica", sub:"Chitarre e DJ", w:182,d:64, defLabel:"DJ",
+             draw:function(){ return bar(0,0,180,60,'ic fBlack',4)+
+               bar(-58,0,36,32,'ic fGrey',3)+circ(-58,2,11,'ic thin fSilver')+
+               bar(58,0,36,32,'ic fGrey',3)+circ(58,2,11,'ic thin fSilver')+
+               bar(0,0,30,34,'ic fGrey',2)+kn(-7,-9,3,7)+kn(-7,-1,3,7)+lin(-7,8,-7,13,'sil')+lin(0,8,0,13,'sil')+lin(7,8,7,13,'sil'); }},
+  /* --- archi --- */
+  vlnpost:  {nome:"Violino", dim:"postazione", cat:"Archi", w:100,d:105,
+             draw:function(){ return postaz(gVln(0.45)); }},
+  violapost:{nome:"Viola", dim:"postazione", cat:"Archi", w:100,d:105,
+             draw:function(){ return postaz(gVln(0.53)); }},
+  violoncello:{nome:"Violoncello (con sedia)", dim:"corpo 76", cat:"Archi", w:85,d:130,
+             draw:function(){ return bar(0,-36,44,44,'ic fBlack',9)+bar(0,-60,44,8,'ic fill',4)+
+               '<g transform="translate(0,22) rotate(-24)">'+violino(1.0,'fWood')+'</g>'; }},
+  contrabbasso:{nome:"Contrabbasso (con sgabello)", dim:"corpo 112", cat:"Archi", w:115,d:135,
+             draw:function(){ return circ(-42,-42,16,'ic fBlack')+
+               '<g transform="translate(6,14) rotate(-12)">'+violino(1.45,'fWoodD')+'</g>'; }},
+  arpa:     {nome:"Arpa da concerto", dim:"55×120 +panca", cat:"Archi", w:75,d:140,
+             draw:function(){ return bar(0,-50,48,26,'ic fBlack',5)+
+               '<path class="ic fWoodL" d="M -27,-22 C -30,-6 -24,22 -17,40 C -11,52 -6,58 0,60 C 6,58 11,52 17,40 C 24,22 30,-6 27,-22 C 16,-32 -16,-32 -27,-22 Z"/>'+
+               lin(-16,-18,-3,50,'sil')+lin(-5,-21,0,54,'sil')+lin(5,-21,3,53,'sil')+lin(16,-18,6,49,'sil')+
+               circ(0,62,4.5,'ic fBrass'); }},
+  /* --- voci / microfoni --- */
+  astamic:  {nome:"Asta microfono", dim:"base Ø32", cat:"Voci e microfoni", w:36,d:36,
+             draw:function(){ return circ(0,0,16,'ic fBlack')+circ(0,0,11,'ic thin fBlack')+circ(0,0,4.5,'dotS'); }},
+  giraffa:  {nome:"Asta giraffa", dim:"~60", cat:"Voci e microfoni", w:62,d:62,
+             draw:function(){ return lin(-12,14,-27,22,'ic thin')+lin(-12,14,-3,27,'ic thin')+lin(-12,14,-17,-1,'ic thin')+
+               circ(-12,14,4,'ic fill')+lin(-12,14,20,-19,'ic')+
+               '<g transform="translate(24,-23) rotate(45)">'+bar(0,0,15,8,'ic fGrey',3)+'</g>'; }},
+  wireless: {nome:"Mic wireless", dim:"", cat:"Voci e microfoni", w:34,d:34, defLabel:"WL",
+             draw:function(){ return circ(0,0,13,'ic fBlack')+circ(0,0,5,'dotS')+
+               '<path class="ic thin" fill="none" d="M 11,-11 A 16 16 0 0 1 15,-6"/><path class="ic thin" fill="none" d="M 14,-15 A 21 21 0 0 1 19,-9"/>'; }},
+  headset:  {nome:"Headset", dim:"", cat:"Voci e microfoni", w:32,d:32, defLabel:"HS",
+             draw:function(){ return '<path class="ic" fill="none" d="M -10,5 A 11 11 0 1 1 10,5"/>'+lin(10,5,13,9,'ic thin')+circ(13,9,3.5,'ic fill'); }},
+  podiosp:  {nome:"Podio speaker", dim:"60×45", cat:"Voci e microfoni", w:62,d:48,
+             draw:function(){ return '<path class="ic fWoodL" d="M -30,22 L 30,22 L 21,-22 L -21,-22 Z"/>'+
+               '<path class="ic thin" fill="none" d="M -24,16 L 24,16 L 17,-16 L -17,-16 Z"/>'+
+               circ(0,-8,2.5,'ic fill')+lin(0,-8,0,0,'ic thin'); }},
+  /* --- monitoraggio --- */
+  wedge:    {nome:"Wedge monitor", dim:"58×50", cat:"Monitoraggio", w:60,d:52, defLabel:"MIX 1",
+             draw:function(){ return '<path class="ic mon fMon" d="M -29,25 L 29,25 L 21,-25 L -21,-25 Z"/>'+
+               '<path class="sil" d="M -23,19 L 23,19 L 17,-19 L -17,-19 Z"/>'+
+               circ(0,5,11,'sil')+bar(0,-11,14,8,'sil',1); }},
+  sidefill: {nome:"Side fill", dim:"58×68", cat:"Monitoraggio", w:60,d:70, defLabel:"SIDE",
+             draw:function(){ return bar(0,0,58,68,'ic mon fMon',3)+circ(0,14,14,'sil')+circ(0,14,5,'sil')+bar(0,-16,20,11,'sil',1); }},
+  drumfill: {nome:"Drum fill", dim:"62×62", cat:"Monitoraggio", w:64,d:64, defLabel:"DRUM FILL",
+             draw:function(){ return bar(0,0,62,62,'ic mon fMon',3)+circ(0,10,15,'sil')+bar(0,-16,18,10,'sil',1); }},
+  iem:      {nome:"IEM beltpack", dim:"simbolo", cat:"Monitoraggio", w:24,d:18, defLabel:"IEM",
+             draw:function(){ return bar(0,1,18,13,'ic mon fMon',2)+lin(7,-5,13,-13,'ic mon')+circ(13,-13,2,'mon fill'); }},
+  iemant:   {nome:"Rack TX in-ear", dim:"rack+antenne", cat:"Monitoraggio", w:60,d:46, defLabel:"TX IEM",
+             draw:function(){ return bar(0,4,46,28,'ic mon fMon',3)+
+               lin(-18,-10,-28,-22,'ic mon')+circ(-28,-22,2.5,'mon fill')+
+               lin(18,-10,28,-22,'ic mon')+circ(28,-22,2.5,'mon fill')+
+               circ(-14,8,2,'dotS')+circ(-6,8,2,'dotS'); }},
+  /* --- tecnica --- */
+  dimono:   {nome:"DI mono", dim:"simbolo", cat:"Tecnica", w:28,d:28, defLabel:"DI",
+             draw:function(){ return '<path class="ic tec" fill="#fff" d="M 0,-12 L 12,10 L -12,10 Z"/>'+circ(0,3,2.2,'tec fill'); }},
+  distereo: {nome:"DI stereo", dim:"simbolo", cat:"Tecnica", w:48,d:28, defLabel:"DI st",
+             draw:function(){ return '<path class="ic tec" fill="#fff" d="M -11,-12 L 1,10 L -23,10 Z"/>'+
+               '<path class="ic tec" fill="#fff" d="M 11,-12 L 23,10 L -1,10 Z"/>'; }},
+  stagebox: {nome:"Stagebox", dim:"~55×40", cat:"Tecnica", w:58,d:46, defLabel:"STAGEBOX",
+             draw:function(){ var s=bar(0,0,54,40,'ic tec fGrey',3);
+               for(var r=0;r<2;r++)for(var c=0;c<4;c++){ s+=circ(-15+c*10,-5+r*11,2,'tec fill'); }
+               return s; }},
+  corrente: {nome:"Corrente 220V", dim:"simbolo", cat:"Tecnica", w:30,d:30, defLabel:"220V",
+             draw:function(){ return bar(0,0,27,27,'ic pow',5)+'<path class="pow fill" d="M 3,-11 L -7,2 L -1,2 L -3,11 L 7,-2 L 1,-2 Z"/>'; }},
+  ciabatta: {nome:"Ciabatta", dim:"simbolo", cat:"Tecnica", w:44,d:17,
+             draw:function(){ return bar(0,0,40,13,'ic pow',3)+circ(-13.5,0,2.2,'pow fill')+circ(-4.5,0,2.2,'pow fill')+circ(4.5,0,2.2,'pow fill')+circ(13.5,0,2.2,'pow fill'); }},
+  foh:      {nome:"Postazione FOH", dim:"zona 2×1,2 m", cat:"Tecnica", w:200,d:120, resizable:true, z:1, defLabel:"FOH",
+             draw:function(it){ var s=rectSvg(it.w,it.d,'ic dash',3)+bar(0,10,96,44,'ic tec fGrey',3);
+               for(var i=0;i<6;i++){ s+=lin(-30+i*12,2,-30+i*12,26,'sil'); }
+               s+=bar(-26,-32,28,17,'ic thin fBlack',2)+bar(8,-32,28,17,'ic thin fBlack',2);
+               return s; }},
+  monmix:   {nome:"Mixer monitor", dim:"~90×60", cat:"Tecnica", w:95,d:70, defLabel:"MON MIX",
+             draw:function(){ var s=bar(0,5,90,52,'ic tec fGrey',3);
+               for(var i=0;i<6;i++){ s+=lin(-32+i*13,-3,-32+i*13,22,'sil'); }
+               return s+bar(0,-17,80,8,'ic thin fBlack',2); }},
+  laptop:   {nome:"Laptop / interfaccia", dim:"~38×28", cat:"Tecnica", w:42,d:32, defLabel:"PC",
+             draw:function(){ return bar(0,-8,36,14,'ic fBlack',2)+bar(0,7,36,14,'ic fGrey',2)+bar(0,10,11,5,'ic thin',1); }}
+};
+var CAT_ORDER = ["Pedane e strutture","Ottoni","Legni","Ritmica","Archi","Voci e microfoni","Monitoraggio","Tecnica"];
+
+/* ============ STATO ============ */
+var LS_KEY = "stageplot_v1";
+var state = { titolo:"", stage:{w:1200,d:800}, items:[] };
+var sel = null, nextId = 1, addCascade = 0;
+var vb = {x:-100,y:-150,w:1500,h:1100};
+var svg = document.getElementById("svg");
+
+function uid(){ return "i"+(nextId++); }
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
+function load(){
+  try{
+    var raw = localStorage.getItem(LS_KEY);
+    if(raw){ state = JSON.parse(raw);
+      state.items.forEach(function(it){ var n=parseInt(it.id.slice(1),10); if(n>=nextId) nextId=n+1; });
+    }
+  }catch(e){}
+}
+
+/* ============ RENDER ============ */
+function gridMarkup(){
+  var s='<g class="grid">', W=state.stage.w, D=state.stage.d, x, y;
+  for(x=50; x<W; x+=50){ s+='<line class="'+(x%100===0?'m':'')+'" x1="'+x+'" y1="0" x2="'+x+'" y2="'+D+'"/>'; }
+  for(y=50; y<D; y+=50){ s+='<line class="'+(y%100===0?'m':'')+'" x1="0" y1="'+y+'" x2="'+W+'" y2="'+y+'"/>'; }
+  return s+'</g>';
+}
+function itemMarkup(it){
+  var t = TYPES[it.type]; if(!t) return '';
+  var hw = Math.max(it.w,70)/2 + 8, hd = Math.max(it.d,30)/2 + 8;
+  var s = '<g class="item'+(sel===it.id?' selected':'')+'" data-id="'+it.id+'" transform="translate('+it.x+' '+it.y+')">';
+  s += '<g transform="rotate('+(it.rot||0)+')">';
+  s += '<rect class="hit" x="'+(-hw)+'" y="'+(-hd)+'" width="'+(2*hw)+'" height="'+(2*hd)+'"/>';
+  s += t.draw(it);
+  if(t.riser){ s += '<text class="lbl sub" y="5">'+(it.w/100)+'×'+(it.d/100)+' m · h'+it.h+'</text>'; }
+  s += '</g>';
+  if(it.label){ s += '<text class="lbl" y="'+(hd+16)+'">'+esc(it.label)+'</text>'; }
+  s += '</g>';
+  return s;
+}
+function esc(x){ return String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function sceneMarkup(){
+  var W=state.stage.w, D=state.stage.d;
+  var s = '<rect class="stage-floor" x="0" y="0" width="'+W+'" height="'+D+'"/>' + gridMarkup();
+  s += '<line class="cl" x1="'+(W/2)+'" y1="0" x2="'+(W/2)+'" y2="'+D+'"/>';
+  s += '<text class="zone-lbl" style="font-size:12px" x="'+(W/2+8)+'" y="16">CL</text>';
+  s += '<text class="zone-lbl" x="'+(W/2)+'" y="-22" text-anchor="middle">FONDO PALCO</text>';
+  s += '<text class="zone-lbl" x="'+(W/2)+'" y="'+(D+38)+'" text-anchor="middle">PUBBLICO</text>';
+  s += '<text class="zone-lbl" x="-16" y="'+(D/2)+'" text-anchor="end">DX palco</text>';
+  s += '<text class="zone-lbl" x="'+(W+16)+'" y="'+(D/2)+'">SX palco</text>';
+  var sorted = state.items.slice().sort(function(a,b){
+    return (TYPES[a.type].z||2) - (TYPES[b.type].z||2);
+  });
+  sorted.forEach(function(it){ s += itemMarkup(it); });
+  return s;
+}
+function render(){
+  svg.setAttribute("viewBox", vb.x+" "+vb.y+" "+vb.w+" "+vb.h);
+  svg.innerHTML = DEFS + sceneMarkup();
+  renderProps();
+  var ppm = svg.clientWidth / vb.w * 100;
+  document.getElementById("scaleInfo").textContent =
+    "palco "+(state.stage.w/100)+"×"+(state.stage.d/100)+" m · zoom "+ppm.toFixed(0)+" px/m";
+}
+
+/* ============ PANNELLO PROPRIETÀ ============ */
+function getSel(){ return state.items.find(function(i){ return i.id===sel; }) || null; }
+function renderProps(){
+  document.getElementById("stW").value = state.stage.w/100;
+  document.getElementById("stD").value = state.stage.d/100;
+  var it = getSel(), box = document.getElementById("selProps");
+  document.getElementById("noSel").hidden = !!it;
+  box.hidden = !it;
+  if(!it) return;
+  var t = TYPES[it.type];
+  document.getElementById("selNome").textContent = t.nome;
+  document.getElementById("pLabel").value = it.label||"";
+  document.getElementById("pRot").value = it.rot||0;
+  document.getElementById("pDims").style.display = t.resizable ? "flex" : "none";
+  document.getElementById("pHwrap").style.display = t.riser ? "" : "none";
+  if(t.resizable){
+    document.getElementById("pW").value = it.w;
+    document.getElementById("pD").value = it.d;
+    if(t.riser) document.getElementById("pH").value = it.h;
+  }
+}
+function mutSel(fn){ var it=getSel(); if(!it) return; fn(it); render(); save(); }
+document.getElementById("pLabel").addEventListener("input", function(){ mutSel(function(it){ it.label=document.getElementById("pLabel").value; }); });
+document.getElementById("pW").addEventListener("change", function(){ mutSel(function(it){ it.w=Math.max(10,+document.getElementById("pW").value||it.w); }); });
+document.getElementById("pD").addEventListener("change", function(){ mutSel(function(it){ it.d=Math.max(10,+document.getElementById("pD").value||it.d); }); });
+document.getElementById("pH").addEventListener("change", function(){ mutSel(function(it){ it.h=Math.max(0,+document.getElementById("pH").value||0); }); });
+document.getElementById("pRot").addEventListener("change", function(){ mutSel(function(it){ it.rot=+document.getElementById("pRot").value||0; }); });
+document.getElementById("pRotL").addEventListener("click", function(){ rotateSel(-15); });
+document.getElementById("pRotR").addEventListener("click", function(){ rotateSel(15); });
+document.getElementById("pDup").addEventListener("click", duplicateSel);
+document.getElementById("pDel").addEventListener("click", deleteSel);
+function rotateSel(deg){ mutSel(function(it){ it.rot=((it.rot||0)+deg)%360; }); }
+function duplicateSel(){
+  var it=getSel(); if(!it) return;
+  var c=JSON.parse(JSON.stringify(it)); c.id=uid(); c.x+=40; c.y+=40;
+  state.items.push(c); sel=c.id; render(); save();
+}
+function deleteSel(){
+  if(!sel) return;
+  state.items = state.items.filter(function(i){ return i.id!==sel; });
+  sel=null; render(); save();
+}
+
+/* ============ PALCO / SNAP ============ */
+document.getElementById("stW").addEventListener("change", function(){
+  state.stage.w = Math.round((+this.value||12)*100); render(); save();
+});
+document.getElementById("stD").addEventListener("change", function(){
+  state.stage.d = Math.round((+this.value||8)*100); render(); save();
+});
+document.getElementById("titolo").addEventListener("input", function(){ state.titolo=this.value; save(); });
+function snapVal(){ return +document.getElementById("snap").value; }
+function snap(v){ var s=snapVal(); return s? Math.round(v/s)*s : Math.round(v); }
+
+/* ============ CATALOGO (UI con anteprime) ============ */
+function miniSvg(k, over){
+  var t=TYPES[k];
+  var it={type:k, w:(over&&over.w)||t.w, d:(over&&over.d)||t.d, h:(over&&over.h)||t.h||40};
+  var ext=Math.max(it.w,it.d)+26;
+  return '<svg class="mini" viewBox="'+(-ext/2)+' '+(-ext/2)+' '+ext+' '+ext+'" width="32" height="32" aria-hidden="true">'+DEFS+t.draw(it)+'</svg>';
+}
+(function buildCatalog(){
+  var el = document.getElementById("catalog"), cats={};
+  CAT_ORDER.forEach(function(c){ cats[c]=[]; });
+  Object.keys(TYPES).forEach(function(k){ cats[TYPES[k].cat].push(k); });
+  function makeBtn(k, nome, over){
+    var b=document.createElement("button");
+    b.innerHTML = miniSvg(k, over)+'<span>'+esc(nome)+(TYPES[k].dim?'<small>'+esc(TYPES[k].dim)+'</small>':'')+'</span>';
+    b.addEventListener("click", function(){ addItem(k, over?JSON.parse(JSON.stringify(over)):undefined); });
+    return b;
+  }
+  CAT_ORDER.forEach(function(c){
+    var h=document.createElement("h3"); h.textContent=c; el.appendChild(h);
+    if(c==="Pedane e strutture"){
+      [["2×1 m",200,100],["1×1 m",100,100],["2×0,5 m",200,50]].forEach(function(p){
+        var b=document.createElement("button");
+        b.innerHTML = miniSvg("pedana",{w:p[1],d:p[2]})+'<span>Pedana '+p[0]+'</span>';
+        b.addEventListener("click", function(){ addItem("pedana",{w:p[1],d:p[2]}); });
+        el.appendChild(b);
+      });
+    }
+    var lastSub=null;
+    cats[c].forEach(function(k){
+      if(k==="pedana") return;
+      var sub=TYPES[k].sub||null;
+      if(sub && sub!==lastSub){ var h4=document.createElement("h4"); h4.textContent=sub; el.appendChild(h4); }
+      lastSub=sub;
+      el.appendChild(makeBtn(k, TYPES[k].nome));
+    });
+  });
+})();
+function addItem(type, over){
+  var t=TYPES[type];
+  var it={ id:uid(), type:type, x:snap(vb.x+vb.w/2+addCascade), y:snap(vb.y+vb.h/2+addCascade),
+           rot:0, w:t.w, d:t.d, label:t.defLabel||"" };
+  if(t.riser) it.h=t.h||40;
+  if(over) Object.keys(over).forEach(function(k){ it[k]=over[k]; });
+  addCascade=(addCascade+25)%150;
+  state.items.push(it); sel=it.id; render(); save();
+  return it;
+}
+
+/* ============ INTERAZIONE (drag / pan / zoom) ============ */
+function svgPoint(e){
+  var p=svg.createSVGPoint(); p.x=e.clientX; p.y=e.clientY;
+  return p.matrixTransform(svg.getScreenCTM().inverse());
+}
+var drag=null;
+svg.addEventListener("pointerdown", function(e){
+  var g = e.target.closest ? e.target.closest(".item") : null;
+  var sp = svgPoint(e);
+  if(g){
+    sel = g.getAttribute("data-id");
+    var it = getSel();
+    drag = {mode:"item", dx:sp.x-it.x, dy:sp.y-it.y, moved:false};
+    render();
+  } else {
+    drag = {mode:"pan", px:e.clientX, py:e.clientY, vx:vb.x, vy:vb.y};
+    svg.classList.add("dragging");
+  }
+  svg.setPointerCapture(e.pointerId);
+});
+svg.addEventListener("pointermove", function(e){
+  if(!drag) return;
+  if(drag.mode==="item"){
+    var it=getSel(); if(!it) return;
+    var sp=svgPoint(e);
+    it.x=snap(sp.x-drag.dx); it.y=snap(sp.y-drag.dy); drag.moved=true;
+    var g=svg.querySelector('[data-id="'+it.id+'"]');
+    if(g) g.setAttribute("transform","translate("+it.x+" "+it.y+")");
+  } else {
+    var kx=vb.w/svg.clientWidth, ky=vb.h/svg.clientHeight;
+    vb.x = drag.vx-(e.clientX-drag.px)*kx;
+    vb.y = drag.vy-(e.clientY-drag.py)*ky;
+    svg.setAttribute("viewBox", vb.x+" "+vb.y+" "+vb.w+" "+vb.h);
+  }
+});
+svg.addEventListener("pointerup", function(e){
+  if(drag && drag.mode==="item"){ render(); save(); }
+  if(drag && drag.mode==="pan" && Math.abs(e.clientX-drag.px)<4 && Math.abs(e.clientY-drag.py)<4){
+    sel=null; render();  /* click sullo sfondo = deseleziona */
+  }
+  svg.classList.remove("dragging");
+  drag=null;
+});
+svg.addEventListener("wheel", function(e){
+  e.preventDefault();
+  var sp=svgPoint(e), f = e.deltaY>0 ? 1.12 : 0.89;
+  if(vb.w*f<300 || vb.w*f>12000) return;
+  vb.x = sp.x-(sp.x-vb.x)*f; vb.y = sp.y-(sp.y-vb.y)*f; vb.w*=f; vb.h*=f;
+  svg.setAttribute("viewBox", vb.x+" "+vb.y+" "+vb.w+" "+vb.h);
+}, {passive:false});
+function fit(){
+  var m=180, W=state.stage.w+2*m, D=state.stage.d+2*m;
+  var ar = svg.clientWidth/svg.clientHeight;
+  if(W/D > ar){ vb={x:-m, y:-m-(W/ar-D-m)/2, w:W, h:W/ar}; }
+  else { vb={x:-m-(D*ar-W-m)/2, y:-m, w:D*ar, h:D}; }
+  render();
+}
+document.getElementById("bFit").addEventListener("click", fit);
+
+/* ============ TASTIERA ============ */
+document.addEventListener("keydown", function(e){
+  var modal=document.getElementById("orchModal");
+  if(!modal.hidden && e.key==="Escape"){ modal.hidden=true; return; }
+  if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+  var it=getSel(), step = e.shiftKey?25:5;
+  if(e.key==="Escape"){ sel=null; render(); }
+  if(!it) return;
+  if(e.key==="Backspace"||e.key==="Delete"){ e.preventDefault(); deleteSel(); }
+  else if(e.key==="r"){ rotateSel(15); }
+  else if(e.key==="R"){ rotateSel(-15); }
+  else if(e.key==="d"||e.key==="D"){ duplicateSel(); }
+  else if(e.key.indexOf("Arrow")===0){
+    e.preventDefault();
+    if(e.key==="ArrowLeft") it.x-=step; if(e.key==="ArrowRight") it.x+=step;
+    if(e.key==="ArrowUp") it.y-=step; if(e.key==="ArrowDown") it.y+=step;
+    render(); save();
+  }
+});
+
+/* ============ GENERATORE ORGANICO ORCHESTRA ============ */
+/* Disposizione standard (direttore fronte-centro, archi ad arco, legni/ottoni in file, percussioni in fondo).
+   Spaziature reali: ~100 cm tra leggii in fila, ~125 cm tra le file. */
+var ORCH_DEF = [
+  {id:"v1", nome:"Violini I",   def:12, type:"vlnpost",     arc:[-82,-36], sp:100},
+  {id:"v2", nome:"Violini II",  def:10, type:"vlnpost",     arc:[-36,-4],  sp:100},
+  {id:"vle",nome:"Viole",       def:8,  type:"violapost",   arc:[4,36],    sp:100},
+  {id:"vc", nome:"Violoncelli", def:6,  type:"violoncello", arc:[38,72],   sp:120},
+  {id:"cb", nome:"Contrabbassi",def:4,  type:"contrabbasso",arc:[48,82],   sp:145, rowStart:2},
+  {id:"fl", nome:"Flauti",      def:2,  type:"flauto",      row:0, slot:0},
+  {id:"ob", nome:"Oboi",        def:2,  type:"oboe",        row:0, slot:1},
+  {id:"cl", nome:"Clarinetti",  def:2,  type:"clarinetto",  row:1, slot:0},
+  {id:"fg", nome:"Fagotti",     def:2,  type:"fagotto",     row:1, slot:1},
+  {id:"cor",nome:"Corni",       def:4,  type:"corno",       row:2, slot:0},
+  {id:"tr", nome:"Trombe",      def:3,  type:"tromba",      row:2, slot:1},
+  {id:"tbn",nome:"Tromboni",    def:3,  type:"trombone",    row:2, slot:2},
+  {id:"tba",nome:"Tuba",        def:1,  type:"tuba",        row:2, slot:3},
+  {id:"arp",nome:"Arpa",        def:1,  type:"arpa",        spot:{a:-58, f:0.82}},
+  {id:"pf", nome:"Pianoforte",  def:0,  type:"grancoda",    spot:{a:-73, f:1.0}},
+  {id:"cel",nome:"Celesta",     def:0,  type:"celesta",     spot:{a:-66, f:1.18}},
+  {id:"tim",nome:"Timpani (set 4)",def:1,type:"timpani",    back:0},
+  {id:"gc", nome:"Gran cassa",  def:1,  type:"grancassa",   back:1},
+  {id:"pia",nome:"Piatti",      def:1,  type:"piatticoppia",back:2},
+  {id:"rul",nome:"Rullante",    def:1,  type:"rullante",    back:3},
+  {id:"cmp",nome:"Campane tubolari",def:0,type:"campane",   back:4},
+  {id:"tam",nome:"Tam-tam",     def:0,  type:"tamtam",      back:5}
+];
+
+function genOrchestra(counts, fitStage, clearFirst){
+  var R0=250, DR=125, out=[];   /* posizioni relative al podio (0,0); -y = verso il fondo */
+  function rad(g){ return g*Math.PI/180; }
+  function rotTo(x,y){ return Math.atan2(x,-y)*180/Math.PI; }  /* postazione rivolta al podio */
+
+  /* 1. archi ad arco, per sezione, file concentriche con passo costante (ordinato) */
+  var maxStringRow=0;
+  ORCH_DEF.forEach(function(sec){
+    var n=counts[sec.id]||0; if(!n || !sec.arc) return;
+    var a1=rad(sec.arc[0]), a2=rad(sec.arc[1]), mid=(a1+a2)/2, span=a2-a1;
+    var row=sec.rowStart||0, left=n, first=true;
+    while(left>0){
+      var r=R0+DR*row, cap=Math.max(1, Math.floor(span*r/sec.sp)+1), k=Math.min(left,cap);
+      var step=sec.sp/r, start=mid-step*(k-1)/2;
+      for(var i=0;i<k;i++){
+        var a=start+step*i, x=r*Math.sin(a), y=-r*Math.cos(a);
+        out.push({type:sec.type, x:x, y:y, rot:rotTo(x,y),
+          label:(first && i===Math.floor((k-1)/2)) ? sec.nome+" ("+n+")" : ""});
+      }
+      left-=k; row++; first=false;
+    }
+    maxStringRow=Math.max(maxStringRow,row);
+  });
+
+  /* 2. legni e ottoni: file diritte dietro gli archi, gruppi affiancati */
+  var windBase=R0+DR*Math.max(maxStringRow,2)+15, rows={}, maxWindRow=-1;
+  ORCH_DEF.forEach(function(sec){
+    var n=counts[sec.id]||0;
+    if(n && sec.row!=null){ (rows[sec.row]=rows[sec.row]||[]).push(sec); maxWindRow=Math.max(maxWindRow,sec.row); }
+  });
+  Object.keys(rows).forEach(function(ri){
+    ri=+ri;
+    var groups=rows[ri].sort(function(a,b){ return a.slot-b.slot; });
+    var sp=100, gap=70, seats=[], cur=0;
+    groups.forEach(function(g){
+      var n=counts[g.id];
+      for(var i=0;i<n;i++){ seats.push({g:g,i:i,n:n,x:cur}); cur+=sp; }
+      cur+=gap;
+    });
+    var tot=cur-sp-gap, y=-(windBase+DR*ri);
+    seats.forEach(function(s){
+      var x=s.x-tot/2;
+      out.push({type:s.g.type, x:x, y:y, rot:rotTo(x,y),
+        label: s.i===Math.floor((s.n-1)/2) ? s.g.nome+(s.n>1?" ("+s.n+")":"") : ""});
+    });
+  });
+
+  /* 3. percussioni: linea in fondo, centrata */
+  var backs=ORCH_DEF.filter(function(s){ return s.back!=null && (counts[s.id]||0)>0; })
+                    .sort(function(a,b){ return a.back-b.back; });
+  if(backs.length){
+    var maxD=0, totW=0;
+    backs.forEach(function(b){ maxD=Math.max(maxD,TYPES[b.type].d); totW+=TYPES[b.type].w; });
+    totW+=70*(backs.length-1);
+    var backY=-(windBase+DR*(maxWindRow+1)+25+maxD/2), cx=-totW/2;
+    backs.forEach(function(b){
+      var w=TYPES[b.type].w;
+      out.push({type:b.type, x:cx+w/2, y:backY, rot:0, label:b.nome});
+      cx+=w+70;
+    });
+  }
+
+  /* 4. arpa / pianoforte / celesta a sinistra */
+  ORCH_DEF.forEach(function(sec){
+    var n=counts[sec.id]||0; if(!n || !sec.spot) return;
+    for(var i=0;i<n;i++){
+      var r=windBase*sec.spot.f+i*130, a=rad(sec.spot.a);
+      var x=r*Math.sin(a), y=-r*Math.cos(a);
+      out.push({type:sec.type, x:x, y:y, rot:rotTo(x,y), label:sec.nome+(n>1?" "+(i+1):"")});
+    }
+  });
+
+  /* 5. podio + dimensionamento palco */
+  out.push({type:"podio", x:0, y:0, rot:0, label:""});
+  var minY=0, maxX=0;
+  out.forEach(function(o){ var t=TYPES[o.type];
+    minY=Math.min(minY, o.y-t.d/2-20); maxX=Math.max(maxX, Math.abs(o.x)+t.w/2+20); });
+  if(fitStage){
+    state.stage.w=Math.max(800, Math.ceil((2*maxX+160)/50)*50);
+    state.stage.d=Math.max(600, Math.ceil((-minY+150+60)/50)*50);
+  }
+  var C={x:state.stage.w/2, y:state.stage.d-150};
+  if(!fitStage && (C.y+minY<0 || C.x-maxX<0)){
+    alert("L'organico esce dal palco: allarga il palco o attiva «Adatta le dimensioni».");
+  }
+  if(clearFirst) state.items=[];
+  out.forEach(function(o){
+    var t=TYPES[o.type];
+    var it={id:uid(), type:o.type, x:Math.round(C.x+o.x), y:Math.round(C.y+o.y),
+            rot:Math.round(o.rot/5)*5, w:t.w, d:t.d, label:o.label||""};
+    if(t.riser) it.h=t.h||40;
+    state.items.push(it);
+  });
+  sel=null; save();
+}
+
+/* Modale organico */
+(function(){
+  var grid=document.getElementById("orchGrid");
+  grid.innerHTML=ORCH_DEF.map(function(s){
+    return '<label>'+esc(s.nome)+' <input type="number" min="0" max="40" id="orch_'+s.id+'" value="'+s.def+'"></label>';
+  }).join('');
+  var modal=document.getElementById("orchModal");
+  document.getElementById("bOrch").addEventListener("click", function(){ modal.hidden=false; });
+  document.getElementById("orchCancel").addEventListener("click", function(){ modal.hidden=true; });
+  modal.addEventListener("click", function(e){ if(e.target===modal) modal.hidden=true; });
+  document.getElementById("orchGo").addEventListener("click", function(){
+    var counts={}, tot=0;
+    ORCH_DEF.forEach(function(s){ counts[s.id]=Math.max(0,parseInt(document.getElementById("orch_"+s.id).value,10)||0); tot+=counts[s.id]; });
+    if(!tot){ alert("Tutte le sezioni sono a 0."); return; }
+    genOrchestra(counts, document.getElementById("orchFit").checked, document.getElementById("orchClear").checked);
+    modal.hidden=true; fit();
+  });
+})();
+
+/* ============ FILE: nuovo / json / png ============ */
+document.getElementById("bNew").addEventListener("click", function(){
+  if(!confirm("Nuovo stage plot? Quello attuale verrà cancellato (esporta prima il .json se ti serve).")) return;
+  state={titolo:"",stage:{w:1200,d:800},items:[]}; sel=null; save(); fit();
+  document.getElementById("titolo").value="";
+});
+document.getElementById("bJson").addEventListener("click", function(){
+  var blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  dl(URL.createObjectURL(blob), fileName()+".json");
+});
+document.getElementById("bImport").addEventListener("click", function(){ document.getElementById("fileImport").click(); });
+document.getElementById("fileImport").addEventListener("change", function(){
+  var f=this.files[0]; if(!f) return;
+  var fr=new FileReader();
+  fr.onload=function(){ try{
+      state=JSON.parse(fr.result); sel=null;
+      state.items.forEach(function(it){ var n=parseInt(it.id.slice(1),10); if(n>=nextId) nextId=n+1; });
+      document.getElementById("titolo").value=state.titolo||"";
+      save(); fit();
+    }catch(e){ alert("File non valido: "+e.message); } };
+  fr.readAsText(f); this.value="";
+});
+function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"stage-plot"; }
+function dl(href,name){ var a=document.createElement("a"); a.href=href; a.download=name; document.body.appendChild(a); a.click(); a.remove(); }
+
+document.getElementById("bPng").addEventListener("click", function(){
+  var keep=sel; sel=null;
+  var m=130, W=state.stage.w, D=state.stage.d;
+  var head = 70; /* spazio per titolo */
+  var inner = sceneMarkup(); sel=keep;
+  var css = document.querySelector("style").textContent;
+  var titolo = esc(state.titolo||"Stage plot");
+  var oggi = new Date().toLocaleDateString("it-IT");
+  var svgStr = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+(-m)+' '+(-m-head)+' '+(W+2*m)+' '+(D+2*m+head)+'">'+
+    '<style>'+css+'</style>'+DEFS+
+    '<rect x="'+(-m)+'" y="'+(-m-head)+'" width="'+(W+2*m)+'" height="'+(D+2*m+head)+'" fill="#ffffff"/>'+
+    '<text x="'+(-m+30)+'" y="'+(-m-head+46)+'" font-size="34" font-weight="700" fill="#111827">'+titolo+'</text>'+
+    '<text x="'+(W+m-30)+'" y="'+(-m-head+46)+'" font-size="20" fill="#6b7280" text-anchor="end">'+oggi+' · simonecastellan.com · griglia 0,5 m · palco '+(W/100)+'×'+(D/100)+' m</text>'+
+    inner+
+    '<line x1="0" y1="'+(D+m-40)+'" x2="100" y2="'+(D+m-40)+'" stroke="#111827" stroke-width="6"/>'+
+    '<text x="50" y="'+(D+m-52)+'" font-size="18" fill="#111827" text-anchor="middle">1 m</text>'+
+    '</svg>';
+  var img=new Image(), k=2;
+  img.onload=function(){
+    var c=document.createElement("canvas");
+    c.width=(W+2*m)*k; c.height=(D+2*m+head)*k;
+    var ctx=c.getContext("2d");
+    ctx.drawImage(img,0,0,c.width,c.height);
+    c.toBlob(function(b){ dl(URL.createObjectURL(b), fileName()+".png"); },"image/png");
+  };
+  img.onerror=function(){ alert("Export PNG fallito."); };
+  img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svgStr);
+  render();
+});
+
+/* ============ DEMO (?demo=1) ============ */
+function demo(){
+  state={titolo:"Demo — band + archi",stage:{w:1200,d:800},items:[]};
+  addItem("pedana",{x:600,y:170,w:300,d:200,h:60,label:"Drum riser"});
+  addItem("batteria",{x:600,y:160,label:""});
+  addItem("wedge",{x:600,y:320,label:"MIX 4"});
+  addItem("stack",{x:990,y:130,label:"GT amp"});
+  addItem("bassamp",{x:210,y:130,label:"Bass amp"});
+  addItem("grancoda",{x:170,y:430,rot:-30,label:"Piano"});
+  addItem("wedge",{x:300,y:560,rot:25,label:"MIX 3"});
+  addItem("astamic",{x:600,y:560,label:"Voce lead"});
+  addItem("wedge",{x:600,y:650,label:"MIX 1"});
+  addItem("gtacustica",{x:950,y:420,label:""});
+  addItem("astamic",{x:910,y:520,label:"Chitarra"});
+  addItem("wedge",{x:910,y:610,rot:-20,label:"MIX 2"});
+  addItem("violoncello",{x:430,y:420,rot:15,label:"Cello"});
+  addItem("dimono",{x:330,y:330,label:"DI piano"});
+  addItem("corrente",{x:1030,y:210});
+  addItem("corrente",{x:170,y:230});
+  addItem("stagebox",{x:1110,y:700});
+  sel=null;
+}
+
+/* ============ TAVOLA ICONE (?icone=1, per QA del catalogo) ============ */
+function gallery(){
+  var s='', y=60, rowH=0, margin=70, maxW=2700, curX=margin;
+  Object.keys(TYPES).forEach(function(k){
+    var t=TYPES[k]; if(k==="testo") return;
+    var it={type:k, w:t.w, d:t.d, h:t.h||40};
+    var cw=Math.max(t.w,110)+margin, ch=Math.max(t.d,90)+100;
+    if(curX+cw>maxW){ curX=margin; y+=rowH; rowH=0; }
+    s+='<g transform="translate('+(curX+cw/2)+' '+(y+Math.max(t.d,90)/2+20)+')">'+t.draw(it)+
+       '<text class="lbl" y="'+(Math.max(t.d,90)/2+30)+'">'+esc(t.nome)+'</text></g>';
+    curX+=cw; rowH=Math.max(rowH,ch);
+  });
+  var H=y+rowH+60;
+  svg.setAttribute("viewBox","0 0 "+maxW+" "+H);
+  svg.innerHTML='<rect x="0" y="0" width="'+maxW+'" height="'+H+'" fill="#fff"/>'+DEFS+s;
+}
+
+/* ============ AVVIO ============ */
+load();
+if(location.search.indexOf("demo=1")>-1) demo();
+if(location.search.indexOf("orch=1")>-1){     /* QA: organico standard completo */
+  var c={}; ORCH_DEF.forEach(function(s){ c[s.id]=s.def; });
+  state.titolo="Orchestra sinfonica — organico standard";
+  genOrchestra(c, true, true);
+}
+document.getElementById("titolo").value = state.titolo||"";
+if(location.search.indexOf("icone=1")>-1){ gallery(); }
+else { window.addEventListener("resize", render); fit(); }
+</script>
+</body>
+</html>
