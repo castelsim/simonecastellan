@@ -69,6 +69,7 @@
     .tools{margin-top:16px; font-size:12px; color:#9aa0a6}
     .tools a{color:#9aa0a6; text-decoration:none; border-bottom:1px solid #d6d9de; padding-bottom:1px}
     .tools a:hover{color:#1a1a1a}
+    .tools-cap{display:block; font-size:10px; text-transform:uppercase; letter-spacing:1.2px; color:#b0b4ba; margin-bottom:5px}
     .escape{display:none; position:fixed; top:0; left:0; right:0; background:#f1f3f4; color:#5f6368;
       font-size:13px; line-height:1.5; padding:10px 16px; text-align:center; z-index:10}
     .escape a{color:#1a1a1a; font-weight:600; text-decoration:underline}
@@ -98,7 +99,8 @@
   </div>
 
   <div class="tools">
-    <a href="/stageplot/" aria-label="Stage Plot — editor di stage plot per spettacoli dal vivo">Stage Plot</a>
+    <span class="tools-cap">Applicativi web</span>
+    <a href="/stageplot/" aria-label="Stage Plot — applicativo web per realizzare stage plot di concerti">Stage Plot</a> — app per realizzare stage plot di concerti
   </div>
 
   <footer class="credit">Designed and built by Simone Castellan.</footer>
@@ -197,7 +199,11 @@ PROFILO. Simone Castellan (1991): tecnico del suono, sound designer e compositor
       document.getElementById("escape").style.display = "block";
       track("inapp_webview");
     }
-    AIS.forEach(function(ai){
+    // 11/06: in homepage mostriamo SOLO ChatGPT (l'unico che apre l'app col prompt in modo affidabile).
+    // Gli altri (Claude/Grok/Perplexity/Gemini) restano DEFINITI sopra in AIS, pronti da riattivare:
+    // per rimetterli tutti, sostituire AIS_VISIBLE con AIS nel forEach qui sotto.
+    var AIS_VISIBLE = AIS.filter(function(ai){ return ai.name === "ChatGPT"; });
+    AIS_VISIBLE.forEach(function(ai){
       var a = document.createElement("a");
       a.className = "pill";
       a.href = ai.url; a.rel = "noopener";
