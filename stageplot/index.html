@@ -176,7 +176,10 @@
   <button class="btn" id="bOrch" title="Genera una formazione tipo">Organico ▾</button>
   <button class="btn" id="bJson">Salva .json</button>
   <button class="btn" id="bImport">Apri .json</button>
-  <button class="btn primary" id="bR3d" title="Genera un render 3D fotorealistico del palco con ChatGPT">✨ Render 3D</button>
+  <button class="btn primary" id="bR3d" title="Genera un render 3D fotorealistico del palco con ChatGPT" style="display:inline-flex;align-items:center;gap:7px">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.073zM13.2599 22.4307a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6449zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.8956zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.4069-.6765zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg>
+    Render 3D
+  </button>
   <button class="btn danger" id="bNew">Nuovo</button>
   <input type="file" id="fileImport" accept=".json" hidden>
   <div class="menu-pop" id="orgMenu" hidden>
@@ -234,6 +237,9 @@
       <button class="btn" id="pRotL">⟲ 15</button>
       <button class="btn" id="pRotR">⟳ 15</button>
     </div>
+    <label id="pLeggioWrap" style="display:none;margin-top:10px;font-size:12.5px;color:#374151">
+      <input type="checkbox" id="pLeggio"> Leggio davanti alla postazione
+    </label>
     <div class="btns">
       <button class="btn" id="pDup">Duplica</button>
       <button class="btn danger" id="pDel">Elimina</button>
@@ -292,14 +298,14 @@
 
 <div class="modal" id="r3dModal" hidden>
   <div class="mcard" style="width:520px">
-    <h2>✨ Render 3D con ChatGPT</h2>
+    <h2>Render 3D con ChatGPT</h2>
     <p class="hint" style="margin-bottom:8px">Premendo <b>Apri ChatGPT</b> succede questo, in automatico:</p>
     <ol class="hint" style="margin:0 0 10px 18px;line-height:1.5">
-      <li>scarico sul dispositivo <b>2 file</b>: la planimetria <b>PNG</b> (con channel list) e il progetto <b>.json</b> (coordinate e misure esatte di ogni elemento, pensato per il 3D);</li>
-      <li>copio negli appunti il <b>prompt professionale</b> per il render;</li>
-      <li>apro <b>ChatGPT</b> con il prompt già precompilato.</li>
+      <li>copio la planimetria <b>PNG negli appunti</b> → in chat la incolli (⌘V / tieni premuto → Incolla);</li>
+      <li>scarico il progetto <b>.json</b> (scena 3D completa: misure, quote, componenti, materiali) → lo alleghi con la graffetta;</li>
+      <li>apro <b>ChatGPT</b> con il prompt professionale già precompilato.</li>
     </ol>
-    <p class="hint" style="margin-bottom:8px">Tu devi solo <b>allegare i 2 file scaricati</b> alla chat (trascinali o usa la graffetta) e inviare. <i>ChatGPT non permette di allegare file in automatico dall'esterno.</i></p>
+    <p class="hint" style="margin-bottom:8px"><i>ChatGPT non permette di allegare file in automatico dall'esterno:</i> incolla l'immagine, allega il .json e invia.</p>
     <p class="hint" style="background:#f0f7ff;border:1px solid #d4e4f7;border-radius:8px;padding:8px 10px">
       💡 <b>Consiglio:</b> allega anche una <b>foto reale del palco/locale</b> — il render verrà
       ambientato lì e sarà molto più preciso e realistico.</p>
@@ -365,11 +371,20 @@ function keyboardStrip(cx,cy,w,h,whiteN){
   return s;
 }
 
-/* Postazione orchestrale: sedia nera + leggio nero (+ glifo strumento) */
-function postaz(glyph){
-  return bar(0,-22,46,46,'ic fBlack',9)+bar(0,-48,46,9,'ic fill',4)+
-    lin(0,26,-9,17,'ic thin')+lin(0,26,9,17,'ic thin')+circ(0,26,2.8,'ic fill')+
-    bar(0,38,48,15,'ic fBlack',2)+(glyph||'');
+/* Postazione orchestrale: sedia nera + leggio nero (+ glifo strumento).
+   it.leggio===false → senza leggio (solista/a memoria). */
+function postaz(glyph,it){
+  var s=bar(0,-22,46,46,'ic fBlack',9)+bar(0,-48,46,9,'ic fill',4);
+  if(!it || it.leggio!==false){
+    s+=lin(0,26,-9,17,'ic thin')+lin(0,26,9,17,'ic thin')+circ(0,26,2.8,'ic fill')+
+       bar(0,38,48,15,'ic fBlack',2);
+  }
+  return s+(glyph||'');
+}
+/* leggio opzionale davanti a violoncello/contrabbasso (it.leggio===true) */
+function leggioFront(y){
+  return lin(0,y-12,-9,y-21,'ic thin')+lin(0,y-12,9,y-21,'ic thin')+circ(0,y-12,2.8,'ic fill')+
+    bar(0,y,48,15,'ic fBlack',2);
 }
 /* Glifi strumento in scala (cm reali) */
 function gVln(s){ return '<g transform="translate(28,-14) rotate(38)">'+violino(s,'fWood')+'</g>'; }
@@ -502,7 +517,7 @@ var TYPES = {
   sedia:    {nome:"Sedia", dim:"46×46", cat:"Pedane e strutture", w:50,d:55,
              draw:function(){ return bar(0,3,46,46,'ic fBlack',9)+bar(0,-22,46,9,'ic fill',4); }},
   sedialeggio:{nome:"Sedia + leggio", dim:"postazione", cat:"Pedane e strutture", w:75,d:105,
-             draw:function(){ return postaz(''); }},
+             draw:function(it){ return postaz('',it); }},
   leggio:   {nome:"Leggio", dim:"48×35", cat:"Pedane e strutture", w:50,d:35,
              draw:function(){ return lin(0,-6,-9,14,'ic thin')+lin(0,-6,9,14,'ic thin')+circ(0,-6,2.8,'ic fill')+
                bar(0,2,48,15,'ic fBlack',2); }},
@@ -525,28 +540,28 @@ var TYPES = {
              draw:function(){ return ''; }},
   /* --- ottoni --- */
   corno:    {nome:"Corno", dim:"postazione", cat:"Ottoni", w:95,d:105,
-             draw:function(){ return postaz(gCorno()); }},
+             draw:function(it){ return postaz(gCorno(),it); }},
   tromba:   {nome:"Tromba", dim:"postazione", cat:"Ottoni", w:95,d:105,
-             draw:function(){ return postaz(gTromba()); }},
+             draw:function(it){ return postaz(gTromba(),it); }},
   trombone: {nome:"Trombone", dim:"postazione", cat:"Ottoni", w:95,d:112,
-             draw:function(){ return postaz(gTrombone()); }},
+             draw:function(it){ return postaz(gTrombone(),it); }},
   tuba:     {nome:"Tuba", dim:"postazione", cat:"Ottoni", w:95,d:105,
-             draw:function(){ return postaz(gTuba()); }},
+             draw:function(it){ return postaz(gTuba(),it); }},
   /* --- legni --- */
   flauto:   {nome:"Flauto", dim:"postazione", cat:"Legni", w:95,d:105,
-             draw:function(){ return postaz(gFlauto()); }},
+             draw:function(it){ return postaz(gFlauto(),it); }},
   oboe:     {nome:"Oboe", dim:"postazione", cat:"Legni", w:95,d:105,
-             draw:function(){ return postaz(gOboe()); }},
+             draw:function(it){ return postaz(gOboe(),it); }},
   clarinetto:{nome:"Clarinetto", dim:"postazione", cat:"Legni", w:95,d:105,
-             draw:function(){ return postaz(gClar()); }},
+             draw:function(it){ return postaz(gClar(),it); }},
   fagotto:  {nome:"Fagotto", dim:"postazione", cat:"Legni", w:95,d:110,
-             draw:function(){ return postaz(gFag()); }},
+             draw:function(it){ return postaz(gFag(),it); }},
   saxalto:  {nome:"Sax alto", dim:"postazione", cat:"Legni", w:95,d:105,
-             draw:function(){ return postaz(gSax(1)); }},
+             draw:function(it){ return postaz(gSax(1),it); }},
   saxtenore:{nome:"Sax tenore", dim:"postazione", cat:"Legni", w:100,d:108,
-             draw:function(){ return postaz(gSax(1.13)); }},
+             draw:function(it){ return postaz(gSax(1.13),it); }},
   saxbaritono:{nome:"Sax baritono", dim:"postazione", cat:"Legni", w:105,d:112,
-             draw:function(){ return postaz(gSax(1.25)); }},
+             draw:function(it){ return postaz(gSax(1.25),it); }},
   /* --- ritmica: batteria e percussioni --- */
   batteria: {nome:"Batteria 5 pezzi", dim:"180×150", cat:"Ritmica", sub:"Batteria e percussioni", w:180,d:150,
              draw:function(){
@@ -693,15 +708,17 @@ var TYPES = {
                bar(0,0,30,34,'ic fGrey',2)+kn(-7,-9,3,7)+kn(-7,-1,3,7)+lin(-7,8,-7,13,'sil')+lin(0,8,0,13,'sil')+lin(7,8,7,13,'sil'); }},
   /* --- archi --- */
   vlnpost:  {nome:"Violino", dim:"postazione", cat:"Archi", w:100,d:105,
-             draw:function(){ return postaz(gVln(0.45)); }},
+             draw:function(it){ return postaz(gVln(0.45),it); }},
   violapost:{nome:"Viola", dim:"postazione", cat:"Archi", w:100,d:105,
-             draw:function(){ return postaz(gVln(0.53)); }},
+             draw:function(it){ return postaz(gVln(0.53),it); }},
   violoncello:{nome:"Violoncello (con sedia)", dim:"corpo 76", cat:"Archi", w:85,d:130,
-             draw:function(){ return shadow(42,58,0,8)+bar(0,-36,44,44,'ic fBlack',9)+bar(0,-60,44,8,'ic fill',4)+
-               '<g transform="translate(0,22) rotate(-24)">'+violino(1.0,'fWood')+'</g>'; }},
+             draw:function(it){ return shadow(42,58,0,8)+bar(0,-36,44,44,'ic fBlack',9)+bar(0,-60,44,8,'ic fill',4)+
+               '<g transform="translate(0,22) rotate(-24)">'+violino(1.0,'fWood')+'</g>'+
+               (it&&it.leggio===true?leggioFront(58):''); }},
   contrabbasso:{nome:"Contrabbasso (con sgabello)", dim:"corpo 112", cat:"Archi", w:115,d:135,
-             draw:function(){ return shadow(54,60,0,6)+circ(-42,-42,16,'ic fBlack')+
-               '<g transform="translate(6,14) rotate(-12)">'+violino(1.45,'fWoodD')+'</g>'; }},
+             draw:function(it){ return shadow(54,60,0,6)+circ(-42,-42,16,'ic fBlack')+
+               '<g transform="translate(6,14) rotate(-12)">'+violino(1.45,'fWoodD')+'</g>'+
+               (it&&it.leggio===true?leggioFront(60):''); }},
   arpa:     {nome:"Arpa da concerto", dim:"55×120 +panca", cat:"Ritmica", sub:"Tastiere e arpa", w:75,d:140,
              draw:function(){ return bar(0,-50,48,26,'ic fBlack',5)+
                '<path class="ic fWoodL" d="M -27,-22 C -30,-6 -24,22 -17,40 C -11,52 -6,58 0,60 C 6,58 11,52 17,40 C 24,22 30,-6 27,-22 C 16,-32 -16,-32 -27,-22 Z"/>'+
@@ -799,6 +816,9 @@ var TYPES = {
                lin(0,2,-22,28,'ic thin')+lin(0,2,22,28,'ic thin')+lin(0,2,0,32,'ic thin')+circ(0,2,3,'ic fill'); }}
 };
 var CAT_ORDER = ["Pedane e strutture","Ottoni","Legni","Ritmica","Archi","Voci e microfoni","Monitoraggio","Tecnica","Video"];
+/* tipi con leggio opzionale: 1 = di default CON leggio, 0 = di default SENZA (attivabile) */
+var LEGGIO_TYPES = { corno:1,tromba:1,trombone:1,tuba:1, flauto:1,oboe:1,clarinetto:1,fagotto:1,
+  saxalto:1,saxtenore:1,saxbaritono:1, vlnpost:1,violapost:1, sedialeggio:1, violoncello:0,contrabbasso:0 };
 
 /* ============ STATO ============ */
 var LS_KEY = "stageplot_v1";
@@ -811,7 +831,10 @@ function uid(){ return "i"+(nextId++); }
 function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
 function normalizeChannelRow(r){
   r=r||{};
-  return {src:r.src||"", mic:r.mic||"", stand:r.stand||"", p48:!!r.p48, notes:r.notes||""};
+  var out={src:r.src||"", mic:r.mic||"", stand:r.stand||"", p48:!!r.p48, notes:r.notes||""};
+  if(r.linked_item_id) out.linked_item_id=r.linked_item_id;            /* aggancio all'oggetto 3D */
+  if(r.linked_component_id) out.linked_component_id=r.linked_component_id;
+  return out;
 }
 function normalizeState(s){
   s.items=s.items||[];
@@ -893,6 +916,9 @@ function renderProps(){
   document.getElementById("pRot").value = it.rot||0;
   document.getElementById("pDims").style.display = t.resizable ? "flex" : "none";
   document.getElementById("pHwrap").style.display = t.riser ? "" : "none";
+  var lw=document.getElementById("pLeggioWrap");
+  lw.style.display = LEGGIO_TYPES[it.type]!=null ? "block" : "none";
+  if(LEGGIO_TYPES[it.type]!=null) document.getElementById("pLeggio").checked = it.leggio!==false && (it.leggio===true || LEGGIO_TYPES[it.type]===1);
   if(t.resizable){
     document.getElementById("pW").value = it.w;
     document.getElementById("pD").value = it.d;
@@ -905,6 +931,7 @@ document.getElementById("pW").addEventListener("change", function(){ mutSel(func
 document.getElementById("pD").addEventListener("change", function(){ mutSel(function(it){ it.d=Math.max(10,+document.getElementById("pD").value||it.d); }); });
 document.getElementById("pH").addEventListener("change", function(){ mutSel(function(it){ it.h=Math.max(0,+document.getElementById("pH").value||0); }); });
 document.getElementById("pRot").addEventListener("change", function(){ mutSel(function(it){ it.rot=+document.getElementById("pRot").value||0; }); });
+document.getElementById("pLeggio").addEventListener("change", function(){ mutSel(function(it){ it.leggio=document.getElementById("pLeggio").checked; }); });
 document.getElementById("pRotL").addEventListener("click", function(){ rotateSel(-15); });
 document.getElementById("pRotR").addEventListener("click", function(){ rotateSel(15); });
 document.getElementById("pDup").addEventListener("click", duplicateSel);
@@ -1032,6 +1059,7 @@ function addItem(type, over){
   var it={ id:uid(), type:type, x:snap(vb.x+vb.w/2+addCascade), y:snap(vb.y+vb.h/2+addCascade),
            rot:0, w:t.w, d:t.d, label:t.defLabel||"" };
   if(t.riser) it.h=t.h||40;
+  if(LEGGIO_TYPES[type]!=null) it.leggio=(LEGGIO_TYPES[type]===1);
   if(over) Object.keys(over).forEach(function(k){ it[k]=over[k]; });
   addCascade=(addCascade+25)%150;
   state.items.push(it); sel=it.id; render(); save();
@@ -1400,6 +1428,7 @@ function placeOut(out, fitStage, clearFirst, force){
     var it={id:uid(), type:o.type, x:Math.round(C.x+o.x), y:Math.round(C.y+o.y),
             rot:Math.round((o.rot||0)/5)*5, w:z.w, d:z.d, label:o.label||""};
     if(t.riser) it.h=(o.h!=null?o.h:(t.h||40));
+    if(LEGGIO_TYPES[o.type]!=null) it.leggio=(o.leggio!=null?o.leggio:LEGGIO_TYPES[o.type]===1);
     state.items.push(it);
   });
   sel=null; save();
@@ -1926,20 +1955,26 @@ function rowFromMic(src, mic, stand, p48, notes){ return ch(src, mic, stand, p48
 function autoInputs(){
   if(state.inputs.some(function(r){return r.src||r.mic;}) && !confirm("Rigenerare la input list dai mic/DI sul palco? Sostituisce quella attuale.")) return;
   var rows=[];
+  function linkTo(row,it,compId){ row.linked_item_id=it.id; if(compId) row.linked_component_id=compId; return row; }
   state.items.forEach(function(it){
     var t=TYPES[it.type]; if(!t) return;
+    if(it.type==="coppiast"){
+      rows.push(linkTo(rowFromMic(labelPrefix(it,"L"),"KM184"),it,"mic_L"));
+      rows.push(linkTo(rowFromMic(labelPrefix(it,"R"),"KM184"),it,"mic_R"));
+      return;
+    }
     if(IN_MULTI[it.type]){
       IN_MULTI[it.type].forEach(function(k){
-        rows.push(rowFromMic(labelPrefix(it,k[0]), k[1], k[2], k[3], k[4]));
+        rows.push(linkTo(rowFromMic(labelPrefix(it,k[0]), k[1], k[2], k[3], k[4]),it));
       });
       return;
     }
     if(it.type==="distereo"){
-      rows.push(rowFromMic(labelPrefix(it,"L"),"DI"));
-      rows.push(rowFromMic(labelPrefix(it,"R"),"DI"));
+      rows.push(linkTo(rowFromMic(labelPrefix(it,"L"),"DI"),it));
+      rows.push(linkTo(rowFromMic(labelPrefix(it,"R"),"DI"),it));
       return;
     }
-    if(IN_SRC[it.type]!=null){ rows.push(rowFromMic(it.label || t.nome, IN_SRC[it.type])); }
+    if(IN_SRC[it.type]!=null){ rows.push(linkTo(rowFromMic(it.label || t.nome, IN_SRC[it.type]),it)); }
   });
   state.inputs=rows; save(); renderChannels();
 }
@@ -1947,7 +1982,10 @@ function autoOutputs(){
   if(state.outputs.some(function(r){return r.src||r.mic;}) && !confirm("Rigenerare la output list dai monitor sul palco? Sostituisce quella attuale.")) return;
   var rows=[];
   state.items.forEach(function(it){
-    if(OUT_SET[it.type]!=null) rows.push(outch(it.label || TYPES[it.type].nome, OUT_SET[it.type], "stage"));
+    if(OUT_SET[it.type]!=null){
+      var r=outch(it.label || TYPES[it.type].nome, OUT_SET[it.type], "stage");
+      r.linked_item_id=it.id; rows.push(r);
+    }
   });
   state.outputs=rows; save(); renderChannels();
 }
@@ -1964,29 +2002,187 @@ document.getElementById("bNew").addEventListener("click", function(){
   state={titolo:"",stage:{w:1200,d:800},items:[],inputs:[],outputs:[]}; sel=null; save(); fit();
   document.getElementById("titolo").value=""; renderChannels();
 });
-/* JSON di progetto COMPLETO: stato + metadati per ricostruzione/render 3D.
-   Contiene unità, sistema di assi, e una legenda con nome/categoria/ingombro reale
-   di ogni tipo usato → un software 3D (o un'AI) può ricostruire la scena senza l'app. */
+/* ============ JSON DI PROGETTO formato 3 — pronto per render 3D ============
+   items arricchiti (z, h, components relativi, render{}), librerie assets/materials,
+   regole di render e validazione. Le coordinate dei components sono RELATIVE al
+   centro dell'item padre (relative_to_parent). */
+/* altezze tipiche in cm (override per tipo; fallback per categoria) */
+var H3D={ pedana:0,scala:40,rampa:40,parapetto:110,fondale:400,quinta:400,truss:30,transenna:120,
+  tappeto:1,tavolo:75,sedia:85,sedialeggio:115,leggio:125,podio:20,pedanacoro:60,sgabello:75,ventilatore:120,
+  batteria:120,edrums:110,drumshield:180,rullante:80,percussioni:90,cajon:48,timbales:90,timpani:90,
+  grancassa:130,piatto:140,piatticoppia:40,campane:170,tamtam:180,glockenspiel:90,xilofono:95,vibrafono:95,marimba:95,
+  comboamp:45,stack:110,bassamp:120,keysamp:50,leslie:105,
+  grancoda:101,mezzacoda:99,pianoverticale:131,stagepiano:95,doppiatastiera:120,celesta:90,panchetta:48,
+  gtstand:105,gtacustica:110,bassstand:115,djset:95,arpa:175,
+  astamic:160,giraffa:170,astabassa:60,coppiast:170,podiosp:115,
+  wedge:35,sidefill:140,drumfill:60,iemant:60,
+  dimono:5,distereo:5,stagebox:25,splitter:25,multicore:15,quadro:120,foh:95,monmix:95,laptop:25,audiointerface:9,
+  schermo:300,proiettore:30,camera:160 };
+/* elementi documentati in patch/2D ma NON da renderizzare (simboli) */
+var HIDDEN3D={ testo:1, corrente:1, ciabatta:1, iem:1, headset:1, wireless:1 };
+/* descrizioni EN per il motore 3D (fallback = nome italiano) */
+var DESC3D={ pedana:"black stage riser/platform", podio:"square conductor podium with black trim",
+  pedanacoro:"choir riser with 3 steps", tappeto:"large muted-red orchestral rug", sedia:"black padded orchestra chair",
+  sedialeggio:"black padded orchestra chair with black music stand", leggio:"black orchestral music stand",
+  batteria:"5-piece acoustic drum kit (kick 22\", snare, 2 rack toms, floor tom, hi-hat, crash, ride, throne)",
+  edrums:"electronic drum kit with mesh pads on rack", timpani:"4 copper concert timpani with stool",
+  grancassa:"concert bass drum on vertical cradle stand", piatto:"suspended cymbal on stand",
+  piatticoppia:"pair of clash cymbals with leather straps", campane:"tubular bells / orchestral chimes",
+  tamtam:"large tam-tam gong on frame", glockenspiel:"glockenspiel on stand", xilofono:"xylophone on frame",
+  vibrafono:"vibraphone with silver bars", marimba:"5-octave concert marimba",
+  comboamp:"guitar combo amplifier", stack:"guitar head + 4x12 cabinet", bassamp:"bass amp 8x10 fridge cabinet",
+  leslie:"Leslie rotary speaker cabinet", grancoda:"concert grand piano, black polished, lid open",
+  mezzacoda:"baby grand piano, black polished", pianoverticale:"upright piano, black",
+  stagepiano:"88-key stage piano on X stand", doppiatastiera:"two keyboards on double tier stand",
+  celesta:"celesta, wooden body", panchetta:"black piano bench", arpa:"concert pedal harp, natural wood",
+  gtstand:"electric guitar on stand", gtacustica:"acoustic guitar on stand", bassstand:"electric bass on stand",
+  djset:"DJ table with 2 turntables and mixer", astamic:"black straight microphone stand with mic",
+  giraffa:"black boom microphone stand", astabassa:"short/low microphone stand", coppiast:"stereo microphone pair on single stand with stereo bar",
+  podiosp:"wooden speaker lectern with gooseneck mic", wedge:"black floor wedge monitor", sidefill:"side fill monitor stack",
+  drumfill:"drum fill monitor", iemant:"IEM transmitter rack with antennas",
+  dimono:"passive DI box", distereo:"stereo DI box", stagebox:"digital stagebox", splitter:"audio splitter rack 3U",
+  multicore:"sub-snake box with multicore cable", quadro:"power distribution board", foh:"front-of-house mixing desk position",
+  monmix:"monitor mixing console", laptop:"laptop computer", audiointerface:"audio interface",
+  schermo:"LED wall / projection screen", proiettore:"video projector", camera:"video camera on tripod",
+  violoncello:"cello resting against chair, with endpin", contrabbasso:"double bass with stool",
+  orchestra_chair:"black padded orchestra chair", music_stand:"black orchestral music stand",
+  violin:"realistic varnished wooden violin resting on chair", viola:"realistic varnished wooden viola resting on chair",
+  cello:"realistic wooden cello with endpin", double_bass:"realistic wooden double bass",
+  french_horn:"brass french horn on chair", trumpet:"brass trumpet on stand", trombone_i:"brass trombone on stand",
+  tuba_i:"brass tuba on stand", flute:"silver concert flute", oboe_i:"black wooden oboe", clarinet:"black clarinet",
+  bassoon:"wooden bassoon", alto_sax:"brass alto saxophone on stand", tenor_sax:"brass tenor saxophone on stand",
+  baritone_sax:"brass baritone saxophone on stand", mic_stand:"black straight microphone stand",
+  stereo_bar:"black stereo microphone bar", small_diaphragm_condenser:"pencil condenser microphone (KM184-like)" };
+var MAT3D={ black_metal:{type:"metal",color:"black",finish:"matte"},
+  black_padded_chair:{type:"mixed",color:"black",finish:"semi_matte"},
+  varnished_wood:{type:"wood",color:"warm_amber_brown",finish:"glossy"},
+  dark_varnished_wood:{type:"wood",color:"dark_brown",finish:"satin"},
+  brass_polished:{type:"metal",color:"brass_gold",finish:"polished"},
+  copper:{type:"metal",color:"copper",finish:"satin"},
+  silver_metal:{type:"metal",color:"silver",finish:"satin"},
+  drum_shell_and_heads:{type:"mixed",color:"natural_heads_chrome_hw",finish:"mixed"},
+  black_gloss_piano:{type:"painted_wood",color:"black",finish:"high_gloss"},
+  black_tolex:{type:"mixed",color:"black",finish:"matte"},
+  muted_red_fabric:{type:"fabric",color:"muted_red",finish:"matte"},
+  stage_riser_black:{type:"painted_wood",color:"black",finish:"matte"},
+  plexiglass_clear:{type:"acrylic",color:"clear",finish:"transparent"},
+  grey_metal:{type:"metal",color:"dark_grey",finish:"matte"} };
+/* material di default per tipo/asset (fallback black_tolex per ampli/tecnica, black_metal aste) */
+var TYPEMAT={ pedana:"stage_riser_black",pedanacoro:"stage_riser_black",podio:"stage_riser_black",scala:"stage_riser_black",rampa:"stage_riser_black",
+  tappeto:"muted_red_fabric", sedia:"black_padded_chair",sedialeggio:"black_padded_chair",panchetta:"black_padded_chair",sgabello:"black_padded_chair",
+  leggio:"black_metal",astamic:"black_metal",giraffa:"black_metal",astabassa:"black_metal",coppiast:"black_metal",truss:"silver_metal",transenna:"grey_metal",parapetto:"grey_metal",
+  batteria:"drum_shell_and_heads",edrums:"black_metal",rullante:"drum_shell_and_heads",timbales:"drum_shell_and_heads",percussioni:"varnished_wood",cajon:"varnished_wood",
+  timpani:"copper",grancassa:"dark_varnished_wood",piatto:"brass_polished",piatticoppia:"brass_polished",campane:"silver_metal",tamtam:"brass_polished",
+  glockenspiel:"silver_metal",xilofono:"varnished_wood",vibrafono:"silver_metal",marimba:"dark_varnished_wood",
+  grancoda:"black_gloss_piano",mezzacoda:"black_gloss_piano",pianoverticale:"black_gloss_piano",celesta:"dark_varnished_wood",
+  stagepiano:"black_metal",doppiatastiera:"black_metal",arpa:"varnished_wood",
+  gtacustica:"varnished_wood",bassstand:"varnished_wood",gtstand:"varnished_wood",
+  violoncello:"varnished_wood",contrabbasso:"dark_varnished_wood",
+  drumshield:"plexiglass_clear", schermo:"black_metal",
+  orchestra_chair:"black_padded_chair",music_stand:"black_metal",violin:"varnished_wood",viola:"varnished_wood",
+  cello:"varnished_wood",double_bass:"dark_varnished_wood",mic_stand:"black_metal",stereo_bar:"black_metal",
+  small_diaphragm_condenser:"black_metal",
+  french_horn:"brass_polished",trumpet:"brass_polished",trombone_i:"brass_polished",tuba_i:"brass_polished",
+  flute:"silver_metal",oboe_i:"black_metal",clarinet:"black_metal",bassoon:"dark_varnished_wood",
+  alto_sax:"brass_polished",tenor_sax:"brass_polished",baritone_sax:"brass_polished" };
+/* asset strumento per le postazioni orchestrali */
+var POST_INSTR={ corno:["french_horn",30,32,30], tromba:["trumpet",14,53,14], trombone:["trombone_i",18,120,20],
+  tuba:["tuba_i",40,55,50], flauto:["flute",3,67,3], oboe:["oboe_i",7,62,7], clarinetto:["clarinet",8,66,8],
+  fagotto:["bassoon",12,134,14], saxalto:["alto_sax",12,63,25], saxtenore:["tenor_sax",14,77,28],
+  saxbaritono:["baritone_sax",18,95,32], vlnpost:["violin",22,60,8], violapost:["viola",25,68,9] };
+function comp(id,asset,x,y,z,w,d,h,rot,tilt){
+  var c={id:id, type:asset, x:x, y:y, z:z, w:w, d:d, h:h, rot:rot||0};
+  if(tilt) c.tilt=tilt; return c;
+}
+function components3D(it){
+  var withStand = it.leggio!==false && LEGGIO_TYPES[it.type]!=null &&
+                  (it.leggio===true || LEGGIO_TYPES[it.type]===1);
+  if(POST_INSTR[it.type] || it.type==="sedialeggio"){
+    var cs=[ comp("chair","orchestra_chair",0,-22,0,45,50,85,0) ];
+    if(withStand) cs.push(comp("music_stand","music_stand",0,38,0,50,35,115,0));
+    var gi=POST_INSTR[it.type];
+    if(gi) cs.push(comp("instrument",gi[0],8,-14,48,gi[1],gi[2],gi[3],-15,12));
+    return cs;
+  }
+  if(it.type==="violoncello"){
+    var cs2=[ comp("chair","orchestra_chair",0,-36,0,45,50,85,0),
+              comp("instrument","cello",0,18,0,48,32,125,0,-8) ];
+    if(it.leggio===true) cs2.push(comp("music_stand","music_stand",0,58,0,50,35,115,0));
+    return cs2;
+  }
+  if(it.type==="contrabbasso"){
+    var cs3=[ comp("stool","orchestra_chair",-42,-42,0,40,40,75,0),
+              comp("instrument","double_bass",6,14,0,70,45,190,0,-10) ];
+    if(it.leggio===true) cs3.push(comp("music_stand","music_stand",0,60,0,50,35,115,0));
+    return cs3;
+  }
+  if(it.type==="coppiast"){
+    return [ comp("stand","mic_stand",0,8,0,30,30,165,0),
+             comp("bar","stereo_bar",0,0,165,70,4,4,0),
+             comp("mic_L","small_diaphragm_condenser",-8.5,0,165,2.5,11,2.5,-55,-10),
+             comp("mic_R","small_diaphragm_condenser",8.5,0,165,2.5,11,2.5,55,-10) ];
+  }
+  return null;
+}
 function buildProjectJson(){
-  var legend={};
-  state.items.forEach(function(it){
-    var t=TYPES[it.type]; if(!t || legend[it.type]) return;
-    legend[it.type]={ nome:t.nome, categoria:t.cat+(t.sub?" / "+t.sub:""),
-      ingombro_cm:{w:t.w, d:t.d}, dimensioni_dichiarate:t.dim||"",
-      altezza_regolabile: !!t.riser, livello: (t.z||2)<=1 ? "a pavimento (sotto gli altri)" : "elemento in piedi" };
+  var usedAssets={}, legend={};
+  function noteAsset(id,w,d,h){
+    if(usedAssets[id]) return;
+    usedAssets[id]={ description:DESC3D[id]||((TYPES[id]&&TYPES[id].nome)||id),
+      default_w:w, default_d:d, default_h:h, material_id:TYPEMAT[id]||"black_tolex" };
+  }
+  /* pedane presenti → quota z degli elementi appoggiati sopra */
+  var risers=state.items.filter(function(r){ return r.type==="pedana"; });
+  function zOf(it){
+    if(it.type==="pedana") return 0;
+    for(var i=0;i<risers.length;i++){ var r=risers[i];
+      if(Math.abs(it.x-r.x)<=r.w/2 && Math.abs(it.y-r.y)<=r.d/2) return r.h||40; }
+    return 0;
+  }
+  var items=state.items.map(function(it){
+    var t=TYPES[it.type]||{};
+    var h = it.type==="pedana" ? (it.h||40) : (H3D[it.type]!=null?H3D[it.type]:80);
+    var out={ id:it.id, type:it.type, label:it.label||"",
+      x:it.x, y:it.y, z:zOf(it), w:it.w, d:it.d, h:h, rot:it.rot||0 };
+    if(it.leggio!=null) out.leggio=it.leggio;
+    var comps=components3D(it);
+    if(comps){ out.components=comps; out.relative_to_parent=true;
+      comps.forEach(function(c){ noteAsset(c.type,c.w,c.d,c.h); }); }
+    if(it.type==="coppiast"){
+      out.stereo_technique={ type:"ORTF", height_cm:165, capsule_spacing_cm:17, angle_deg:110, aimed_at:"ensemble_center" };
+    }
+    out.render={ visible: !HIDDEN3D[it.type], asset_id: it.type,
+      material_id: TYPEMAT[it.type]||"black_tolex", detail_level:"high" };
+    if(HIDDEN3D[it.type]) out.visible_in_render=false;
+    noteAsset(it.type, t.w||it.w, t.d||it.d, h);
+    if(!legend[it.type] && t.nome){
+      var dc=comps ? comps.map(function(c){ return c.type; }) : undefined;
+      legend[it.type]={ nome:t.nome, categoria:t.cat+(t.sub?" / "+t.sub:""),
+        ingombro_cm:{w:t.w, d:t.d}, dimensioni_dichiarate:t.dim||"" };
+      if(dc) legend[it.type].default_components=dc;
+    }
+    return out;
   });
   return {
-    meta:{ app:"Stage Plot — https://simonecastellan.com/stageplot/", formato:2,
+    meta:{ app:"Stage Plot — https://simonecastellan.com/stageplot/", formato:3,
       esportato:new Date().toISOString(), unita:"centimetri", angoli:"gradi",
-      scopo:"stage plot 2D in scala reale + dati per render 3D" },
+      scopo:"stage plot 2D in scala reale + scena ricostruibile per render 3D" },
     assi:{ origine:"angolo tra FONDO PALCO e lato DESTRO del palco (stage right, visto dai musicisti)",
       x:"cresce verso il lato sinistro del palco (stage left)",
       y:"cresce verso il PUBBLICO (fronte palco)",
-      rotazione:"in gradi, senso orario; 0 = elemento rivolto verso il pubblico",
-      posizione_elementi:"items[].x/y = centro dell'elemento in cm; items[].w/d = ingombro reale in cm; items[].h = altezza pedana in cm (solo pedane)" },
+      z:"quota da terra in cm (0 = piano del palco; gli elementi sopra una pedana hanno z = altezza pedana)",
+      rotazione:"rot in gradi, senso orario; 0 = elemento rivolto verso il pubblico; tilt = inclinazione verticale",
+      posizione_elementi:"items[].x/y = CENTRO dell'elemento in cm; w/d = ingombro reale; components[] in coordinate relative al centro del padre (relative_to_parent)" },
     titolo:state.titolo, stage:{w:state.stage.w, d:state.stage.d, unita:"cm"},
-    items:state.items, inputs:state.inputs, outputs:state.outputs,
-    legenda_tipi:legend
+    items:items, inputs:state.inputs, outputs:state.outputs,
+    legenda_tipi:legend, assets:usedAssets, materials:MAT3D,
+    render_rules:{ do_not_add_unlisted_items:true, do_not_remove_items:true, preserve_positions:true,
+      preserve_rotations:true, preserve_scale:true, hide_labels:true, hide_grid:true,
+      hide_patch_tables:true, people_visible:false },
+    environment_source:{ mode:"photo", note:"se è allegata una foto del palco/venue reale usala per ambiente, prospettiva, luci, materiali e fondale; altrimenti palco generico da concerto, fondo scuro, luci calde frontali + controluce blu/ambra",
+      use_photo_for_perspective:true, use_photo_for_lighting:true, use_photo_for_materials:true, use_photo_for_background:true },
+    validation:{ required_for_3d_render:["items[].x","items[].y","items[].w","items[].d","items[].rot","items[].z","items[].h","assets","materials"],
+      warn_if_missing:["components","linked_item_id","linked_component_id","tilt"] }
   };
 }
 document.getElementById("bJson").addEventListener("click", function(){
@@ -1998,9 +2194,15 @@ document.getElementById("fileImport").addEventListener("change", function(){
   var f=this.files[0]; if(!f) return;
   var fr=new FileReader();
   fr.onload=function(){ try{
-      var j=JSON.parse(fr.result);   /* accetta sia il formato 2 (con meta) sia i vecchi salvataggi */
+      var j=JSON.parse(fr.result);   /* accetta formato 3/2 (con meta) e i vecchi salvataggi */
+      var baseItems=(j.items||[]).map(function(o){   /* scarta l'arricchimento 3D, tiene i campi editor */
+        var b={id:o.id, type:o.type, x:o.x, y:o.y, rot:o.rot||0, w:o.w, d:o.d, label:o.label||""};
+        if(o.h!=null && TYPES[o.type] && TYPES[o.type].riser) b.h=o.h;
+        if(o.leggio!=null) b.leggio=o.leggio;
+        return b;
+      });
       state=normalizeState({ titolo:j.titolo||"", stage:(j.stage&&j.stage.w)?{w:j.stage.w,d:j.stage.d}:{w:1200,d:800},
-        items:j.items||[], inputs:j.inputs||[], outputs:j.outputs||[] });
+        items:baseItems, inputs:j.inputs||[], outputs:j.outputs||[] });
       sel=null;
       state.items.forEach(function(it){ var n=parseInt(it.id.slice(1),10); if(n>=nextId) nextId=n+1; });
       document.getElementById("titolo").value=state.titolo||"";
@@ -2095,22 +2297,24 @@ function r3dPrompt(){
   var titolo=state.titolo||"senza titolo";
   return "Agisci come visualizzatore 3D professionista specializzato in produzioni live (concert & stage design). "+
 "Devo ottenere un RENDER 3D FOTOREALISTICO del palco allestito secondo il mio stage plot.\n\n"+
-"TI ALLEGO IN QUESTA CHAT (caricali prima di generare):\n"+
-"1) PNG — planimetria 2D in scala con input patch e monitor list: riferimento visivo principale;\n"+
-"2) JSON — progetto completo: unità in cm; origine assi = angolo tra fondo palco e lato destro (stage right); "+
-"x cresce verso stage left, y verso il pubblico; rotazioni in gradi orari (0 = elemento rivolto al pubblico); "+
-"items[].x/y = centro elemento, w/d = ingombro reale; legenda dei tipi inclusa nel file.\n\n"+
+"MATERIALE IN QUESTA CHAT (usalo prima di generare):\n"+
+"1) IMMAGINE incollata — planimetria 2D in scala con input patch e monitor list: riferimento visivo principale;\n"+
+"2) FILE JSON allegato — scena 3D completa, unità in cm. Contiene: sistema assi (origine = angolo fondo/stage-right; "+
+"x verso stage left; y verso il pubblico; z = quota da terra; rot in gradi orari, 0 = verso il pubblico; tilt = inclinazione); "+
+"items[] con x/y/z, w/d/h, rot e components[] (sedia, leggio, strumento) in coordinate RELATIVE al centro dell'elemento; "+
+"librerie assets{} (forma+dimensioni di ogni oggetto) e materials{} (colore/finitura); render_rules{} e validation{}.\n\n"+
 "PROGETTO: \""+titolo+"\" — palco "+(state.stage.w/100)+"×"+(state.stage.d/100)+" m.\n"+
 "ELEMENTI ("+state.items.length+"): "+lista+".\n\n"+
 "REQUISITI DEL RENDER:\n"+
-"- Fedeltà ASSOLUTA a scala, posizioni e rotazioni del JSON; non aggiungere né togliere elementi.\n"+
+"- Fedeltà ASSOLUTA a scala, posizioni, rotazioni e quote del JSON; non aggiungere né togliere elementi (vedi render_rules).\n"+
+"- Espandi ogni postazione nei suoi components: NON disegnare scatole, ma sedia, leggio e strumento reali secondo assets{} e materials{}.\n"+
 "- Vista prospettica 3/4 dal lato pubblico, camera a ~8-10 m, elevazione ~25°, orientamento orizzontale.\n"+
-"- Piano palco in legno scuro opaco; pedane con frontalini neri e altezze come da JSON (campo h in cm).\n"+
-"- Materiali realistici: legni degli strumenti, ottoni, pelli dei tamburi, griglie degli ampli, monitor wedge neri con cono visibile, aste microfoniche nere.\n"+
+"- Piano palco in legno scuro opaco; pedane con frontalini neri e altezze come da JSON (campo h).\n"+
+"- Materiali da materials{}: legni, ottoni, pelli dei tamburi, nero opaco/lucido, ecc. Non inventare colori.\n"+
 "- Illuminazione da concerto: lavata frontale calda + controluce blu/ambra, haze leggero, fondo scuro.\n"+
-"- Nessuna persona; nessuna etichetta o testo flottante nel render.\n"+
+"- Nessuna persona; nessuna etichetta, griglia o tabella nel render (hide_labels/hide_grid).\n"+
 "- Massima risoluzione disponibile.\n\n"+
-"SE TI ALLEGO ANCHE UNA FOTO DEL PALCO/LOCALE REALE: integra l'allestimento in quell'ambiente, rispettandone prospettiva, materiali e luci.\n\n"+
+"SE TI INCOLLO ANCHE UNA FOTO DEL PALCO/LOCALE REALE: usala per ambiente, prospettiva, luci, materiali e fondale (environment_source.mode = photo), mantenendo l'allestimento dal JSON.\n\n"+
 "Se qualcosa nel JSON ti è ambiguo, chiedimelo PRIMA di generare.";
 }
 (function(){
@@ -2122,21 +2326,34 @@ function r3dPrompt(){
   document.addEventListener("keydown", function(e){ if(!modal.hidden && e.key==="Escape") modal.hidden=true; });
   document.getElementById("r3dGo").addEventListener("click", function(){
     if(!state.items.length){ status("⚠ Il palco è vuoto: aggiungi elementi prima del render."); return; }
-    var win=window.open("","_blank");                       /* aperta SUBITO (sincrona) per evitare il popup blocker */
     var base=fileName(), prompt=r3dPrompt();
+    var url="https://chatgpt.com/?q="+encodeURIComponent(prompt);
+    var openLink=" <span style='color:#6b7280'>Se ChatGPT non si è aperto, <a href=\""+url+"\" target=\"_blank\" rel=\"noopener\">aprilo qui</a>.</span>";
+    var pngPromise=renderPng(), pngDl=false;
+    function downloadPng(msg){ if(pngDl) return; pngDl=true;
+      pngPromise.then(function(png){ dl(URL.createObjectURL(png), base+".png"); status(msg+openLink); })
+                .catch(function(){ status("⚠ Generazione planimetria fallita."); }); }
+
+    /* 1) PNG → APPUNTI come immagine (mentre il documento è ancora a fuoco) */
+    var clipTried=false;
+    if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+      try{
+        navigator.clipboard.write([ new ClipboardItem({ "image/png": pngPromise }) ])
+          .then(function(){ status("✓ Planimetria <b>copiata negli appunti</b> · <b>"+base+".json</b> scaricato · ChatGPT aperto.<br>In chat: <b>incolla l'immagine</b> (⌘V / tieni premuto → Incolla), <b>allega il .json</b> e, se l'hai, la <b>foto del palco</b>, poi invia."+openLink); })
+          .catch(function(){ downloadPng("ℹ La copia immagine non è supportata qui: <b>"+base+".png</b> e <b>"+base+".json</b> scaricati · ChatGPT aperto.<br>Allega i 2 file (e la foto del palco) e invia."); });
+        clipTried=true;
+      }catch(e){ clipTried=false; }
+    }
+
+    /* 2) JSON → download */
     var jsonBlob=new Blob([JSON.stringify(buildProjectJson(),null,2)],{type:"application/json"});
-    status("Preparo i file…");
-    renderPng().then(function(png){
-      dl(URL.createObjectURL(png), base+".png");
-      dl(URL.createObjectURL(jsonBlob), base+".json");
-      try{ navigator.clipboard && navigator.clipboard.writeText(prompt); }catch(e){}
-      var url="https://chatgpt.com/?q="+encodeURIComponent(prompt);
-      if(win && !win.closed){ win.location=url; } else { window.location.href=url; }
-      status("✓ Scaricati <b>"+base+".png</b> e <b>"+base+".json</b> · prompt copiato negli appunti · ChatGPT aperto.<br>Ora <b>allega i 2 file</b> (e la foto del palco, se la hai) alla chat e invia.");
-    }).catch(function(){
-      if(win) win.close();
-      status("⚠ Generazione file fallita. Riprova.");
-    });
+    dl(URL.createObjectURL(jsonBlob), base+".json");
+
+    /* 3) apri ChatGPT (nello stesso gesto utente) */
+    var win=window.open(url,"_blank","noopener");
+
+    if(!clipTried){ downloadPng("ℹ <b>"+base+".png</b> e <b>"+base+".json</b> scaricati · ChatGPT aperto.<br>Allega i 2 file (e la foto del palco) e invia."); }
+    else { status("Preparo la planimetria e apro ChatGPT…"); }
   });
 })();
 
