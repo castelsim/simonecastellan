@@ -242,9 +242,15 @@
       <button class="btn" id="pRotR">⟳ 15</button>
     </div>
     <div id="pPostaz" style="display:none;border-top:1px solid #eef0f2;margin-top:10px;padding-top:8px">
-      <label class="chk"><input type="checkbox" id="pSedia"> Sedia</label>
-      <label class="chk"><input type="checkbox" id="pLeggioCfg"> Leggio</label>
-      <label class="chk"><input type="checkbox" id="pDoppia"> Postazione a 2 (2 strumenti + 1 leggio)</label>
+      <div id="pFlags">
+        <label class="chk"><input type="checkbox" id="pSedia"> Sedia</label>
+        <label class="chk"><input type="checkbox" id="pLeggioCfg"> Leggio</label>
+        <label class="chk"><input type="checkbox" id="pDoppia"> Postazione a 2 (2 strumenti + 1 leggio)</label>
+      </div>
+      <div id="pSepWrap" style="display:none;margin-top:6px">
+        <label>Distanza tra i 2 (cm)</label>
+        <input type="number" id="pSep" min="20" max="300" step="5">
+      </div>
     </div>
     <div class="btns">
       <button class="btn" id="pDup">Duplica</button>
@@ -510,20 +516,20 @@ function bassPost(){
   return shadow(54,60,0,6)+circ(-42,-42,16,'ic fBlack')+
     '<g transform="translate(6,14) rotate(-12)">'+violino(1.45,'fWoodD')+'</g>';
 }
-function doubleStringPost(kind){
-  var left='', right='', dx=45, legY=38;
-  if(kind==="vln1"||kind==="vln2"){
+function doubleStringPost(kind, dx){
+  var left='', right='', legY=38;
+  if(kind==="vln1"||kind==="vln2"){ dx=dx||45;
     left='<g transform="translate('+(-dx)+',0) rotate(-8)">'+postaz(gVln(0.45))+'</g>';
     right='<g transform="translate('+dx+',0) rotate(8)">'+postaz(gVln(0.45))+'</g>';
-  } else if(kind==="vla"){
+  } else if(kind==="vla"){ dx=dx||45;
     left='<g transform="translate('+(-dx)+',0) rotate(-8)">'+postaz(gVln(0.53))+'</g>';
     right='<g transform="translate('+dx+',0) rotate(8)">'+postaz(gVln(0.53))+'</g>';
   } else if(kind==="vc"){
-    dx=55; legY=54;
+    dx=dx||55; legY=54;
     left='<g transform="translate('+(-dx)+',4) rotate(-7)">'+celloPost()+'</g>';
     right='<g transform="translate('+dx+',4) rotate(7)">'+celloPost()+'</g>';
   } else {
-    dx=70; legY=58;
+    dx=dx||70; legY=58;
     left='<g transform="translate('+(-dx)+',7) rotate(-7)">'+bassPost()+'</g>';
     right='<g transform="translate('+dx+',7) rotate(7)">'+bassPost()+'</g>';
   }
@@ -536,8 +542,9 @@ function chairSvg(cx){ return bar(cx,-22,46,46,'ic fBlack',9)+bar(cx,-48,46,9,'i
 function station(it, glyph, dblKind){
   it=it||{};
   if(it.doppia){
-    if(/^(vln1|vln2|vla|vc|cb)$/.test(dblKind||"")) return doubleStringPost(dblKind);
-    var dx=45;
+    var half = it.sep ? it.sep/2 : null;
+    if(/^(vln1|vln2|vla|vc|cb)$/.test(dblKind||"")) return doubleStringPost(dblKind, half);
+    var dx = half || 45;
     return chairSvg(-dx)+chairSvg(dx)+
       '<g transform="translate('+(-dx)+',0)">'+glyph+'</g>'+
       '<g transform="translate('+dx+',0)">'+glyph+'</g>'+
@@ -878,17 +885,17 @@ var TYPES = {
   violapost:{nome:"Viola", dim:"postazione", cat:"Archi", w:100,d:105,
              draw:function(it){ return station(it, gVln(0.53), "vla"); }},
   vln1x2:   {nome:"Violini I ×2 + leggio", dim:"2 post. 175×130", cat:"Archi", w:175,d:130, catalog:false,
-             draw:function(){ return doubleStringPost("vln1"); }},
+             draw:function(it){ return doubleStringPost("vln1", it&&it.sep?it.sep/2:null); }},
   vln2x2:   {nome:"Violini II ×2 + leggio", dim:"2 post. 175×130", cat:"Archi", w:175,d:130, catalog:false,
-             draw:function(){ return doubleStringPost("vln2"); }},
+             draw:function(it){ return doubleStringPost("vln2", it&&it.sep?it.sep/2:null); }},
   violax2:  {nome:"Viole ×2 + leggio", dim:"2 post. 175×130", cat:"Archi", w:175,d:130, catalog:false,
-             draw:function(){ return doubleStringPost("vla"); }},
+             draw:function(it){ return doubleStringPost("vla", it&&it.sep?it.sep/2:null); }},
   cellix2:  {nome:"Celli ×2 + leggio", dim:"2 post. 205×165", cat:"Archi", w:205,d:165, catalog:false,
-             draw:function(){ return doubleStringPost("vc"); }},
+             draw:function(it){ return doubleStringPost("vc", it&&it.sep?it.sep/2:null); }},
   cbx2:     {nome:"Contrabbassi ×2 + leggio", dim:"2 post. 260×180", cat:"Archi", w:260,d:180, catalog:false,
-             draw:function(){ return doubleStringPost("cb"); }},
+             draw:function(it){ return doubleStringPost("cb", it&&it.sep?it.sep/2:null); }},
   archi2leggio:{nome:"2 archi + 1 leggio", dim:"postazione doppia", cat:"Archi", w:175,d:130, catalog:false,
-             draw:function(){ return doubleStringPost("vln1"); }},
+             draw:function(it){ return doubleStringPost("vln1", it&&it.sep?it.sep/2:null); }},
   violoncello:{nome:"Violoncello", dim:"postazione", cat:"Archi", w:85,d:130,
              draw:function(it){ it=it||{};
                if(it.doppia) return doubleStringPost("vc");
@@ -1011,14 +1018,28 @@ var TYPES = {
 var CAT_ORDER = ["Pedane e strutture","Ottoni","Legni","Ritmica","Archi","Voci e microfoni","Monitoraggio","Tecnica","Video"];
 /* postazioni configurabili (sedia/leggio/doppia). s=[w,d] singola, d=[w,d] doppia */
 var POSTAZ = {
-  vlnpost:{s:[100,105], dbl:[175,130]}, violapost:{s:[100,105], dbl:[175,130]},
-  violoncello:{s:[85,130], dbl:[205,165]}, contrabbasso:{s:[115,135], dbl:[260,180]},
-  corno:{s:[95,105], dbl:[170,125]}, tromba:{s:[95,105], dbl:[170,125]},
-  trombone:{s:[95,112], dbl:[175,132]}, tuba:{s:[95,105], dbl:[170,125]},
-  flauto:{s:[95,105], dbl:[170,125]}, oboe:{s:[95,105], dbl:[170,125]},
-  clarinetto:{s:[95,105], dbl:[170,125]}, fagotto:{s:[95,110], dbl:[175,130]},
-  saxalto:{s:[95,105], dbl:[175,125]}, saxtenore:{s:[100,108], dbl:[185,130]}, saxbaritono:{s:[105,112], dbl:[195,135]}
+  vlnpost:{s:[100,105], dbl:[175,130], sep:90}, violapost:{s:[100,105], dbl:[175,130], sep:90},
+  violoncello:{s:[85,130], dbl:[205,165], sep:110}, contrabbasso:{s:[115,135], dbl:[260,180], sep:140},
+  corno:{s:[95,105], dbl:[170,125], sep:90}, tromba:{s:[95,105], dbl:[170,125], sep:90},
+  trombone:{s:[95,112], dbl:[175,132], sep:90}, tuba:{s:[95,105], dbl:[170,125], sep:90},
+  flauto:{s:[95,105], dbl:[170,125], sep:90}, oboe:{s:[95,105], dbl:[170,125], sep:90},
+  clarinetto:{s:[95,105], dbl:[170,125], sep:90}, fagotto:{s:[95,110], dbl:[175,130], sep:90},
+  saxalto:{s:[95,105], dbl:[175,125], sep:90}, saxtenore:{s:[100,108], dbl:[185,130], sep:90}, saxbaritono:{s:[105,112], dbl:[195,135], sep:90}
 };
+/* tipi "doppia" generati dal modale Organico (kind per il disegno + dimensioni + distanza default) */
+var DOUBLE_TYPES = {
+  vln1x2:{kind:"vln1", dbl:[175,130], sep:90}, vln2x2:{kind:"vln2", dbl:[175,130], sep:90},
+  violax2:{kind:"vla", dbl:[175,130], sep:90}, cellix2:{kind:"vc", dbl:[205,165], sep:110},
+  cbx2:{kind:"cb", dbl:[260,180], sep:140}, archi2leggio:{kind:"vln1", dbl:[175,130], sep:90}
+};
+/* config "distanza tra i 2" per l'item selezionato (doppia da flag o tipo ×2 del modale) */
+function sepCfg(it){
+  if(!it) return null;
+  if(DOUBLE_TYPES[it.type]) return DOUBLE_TYPES[it.type];
+  if(POSTAZ[it.type] && it.doppia) return POSTAZ[it.type];
+  return null;
+}
+function sepToW(cfg, sep){ return Math.round(sep + (cfg.dbl[0]-cfg.sep)); }   /* larghezza ingombro dalla distanza */
 var DEFAULT_LABELS = {
   pedana:"PED", scala:"Scala", rampa:"Rampa", parapetto:"Parap.", fondale:"Backdrop", quinta:"Quinta", truss:"Truss", transenna:"Transenna",
   tappeto:"Tappeto", tavolo:"Tavolo", sedia:"Sedia", sedialeggio:"Sedia+leggio", leggio:"Leggio", podio:"Podio", pedanacoro:"Coro riser",
@@ -1138,14 +1159,19 @@ function renderProps(){
     document.getElementById("pD").value = it.d;
     if(t.riser) document.getElementById("pH").value = it.h;
   }
-  var pp=document.getElementById("pPostaz");
-  if(POSTAZ[it.type]){
-    pp.style.display="block";
+  var pp=document.getElementById("pPostaz"), cfg=sepCfg(it);
+  var isPostaz=!!POSTAZ[it.type];
+  pp.style.display = (isPostaz || cfg) ? "block" : "none";
+  document.getElementById("pFlags").style.display = isPostaz ? "block" : "none";
+  if(isPostaz){
     var dbl=it.doppia===true;
     document.getElementById("pSedia").checked = it.sedia!==false; document.getElementById("pSedia").disabled=dbl;
     document.getElementById("pLeggioCfg").checked = it.leggio!==false; document.getElementById("pLeggioCfg").disabled=dbl;
     document.getElementById("pDoppia").checked = dbl;
-  } else pp.style.display="none";
+  }
+  var sw=document.getElementById("pSepWrap");
+  if(cfg){ sw.style.display="block"; document.getElementById("pSep").value = it.sep || cfg.sep; }
+  else sw.style.display="none";
 }
 function mutSel(fn){ var it=getSel(); if(!it) return; fn(it); render(); save(); }
 document.getElementById("pLabel").addEventListener("input", function(){ mutSel(function(it){ it.label=document.getElementById("pLabel").value; }); });
@@ -1157,7 +1183,16 @@ document.getElementById("pSedia").addEventListener("change", function(){ mutSel(
 document.getElementById("pLeggioCfg").addEventListener("change", function(){ mutSel(function(it){ it.leggio=document.getElementById("pLeggioCfg").checked; }); });
 document.getElementById("pDoppia").addEventListener("change", function(){ mutSel(function(it){
   it.doppia=document.getElementById("pDoppia").checked;
-  var P=POSTAZ[it.type]; if(P){ var dim=it.doppia?P.dbl:P.s; it.w=dim[0]; it.d=dim[1]; }
+  var P=POSTAZ[it.type];
+  if(P){
+    if(it.doppia){ it.sep=it.sep||P.sep; it.w=sepToW(P, it.sep); it.d=P.dbl[1]; }
+    else { it.w=P.s[0]; it.d=P.s[1]; }
+  }
+}); });
+document.getElementById("pSep").addEventListener("change", function(){ mutSel(function(it){
+  var cfg=sepCfg(it); if(!cfg) return;
+  it.sep=Math.max(20, Math.min(300, +document.getElementById("pSep").value||cfg.sep));
+  it.w=sepToW(cfg, it.sep);
 }); });
 document.getElementById("pRotL").addEventListener("click", function(){ rotateSel(-15); });
 document.getElementById("pRotR").addEventListener("click", function(){ rotateSel(15); });
@@ -2626,6 +2661,7 @@ document.getElementById("fileImport").addEventListener("change", function(){
         var b={id:o.id, type:o.type, x:o.x, y:o.y, rot:o.rot||0, w:o.w, d:o.d, label:o.label||""};
         if(o.h!=null && TYPES[o.type] && TYPES[o.type].riser) b.h=o.h;
         if(POSTAZ[o.type]){ b.sedia=o.sedia!==false; b.leggio=o.leggio!==false; b.doppia=o.doppia===true; }
+        if(o.sep!=null && (DOUBLE_TYPES[o.type] || POSTAZ[o.type])) b.sep=o.sep;
         return b;
       });
       state=normalizeState({ titolo:j.titolo||"", luogo:j.luogo||(j.meta&&j.meta.luogo)||"", stage:(j.stage&&j.stage.w)?{w:j.stage.w,d:j.stage.d}:{w:1200,d:800},
