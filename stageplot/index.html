@@ -29,7 +29,8 @@
   .hdr-stage .lab{font-size:10px;font-weight:800;letter-spacing:.7px;color:#9ca3af;text-transform:uppercase}
   .hdr-stage label{display:flex;align-items:center;gap:4px;font-size:11.5px;color:#6b7280;white-space:nowrap}
   .hdr-stage label i{font-style:normal;color:#9ca3af}
-  .hdr-stage input{width:46px;border:1px solid #e5e7eb;border-radius:7px;padding:4px 6px;font-size:13px;text-align:center}
+  .hdr-stage input{width:58px;border:1px solid #e5e7eb;border-radius:7px;padding:4px 6px;font-size:13px;text-align:center;-moz-appearance:textfield}
+  .hdr-stage input::-webkit-outer-spin-button,.hdr-stage input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   .hdr-stage select{border:1px solid #e5e7eb;border-radius:7px;padding:4px 6px;font-size:13px;background:#fff}
   .hdr-stage input:focus,.hdr-stage select:focus{outline:none;border-color:#9aa3ad}
   header input[type=text]{flex:1;max-width:340px;border:1px solid #e5e7eb;border-radius:8px;padding:7px 10px;font-size:14px}
@@ -252,9 +253,7 @@
     </div>
   </div>
   <div class="sec" id="noSel" style="font-size:12.5px;color:#9ca3af">
-    Clicca un elemento del catalogo per aggiungerlo, poi trascinalo sul palco.
-    Tutti gli elementi sono disegnati con le <b>dimensioni reali</b> in scala.
-    <button class="btn" id="bResume" style="margin-top:12px" hidden>↩ Riprendi ultima sessione</button>
+    <button class="btn" id="bResume" hidden>↩ Riprendi ultima sessione</button>
   </div>
   <div class="sec" id="chanlist" style="border-top:1px solid #e5e7eb;padding-top:6px;margin-top:8px">
     <div class="clhead"><h3>Input patch</h3><button class="btn" id="inAuto" title="Genera i canali dai mic/DI presenti sul palco">Auto</button></div>
@@ -323,10 +322,10 @@
       <label>Celli <input type="number" min="0" max="40" id="str_vc" value="4"></label>
       <label>Contrabbassi <input type="number" min="0" max="20" id="str_cb" value="2"></label>
     </div>
-    <label class="ochk"><input type="checkbox" id="strPodio" checked> Aggiungi podio direttore</label>
+    <label class="ochk"><input type="checkbox" id="strPodio"> Aggiungi podio direttore</label>
     <label class="ochk"><input type="checkbox" id="strStereo"> Aggiungi coppia stereo davanti agli archi</label>
-    <label class="ochk"><input type="checkbox" id="strFit" checked> Adatta le dimensioni del palco all'organico</label>
-    <label class="ochk"><input type="checkbox" id="strClear" checked> Svuota il palco prima di generare</label>
+    <label class="ochk"><input type="checkbox" id="strFit"> Adatta le dimensioni del palco all'organico</label>
+    <label class="ochk"><input type="checkbox" id="strClear"> Svuota il palco prima di generare</label>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
       <button class="btn" id="strCancel">Annulla</button>
       <button class="btn primary" id="strGo">Genera archi</button>
