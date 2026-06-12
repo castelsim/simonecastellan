@@ -850,16 +850,12 @@ function fmtM(cm){ return (cm/100).toLocaleString("it-IT",{maximumFractionDigits
 function sceneMarkup(){
   var W=state.stage.w, D=state.stage.d;
   var s = '<rect class="stage-floor" x="0" y="0" width="'+W+'" height="'+D+'"/>' + gridMarkup();
-  s += '<line class="cl" x1="'+(W/2)+'" y1="0" x2="'+(W/2)+'" y2="'+D+'"/>';
-  s += '<text class="zone-lbl" style="font-size:12px" x="'+(W/2+8)+'" y="16">CL</text>';
   s += '<line class="dim-line" x1="0" y1="-54" x2="'+W+'" y2="-54"/>'+
        '<line class="dim-line" x1="-54" y1="0" x2="-54" y2="'+D+'"/>'+
        '<text class="dim-lbl" x="'+(W/2)+'" y="-64" text-anchor="middle">'+fmtM(W)+'</text>'+
        '<text class="dim-lbl" transform="translate(-66 '+(D/2)+') rotate(-90)" text-anchor="middle">'+fmtM(D)+'</text>';
   s += '<text class="zone-lbl" x="'+(W/2)+'" y="-22" text-anchor="middle">FONDO PALCO</text>';
   s += '<text class="zone-lbl" x="'+(W/2)+'" y="'+(D+38)+'" text-anchor="middle">PUBBLICO</text>';
-  s += '<text class="zone-lbl" x="-16" y="'+(D/2)+'" text-anchor="end">DX palco</text>';
-  s += '<text class="zone-lbl" x="'+(W+16)+'" y="'+(D/2)+'">SX palco</text>';
   var sorted = state.items.slice().sort(function(a,b){
     return (TYPES[a.type].z||2) - (TYPES[b.type].z||2);
   });
