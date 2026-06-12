@@ -171,37 +171,17 @@
 <svg id="defs-master" width="0" height="0" style="position:absolute" aria-hidden="true"></svg>
 <header>
   <span class="brand">STAGE PLOT</span>
-  <input type="text" id="titolo" placeholder="Titolo evento / band (compare nell'export)">
+  <span style="flex:1"></span>
   <button class="btn" id="bFit" title="Adatta lo zoom al palco">⤢ Adatta</button>
-  <button class="btn" id="bOrch" title="Genera una formazione tipo">Organico ▾</button>
   <button class="btn" id="bJson">Salva .json</button>
   <button class="btn" id="bImport">Apri .json</button>
+  <button class="btn" id="bPng" title="Scarica la planimetria PNG (con channel list)">Esporta PNG</button>
   <button class="btn primary" id="bR3d" title="Genera un render 3D fotorealistico del palco con ChatGPT" style="display:inline-flex;align-items:center;gap:7px">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.073zM13.2599 22.4307a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6449zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.8956zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.4069-.6765zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg>
     Render 3D
   </button>
   <button class="btn danger" id="bNew">Nuovo</button>
   <input type="file" id="fileImport" accept=".json" hidden>
-  <div class="menu-pop" id="orgMenu" hidden>
-    <div class="org-group">Live / Pop</div>
-    <button data-f="band"><span>Pop/Rock band 5</span><span class="tag">15 in</span><small>voce, cori, chitarra, basso, keys, batteria · wedge + IEM · stagebox e corrente</small></button>
-    <button data-f="acoustic"><span>Acoustic trio</span><span class="tag">7 in</span><small>voce, chitarra acustica, piano, cajon · setup compatto per club/teatro</small></button>
-    <div class="org-group">Classica / Archi</div>
-    <button data-f="quartetto"><span>Quartetto archi</span><span class="tag">3 in</span><small>2 violini, viola, cello, tappeto, coppia stereo, direttore/cue opzionale</small></button>
-    <button data-f="camera"><span>Orchestra da camera</span><span class="tag">area mic</span><small>archi piccoli, legni a 1, 2 corni · layout compatto con spot realistici</small></button>
-    <button data-f="sinfonica_ridotta"><span>Sinfonica ridotta</span><span class="tag">spot</span><small>archi medi, legni a 2, ottoni essenziali, timpani e arpa</small></button>
-    <button data-f="sinfonica"><span>Sinfonica completa</span><span class="tag">full</span><small>organico standard completo, archi a ventaglio, legni/ottoni/percussioni per sezioni</small></button>
-    <div class="org-group">Coro / Teatro</div>
-    <button data-f="coro"><span>Coro SATB + piano</span><span class="tag">8 in</span><small>gradoni, direttore vicino al coro, 3 mic d'insieme, solisti, side fill</small></button>
-    <button data-f="orchcoro"><span>Orchestra + coro</span><span class="tag">15 in</span><small>sinfonica ridotta, coro su gradoni dietro, spot orchestra + coro L/C/R</small></button>
-    <div class="org-group">Jazz / Fiati</div>
-    <button data-f="jazzcombo"><span>Jazz quintet</span><span class="tag">10 in</span><small>piano, contrabbasso, batteria, sax, voce · palco club/teatro</small></button>
-    <button data-f="bigband"><span>Big band 5/4/4 + ritmica</span><span class="tag">16 in</span><small>sax, tromboni, trombe su file/pedane, ritmica laterale, voce frontale</small></button>
-    <div class="org-group">Produzioni ibride</div>
-    <button data-f="orchband"><span>Orchestra da camera + band</span><span class="tag">22 in</span><small>camera orchestra + sezione ritmica davanti, lead vocal e side fill</small></button>
-    <div class="sep"></div>
-    <button data-f="custom"><span>Personalizza orchestra</span><span class="tag">manuale</span><small>scegli numeri per sezione, poi genera palco e patch list</small></button>
-  </div>
 </header>
 
 <aside id="catalog"></aside>
@@ -209,6 +189,12 @@
 <main><svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg></main>
 
 <aside id="props">
+  <div class="sec" id="eventoSec" style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:10px 11px;margin-bottom:14px">
+    <h3 style="margin-bottom:6px">Evento</h3>
+    <label>Titolo</label><input type="text" id="titolo" placeholder="Es. Concerto di Natale — ORSI">
+    <label>Luogo (per il render)</label><input type="text" id="luogo" placeholder="Es. Teatro Comunale, Vicenza">
+    <div class="hint" style="font-size:11px;color:#9ca3af;margin-top:5px">Titolo e luogo compaiono nell'export e guidano il render 3D.</div>
+  </div>
   <div class="sec">
     <h3>Palco</h3>
     <div class="row">
@@ -301,14 +287,13 @@
     <h2>Render 3D con ChatGPT</h2>
     <p class="hint" style="margin-bottom:8px">Premendo <b>Apri ChatGPT</b> succede questo, in automatico:</p>
     <ol class="hint" style="margin:0 0 10px 18px;line-height:1.5">
-      <li>copio la planimetria <b>PNG negli appunti</b> → in chat la incolli (⌘V / tieni premuto → Incolla);</li>
-      <li>scarico il progetto <b>.json</b> (scena 3D completa: misure, quote, componenti, materiali) → lo alleghi con la graffetta;</li>
+      <li>scarico <b>2 file</b>: la planimetria <b>PNG</b> (con channel list) e il progetto <b>.json</b> (scena 3D completa: misure, quote, componenti, materiali);</li>
       <li>apro <b>ChatGPT</b> con il prompt professionale già precompilato.</li>
     </ol>
-    <p class="hint" style="margin-bottom:8px"><i>ChatGPT non permette di allegare file in automatico dall'esterno:</i> incolla l'immagine, allega il .json e invia.</p>
+    <p class="hint" style="margin-bottom:8px">Tu devi solo <b>allegare i 2 file scaricati</b> alla chat (graffetta) e inviare. <i>ChatGPT non permette di allegare file in automatico dall'esterno.</i></p>
     <p class="hint" style="background:#f0f7ff;border:1px solid #d4e4f7;border-radius:8px;padding:8px 10px">
-      💡 <b>Consiglio:</b> allega anche una <b>foto reale del palco/locale</b> — il render verrà
-      ambientato lì e sarà molto più preciso e realistico.</p>
+      💡 Se hai compilato il <b>Luogo</b> dell'evento, ChatGPT cercherà immagini reali di quella sala per ambientare il render.
+      Meglio ancora: allega una <b>foto del palco/locale</b> — il render sarà molto più preciso.</p>
     <div class="mstatus" id="r3dStatus" style="font-size:12.5px;min-height:16px;margin-top:4px"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
       <button class="btn" id="r3dCancel">Annulla</button>
@@ -822,7 +807,7 @@ var LEGGIO_TYPES = { corno:1,tromba:1,trombone:1,tuba:1, flauto:1,oboe:1,clarine
 
 /* ============ STATO ============ */
 var LS_KEY = "stageplot_v1";
-var state = { titolo:"", stage:{w:1200,d:800}, items:[], inputs:[], outputs:[] };
+var state = { titolo:"", luogo:"", stage:{w:1200,d:800}, items:[], inputs:[], outputs:[] };
 var sel = null, nextId = 1, addCascade = 0;
 var vb = {x:-100,y:-150,w:1500,h:1100};
 var svg = document.getElementById("svg");
@@ -838,6 +823,7 @@ function normalizeChannelRow(r){
 }
 function normalizeState(s){
   s.items=s.items||[];
+  s.titolo=s.titolo||""; s.luogo=s.luogo||"";
   s.inputs=(s.inputs||[]).map(normalizeChannelRow);
   s.outputs=(s.outputs||[]).map(normalizeChannelRow);
   return s;
@@ -956,6 +942,7 @@ document.getElementById("stD").addEventListener("change", function(){
   state.stage.d = Math.round((+this.value||8)*100); render(); save();
 });
 document.getElementById("titolo").addEventListener("input", function(){ state.titolo=this.value; save(); });
+document.getElementById("luogo").addEventListener("input", function(){ state.luogo=this.value; save(); });
 function snapVal(){ return +document.getElementById("snap").value; }
 function snap(v){ var s=snapVal(); return s? Math.round(v/s)*s : Math.round(v); }
 
@@ -999,6 +986,12 @@ function miniSvg(k, over){
         body.appendChild(makeBtn("pedana",nome,over,p[0])); n++;
         entries.push({k:"pedana",nome:nome,over:over,dim:p[0]});
       });
+    }
+    if(c==="Archi"){
+      var ob=document.createElement("button"); ob.type="button";
+      ob.innerHTML=miniSvg("vlnpost")+'<span>Orchestra d\'archi<small>genera la sezione · es. 8 6 4 4 2</small></span>';
+      ob.addEventListener("click", addStringOrchestra);
+      body.appendChild(ob); n++;
     }
     var lastSub=null, rhythmSubs=[], rhythmMap={};
     function rhythmGroup(sub){
@@ -1064,6 +1057,21 @@ function addItem(type, over){
   addCascade=(addCascade+25)%150;
   state.items.push(it); sel=it.id; render(); save();
   return it;
+}
+/* Genera una sezione/orchestra d'archi a ventaglio dai conteggi (V1 V2 Vle Vc Cb). */
+function addStringOrchestra(){
+  var raw=window.prompt("Orchestra d'archi — quanti leggii per sezione?\nOrdine: Violini I · Violini II · Viole · Violoncelli · Contrabbassi\nEsempio: 8 6 4 4 2  (oppure 86442)", "8 6 4 4 2");
+  if(raw===null) return;
+  raw=raw.trim(); if(!raw) return;
+  var nums = /[^0-9]/.test(raw) ? raw.split(/[^0-9]+/).filter(Boolean).map(Number) : raw.split("").map(Number);
+  var counts={ v1:nums[0]||0, v2:nums[1]||0, vle:nums[2]||0, vc:nums[3]||0, cb:nums[4]||0 };
+  var tot=counts.v1+counts.v2+counts.vle+counts.vc+counts.cb;
+  if(!tot){ alert("Inserisci almeno una sezione, es. 8 6 4 4 2."); return; }
+  var et=counts.v1+"-"+counts.v2+"-"+counts.vle+"-"+counts.vc+"-"+counts.cb;
+  if(state.items.length && !confirm("Generare l'orchestra d'archi ("+et+")?\nIl palco attuale verrà sostituito.")) return;
+  placeOut(buildOrchestraOut(counts), true, true, true);
+  if(!state.titolo){ state.titolo="Orchestra d'archi "+et; document.getElementById("titolo").value=state.titolo; }
+  save(); fit();
 }
 
 /* ============ INTERAZIONE (drag / pan / zoom) ============ */
@@ -1636,38 +1644,7 @@ var FORM_TITLES = {
   jazzcombo:"Jazz quintet", bigband:"Big band 5/4/4 + ritmica"
 };
 
-/* ============ MENU FORMAZIONI (pulsante "Organico ▾") ============ */
-(function(){
-  var btn=document.getElementById("bOrch"), menu=document.getElementById("orgMenu");
-  var orchModal=document.getElementById("orchModal");
-  function closeMenu(){ menu.hidden=true; }
-  btn.addEventListener("click", function(e){
-    e.stopPropagation();
-    if(menu.hidden){
-      menu.hidden=false;
-      var maxLeft=Math.max(8, window.innerWidth-menu.offsetWidth-8);
-      menu.style.left=Math.min(btn.offsetLeft, maxLeft)+"px";
-    }
-    else closeMenu();
-  });
-  document.addEventListener("click", function(e){ if(!menu.hidden && !menu.contains(e.target)) closeMenu(); });
-  document.addEventListener("keydown", function(e){ if(e.key==="Escape") closeMenu(); });
-  menu.addEventListener("click", function(e){
-    var b=e.target.closest("button[data-f]"); if(!b) return;
-    closeMenu(); runFormation(b.getAttribute("data-f"));
-  });
-  function runFormation(f){
-    if(f==="custom"){ applySuggestedOrchestra(); orchModal.hidden=false; return; }
-    var data=formationData(f); if(!data) return;
-    if((state.items.length||state.inputs.length||state.outputs.length) &&
-       !confirm("Generare la formazione \""+FORM_TITLES[f]+"\"? Palco e channel list attuali verranno sostituiti.")) return;
-    placeOut(data.out, true, true, true);
-    state.inputs=data.inp.map(normalizeChannelRow);
-    state.outputs=data.outp.map(normalizeChannelRow);
-    if(!state.titolo){ state.titolo=FORM_TITLES[f]; document.getElementById("titolo").value=FORM_TITLES[f]; }
-    save(); fit(); renderChannels();
-  }
-})();
+/* (menu "Organico" rimosso su richiesta; i generatori formationData restano per le QA ?form= e per "Orchestra d'archi") */
 
 /* ============ CHANNEL LIST (input / output per i fonici) ============ */
 /* mic/DI suggeriti per tipo (auto input list); valore = etichetta mic. multi = più canali per un solo elemento */
@@ -1999,8 +1976,8 @@ document.getElementById("outAuto").addEventListener("click", autoOutputs);
 /* ============ FILE: nuovo / json / png ============ */
 document.getElementById("bNew").addEventListener("click", function(){
   if(!confirm("Nuovo stage plot? Quello attuale verrà cancellato (esporta prima il .json se ti serve).")) return;
-  state={titolo:"",stage:{w:1200,d:800},items:[],inputs:[],outputs:[]}; sel=null; save(); fit();
-  document.getElementById("titolo").value=""; renderChannels();
+  state={titolo:"",luogo:"",stage:{w:1200,d:800},items:[],inputs:[],outputs:[]}; sel=null; save(); fit();
+  document.getElementById("titolo").value=""; document.getElementById("luogo").value=""; renderChannels();
 });
 /* ============ JSON DI PROGETTO formato 3 — pronto per render 3D ============
    items arricchiti (z, h, components relativi, render{}), librerie assets/materials,
@@ -2173,13 +2150,14 @@ function buildProjectJson(){
       z:"quota da terra in cm (0 = piano del palco; gli elementi sopra una pedana hanno z = altezza pedana)",
       rotazione:"rot in gradi, senso orario; 0 = elemento rivolto verso il pubblico; tilt = inclinazione verticale",
       posizione_elementi:"items[].x/y = CENTRO dell'elemento in cm; w/d = ingombro reale; components[] in coordinate relative al centro del padre (relative_to_parent)" },
-    titolo:state.titolo, stage:{w:state.stage.w, d:state.stage.d, unita:"cm"},
+    titolo:state.titolo, luogo:state.luogo, stage:{w:state.stage.w, d:state.stage.d, unita:"cm"},
     items:items, inputs:state.inputs, outputs:state.outputs,
     legenda_tipi:legend, assets:usedAssets, materials:MAT3D,
     render_rules:{ do_not_add_unlisted_items:true, do_not_remove_items:true, preserve_positions:true,
       preserve_rotations:true, preserve_scale:true, hide_labels:true, hide_grid:true,
       hide_patch_tables:true, people_visible:false },
-    environment_source:{ mode:"photo", note:"se è allegata una foto del palco/venue reale usala per ambiente, prospettiva, luci, materiali e fondale; altrimenti palco generico da concerto, fondo scuro, luci calde frontali + controluce blu/ambra",
+    environment_source:{ mode: state.luogo ? "venue_lookup" : "generic", venue: state.luogo||"",
+      note:"Priorità ambientazione: 1) se è allegata una foto del palco/locale, usala (prospettiva, luci, materiali, fondale). 2) altrimenti, se 'venue' è valorizzato, cercane immagini/planimetrie reali e ricostruisci quell'ambiente. 3) altrimenti palco generico da concerto, fondo scuro, luci calde frontali + controluce blu/ambra.",
       use_photo_for_perspective:true, use_photo_for_lighting:true, use_photo_for_materials:true, use_photo_for_background:true },
     validation:{ required_for_3d_render:["items[].x","items[].y","items[].w","items[].d","items[].rot","items[].z","items[].h","assets","materials"],
       warn_if_missing:["components","linked_item_id","linked_component_id","tilt"] }
@@ -2201,11 +2179,12 @@ document.getElementById("fileImport").addEventListener("change", function(){
         if(o.leggio!=null) b.leggio=o.leggio;
         return b;
       });
-      state=normalizeState({ titolo:j.titolo||"", stage:(j.stage&&j.stage.w)?{w:j.stage.w,d:j.stage.d}:{w:1200,d:800},
+      state=normalizeState({ titolo:j.titolo||"", luogo:j.luogo||(j.meta&&j.meta.luogo)||"", stage:(j.stage&&j.stage.w)?{w:j.stage.w,d:j.stage.d}:{w:1200,d:800},
         items:baseItems, inputs:j.inputs||[], outputs:j.outputs||[] });
       sel=null;
       state.items.forEach(function(it){ var n=parseInt(it.id.slice(1),10); if(n>=nextId) nextId=n+1; });
       document.getElementById("titolo").value=state.titolo||"";
+      document.getElementById("luogo").value=state.luogo||"";
       save(); fit(); renderChannels();
     }catch(e){ alert("File non valido: "+e.message); } };
   fr.readAsText(f); this.value="";
@@ -2254,13 +2233,14 @@ function buildExportSvg(){
   var inner = sceneMarkup(); sel=keep;
   var css = document.querySelector("style").textContent;
   var titolo = esc(state.titolo||"Stage plot");
+  var luogo = esc(state.luogo||"");
   var oggi = new Date().toLocaleDateString("it-IT");
   var vbW = W+2*m+tableW, vbH = D+2*m+head;
   var svgStr = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+(-m)+' '+(-m-head)+' '+vbW+' '+vbH+'">'+
     '<style>'+css+'</style>'+DEFS+
     '<rect x="'+(-m)+'" y="'+(-m-head)+'" width="'+vbW+'" height="'+vbH+'" fill="#ffffff"/>'+
-    '<text x="'+(-m+30)+'" y="'+(-m-head+46)+'" font-size="34" font-weight="700" fill="#111827">'+titolo+'</text>'+
-    '<text x="'+(W+m-30)+'" y="'+(-m-head+46)+'" font-size="20" fill="#6b7280" text-anchor="end">'+oggi+' · simonecastellan.com · griglia 0,5 m · palco '+(W/100)+'×'+(D/100)+' m</text>'+
+    '<text x="'+(-m+30)+'" y="'+(-m-head+44)+'" font-size="34" font-weight="700" fill="#111827">'+titolo+(luogo?'<tspan font-size="22" font-weight="400" fill="#6b7280">   ·   '+luogo+'</tspan>':'')+'</text>'+
+    '<text x="'+(W+m-30)+'" y="'+(-m-head+44)+'" font-size="20" fill="#6b7280" text-anchor="end">'+oggi+' · simonecastellan.com · griglia 0,5 m · palco '+(W/100)+'×'+(D/100)+' m</text>'+
     inner+
     '<line x1="0" y1="'+(D+m-40)+'" x2="100" y2="'+(D+m-40)+'" stroke="#111827" stroke-width="6"/>'+
     '<text x="50" y="'+(D+m-52)+'" font-size="18" fill="#111827" text-anchor="middle">1 m</text>'+
@@ -2282,6 +2262,10 @@ function renderPng(scale){
     img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(ex.svgStr);
   });
 }
+document.getElementById("bPng").addEventListener("click", function(){
+  renderPng().then(function(b){ dl(URL.createObjectURL(b), fileName()+".png"); })
+             .catch(function(){ alert("Export PNG fallito."); });
+});
 /* ============ RENDER 3D (ChatGPT: file scaricati + prompt precompilato) ============ */
 /* Nota tecnica: ChatGPT NON accetta allegati automatici da siti esterni; il massimo
    possibile è precompilare il prompt via chatgpt.com/?q=… (apre anche l'app su mobile)
@@ -2295,6 +2279,12 @@ function r3dPrompt(){
   });
   var lista=ordered.map(function(n){ return counts[n]+"× "+n; }).join(", ");
   var titolo=state.titolo||"senza titolo";
+  var luogo=state.luogo||"";
+  var ambienteBlock = luogo
+    ? "AMBIENTAZIONE — LUOGO: \""+luogo+"\".\n"+
+      "PRIMA di renderizzare, CERCA online questo luogo: trova foto reali della sala/del palco, planimetrie e immagini di concerti che vi si sono tenuti, e ricostruisci fedelmente quell'ambiente (architettura, palco, fondale, materiali, atmosfera e luci tipiche). Il render deve sembrare scattato proprio lì.\n"+
+      "Se ti incollo anche una foto del palco, quella ha la priorità sulla ricerca.\n\n"
+    : "AMBIENTAZIONE: se ti incollo una foto del palco/locale usala; altrimenti palco generico da concerto, fondo scuro.\n\n";
   return "Agisci come visualizzatore 3D professionista specializzato in produzioni live (concert & stage design). "+
 "Devo ottenere un RENDER 3D FOTOREALISTICO del palco allestito secondo il mio stage plot.\n\n"+
 "MATERIALE IN QUESTA CHAT (usalo prima di generare):\n"+
@@ -2303,18 +2293,18 @@ function r3dPrompt(){
 "x verso stage left; y verso il pubblico; z = quota da terra; rot in gradi orari, 0 = verso il pubblico; tilt = inclinazione); "+
 "items[] con x/y/z, w/d/h, rot e components[] (sedia, leggio, strumento) in coordinate RELATIVE al centro dell'elemento; "+
 "librerie assets{} (forma+dimensioni di ogni oggetto) e materials{} (colore/finitura); render_rules{} e validation{}.\n\n"+
-"PROGETTO: \""+titolo+"\" — palco "+(state.stage.w/100)+"×"+(state.stage.d/100)+" m.\n"+
+"PROGETTO: \""+titolo+"\""+(luogo?" — "+luogo:"")+" — palco "+(state.stage.w/100)+"×"+(state.stage.d/100)+" m.\n"+
 "ELEMENTI ("+state.items.length+"): "+lista+".\n\n"+
+ambienteBlock+
 "REQUISITI DEL RENDER:\n"+
 "- Fedeltà ASSOLUTA a scala, posizioni, rotazioni e quote del JSON; non aggiungere né togliere elementi (vedi render_rules).\n"+
 "- Espandi ogni postazione nei suoi components: NON disegnare scatole, ma sedia, leggio e strumento reali secondo assets{} e materials{}.\n"+
 "- Vista prospettica 3/4 dal lato pubblico, camera a ~8-10 m, elevazione ~25°, orientamento orizzontale.\n"+
 "- Piano palco in legno scuro opaco; pedane con frontalini neri e altezze come da JSON (campo h).\n"+
 "- Materiali da materials{}: legni, ottoni, pelli dei tamburi, nero opaco/lucido, ecc. Non inventare colori.\n"+
-"- Illuminazione da concerto: lavata frontale calda + controluce blu/ambra, haze leggero, fondo scuro.\n"+
+"- Illuminazione coerente con il luogo; se sconosciuto, lavata frontale calda + controluce blu/ambra, haze leggero, fondo scuro.\n"+
 "- Nessuna persona; nessuna etichetta, griglia o tabella nel render (hide_labels/hide_grid).\n"+
 "- Massima risoluzione disponibile.\n\n"+
-"SE TI INCOLLO ANCHE UNA FOTO DEL PALCO/LOCALE REALE: usala per ambiente, prospettiva, luci, materiali e fondale (environment_source.mode = photo), mantenendo l'allestimento dal JSON.\n\n"+
 "Se qualcosa nel JSON ti è ambiguo, chiedimelo PRIMA di generare.";
 }
 (function(){
@@ -2329,37 +2319,23 @@ function r3dPrompt(){
     var base=fileName(), prompt=r3dPrompt();
     var url="https://chatgpt.com/?q="+encodeURIComponent(prompt);
     var openLink=" <span style='color:#6b7280'>Se ChatGPT non si è aperto, <a href=\""+url+"\" target=\"_blank\" rel=\"noopener\">aprilo qui</a>.</span>";
-    var pngPromise=renderPng(), pngDl=false;
-    function downloadPng(msg){ if(pngDl) return; pngDl=true;
-      pngPromise.then(function(png){ dl(URL.createObjectURL(png), base+".png"); status(msg+openLink); })
-                .catch(function(){ status("⚠ Generazione planimetria fallita."); }); }
-
-    /* 1) PNG → APPUNTI come immagine (mentre il documento è ancora a fuoco) */
-    var clipTried=false;
-    if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
-      try{
-        navigator.clipboard.write([ new ClipboardItem({ "image/png": pngPromise }) ])
-          .then(function(){ status("✓ Planimetria <b>copiata negli appunti</b> · <b>"+base+".json</b> scaricato · ChatGPT aperto.<br>In chat: <b>incolla l'immagine</b> (⌘V / tieni premuto → Incolla), <b>allega il .json</b> e, se l'hai, la <b>foto del palco</b>, poi invia."+openLink); })
-          .catch(function(){ downloadPng("ℹ La copia immagine non è supportata qui: <b>"+base+".png</b> e <b>"+base+".json</b> scaricati · ChatGPT aperto.<br>Allega i 2 file (e la foto del palco) e invia."); });
-        clipTried=true;
-      }catch(e){ clipTried=false; }
-    }
-
-    /* 2) JSON → download */
+    status("Preparo i file…");
+    /* 1) JSON → download */
     var jsonBlob=new Blob([JSON.stringify(buildProjectJson(),null,2)],{type:"application/json"});
     dl(URL.createObjectURL(jsonBlob), base+".json");
-
+    /* 2) PNG → download */
+    renderPng().then(function(png){
+      dl(URL.createObjectURL(png), base+".png");
+      status("✓ Scaricati <b>"+base+".png</b> e <b>"+base+".json</b> · ChatGPT aperto.<br>In chat: <b>allega i 2 file</b> (graffetta) e, se l'hai, la <b>foto del palco</b>, poi invia."+openLink);
+    }).catch(function(){ status("⚠ Generazione planimetria fallita. Il .json è stato scaricato."+openLink); });
     /* 3) apri ChatGPT (nello stesso gesto utente) */
-    var win=window.open(url,"_blank","noopener");
-
-    if(!clipTried){ downloadPng("ℹ <b>"+base+".png</b> e <b>"+base+".json</b> scaricati · ChatGPT aperto.<br>Allega i 2 file (e la foto del palco) e invia."); }
-    else { status("Preparo la planimetria e apro ChatGPT…"); }
+    window.open(url,"_blank","noopener");
   });
 })();
 
 /* ============ DEMO (?demo=1) ============ */
 function demo(){
-  state={titolo:"Demo — band + archi",stage:{w:1200,d:800},items:[],inputs:[],outputs:[]};
+  state={titolo:"Demo — band + archi",luogo:"",stage:{w:1200,d:800},items:[],inputs:[],outputs:[]};
   addItem("pedana",{x:600,y:170,w:300,d:200,h:60,label:"Drum riser"});
   addItem("batteria",{x:600,y:160,label:""});
   addItem("wedge",{x:600,y:320,label:"MIX 4"});
@@ -2415,6 +2391,7 @@ if(qForm){
     state.outputs=qd.outp.map(normalizeChannelRow); }
 }
 document.getElementById("titolo").value = state.titolo||"";
+document.getElementById("luogo").value = state.luogo||"";
 normalizeState(state); renderChannels();
 if(location.search.indexOf("inputaudit=1")>-1){   /* QA: un esemplare di ogni sorgente + Auto */
   state.items=[];
@@ -2422,6 +2399,10 @@ if(location.search.indexOf("inputaudit=1")>-1){   /* QA: un esemplare di ogni so
   autoInputs();
 }
 if(location.search.indexOf("r3d=1")>-1){ document.getElementById("r3dModal").hidden=false; }  /* QA modale render 3D */
+var qStr=(location.search.match(/strorch=([0-9 .\-]+)/)||[])[1];
+if(qStr){ var ns=qStr.split(/[^0-9]+/).filter(Boolean).map(Number);
+  placeOut(buildOrchestraOut({v1:ns[0]||0,v2:ns[1]||0,vle:ns[2]||0,vc:ns[3]||0,cb:ns[4]||0}), true, true, true);
+  state.titolo="Orchestra d'archi "+qStr; }
 if(location.search.indexOf("icone=1")>-1){ gallery(); }
 else if(location.search.indexOf("export=1")>-1){   /* QA: anteprima del PNG esportato (planimetria + channel list) */
   var ex=buildExportSvg();
