@@ -223,9 +223,6 @@
       <button class="btn" id="pRotL">⟲ 15</button>
       <button class="btn" id="pRotR">⟳ 15</button>
     </div>
-    <label id="pLeggioWrap" style="display:none;margin-top:10px;font-size:12.5px;color:#374151">
-      <input type="checkbox" id="pLeggio"> Leggio davanti alla postazione
-    </label>
     <div class="btns">
       <button class="btn" id="pDup">Duplica</button>
       <button class="btn danger" id="pDel">Elimina</button>
@@ -356,19 +353,15 @@ function keyboardStrip(cx,cy,w,h,whiteN){
   return s;
 }
 
-/* Postazione orchestrale: sedia nera + leggio nero (+ glifo strumento).
-   it.leggio===false → senza leggio (solista/a memoria). */
-function postaz(glyph,it){
-  var s=bar(0,-22,46,46,'ic fBlack',9)+bar(0,-48,46,9,'ic fill',4);
-  if(!it || it.leggio!==false){
-    s+=lin(0,26,-9,17,'ic thin')+lin(0,26,9,17,'ic thin')+circ(0,26,2.8,'ic fill')+
-       bar(0,38,48,15,'ic fBlack',2);
-  }
-  return s+(glyph||'');
+/* Postazione orchestrale: SOLO sedia nera + glifo strumento.
+   Il leggio è un elemento separato del catalogo (in fondo a ogni categoria). */
+function postaz(glyph){
+  return bar(0,-22,46,46,'ic fBlack',9)+bar(0,-48,46,9,'ic fill',4)+(glyph||'');
 }
-/* leggio opzionale davanti a violoncello/contrabbasso (it.leggio===true) */
-function leggioFront(y){
-  return lin(0,y-12,-9,y-21,'ic thin')+lin(0,y-12,9,y-21,'ic thin')+circ(0,y-12,2.8,'ic fill')+
+/* glifo leggio (vista dall'alto) per l'elemento "leggio" e per "Sedia + leggio" */
+function leggioGlyph(y){
+  y=y||2;
+  return lin(0,y-8,-9,y+12,'ic thin')+lin(0,y-8,9,y+12,'ic thin')+circ(0,y-8,2.8,'ic fill')+
     bar(0,y,48,15,'ic fBlack',2);
 }
 /* Glifi strumento in scala (cm reali) */
@@ -502,10 +495,9 @@ var TYPES = {
   sedia:    {nome:"Sedia", dim:"46×46", cat:"Pedane e strutture", w:50,d:55,
              draw:function(){ return bar(0,3,46,46,'ic fBlack',9)+bar(0,-22,46,9,'ic fill',4); }},
   sedialeggio:{nome:"Sedia + leggio", dim:"postazione", cat:"Pedane e strutture", w:75,d:105,
-             draw:function(it){ return postaz('',it); }},
+             draw:function(){ return bar(0,-22,46,46,'ic fBlack',9)+bar(0,-48,46,9,'ic fill',4)+leggioGlyph(38); }},
   leggio:   {nome:"Leggio", dim:"48×35", cat:"Pedane e strutture", w:50,d:35,
-             draw:function(){ return lin(0,-6,-9,14,'ic thin')+lin(0,-6,9,14,'ic thin')+circ(0,-6,2.8,'ic fill')+
-               bar(0,2,48,15,'ic fBlack',2); }},
+             draw:function(){ return leggioGlyph(2); }},
   podio:    {nome:"Podio direttore", dim:"100×100", cat:"Pedane e strutture", w:100,d:100,
              draw:function(){ return bar(0,0,100,100,'ic fFloor',3)+bar(0,0,84,84,'ic thin',2)+
                bar(0,-38,52,13,'ic fBlack',2)+circ(0,-27,2.5,'ic fill'); }},
@@ -697,13 +689,11 @@ var TYPES = {
   violapost:{nome:"Viola", dim:"postazione", cat:"Archi", w:100,d:105,
              draw:function(it){ return postaz(gVln(0.53),it); }},
   violoncello:{nome:"Violoncello (con sedia)", dim:"corpo 76", cat:"Archi", w:85,d:130,
-             draw:function(it){ return shadow(42,58,0,8)+bar(0,-36,44,44,'ic fBlack',9)+bar(0,-60,44,8,'ic fill',4)+
-               '<g transform="translate(0,22) rotate(-24)">'+violino(1.0,'fWood')+'</g>'+
-               (it&&it.leggio===true?leggioFront(58):''); }},
+             draw:function(){ return shadow(42,58,0,8)+bar(0,-36,44,44,'ic fBlack',9)+bar(0,-60,44,8,'ic fill',4)+
+               '<g transform="translate(0,22) rotate(-24)">'+violino(1.0,'fWood')+'</g>'; }},
   contrabbasso:{nome:"Contrabbasso (con sgabello)", dim:"corpo 112", cat:"Archi", w:115,d:135,
-             draw:function(it){ return shadow(54,60,0,6)+circ(-42,-42,16,'ic fBlack')+
-               '<g transform="translate(6,14) rotate(-12)">'+violino(1.45,'fWoodD')+'</g>'+
-               (it&&it.leggio===true?leggioFront(60):''); }},
+             draw:function(){ return shadow(54,60,0,6)+circ(-42,-42,16,'ic fBlack')+
+               '<g transform="translate(6,14) rotate(-12)">'+violino(1.45,'fWoodD')+'</g>'; }},
   arpa:     {nome:"Arpa da concerto", dim:"55×120 +panca", cat:"Ritmica", sub:"Tastiere e arpa", w:75,d:140,
              draw:function(){ return bar(0,-50,48,26,'ic fBlack',5)+
                '<path class="ic fWoodL" d="M -27,-22 C -30,-6 -24,22 -17,40 C -11,52 -6,58 0,60 C 6,58 11,52 17,40 C 24,22 30,-6 27,-22 C 16,-32 -16,-32 -27,-22 Z"/>'+
@@ -802,8 +792,6 @@ var TYPES = {
 };
 var CAT_ORDER = ["Pedane e strutture","Ottoni","Legni","Ritmica","Archi","Voci e microfoni","Monitoraggio","Tecnica","Video"];
 /* tipi con leggio opzionale: 1 = di default CON leggio, 0 = di default SENZA (attivabile) */
-var LEGGIO_TYPES = { corno:1,tromba:1,trombone:1,tuba:1, flauto:1,oboe:1,clarinetto:1,fagotto:1,
-  saxalto:1,saxtenore:1,saxbaritono:1, vlnpost:1,violapost:1, sedialeggio:1, violoncello:0,contrabbasso:0 };
 
 /* ============ STATO ============ */
 var LS_KEY = "stageplot_v1";
@@ -902,9 +890,6 @@ function renderProps(){
   document.getElementById("pRot").value = it.rot||0;
   document.getElementById("pDims").style.display = t.resizable ? "flex" : "none";
   document.getElementById("pHwrap").style.display = t.riser ? "" : "none";
-  var lw=document.getElementById("pLeggioWrap");
-  lw.style.display = LEGGIO_TYPES[it.type]!=null ? "block" : "none";
-  if(LEGGIO_TYPES[it.type]!=null) document.getElementById("pLeggio").checked = it.leggio!==false && (it.leggio===true || LEGGIO_TYPES[it.type]===1);
   if(t.resizable){
     document.getElementById("pW").value = it.w;
     document.getElementById("pD").value = it.d;
@@ -917,7 +902,6 @@ document.getElementById("pW").addEventListener("change", function(){ mutSel(func
 document.getElementById("pD").addEventListener("change", function(){ mutSel(function(it){ it.d=Math.max(10,+document.getElementById("pD").value||it.d); }); });
 document.getElementById("pH").addEventListener("change", function(){ mutSel(function(it){ it.h=Math.max(0,+document.getElementById("pH").value||0); }); });
 document.getElementById("pRot").addEventListener("change", function(){ mutSel(function(it){ it.rot=+document.getElementById("pRot").value||0; }); });
-document.getElementById("pLeggio").addEventListener("change", function(){ mutSel(function(it){ it.leggio=document.getElementById("pLeggio").checked; }); });
 document.getElementById("pRotL").addEventListener("click", function(){ rotateSel(-15); });
 document.getElementById("pRotR").addEventListener("click", function(){ rotateSel(15); });
 document.getElementById("pDup").addEventListener("click", duplicateSel);
@@ -987,12 +971,6 @@ function miniSvg(k, over){
         entries.push({k:"pedana",nome:nome,over:over,dim:p[0]});
       });
     }
-    if(c==="Archi"){
-      var ob=document.createElement("button"); ob.type="button";
-      ob.innerHTML=miniSvg("vlnpost")+'<span>Orchestra d\'archi<small>genera la sezione · es. 8 6 4 4 2</small></span>';
-      ob.addEventListener("click", addStringOrchestra);
-      body.appendChild(ob); n++;
-    }
     var lastSub=null, rhythmSubs=[], rhythmMap={};
     function rhythmGroup(sub){
       if(!rhythmMap[sub]){
@@ -1011,7 +989,7 @@ function miniSvg(k, over){
       return rhythmMap[sub];
     }
     cats[c].forEach(function(k){
-      if(k==="pedana") return;
+      if(k==="pedana"||k==="leggio") return;   /* leggio: aggiunto in fondo a OGNI categoria */
       var sub=TYPES[k].sub||null;
       var target=body;
       if(c==="Ritmica" && sub){
@@ -1026,6 +1004,7 @@ function miniSvg(k, over){
       target.appendChild(makeBtn(k, TYPES[k].nome)); n++;
       entries.push({k:k,nome:TYPES[k].nome,over:null});
     });
+    body.appendChild(makeBtn("leggio", "Leggio")); n++;   /* sempre come ultimo elemento */
     head.innerHTML='<span class="caret">▸</span><span>'+esc(c)+'</span><span class="count">'+n+'</span>';
     head.addEventListener("click", function(){
       var willOpen = !body.classList.contains("open");
@@ -1035,6 +1014,7 @@ function miniSvg(k, over){
     sections.push({head:head, body:body});
     wrap.appendChild(head); wrap.appendChild(body);
   });
+  entries.push({k:"leggio",nome:"Leggio",over:null});   // ricercabile una volta sola
   // tutte le categorie chiuse di default (nessuna .open)
 
   search.addEventListener("input", function(){
@@ -1052,26 +1032,10 @@ function addItem(type, over){
   var it={ id:uid(), type:type, x:snap(vb.x+vb.w/2+addCascade), y:snap(vb.y+vb.h/2+addCascade),
            rot:0, w:t.w, d:t.d, label:t.defLabel||"" };
   if(t.riser) it.h=t.h||40;
-  if(LEGGIO_TYPES[type]!=null) it.leggio=(LEGGIO_TYPES[type]===1);
   if(over) Object.keys(over).forEach(function(k){ it[k]=over[k]; });
   addCascade=(addCascade+25)%150;
   state.items.push(it); sel=it.id; render(); save();
   return it;
-}
-/* Genera una sezione/orchestra d'archi a ventaglio dai conteggi (V1 V2 Vle Vc Cb). */
-function addStringOrchestra(){
-  var raw=window.prompt("Orchestra d'archi — quanti leggii per sezione?\nOrdine: Violini I · Violini II · Viole · Violoncelli · Contrabbassi\nEsempio: 8 6 4 4 2  (oppure 86442)", "8 6 4 4 2");
-  if(raw===null) return;
-  raw=raw.trim(); if(!raw) return;
-  var nums = /[^0-9]/.test(raw) ? raw.split(/[^0-9]+/).filter(Boolean).map(Number) : raw.split("").map(Number);
-  var counts={ v1:nums[0]||0, v2:nums[1]||0, vle:nums[2]||0, vc:nums[3]||0, cb:nums[4]||0 };
-  var tot=counts.v1+counts.v2+counts.vle+counts.vc+counts.cb;
-  if(!tot){ alert("Inserisci almeno una sezione, es. 8 6 4 4 2."); return; }
-  var et=counts.v1+"-"+counts.v2+"-"+counts.vle+"-"+counts.vc+"-"+counts.cb;
-  if(state.items.length && !confirm("Generare l'orchestra d'archi ("+et+")?\nIl palco attuale verrà sostituito.")) return;
-  placeOut(buildOrchestraOut(counts), true, true, true);
-  if(!state.titolo){ state.titolo="Orchestra d'archi "+et; document.getElementById("titolo").value=state.titolo; }
-  save(); fit();
 }
 
 /* ============ INTERAZIONE (drag / pan / zoom) ============ */
@@ -1436,7 +1400,6 @@ function placeOut(out, fitStage, clearFirst, force){
     var it={id:uid(), type:o.type, x:Math.round(C.x+o.x), y:Math.round(C.y+o.y),
             rot:Math.round((o.rot||0)/5)*5, w:z.w, d:z.d, label:o.label||""};
     if(t.riser) it.h=(o.h!=null?o.h:(t.h||40));
-    if(LEGGIO_TYPES[o.type]!=null) it.leggio=(o.leggio!=null?o.leggio:LEGGIO_TYPES[o.type]===1);
     state.items.push(it);
   });
   sel=null; save();
@@ -1644,7 +1607,7 @@ var FORM_TITLES = {
   jazzcombo:"Jazz quintet", bigband:"Big band 5/4/4 + ritmica"
 };
 
-/* (menu "Organico" rimosso su richiesta; i generatori formationData restano per le QA ?form= e per "Orchestra d'archi") */
+/* (menu "Organico" e generatori organici rimossi dall'interfaccia su richiesta; formationData/buildOrchestraOut restano solo per le QA ?form=) */
 
 /* ============ CHANNEL LIST (input / output per i fonici) ============ */
 /* mic/DI suggeriti per tipo (auto input list); valore = etichetta mic. multi = più canali per un solo elemento */
@@ -2072,26 +2035,22 @@ function comp(id,asset,x,y,z,w,d,h,rot,tilt){
   if(tilt) c.tilt=tilt; return c;
 }
 function components3D(it){
-  var withStand = it.leggio!==false && LEGGIO_TYPES[it.type]!=null &&
-                  (it.leggio===true || LEGGIO_TYPES[it.type]===1);
-  if(POST_INSTR[it.type] || it.type==="sedialeggio"){
-    var cs=[ comp("chair","orchestra_chair",0,-22,0,45,50,85,0) ];
-    if(withStand) cs.push(comp("music_stand","music_stand",0,38,0,50,35,115,0));
+  if(it.type==="sedialeggio"){   /* combo esplicito sedia + leggio (senza strumento) */
+    return [ comp("chair","orchestra_chair",0,-22,0,45,50,85,0),
+             comp("music_stand","music_stand",0,38,0,50,35,115,0) ];
+  }
+  if(POST_INSTR[it.type]){       /* postazione = sedia + strumento (leggio separato) */
     var gi=POST_INSTR[it.type];
-    if(gi) cs.push(comp("instrument",gi[0],8,-14,48,gi[1],gi[2],gi[3],-15,12));
-    return cs;
+    return [ comp("chair","orchestra_chair",0,-22,0,45,50,85,0),
+             comp("instrument",gi[0],8,-14,48,gi[1],gi[2],gi[3],-15,12) ];
   }
   if(it.type==="violoncello"){
-    var cs2=[ comp("chair","orchestra_chair",0,-36,0,45,50,85,0),
-              comp("instrument","cello",0,18,0,48,32,125,0,-8) ];
-    if(it.leggio===true) cs2.push(comp("music_stand","music_stand",0,58,0,50,35,115,0));
-    return cs2;
+    return [ comp("chair","orchestra_chair",0,-36,0,45,50,85,0),
+             comp("instrument","cello",0,18,0,48,32,125,0,-8) ];
   }
   if(it.type==="contrabbasso"){
-    var cs3=[ comp("stool","orchestra_chair",-42,-42,0,40,40,75,0),
-              comp("instrument","double_bass",6,14,0,70,45,190,0,-10) ];
-    if(it.leggio===true) cs3.push(comp("music_stand","music_stand",0,60,0,50,35,115,0));
-    return cs3;
+    return [ comp("stool","orchestra_chair",-42,-42,0,40,40,75,0),
+             comp("instrument","double_bass",6,14,0,70,45,190,0,-10) ];
   }
   if(it.type==="coppiast"){
     return [ comp("stand","mic_stand",0,8,0,30,30,165,0),
@@ -2121,7 +2080,6 @@ function buildProjectJson(){
     var h = it.type==="pedana" ? (it.h||40) : (H3D[it.type]!=null?H3D[it.type]:80);
     var out={ id:it.id, type:it.type, label:it.label||"",
       x:it.x, y:it.y, z:zOf(it), w:it.w, d:it.d, h:h, rot:it.rot||0 };
-    if(it.leggio!=null) out.leggio=it.leggio;
     var comps=components3D(it);
     if(comps){ out.components=comps; out.relative_to_parent=true;
       comps.forEach(function(c){ noteAsset(c.type,c.w,c.d,c.h); }); }
@@ -2176,7 +2134,6 @@ document.getElementById("fileImport").addEventListener("change", function(){
       var baseItems=(j.items||[]).map(function(o){   /* scarta l'arricchimento 3D, tiene i campi editor */
         var b={id:o.id, type:o.type, x:o.x, y:o.y, rot:o.rot||0, w:o.w, d:o.d, label:o.label||""};
         if(o.h!=null && TYPES[o.type] && TYPES[o.type].riser) b.h=o.h;
-        if(o.leggio!=null) b.leggio=o.leggio;
         return b;
       });
       state=normalizeState({ titolo:j.titolo||"", luogo:j.luogo||(j.meta&&j.meta.luogo)||"", stage:(j.stage&&j.stage.w)?{w:j.stage.w,d:j.stage.d}:{w:1200,d:800},
@@ -2399,10 +2356,6 @@ if(location.search.indexOf("inputaudit=1")>-1){   /* QA: un esemplare di ogni so
   autoInputs();
 }
 if(location.search.indexOf("r3d=1")>-1){ document.getElementById("r3dModal").hidden=false; }  /* QA modale render 3D */
-var qStr=(location.search.match(/strorch=([0-9 .\-]+)/)||[])[1];
-if(qStr){ var ns=qStr.split(/[^0-9]+/).filter(Boolean).map(Number);
-  placeOut(buildOrchestraOut({v1:ns[0]||0,v2:ns[1]||0,vle:ns[2]||0,vc:ns[3]||0,cb:ns[4]||0}), true, true, true);
-  state.titolo="Orchestra d'archi "+qStr; }
 if(location.search.indexOf("icone=1")>-1){ gallery(); }
 else if(location.search.indexOf("export=1")>-1){   /* QA: anteprima del PNG esportato (planimetria + channel list) */
   var ex=buildExportSvg();
