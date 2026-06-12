@@ -332,6 +332,67 @@
   </div>
 </div>
 
+<div class="modal" id="legniModal" hidden>
+  <div class="mcard" style="width:520px">
+    <h2>Organico legni</h2>
+    <p class="hint">Inserisci quanti strumenti per famiglia. Disposizione standard: flauti e oboi davanti, clarinetti e fagotti dietro. Ogni postazione ha sedia + leggio.</p>
+    <div class="opreset">
+      <label>Preset</label>
+      <select id="legPreset">
+        <option value="2,2,2,2">Sinfonica standard — 2.2.2.2</option>
+        <option value="3,3,3,3">Grande — 3.3.3.3</option>
+        <option value="2,2,2,1">Classica — 2.2.2.1 (1 fagotto)</option>
+        <option value="1,1,1,1">Ridotta — 1.1.1.1</option>
+      </select>
+    </div>
+    <div class="ogrid" id="legGrid">
+      <label>Flauti <input type="number" min="0" max="12" id="leg_fl" value="2"></label>
+      <label>Oboi <input type="number" min="0" max="12" id="leg_ob" value="2"></label>
+      <label>Clarinetti <input type="number" min="0" max="12" id="leg_cl" value="2"></label>
+      <label>Fagotti <input type="number" min="0" max="12" id="leg_fg" value="2"></label>
+    </div>
+    <label class="ochk"><input type="checkbox" id="legPodio"> Aggiungi podio direttore</label>
+    <label class="ochk"><input type="checkbox" id="legFit"> Adatta le dimensioni del palco all'organico</label>
+    <label class="ochk"><input type="checkbox" id="legClear"> Svuota il palco prima di generare</label>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+      <button class="btn" id="legCancel">Annulla</button>
+      <button class="btn primary" id="legGo">Genera legni</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="ottoniModal" hidden>
+  <div class="mcard" style="width:520px">
+    <h2>Organico ottoni</h2>
+    <p class="hint">Inserisci quanti strumenti per famiglia. Disposizione standard: corni davanti, trombe/tromboni/tuba dietro (sax, se presenti, in prima fila). Ogni postazione ha sedia + leggio.</p>
+    <div class="opreset">
+      <label>Preset</label>
+      <select id="ottPreset">
+        <option value="4,3,3,1,0,0,0">Sinfonica — 4 corni · 3 trombe · 3 tromboni · 1 tuba</option>
+        <option value="6,4,4,1,0,0,0">Grande — 6.4.4.1</option>
+        <option value="2,2,2,1,0,0,0">Ridotta — 2.2.2.1</option>
+        <option value="0,4,4,0,2,2,1">Big band ottoni+sax</option>
+      </select>
+    </div>
+    <div class="ogrid" id="ottGrid">
+      <label>Corni <input type="number" min="0" max="12" id="ott_cor" value="4"></label>
+      <label>Trombe <input type="number" min="0" max="12" id="ott_tr" value="3"></label>
+      <label>Tromboni <input type="number" min="0" max="12" id="ott_tbn" value="3"></label>
+      <label>Tuba <input type="number" min="0" max="4" id="ott_tba" value="1"></label>
+      <label>Sax alto <input type="number" min="0" max="8" id="ott_sa" value="0"></label>
+      <label>Sax tenore <input type="number" min="0" max="8" id="ott_st" value="0"></label>
+      <label>Sax baritono <input type="number" min="0" max="4" id="ott_sb" value="0"></label>
+    </div>
+    <label class="ochk"><input type="checkbox" id="ottPodio"> Aggiungi podio direttore</label>
+    <label class="ochk"><input type="checkbox" id="ottFit"> Adatta le dimensioni del palco all'organico</label>
+    <label class="ochk"><input type="checkbox" id="ottClear"> Svuota il palco prima di generare</label>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+      <button class="btn" id="ottCancel">Annulla</button>
+      <button class="btn primary" id="ottGo">Genera ottoni</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="r3dModal" hidden>
   <div class="mcard" style="width:520px">
     <h2>Render 3D con ChatGPT</h2>
@@ -1181,7 +1242,17 @@ function miniSvg(k, over){
     if(c==="Archi"){
       body.appendChild(makeActionBtn("Organico archi", "Vln I · Vln II · Viole · Vc · Cb", "vln1x2", openStringModal));
       n++;
-      entries.push({nome:"Organico archi", dim:"Vln I · Vln II · Viole · Vc · Cb", action:true});
+      entries.push({nome:"Organico archi", dim:"Vln I · Vln II · Viole · Vc · Cb", action:openStringModal, icon:"vln1x2"});
+    }
+    if(c==="Legni"){
+      body.appendChild(makeActionBtn("Organico legni", "Flauti · Oboi · Clarinetti · Fagotti", "flauto", openLegniModal));
+      n++;
+      entries.push({nome:"Organico legni", dim:"Flauti · Oboi · Clarinetti · Fagotti", action:openLegniModal, icon:"flauto"});
+    }
+    if(c==="Ottoni"){
+      body.appendChild(makeActionBtn("Organico ottoni", "Corni · Trombe · Tromboni · Tuba · Sax", "tromba", openOttoniModal));
+      n++;
+      entries.push({nome:"Organico ottoni", dim:"Corni · Trombe · Tromboni · Tuba · Sax", action:openOttoniModal, icon:"tromba"});
     }
     var lastSub=null, rhythmSubs=[], rhythmMap={};
     function rhythmGroup(sub){
@@ -1235,7 +1306,7 @@ function miniSvg(k, over){
     var matched=entries.filter(function(e){ return e.nome.toLowerCase().indexOf(q)>-1; });
     if(!matched.length){ results.innerHTML='<div class="nores">Nessun elemento trovato</div>'; return; }
     matched.forEach(function(e){
-      results.appendChild(e.action ? makeActionBtn(e.nome, e.dim, "vln1x2", openStringModal) : makeBtn(e.k, e.nome, e.over, e.dim));
+      results.appendChild(e.action ? makeActionBtn(e.nome, e.dim, e.icon||"vln1x2", e.action) : makeBtn(e.k, e.nome, e.over, e.dim));
     });
   });
 })();
@@ -1324,6 +1395,8 @@ document.addEventListener("keydown", function(e){
   if(!modal.hidden && e.key==="Escape"){ modal.hidden=true; return; }
   var strModal=document.getElementById("stringModal");
   if(!strModal.hidden && e.key==="Escape"){ strModal.hidden=true; return; }
+  var legM=document.getElementById("legniModal"); if(!legM.hidden && e.key==="Escape"){ legM.hidden=true; return; }
+  var ottM=document.getElementById("ottoniModal"); if(!ottM.hidden && e.key==="Escape"){ ottM.hidden=true; return; }
   if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
   var it=getSel(), step = e.shiftKey?25:5;
   if(e.key==="Escape"){ sel=null; render(); }
@@ -1918,6 +1991,67 @@ function stringTotal(c){ return (c.v1||0)+(c.v2||0)+(c.vle||0)+(c.vc||0)+(c.cb||
     if(genStringOrganico(counts, opts, document.getElementById("strFit").checked, document.getElementById("strClear").checked)){
       modal.hidden=true; fit();
     }
+  });
+})();
+
+/* ====== GENERATORI ORGANICO LEGNI / OTTONI (file diritte per famiglia) ====== */
+var LEGNI_FAM={ fl:{type:"flauto",label:"Fl"}, ob:{type:"oboe",label:"Ob"}, cl:{type:"clarinetto",label:"Cl"}, fg:{type:"fagotto",label:"Fg"} };
+var LEGNI_ROWS=[ ["fl","ob"], ["cl","fg"] ];   /* davanti flauti+oboi, dietro clarinetti+fagotti */
+var OTTONI_FAM={ sa:{type:"saxalto",label:"Sax A"}, st:{type:"saxtenore",label:"Sax T"}, sb:{type:"saxbaritono",label:"Sax Bar"},
+  cor:{type:"corno",label:"Cor"}, tr:{type:"tromba",label:"Tr"}, tbn:{type:"trombone",label:"Tbn"}, tba:{type:"tuba",label:"Tuba"} };
+var OTTONI_ROWS=[ ["sa","st","sb"], ["cor"], ["tr","tbn","tba"] ];   /* sax (se ci sono) · corni · trombe/tromboni/tuba */
+function buildWindOrganicoOut(counts, opts, fam, rowsLayout){
+  opts=opts||{};
+  var out=[], R0=180, DR=185, sp=118, gap=110, placedRows=0;
+  rowsLayout.forEach(function(rowFams){
+    var groups=rowFams.map(function(fk){ return {fk:fk, n:counts[fk]||0}; }).filter(function(g){ return g.n>0; });
+    if(!groups.length) return;
+    var seats=[], cur=0;
+    groups.forEach(function(g, gi){
+      if(gi>0) cur+=gap;
+      var mid=Math.floor((g.n-1)/2);
+      for(var i=0;i<g.n;i++){ seats.push({fk:g.fk, x:cur, label:(i===mid? fam[g.fk].label+(g.n>1?" ("+g.n+")":"") : "")}); cur+=sp; }
+    });
+    var totW=cur-sp, x0=-totW/2, y=-(R0+DR*placedRows);
+    seats.forEach(function(s){ out.push({type:fam[s.fk].type, x:Math.round(x0+s.x), y:y, rot:0, label:s.label}); });
+    placedRows++;
+  });
+  if(opts.podio) out.push({type:"podio", x:0, y:130, rot:0, label:"Podio"});
+  return out;
+}
+function genLegniOrganico(counts, opts, fit, clear, force){ pendingReviewModal="legniModal"; return placeOut(buildWindOrganicoOut(counts, opts, LEGNI_FAM, LEGNI_ROWS), fit, clear, force); }
+function genOttoniOrganico(counts, opts, fit, clear, force){ pendingReviewModal="ottoniModal"; return placeOut(buildWindOrganicoOut(counts, opts, OTTONI_FAM, OTTONI_ROWS), fit, clear, force); }
+function openLegniModal(){ pendingReviewModal="legniModal"; document.getElementById("legniModal").hidden=false; }
+function openOttoniModal(){ pendingReviewModal="ottoniModal"; document.getElementById("ottoniModal").hidden=false; }
+function windTotal(c){ var s=0; for(var k in c) s+=c[k]||0; return s; }
+/* Modale legni */
+(function(){
+  var modal=document.getElementById("legniModal"), preset=document.getElementById("legPreset");
+  function read(){ return { fl:+document.getElementById("leg_fl").value||0, ob:+document.getElementById("leg_ob").value||0,
+    cl:+document.getElementById("leg_cl").value||0, fg:+document.getElementById("leg_fg").value||0 }; }
+  preset.addEventListener("change", function(){ var v=this.value.split(",").map(function(x){return parseInt(x,10)||0;});
+    ["fl","ob","cl","fg"].forEach(function(k,i){ document.getElementById("leg_"+k).value=v[i]||0; }); });
+  document.getElementById("legCancel").addEventListener("click", function(){ modal.hidden=true; });
+  modal.addEventListener("click", function(e){ if(e.target===modal) modal.hidden=true; });
+  document.getElementById("legGo").addEventListener("click", function(){
+    var c=read(); if(!windTotal(c)){ alert("Inserisci almeno uno strumento."); return; }
+    if(genLegniOrganico(c, {podio:document.getElementById("legPodio").checked},
+        document.getElementById("legFit").checked, document.getElementById("legClear").checked)){ modal.hidden=true; fit(); }
+  });
+})();
+/* Modale ottoni */
+(function(){
+  var modal=document.getElementById("ottoniModal"), preset=document.getElementById("ottPreset");
+  var keys=["cor","tr","tbn","tba","sa","st","sb"], ids={cor:"ott_cor",tr:"ott_tr",tbn:"ott_tbn",tba:"ott_tba",sa:"ott_sa",st:"ott_st",sb:"ott_sb"};
+  function read(){ var c={}; keys.forEach(function(k){ c[k]=+document.getElementById(ids[k]).value||0; }); return c; }
+  preset.addEventListener("change", function(){ var v=this.value.split(",").map(function(x){return parseInt(x,10)||0;});
+    keys.forEach(function(k,i){ document.getElementById(ids[k]).value=v[i]||0; }); });
+  document.getElementById("ottCancel").addEventListener("click", function(){ modal.hidden=true; });
+  modal.addEventListener("click", function(e){ if(e.target===modal) modal.hidden=true; });
+  document.getElementById("ottGo").addEventListener("click", function(){
+    var c=read(); if(!windTotal(c)){ alert("Inserisci almeno uno strumento."); return; }
+    if(genOttoniOrganico(c, {podio:document.getElementById("ottPodio").checked},
+        document.getElementById("ottFit").checked, document.getElementById("ottClear").checked)){ modal.hidden=true; fit(); }
   });
 })();
 
