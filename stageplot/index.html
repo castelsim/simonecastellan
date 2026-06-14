@@ -308,6 +308,10 @@
         <button class="btn" id="pSplit" style="width:100%;margin-top:9px;font-size:12px">⇔ Dividi in 2 postazioni singole</button>
       </div>
     </div>
+    <div id="pVoce" style="display:none;border-top:1px solid #eef0f2;margin-top:10px;padding-top:8px">
+      <label class="chk"><input type="checkbox" id="pMano"> Microfono in mano (invece che su asta)</label>
+      <label class="chk"><input type="checkbox" id="pLeggioV"> Leggio</label>
+    </div>
     <div class="btns">
       <button class="btn" id="pDup">Duplica</button>
       <button class="btn danger" id="pDel">Elimina</button>
@@ -406,6 +410,38 @@
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
       <button class="btn" id="strCancel">Annulla</button>
       <button class="btn primary" id="strGo">Genera archi</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="voiceModal" hidden>
+  <div class="mcard" style="width:520px">
+    <h2>Organico coro</h2>
+    <p class="hint">Inserisci il numero di coristi per sezione. L'app dispone le voci in file: Soprani e Contralti davanti, Tenori e Bassi dietro, con direttore e microfoni d'insieme.</p>
+    <div class="opreset">
+      <label>Preset</label>
+      <select id="voicePreset">
+        <option value="12,12,8,8">Coro sinfonico — 12.12.8.8</option>
+        <option value="8,8,6,6">Coro medio — 8.8.6.6</option>
+        <option value="5,5,4,4">Coro da camera — 5.5.4.4</option>
+        <option value="3,3,2,2">Ensemble vocale — 3.3.2.2</option>
+        <option value="4,4,4,4">Quartetto ×4 — 4.4.4.4</option>
+      </select>
+    </div>
+    <div class="ogrid" id="voiceGrid">
+      <label>Soprani <input type="number" min="0" max="60" id="voc_sop" value="12"></label>
+      <label>Contralti <input type="number" min="0" max="60" id="voc_con" value="12"></label>
+      <label>Tenori <input type="number" min="0" max="60" id="voc_ten" value="8"></label>
+      <label>Bassi <input type="number" min="0" max="60" id="voc_bas" value="8"></label>
+    </div>
+    <label class="ochk"><input type="checkbox" id="voiceDir"> Aggiungi podio direttore</label>
+    <label class="ochk"><input type="checkbox" id="voiceMics"> Aggiungi microfoni d'insieme (giraffe)</label>
+    <label class="ochk"><input type="checkbox" id="voiceRiser"> Aggiungi pedane gradoni coro</label>
+    <label class="ochk"><input type="checkbox" id="voiceFit"> Adatta le dimensioni del palco all'organico</label>
+    <label class="ochk"><input type="checkbox" id="voiceClear"> Svuota il palco prima di generare</label>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+      <button class="btn" id="voiceCancel">Annulla</button>
+      <button class="btn primary" id="voiceGo">Genera coro</button>
     </div>
   </div>
 </div>
@@ -591,6 +627,20 @@ function leggioGlyph(y){
   return lin(0,y-8,-16,y+13,'ic thin')+lin(0,y-8,0,y+14,'ic thin')+lin(0,y-8,16,y+13,'ic thin')+
     circ(0,y-8,2.6,'ic fill')+
     bar(0,y,50,16,'ic fBlack',2);
+}
+/* Sagoma cantante (vista dall'alto): spalle + testa, rivolto al pubblico (+y).
+   Opzioni: it.mano = microfono in mano (altrimenti su asta davanti); it.leggio = leggio davanti. */
+function singer(it){
+  it=it||{};
+  var s='<ellipse class="ic fBlack" cx="0" cy="-9" rx="21" ry="12.5"/>'+   /* spalle (dietro) */
+        circ(0,4,11,'ic fBlack')+circ(0,4,7,'ic thin fBlack');             /* testa */
+  if(it.mano){
+    s+=lin(3,10,11,20,'ic thin')+'<g transform="translate(13,23) rotate(-30)">'+bar(0,0,7,13,'ic fGrey',3)+'</g>';  /* mic in mano */
+  } else {
+    s+=bar(0,17,7,12,'ic fGrey',3)+lin(0,23,0,31,'ic thin')+circ(0,35,10,'ic fBlack')+circ(0,35,3,'dotS');           /* asta + base */
+  }
+  if(it.leggio) s+='<g transform="translate(0,'+(it.mano?34:52)+')">'+leggioGlyph(0)+'</g>';
+  return s;
 }
 function celloPost(){
   return shadow(42,58,0,8)+bar(0,-36,44,44,'ic fBlack',9)+bar(0,-60,44,8,'ic fill',4)+
@@ -1006,35 +1056,35 @@ var TYPES = {
                  circ(18,-49,4,'ic fBrass')+                                                /* capitello */
                  str; }},
   /* --- voci / microfoni --- */
-  astamic:  {nome:"Asta microfono", dim:"base Ø32", cat:"Voci e microfoni", w:38,d:52,
+  astamic:  {nome:"Asta microfono", dim:"base Ø32", cat:"Microfoni", w:38,d:52,
              draw:function(){
                /* base tonda + stelo + capsula verso il pubblico (ruotabile) */
                return circ(0,-8,15,'ic fBlack')+circ(0,-8,10,'ic thin fBlack')+circ(0,-8,4,'dotS')+
                  lin(0,-8,0,13,'ic')+bar(0,19,8,13,'ic fGrey',4); }},
-  giraffa:  {nome:"Asta giraffa", dim:"~60", cat:"Voci e microfoni", w:62,d:62,
+  giraffa:  {nome:"Asta giraffa", dim:"~60", cat:"Microfoni", w:62,d:62,
              draw:function(){ return lin(-12,14,-27,22,'ic thin')+lin(-12,14,-3,27,'ic thin')+lin(-12,14,-17,-1,'ic thin')+
                circ(-12,14,4,'ic fill')+lin(-12,14,20,-19,'ic')+
                '<g transform="translate(24,-23) rotate(45)">'+bar(0,0,15,8,'ic fGrey',3)+'</g>'; }},
-  astabassa:{nome:"Asta microfono bassa", dim:"~45", cat:"Voci e microfoni", w:50,d:42,
+  astabassa:{nome:"Asta microfono bassa", dim:"~45", cat:"Microfoni", w:50,d:42,
              draw:function(){ return circ(-13,12,12,'ic fBlack')+lin(-13,12,12,-8,'ic')+
                '<g transform="translate(16,-11) rotate(38)">'+bar(0,0,15,8,'ic fGrey',3)+'</g>'; }},
-  coppiast:{nome:"Coppia stereo", dim:"barra 70", cat:"Voci e microfoni", w:78,d:38, defLabel:"ST L/R",
+  coppiast:{nome:"Coppia stereo", dim:"barra 70", cat:"Microfoni", w:78,d:38, defLabel:"ST L/R",
              draw:function(){ return lin(-32,0,32,0,'ic')+lin(0,0,0,24,'ic thin')+circ(0,24,3,'ic fill')+
                '<g transform="translate(-32,0) rotate(-20)">'+bar(0,0,16,8,'ic fGrey',3)+'</g>'+
                '<g transform="translate(32,0) rotate(20)">'+bar(0,0,16,8,'ic fGrey',3)+'</g>'; }},
-  wireless: {nome:"Mic wireless", dim:"", cat:"Voci e microfoni", w:34,d:34, defLabel:"WL",
+  wireless: {nome:"Mic wireless", dim:"", cat:"Microfoni", w:34,d:34, defLabel:"WL",
              draw:function(){ return circ(0,0,13,'ic fBlack')+circ(0,0,5,'dotS')+
                '<path class="ic thin" fill="none" d="M 11,-11 A 16 16 0 0 1 15,-6"/><path class="ic thin" fill="none" d="M 14,-15 A 21 21 0 0 1 19,-9"/>'; }},
-  headset:  {nome:"Headset", dim:"", cat:"Voci e microfoni", w:32,d:32, defLabel:"HS",
+  headset:  {nome:"Headset", dim:"", cat:"Microfoni", w:32,d:32, defLabel:"HS",
              draw:function(){ return '<path class="ic" fill="none" d="M -10,5 A 11 11 0 1 1 10,5"/>'+lin(10,5,13,9,'ic thin')+circ(13,9,3.5,'ic fill'); }},
-  podiosp:  {nome:"Podio speaker", dim:"60×45", cat:"Voci e microfoni", w:62,d:48,
+  podiosp:  {nome:"Podio speaker", dim:"60×45", cat:"Voci", w:62,d:48,
              draw:function(){ return '<path class="ic fWoodL" d="M -30,22 L 30,22 L 21,-22 L -21,-22 Z"/>'+
                '<path class="ic thin" fill="none" d="M -24,16 L 24,16 L 17,-16 L -17,-16 Z"/>'+
                circ(0,-8,2.5,'ic fill')+lin(0,-8,0,0,'ic thin'); }},
-  corista:  {nome:"Corista", dim:"voce+asta", cat:"Voci e microfoni", w:50,d:70,
-             draw:function(){ return circ(0,2,15,'ic fBlack')+circ(0,2,6,'dotS')+
-               lin(0,2,0,25,'ic')+bar(0,31,8,13,'ic fGrey',4)+
-               circ(-12,-22,4,'ic fill')+circ(12,-22,4,'ic fill')+bar(0,-28,24,7,'ic thin fBlack',3); }},
+  cantante: {nome:"Cantante", dim:"voce", cat:"Voci", w:60,d:85, voce:true, defLabel:"Voce",
+             draw:function(it){ return singer(it); }},
+  corista:  {nome:"Corista", dim:"voce coro", cat:"Voci", w:54,d:64, voce:true, defLabel:"Coro",
+             draw:function(it){ it=it||{}; return singer({mano:false, leggio:it.leggio!==false}); }},
   /* --- monitoraggio --- */
   wedge:    {nome:"Wedge monitor", dim:"58×50", cat:"Monitoraggio", w:60,d:52, defLabel:"MIX 1",
              draw:function(){ return '<path class="ic mon fMon" d="M -29,25 L 29,25 L 21,-25 L -21,-25 Z"/>'+
@@ -1108,7 +1158,7 @@ var TYPES = {
              draw:function(){ return bar(0,-10,34,20,'ic fBlack',3)+bar(25,-10,16,12,'ic fGrey',2)+
                lin(0,2,-22,28,'ic thin')+lin(0,2,22,28,'ic thin')+lin(0,2,0,32,'ic thin')+circ(0,2,3,'ic fill'); }}
 };
-var CAT_ORDER = ["Pedane e strutture","Ottoni","Legni","Ritmica","Archi","Voci e microfoni","Monitoraggio","Tecnica","Video"];
+var CAT_ORDER = ["Pedane e strutture","Ottoni","Legni","Ritmica","Archi","Voci","Microfoni","Monitoraggio","Tecnica","Video"];
 /* postazioni configurabili (sedia/leggio/doppia). s=[w,d] singola, d=[w,d] doppia.
    La doppia condivide il leggio → cambia SOLO la larghezza, la profondità resta = singola. */
 var POSTAZ = {
@@ -1135,6 +1185,7 @@ function sepCfg(it){
   return null;
 }
 function sepToW(cfg, sep){ return Math.round(sep + (cfg.dbl[0]-cfg.sep)); }   /* larghezza ingombro dalla distanza */
+var VOCE = { cantante:1, corista:1 };   /* postazioni voce: opzioni mic in mano / leggio */
 var DEFAULT_LABELS = {
   pedana:"PED", scala:"Scala", rampa:"Rampa", parapetto:"Parap.", fondale:"Backdrop", quinta:"Quinta", truss:"Truss", transenna:"Transenna",
   tappeto:"Tappeto", tavolo:"Tavolo", sedia:"Sedia", sedialeggio:"Sedia+leggio", leggio:"Leggio", podio:"Podio", pedanacoro:"Coro riser",
@@ -1149,7 +1200,7 @@ var DEFAULT_LABELS = {
   gtstand:"Gtr", gtacustica:"Ac. gtr", bassstand:"Bass", djset:"DJ",
   vlnpost:"Vln", violapost:"Vla", vln1x2:"Vln I x2", vln2x2:"Vln II x2", violax2:"Vla x2", cellix2:"Vc x2", cbx2:"Cb x2",
   archi2leggio:"Vln x2", violoncello:"Vc", contrabbasso:"Cb", arpa:"Arpa",
-  astamic:"Mic", giraffa:"Boom", astabassa:"Low mic", coppiast:"ST L/R", wireless:"WL", headset:"HS", podiosp:"Lectern", corista:"BV",
+  astamic:"Mic", giraffa:"Boom", astabassa:"Low mic", coppiast:"ST L/R", wireless:"WL", headset:"HS", podiosp:"Speaker", cantante:"Voce", corista:"Coro",
   wedge:"MIX", sidefill:"SIDE", drumfill:"DRUM FILL", iem:"IEM", iemant:"TX IEM", hearback:"HEARBACK",
   dimono:"DI", distereo:"DI st", stagebox:"STAGEBOX", splitter:"SPLIT", multicore:"SUB", corrente:"220V", ciabatta:"Power",
   quadro:"POWER", foh:"FOH", monmix:"MON MIX", laptop:"MAC", audiointerface:"I/O",
@@ -1311,6 +1362,12 @@ function renderProps(){
   if(cfg){ sw.style.display="block"; var sv=it.sep || cfg.sep;
     document.getElementById("pSep").value = sv; document.getElementById("pSepVal").textContent = sv+" cm"; }
   else sw.style.display="none";
+  var pv=document.getElementById("pVoce"), isVoce=!!VOCE[it.type];
+  pv.style.display = isVoce ? "block" : "none";
+  if(isVoce){
+    document.getElementById("pMano").checked = it.mano===true;
+    document.getElementById("pLeggioV").checked = it.leggio!==false;
+  }
 }
 function mutSel(fn){ var it=getSel(); if(!it) return; fn(it); render(); save(); }
 document.getElementById("pLabel").addEventListener("input", function(){ mutSel(function(it){ it.label=document.getElementById("pLabel").value; }); });
@@ -1338,6 +1395,8 @@ function applySep(doSave){
 }
 document.getElementById("pSep").addEventListener("input", function(){ applySep(false); });
 document.getElementById("pSep").addEventListener("change", function(){ applySep(true); });
+document.getElementById("pMano").addEventListener("change", function(){ mutSel(function(it){ it.mano=document.getElementById("pMano").checked; }); });
+document.getElementById("pLeggioV").addEventListener("change", function(){ mutSel(function(it){ it.leggio=document.getElementById("pLeggioV").checked; }); });
 /* Dividi una postazione doppia (×2 del generatore o doppia-da-flag) in 2 postazioni singole */
 var SINGLE_OF_KIND={vln1:"vlnpost", vln2:"vlnpost", vla:"violapost", vc:"violoncello", cb:"contrabbasso"};
 function splitDouble(){
@@ -1467,6 +1526,11 @@ function miniSvg(k, over){
       n++;
       entries.push({nome:"Organico ottoni", dim:"Corni · Trombe · Tromboni · Tuba · Sax", action:openOttoniModal, icon:"tromba"});
     }
+    if(c==="Voci"){
+      body.appendChild(makeActionBtn("Organico coro", "Soprani · Contralti · Tenori · Bassi", "cantante", openVoiceModal));
+      n++;
+      entries.push({nome:"Organico coro", dim:"Soprani · Contralti · Tenori · Bassi", action:openVoiceModal, icon:"cantante"});
+    }
     var lastSub=null, rhythmSubs=[], rhythmMap={};
     function rhythmGroup(sub){
       if(!rhythmMap[sub]){
@@ -1529,6 +1593,7 @@ function addItem(type, over){
            rot:0, w:t.w, d:t.d, label:defaultLabel(type) };
   if(t.riser) it.h=t.h||40;
   if(POSTAZ[type]){ it.sedia=true; it.leggio=true; it.doppia=false; }
+  if(VOCE[type]){ it.mano=false; it.leggio=(type==="corista"); }   /* cantante: mic su asta, no leggio · corista: leggio */
   if(over) Object.keys(over).forEach(function(k){ it[k]=over[k]; });
   addCascade=(addCascade+25)%150;
   state.items.push(it); selectOne(it.id); render(); save();
@@ -2312,6 +2377,48 @@ function stringTotal(c){ return (c.v1||0)+(c.v2||0)+(c.vle||0)+(c.vc||0)+(c.cb||
     if(genStringOrganico(counts, opts, document.getElementById("strFit").checked, document.getElementById("strClear").checked)){
       modal.hidden=true; fit();
     }
+  });
+})();
+
+/* ====== GENERATORE ORGANICO CORO (file di coristi per sezione SATB) ====== */
+function openVoiceModal(){ pendingReviewModal="voiceModal"; document.getElementById("voiceModal").hidden=false; }
+function readVoiceCounts(){ return {
+  sop:Math.max(0,parseInt(document.getElementById("voc_sop").value,10)||0),
+  con:Math.max(0,parseInt(document.getElementById("voc_con").value,10)||0),
+  ten:Math.max(0,parseInt(document.getElementById("voc_ten").value,10)||0),
+  bas:Math.max(0,parseInt(document.getElementById("voc_bas").value,10)||0) }; }
+function setVoiceCounts(v){ ["sop","con","ten","bas"].forEach(function(k,i){ document.getElementById("voc_"+k).value=v[i]||0; }); }
+function voiceTotal(c){ return (c.sop||0)+(c.con||0)+(c.ten||0)+(c.bas||0); }
+function buildVoiceOrganicoOut(counts, opts){
+  opts=opts||{};
+  var out=[], rowsDef=[ [["sop","S"],["con","C"]], [["ten","T"],["bas","B"]] ];   /* davanti S+C, dietro T+B */
+  var sp=64, rowGap=130, frontY=-220;
+  rowsDef.forEach(function(rowSecs, ri){
+    var singers=[];
+    rowSecs.forEach(function(sec){ var n=counts[sec[0]]||0; for(var i=0;i<n;i++) singers.push(sec[1]+" "+(i+1)); });
+    var m=singers.length; if(!m) return;
+    var totW=(m-1)*sp, x0=-totW/2, y=frontY-ri*rowGap;
+    if(opts.riser) out.push({type:"pedanacoro", x:0, y:y-12, w:Math.max(400,totW+150), d:120, h:20+ri*20, label:""});
+    singers.forEach(function(lbl,idx){ out.push({type:"corista", x:Math.round(x0+idx*sp), y:y, rot:0, label:lbl}); });
+  });
+  if(opts.mics) [-260,0,260].forEach(function(x){ out.push({type:"giraffa", x:x, y:frontY+70, rot:180, label:"Coro"}); });
+  if(opts.director) out.push({type:"podio", x:0, y:frontY+150, label:"Direttore"});
+  return out;
+}
+function genVoiceOrganico(counts, opts, fitStage, clearFirst, force){
+  pendingReviewModal="voiceModal";
+  return placeOut(buildVoiceOrganicoOut(counts, opts), fitStage, clearFirst, force);
+}
+(function(){
+  var modal=document.getElementById("voiceModal"), preset=document.getElementById("voicePreset");
+  preset.addEventListener("change", function(){ setVoiceCounts(this.value.split(",").map(function(x){ return parseInt(x,10)||0; })); });
+  document.getElementById("voiceCancel").addEventListener("click", function(){ modal.hidden=true; });
+  modal.addEventListener("click", function(e){ if(e.target===modal) modal.hidden=true; });
+  document.getElementById("voiceGo").addEventListener("click", function(){
+    var counts=readVoiceCounts();
+    if(!voiceTotal(counts)){ alert("Inserisci almeno una voce."); return; }
+    var opts={ director:document.getElementById("voiceDir").checked, mics:document.getElementById("voiceMics").checked, riser:document.getElementById("voiceRiser").checked };
+    if(genVoiceOrganico(counts, opts, document.getElementById("voiceFit").checked, document.getElementById("voiceClear").checked)){ modal.hidden=true; fit(); }
   });
 })();
 
