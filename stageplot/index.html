@@ -592,8 +592,10 @@ function postaz(glyph){
 /* glifo leggio (vista dall'alto) per l'elemento "leggio" e per "Sedia + leggio" */
 function leggioGlyph(y){
   y=y||2;
-  return lin(0,y-8,-9,y+12,'ic thin')+lin(0,y-8,9,y+12,'ic thin')+circ(0,y-8,2.8,'ic fill')+
-    bar(0,y,48,15,'ic fBlack',2);
+  /* tripode a 3 gambe (base ~32 cm) + colonna + mensola 50×16 (Manhasset Symphony) */
+  return lin(0,y-8,-16,y+13,'ic thin')+lin(0,y-8,0,y+14,'ic thin')+lin(0,y-8,16,y+13,'ic thin')+
+    circ(0,y-8,2.6,'ic fill')+
+    bar(0,y,50,16,'ic fBlack',2);
 }
 function celloPost(){
   return shadow(42,58,0,8)+bar(0,-36,44,44,'ic fBlack',9)+bar(0,-60,44,8,'ic fill',4)+
@@ -637,8 +639,8 @@ function station(it, glyph, dblKind){
       '<g transform="translate('+dx+',0)">'+glyph+'</g>'+
       '<g transform="translate(0,38)">'+leggioGlyph(0)+'</g>';
   }
-  /* postazione singola: glifo strumento ingrandito del 27% per leggibilità */
-  return (it.sedia!==false?chairSvg(0):'')+'<g transform="scale(1.27)">'+glyph+'</g>'+(it.leggio!==false?leggioGlyph(38):'');
+  /* postazione singola: stesso glifo a scala reale identico alla doppia (coerenza dimensionale) */
+  return (it.sedia!==false?chairSvg(0):'')+glyph+(it.leggio!==false?leggioGlyph(38):'');
 }
 function timpaniSet(n){
   var specs = n===2 ? [[-42,18,40],[42,18,37]] :
@@ -972,29 +974,29 @@ var TYPES = {
              draw:function(it){ return station(it, gVln(0.45), "vln1"); }},
   violapost:{nome:"Viola", dim:"postazione", cat:"Archi", w:100,d:105,
              draw:function(it){ return station(it, gVln(0.53), "vla"); }},
-  vln1x2:   {nome:"Violini I ×2 + leggio", dim:"2 post. 175×130", cat:"Archi", w:175,d:130, catalog:false,
+  vln1x2:   {nome:"Violini I ×2 + leggio", dim:"2 post. 175×115", cat:"Archi", w:175,d:115, catalog:false,
              draw:function(it){ return doubleStringPost("vln1", it&&it.sep?it.sep/2:null); }},
-  vln2x2:   {nome:"Violini II ×2 + leggio", dim:"2 post. 175×130", cat:"Archi", w:175,d:130, catalog:false,
+  vln2x2:   {nome:"Violini II ×2 + leggio", dim:"2 post. 175×115", cat:"Archi", w:175,d:115, catalog:false,
              draw:function(it){ return doubleStringPost("vln2", it&&it.sep?it.sep/2:null); }},
-  violax2:  {nome:"Viole ×2 + leggio", dim:"2 post. 175×130", cat:"Archi", w:175,d:130, catalog:false,
+  violax2:  {nome:"Viole ×2 + leggio", dim:"2 post. 175×115", cat:"Archi", w:175,d:115, catalog:false,
              draw:function(it){ return doubleStringPost("vla", it&&it.sep?it.sep/2:null); }},
-  cellix2:  {nome:"Celli ×2 + leggio", dim:"2 post. 205×165", cat:"Archi", w:205,d:165, catalog:false,
+  cellix2:  {nome:"Celli ×2 + leggio", dim:"2 post. 205×130", cat:"Archi", w:205,d:130, catalog:false,
              draw:function(it){ return doubleStringPost("vc", it&&it.sep?it.sep/2:null); }},
-  cbx2:     {nome:"Contrabbassi ×2 + leggio", dim:"2 post. 260×180", cat:"Archi", w:260,d:180, catalog:false,
+  cbx2:     {nome:"Contrabbassi ×2 + leggio", dim:"2 post. 260×140", cat:"Archi", w:260,d:140, catalog:false,
              draw:function(it){ return doubleStringPost("cb", it&&it.sep?it.sep/2:null); }},
-  archi2leggio:{nome:"2 archi + 1 leggio", dim:"postazione doppia", cat:"Archi", w:175,d:130, catalog:false,
+  archi2leggio:{nome:"2 archi + 1 leggio", dim:"postazione doppia", cat:"Archi", w:175,d:115, catalog:false,
              draw:function(it){ return doubleStringPost("vln1", it&&it.sep?it.sep/2:null); }},
-  violoncello:{nome:"Violoncello", dim:"postazione", cat:"Archi", w:85,d:130,
+  violoncello:{nome:"Violoncello", dim:"postazione", cat:"Archi", w:110,d:130,
              draw:function(it){ it=it||{};
                if(it.doppia) return doubleStringPost("vc");
                return (it.sedia!==false ? shadow(42,58,0,8)+bar(0,-36,44,44,'ic fBlack',9)+bar(0,-60,44,8,'ic fill',4) : '')+
-                 '<g transform="translate(0,22) rotate(-24) scale(1.27)">'+violino(1.0,'fWood')+'</g>'+
+                 '<g transform="translate(0,22) rotate(-24)">'+violino(1.0,'fWood')+'</g>'+
                  (it.leggio!==false ? leggioGlyph(58) : ''); }},
-  contrabbasso:{nome:"Contrabbasso", dim:"postazione", cat:"Archi", w:115,d:135,
+  contrabbasso:{nome:"Contrabbasso", dim:"postazione", cat:"Archi", w:120,d:140,
              draw:function(it){ it=it||{};
                if(it.doppia) return doubleStringPost("cb");
                return (it.sedia!==false ? shadow(54,60,0,6)+circ(-42,-42,16,'ic fBlack') : '')+
-                 '<g transform="translate(6,14) rotate(-12) scale(1.27)">'+violino(1.45,'fWoodD')+'</g>'+
+                 '<g transform="translate(6,14) rotate(-12)">'+violino(1.45,'fWoodD')+'</g>'+
                  (it.leggio!==false ? leggioGlyph(60) : ''); }},
   arpa:     {nome:"Arpa da concerto", dim:"55×120 +panca", cat:"Ritmica", sub:"Tastiere e arpa", w:75,d:140,
              draw:function(){
@@ -1112,21 +1114,23 @@ var TYPES = {
                lin(0,2,-22,28,'ic thin')+lin(0,2,22,28,'ic thin')+lin(0,2,0,32,'ic thin')+circ(0,2,3,'ic fill'); }}
 };
 var CAT_ORDER = ["Pedane e strutture","Ottoni","Legni","Ritmica","Archi","Voci e microfoni","Monitoraggio","Tecnica","Video"];
-/* postazioni configurabili (sedia/leggio/doppia). s=[w,d] singola, d=[w,d] doppia */
+/* postazioni configurabili (sedia/leggio/doppia). s=[w,d] singola, d=[w,d] doppia.
+   La doppia condivide il leggio → cambia SOLO la larghezza, la profondità resta = singola. */
 var POSTAZ = {
-  vlnpost:{s:[100,105], dbl:[175,130], sep:90}, violapost:{s:[100,105], dbl:[175,130], sep:90},
-  violoncello:{s:[85,130], dbl:[205,165], sep:110}, contrabbasso:{s:[115,135], dbl:[260,180], sep:140},
-  corno:{s:[95,105], dbl:[170,125], sep:90}, tromba:{s:[95,105], dbl:[170,125], sep:90},
-  trombone:{s:[95,112], dbl:[175,132], sep:90}, tuba:{s:[95,105], dbl:[170,125], sep:90},
-  flauto:{s:[95,105], dbl:[170,125], sep:90}, oboe:{s:[95,105], dbl:[170,125], sep:90},
-  clarinetto:{s:[95,105], dbl:[170,125], sep:90}, fagotto:{s:[95,110], dbl:[175,130], sep:90},
-  saxalto:{s:[95,105], dbl:[175,125], sep:90}, saxtenore:{s:[100,108], dbl:[185,130], sep:90}, saxbaritono:{s:[105,112], dbl:[195,135], sep:90}
+  vlnpost:{s:[100,115], dbl:[175,115], sep:90}, violapost:{s:[100,115], dbl:[175,115], sep:90},
+  violoncello:{s:[110,130], dbl:[205,130], sep:110}, contrabbasso:{s:[120,140], dbl:[260,140], sep:140},
+  corno:{s:[95,105], dbl:[170,105], sep:90}, tromba:{s:[95,105], dbl:[170,105], sep:90},
+  trombone:{s:[95,112], dbl:[175,112], sep:90}, tuba:{s:[95,105], dbl:[170,105], sep:90},
+  flauto:{s:[95,105], dbl:[170,105], sep:90}, oboe:{s:[95,105], dbl:[170,105], sep:90},
+  clarinetto:{s:[95,105], dbl:[170,105], sep:90}, fagotto:{s:[95,110], dbl:[175,110], sep:90},
+  saxalto:{s:[95,105], dbl:[175,105], sep:90}, saxtenore:{s:[100,108], dbl:[185,108], sep:90}, saxbaritono:{s:[105,112], dbl:[195,112], sep:90}
 };
-/* tipi "doppia" generati dal modale Organico (kind per il disegno + dimensioni + distanza default) */
+/* tipi "doppia" generati dal modale Organico (kind per il disegno + dimensioni + distanza default).
+   Profondità allineata alla postazione singola corrispondente. */
 var DOUBLE_TYPES = {
-  vln1x2:{kind:"vln1", dbl:[175,130], sep:90}, vln2x2:{kind:"vln2", dbl:[175,130], sep:90},
-  violax2:{kind:"vla", dbl:[175,130], sep:90}, cellix2:{kind:"vc", dbl:[205,165], sep:110},
-  cbx2:{kind:"cb", dbl:[260,180], sep:140}, archi2leggio:{kind:"vln1", dbl:[175,130], sep:90}
+  vln1x2:{kind:"vln1", dbl:[175,115], sep:90}, vln2x2:{kind:"vln2", dbl:[175,115], sep:90},
+  violax2:{kind:"vla", dbl:[175,115], sep:90}, cellix2:{kind:"vc", dbl:[205,130], sep:110},
+  cbx2:{kind:"cb", dbl:[260,140], sep:140}, archi2leggio:{kind:"vln1", dbl:[175,115], sep:90}
 };
 /* config "distanza tra i 2" per l'item selezionato (doppia da flag o tipo ×2 del modale) */
 function sepCfg(it){
