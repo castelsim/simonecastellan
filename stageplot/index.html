@@ -303,8 +303,9 @@
         <label class="chk"><input type="checkbox" id="pDoppia"> Postazione a 2 (2 strumenti + 1 leggio)</label>
       </div>
       <div id="pSepWrap" style="display:none;margin-top:6px">
-        <label>Distanza tra i 2 (cm)</label>
-        <input type="number" id="pSep" min="20" max="300" step="5">
+        <label style="display:flex;justify-content:space-between;align-items:baseline">Distanza tra i 2 <span id="pSepVal" style="color:#374151;font-weight:600">90 cm</span></label>
+        <input type="range" id="pSep" min="20" max="300" step="5" style="width:100%;padding:0">
+        <button class="btn" id="pSplit" style="width:100%;margin-top:9px;font-size:12px">⇔ Dividi in 2 postazioni singole</button>
       </div>
     </div>
     <div class="btns">
@@ -1313,7 +1314,8 @@ function renderProps(){
     document.getElementById("pDoppia").checked = dbl;
   }
   var sw=document.getElementById("pSepWrap");
-  if(cfg){ sw.style.display="block"; document.getElementById("pSep").value = it.sep || cfg.sep; }
+  if(cfg){ sw.style.display="block"; var sv=it.sep || cfg.sep;
+    document.getElementById("pSep").value = sv; document.getElementById("pSepVal").textContent = sv+" cm"; }
   else sw.style.display="none";
 }
 function mutSel(fn){ var it=getSel(); if(!it) return; fn(it); render(); save(); }
@@ -1332,11 +1334,35 @@ document.getElementById("pDoppia").addEventListener("change", function(){ mutSel
     else { it.w=P.s[0]; it.d=P.s[1]; }
   }
 }); });
-document.getElementById("pSep").addEventListener("change", function(){ mutSel(function(it){
-  var cfg=sepCfg(it); if(!cfg) return;
+/* slider distanza: aggiornamento live su "input" (senza salvare ad ogni tacca), salva una volta su "change" */
+function applySep(doSave){
+  var it=getSel(), cfg=sepCfg(it); if(!cfg) return;
   it.sep=Math.max(20, Math.min(300, +document.getElementById("pSep").value||cfg.sep));
   it.w=sepToW(cfg, it.sep);
-}); });
+  document.getElementById("pSepVal").textContent = it.sep+" cm";
+  render(); if(doSave) save();
+}
+document.getElementById("pSep").addEventListener("input", function(){ applySep(false); });
+document.getElementById("pSep").addEventListener("change", function(){ applySep(true); });
+/* Dividi una postazione doppia (×2 del generatore o doppia-da-flag) in 2 postazioni singole */
+var SINGLE_OF_KIND={vln1:"vlnpost", vln2:"vlnpost", vla:"violapost", vc:"violoncello", cb:"contrabbasso"};
+function splitDouble(){
+  var it=getSel(); if(!it) return;
+  var single;
+  if(DOUBLE_TYPES[it.type]) single=SINGLE_OF_KIND[DOUBLE_TYPES[it.type].kind];
+  else if(POSTAZ[it.type] && it.doppia) single=it.type;
+  if(!single || !TYPES[single] || !POSTAZ[single]) return;
+  var cfg=sepCfg(it), half=(it.sep||cfg.sep)/2, rot=(it.rot||0)*Math.PI/180;
+  var ox=Math.cos(rot)*half, oy=Math.sin(rot)*half, P=POSTAZ[single], base=it.label||"";
+  function mk(cx,cy,suf){ return {id:uid(), type:single, x:Math.round(cx), y:Math.round(cy), rot:it.rot||0,
+    w:P.s[0], d:P.s[1], label:base?base+suf:"", sedia:true, leggio:true, doppia:false}; }
+  var a=mk(it.x-ox, it.y-oy, "a"), b=mk(it.x+ox, it.y+oy, "b");
+  state.items=state.items.filter(function(x){ return x.id!==it.id; });
+  state.items.push(a,b);
+  selSet={}; selSet[a.id]=true; selSet[b.id]=true; sel=b.id;
+  render(); save();
+}
+document.getElementById("pSplit").addEventListener("click", splitDouble);
 document.getElementById("pRotL").addEventListener("click", function(){ rotateSel(-15); });
 document.getElementById("pRotR").addEventListener("click", function(){ rotateSel(15); });
 document.getElementById("pDup").addEventListener("click", duplicateSel);
@@ -1772,8 +1798,8 @@ function presetCounts(id){
    Restituisce il raggio esterno (per posizionare legni/ottoni dietro). */
 var STR_R0=290, STR_DR=150;
 function layoutStrings(counts, out){
-  var secs=[["v1","Violini I","vlnpost"],["v2","Violini II","vlnpost"],
-            ["vle","Viole","violapost"],["vc","Violoncelli","violoncello"]];
+  var secs=[["v1","Violini I","vlnpost","Vln I"],["v2","Violini II","vlnpost","Vln II"],
+            ["vle","Viole","violapost","Vla"],["vc","Violoncelli","violoncello","Vc"]];
   var sizes=secs.map(function(s){ return counts[s[0]]||0; });
   var total=sizes.reduce(function(a,b){ return a+b; },0);
   if(!total) return STR_R0;
@@ -1786,11 +1812,12 @@ function layoutStrings(counts, out){
   });
   var P=2*Math.asin(Math.min(0.5, 56/STR_R0));   /* passo angolare ~ corda 112 cm */
   var m0=split.reduce(function(a,s){ return a+s[0]; },0);   /* posti in prima fila */
+  var secCount=[0,0,0,0];   /* numerazione progressiva per sezione: ogni leggio ha un nome */
   for(var r=0;r<rows;r++){
     var rowSeats=[];
     secs.forEach(function(s,i){
-      var k=split[i][r], mid=Math.floor(k/2);
-      for(var j=0;j<k;j++) rowSeats.push({type:s[2], lbl:(r===0&&j===mid)?s[1]+" ("+sizes[i]+")":""});
+      var k=split[i][r];
+      for(var j=0;j<k;j++){ secCount[i]++; rowSeats.push({type:s[2], lbl:s[3]+" "+secCount[i]}); }
     });
     var m=rowSeats.length; if(!m) continue;
     var R=STR_R0+STR_DR*r;
@@ -1803,11 +1830,11 @@ function layoutStrings(counts, out){
   /* Contrabbassi: arco corto dietro/destra dei violoncelli */
   var nb=counts.cb||0, outerRows=rows;
   if(nb){
-    var R=STR_R0+STR_DR*rows, a0=(m0-1)/2*P*0.55, midb=Math.floor(nb/2);
+    var R=STR_R0+STR_DR*rows, a0=(m0-1)/2*P*0.55;
     for(var j=0;j<nb;j++){
       var a=a0+j*P, x=R*Math.sin(a), y=-R*Math.cos(a);
       out.push({type:"contrabbasso", x:Math.round(x), y:Math.round(y),
-        rot:Math.round(a*180/Math.PI), label:j===midb?"Contrabbassi ("+nb+")":""});
+        rot:Math.round(a*180/Math.PI), label:"Cb "+(j+1)});
     }
     outerRows=rows+1;
   }
@@ -1841,7 +1868,7 @@ function buildOrchestraOut(counts){
     seats.forEach(function(s){
       var x=s.x-tot/2;
       out.push({type:s.g.type, x:x, y:y, rot:rotTo(x,y),
-        label: s.i===Math.floor((s.n-1)/2) ? s.g.nome+(s.n>1?" ("+s.n+")":"") : ""});
+        label: (DEFAULT_LABELS[s.g.type]||s.g.nome)+(s.n>1?" "+(s.i+1):"")});
     });
   });
 
@@ -1886,9 +1913,9 @@ function buildStringOrganicoOut(counts, opts){
     {id:"vc", double:"cellix2", single:"violoncello", singleLabel:"Vc"}
   ];
   function desksFor(sec){
-    var n=counts[sec.id]||0, desks=[], pairs=Math.floor(n/2);
-    for(var i=0;i<pairs;i++) desks.push({type:sec.double, label:defaultLabel(sec.double)});
-    if(n%2) desks.push({type:sec.single, label:sec.singleLabel});
+    var n=counts[sec.id]||0, desks=[], pairs=Math.floor(n/2), idx=0;
+    for(var i=0;i<pairs;i++){ idx++; desks.push({type:sec.double, label:sec.singleLabel+" "+idx}); }
+    if(n%2){ idx++; desks.push({type:sec.single, label:sec.singleLabel+" "+idx}); }
     return desks;
   }
   var secDesks=sections.map(function(sec){ return {sec:sec, desks:desksFor(sec)}; });
@@ -1916,9 +1943,9 @@ function buildStringOrganicoOut(counts, opts){
   }
   var cbN=counts.cb||0;
   if(cbN){
-    var cbDesks=[], cbPairs=Math.floor(cbN/2);
-    for(var c=0;c<cbPairs;c++) cbDesks.push({type:"cbx2", label:defaultLabel("cbx2")});
-    if(cbN%2) cbDesks.push({type:"contrabbasso", label:"Cb"});
+    var cbDesks=[], cbPairs=Math.floor(cbN/2), ci=0;
+    for(var c=0;c<cbPairs;c++){ ci++; cbDesks.push({type:"cbx2", label:"Cb "+ci}); }
+    if(cbN%2){ ci++; cbDesks.push({type:"contrabbasso", label:"Cb "+ci}); }
     var cbR=R0+DR*rows+90, cbP=2*Math.asin(Math.min(0.5, 110/cbR));
     var baseA=(totalDesks?((Math.max(3,totalDesks)-1)/2)*P*0.34:0.28);
     cbDesks.forEach(function(d,i){
@@ -2309,8 +2336,7 @@ function buildWindOrganicoOut(counts, opts, fam, rowsLayout){
     var seats=[], cur=0;
     groups.forEach(function(g, gi){
       if(gi>0) cur+=gap;
-      var mid=Math.floor((g.n-1)/2);
-      for(var i=0;i<g.n;i++){ seats.push({fk:g.fk, x:cur, label:(i===mid? fam[g.fk].label+(g.n>1?" ("+g.n+")":"") : "")}); cur+=sp; }
+      for(var i=0;i<g.n;i++){ seats.push({fk:g.fk, x:cur, label:fam[g.fk].label+(g.n>1?" "+(i+1):"")}); cur+=sp; }
     });
     var totW=cur-sp, x0=-totW/2, y=-(R0+DR*placedRows);
     seats.forEach(function(s){ out.push({type:fam[s.fk].type, x:Math.round(x0+s.x), y:y, rot:0, label:s.label}); });
