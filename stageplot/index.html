@@ -632,14 +632,23 @@ function leggioGlyph(y){
    Opzioni: it.mano = microfono in mano (altrimenti su asta davanti); it.leggio = leggio davanti. */
 function singer(it){
   it=it||{};
-  var s='<ellipse class="ic fBlack" cx="0" cy="-9" rx="21" ry="12.5"/>'+   /* spalle (dietro) */
-        circ(0,4,11,'ic fBlack')+circ(0,4,7,'ic thin fBlack');             /* testa */
-  if(it.mano){
-    s+=lin(3,10,11,20,'ic thin')+'<g transform="translate(13,23) rotate(-30)">'+bar(0,0,7,13,'ic fGrey',3)+'</g>';  /* mic in mano */
-  } else {
-    s+=bar(0,17,7,12,'ic fGrey',3)+lin(0,23,0,31,'ic thin')+circ(0,35,10,'ic fBlack')+circ(0,35,3,'dotS');           /* asta + base */
+  /* busto con spalle e braccia (vista dall'alto), rivolto al pubblico (+y) */
+  var s='<path class="ic fBlack" d="M -21,-5 C -24,-15 -15,-19 -7,-16 C -2,-14 2,-14 7,-16 C 15,-19 24,-15 21,-5 C 20,4 14,7 8,5 C 3,4 -3,4 -8,5 C -14,7 -20,4 -21,-5 Z"/>';
+  /* testa con accenno del viso verso il fronte (puntina) */
+  s+='<path class="ic fBlack" d="M -9,7 A 10 10 0 1 1 9,7 C 6,13 3,16 0,16 C -3,16 -6,13 -9,7 Z"/>';
+  s+=circ(0,5,6.5,'ic thin fBlack');
+  var legY=30;
+  if(!it.nomic){
+    if(it.mano){
+      s+='<path d="M 9,9 Q 20,16 18,26" fill="none" stroke="#17181b" stroke-width="6.5" stroke-linecap="round"/>';   /* braccio */
+      s+='<g transform="translate(19,29) rotate(-28)">'+bar(0,0,7.5,15,'ic fGrey',3)+'</g>';                          /* mic in mano */
+      legY=40;
+    } else {
+      s+=bar(0,21,8,12,'ic fGrey',3)+lin(0,27,0,33,'ic thin')+circ(0,37,11,'ic fBlack')+circ(0,37,4,'dotS');         /* capsula + asta + base */
+      legY=54;
+    }
   }
-  if(it.leggio) s+='<g transform="translate(0,'+(it.mano?34:52)+')">'+leggioGlyph(0)+'</g>';
+  if(it.leggio) s+='<g transform="translate(0,'+legY+')">'+leggioGlyph(0)+'</g>';
   return s;
 }
 function celloPost(){
@@ -1081,10 +1090,10 @@ var TYPES = {
              draw:function(){ return '<path class="ic fWoodL" d="M -30,22 L 30,22 L 21,-22 L -21,-22 Z"/>'+
                '<path class="ic thin" fill="none" d="M -24,16 L 24,16 L 17,-16 L -17,-16 Z"/>'+
                circ(0,-8,2.5,'ic fill')+lin(0,-8,0,0,'ic thin'); }},
-  cantante: {nome:"Cantante", dim:"voce", cat:"Voci", w:60,d:85, voce:true, defLabel:"Voce",
+  cantante: {nome:"Cantante", dim:"voce", cat:"Voci", w:64,d:90, voce:true, defLabel:"Voce",
              draw:function(it){ return singer(it); }},
-  corista:  {nome:"Corista", dim:"voce coro", cat:"Voci", w:54,d:64, voce:true, defLabel:"Coro",
-             draw:function(it){ it=it||{}; return singer({mano:false, leggio:it.leggio!==false}); }},
+  corista:  {nome:"Corista", dim:"voce coro", cat:"Voci", w:54,d:88, voce:true, defLabel:"Coro",
+             draw:function(it){ it=it||{}; return singer({mano:false, nomic:true, leggio:it.leggio!==false}); }},
   /* --- monitoraggio --- */
   wedge:    {nome:"Wedge monitor", dim:"58×50", cat:"Monitoraggio", w:60,d:52, defLabel:"MIX 1",
              draw:function(){ return '<path class="ic mon fMon" d="M -29,25 L 29,25 L 21,-25 L -21,-25 Z"/>'+
@@ -1396,7 +1405,10 @@ function applySep(doSave){
 document.getElementById("pSep").addEventListener("input", function(){ applySep(false); });
 document.getElementById("pSep").addEventListener("change", function(){ applySep(true); });
 document.getElementById("pMano").addEventListener("change", function(){ mutSel(function(it){ it.mano=document.getElementById("pMano").checked; }); });
-document.getElementById("pLeggioV").addEventListener("change", function(){ mutSel(function(it){ it.leggio=document.getElementById("pLeggioV").checked; }); });
+document.getElementById("pLeggioV").addEventListener("change", function(){ mutSel(function(it){
+  it.leggio=document.getElementById("pLeggioV").checked;
+  if(it.type==="cantante") it.d = it.leggio?122:90;   /* fa spazio al leggio davanti */
+}); });
 /* Dividi una postazione doppia (×2 del generatore o doppia-da-flag) in 2 postazioni singole */
 var SINGLE_OF_KIND={vln1:"vlnpost", vln2:"vlnpost", vla:"violapost", vc:"violoncello", cb:"contrabbasso"};
 function splitDouble(){
