@@ -217,19 +217,21 @@
   @media (max-width:880px){
     header,footer{display:none}
     body{display:block;height:100%}
-    main{position:fixed;top:84px;left:0;right:0;bottom:58px;background:#fafafa}
     #mTop{display:block} #mBottom{display:flex}
-    /* catalogo, proprietà e menu = bottom sheet che salgono dal basso */
-    #catalog,#props,#mMenu{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;max-width:none;height:auto;max-height:80vh;
+    /* bande fisse: barra alta | palco | barra azioni | pannello fisso */
+    main{position:fixed;top:84px;left:0;right:0;bottom:calc(40vh + 50px);background:#fafafa}
+    #mBottom{bottom:40vh;height:50px;border-top:1px solid #e5e7eb}
+    /* PANNELLO FISSO in basso: proprietà dell'elemento selezionato, oppure channel list */
+    #props{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;max-width:none;height:40vh;z-index:30;
+      background:#fff;border:none;border-top:1px solid #e5e7eb;transform:none;overflow-y:auto;padding:11px 14px 22px;box-shadow:0 -4px 16px rgba(0,0,0,.07)}
+    #props #eventoSec{display:none}                              /* titolo nel top bar, luogo nel menu ⋯ */
+    body.m-has-sel #props #chanlist{display:none}               /* elemento selezionato → nascondi channel list */
+    /* CATALOGO e MENU = bottom sheet (overlay che salgono dal basso) */
+    #catalog,#mMenu{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;max-width:none;height:auto;max-height:80vh;display:block;
       z-index:60;background:#fff;border:none;border-radius:16px 16px 0 0;transform:translateY(103%);transition:transform .26s ease;
       box-shadow:0 -8px 30px rgba(0,0,0,.22);overflow-y:auto;padding:12px 14px 26px}
-    #props{max-height:62vh}
-    #catalog.open,#props.open,#mMenu.open{transform:none}
-    #catalog::before,#props::before,#mMenu::before{content:"";display:block;width:38px;height:4px;border-radius:3px;background:#d1d5db;margin:0 auto 12px}
-    /* su mobile in modalità selezione il pannello mostra SOLO l'elemento */
-    #props #eventoSec,#props #chanlist{display:none}
-    body.mprops-full #props #eventoSec,body.mprops-full #props #chanlist{display:block}
-    body.mprops-full #props #selProps,body.mprops-full #props #groupProps,body.mprops-full #props #noSel{display:none}
+    #catalog.open,#mMenu.open{transform:none}
+    #catalog::before,#mMenu::before{content:"";display:block;width:38px;height:4px;border-radius:3px;background:#d1d5db;margin:0 auto 12px}
     #mobBackdrop.show{display:block}
     .mcard{width:auto !important;max-width:94vw;max-height:88vh}
   }
@@ -402,7 +404,7 @@
 </div>
 <div id="mMenu">
   <div class="msheet-h">Menu</div>
-  <button data-act="evento">Evento e channel list</button>
+  <button data-act="luogo">Luogo evento (per il render)</button>
   <button data-act="pdf">Esporta PDF in scala</button>
   <button data-act="vr">Render 3D / VR</button>
   <button data-act="theme">Tema chiaro / scuro</button>
@@ -1407,6 +1409,7 @@ function renderProps(){
   var mWi=document.getElementById("mW"); if(mWi && document.activeElement!==mWi) mWi.value=state.stage.w/100;
   var mDi=document.getElementById("mD"); if(mDi && document.activeElement!==mDi) mDi.value=state.stage.d/100;
   var n = selIds().length, grp = document.getElementById("groupProps");
+  document.body.classList.toggle("m-has-sel", n>0);   /* mobile: pannello = elemento vs channel list */
   if(n>1){
     grp.hidden=false; document.getElementById("selProps").hidden=true; document.getElementById("noSel").hidden=true;
     document.getElementById("grpNome").textContent = n+" elementi selezionati";
@@ -1689,27 +1692,21 @@ function addItem(type, over){
 function isMobile(){ return window.matchMedia("(max-width:880px)").matches; }
 function closeMobileDrawers(){
   if(!isMobile()) return;
-  ["catalog","props","mMenu"].forEach(function(id){ var e=document.getElementById(id); if(e) e.classList.remove("open"); });
+  ["catalog","mMenu"].forEach(function(id){ var e=document.getElementById(id); if(e) e.classList.remove("open"); });
   document.getElementById("mobBackdrop").classList.remove("show");
-  document.body.classList.remove("mprops-full");
 }
 (function(){
   var cat=document.getElementById("catalog"), pr=document.getElementById("props"),
       mm=document.getElementById("mMenu"), bd=document.getElementById("mobBackdrop");
-  function closeAll(){ cat.classList.remove("open"); pr.classList.remove("open"); mm.classList.remove("open");
-    bd.classList.remove("show"); document.body.classList.remove("mprops-full"); }
-  function openSheet(which, full){
+  function closeAll(){ cat.classList.remove("open"); mm.classList.remove("open"); bd.classList.remove("show"); }
+  function openSheet(which){
     closeAll();
     if(which==="catalog") cat.classList.add("open");
     else if(which==="menu") mm.classList.add("open");
-    else if(which==="props"){ if(full) document.body.classList.add("mprops-full"); pr.classList.add("open"); }
     bd.classList.add("show");
   }
   bd.addEventListener("click", closeAll);
-  window.openDrawer=function(which){ if(which==="props") openSheet("props"); else if(which==="cat") openSheet("catalog"); else closeAll(); };
-  window.mShowProps=function(){ if(isMobile()) openSheet("props"); };       /* foglio elemento (al tocco) */
-  window.mHideProps=function(){ if(!isMobile()) return; pr.classList.remove("open"); document.body.classList.remove("mprops-full");
-    if(!cat.classList.contains("open")&&!mm.classList.contains("open")) bd.classList.remove("show"); };
+  window.openDrawer=function(which){ if(which==="cat") openSheet("catalog"); else closeAll(); };   /* proprietà ora è pannello fisso */
   /* barra alta: titolo + dimensioni palco */
   var mTitle=document.getElementById("mTitle");
   mTitle.addEventListener("input", function(){ state.titolo=this.value; var t=document.getElementById("titolo"); if(t) t.value=this.value; save(); });
@@ -1729,7 +1726,7 @@ function closeMobileDrawers(){
   Array.prototype.forEach.call(mm.querySelectorAll("button"), function(b){
     b.addEventListener("click", function(){
       var a=b.getAttribute("data-act"); if(!a) return; closeAll();
-      if(a==="evento") openSheet("props", true);
+      if(a==="luogo"){ var v=prompt("Luogo dell'evento (per il render 3D):", state.luogo||""); if(v!==null){ state.luogo=v; var l=document.getElementById("luogo"); if(l) l.value=v; save(); } }
       else if(a==="pdf") proxy("bPdf"); else if(a==="vr") proxy("bR3d"); else if(a==="theme") proxy("bTheme");
       else if(a==="json") proxy("bJson"); else if(a==="import") proxy("bImport"); else if(a==="new") proxy("bNew");
     });
@@ -1825,10 +1822,7 @@ svg.addEventListener("pointermove", function(e){
 svg.addEventListener("pointerup", function(e){
   delete pointers[e.pointerId];
   if(pinch){ if(Object.keys(pointers).length<2) pinch=null; svg.classList.remove("dragging"); drag=null; return; }
-  if(drag && drag.mode==="item"){
-    if(drag.moved){ render(); save(); }
-    else if(window.mShowProps){ window.mShowProps(); }   /* tap secco su un elemento = apri foglio proprietà (mobile) */
-  }
+  if(drag && drag.mode==="item" && drag.moved){ render(); save(); }
   else if(drag && drag.mode==="marquee"){
     var r=drag.rect;
     if(r && (r.w>8||r.h>8)){
@@ -1839,8 +1833,7 @@ svg.addEventListener("pointerup", function(e){
     render();
   }
   else if(drag && drag.mode==="pan" && Math.abs(e.clientX-drag.px)<4 && Math.abs(e.clientY-drag.py)<4){
-    clearSelection(); render();  /* click sullo sfondo = deseleziona */
-    if(window.mHideProps) window.mHideProps();
+    clearSelection(); render();  /* click sullo sfondo = deseleziona (pannello torna a channel list) */
   }
   svg.classList.remove("dragging");
   drag=null;
@@ -1860,14 +1853,13 @@ svg.addEventListener("dblclick", function(e){   /* doppio click su un elemento =
   var g = e.target.closest ? e.target.closest(".item") : null; if(!g) return;
   var id = g.getAttribute("data-id");
   selectOne(id); render();
-  if(isMobile() && window.openDrawer) window.openDrawer("props");
   var inp = document.getElementById("pLabel");
   if(inp){ inp.focus(); inp.select(); }
 });
 function fit(){
-  var m=180, W=state.stage.w+2*m, D=state.stage.d+2*m;
+  var mob=isMobile(), m=mob?45:180, W=state.stage.w+2*m, D=state.stage.d+2*m;
   var ar = svg.clientWidth/svg.clientHeight;
-  if(W/D > ar){ vb={x:-m, y:-m-(W/ar-D-m)/2, w:W, h:W/ar}; }
+  if(W/D > ar){ var h=W/ar; vb={x:-m, y: mob ? -m : -m-(h-D-m)/2, w:W, h:h}; }   /* mobile: palco in alto */
   else { vb={x:-m-(D*ar-W-m)/2, y:-m, w:D*ar, h:D}; }
   render();
 }
