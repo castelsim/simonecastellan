@@ -125,8 +125,8 @@
   .fFloor{fill:url(#gFloor)} .fRed{fill:url(#gRed)}       .fGrey{fill:#494d54}
   .fMon{fill:#33363b}
   /* sagome cantanti: pelle, capelli, vestiti */
-  .fSkin{fill:#e7b48f} .fShirt{fill:#3f5c83} .fDress{fill:#a63f62}
-  .hair0{fill:#5b3a1e} .hair1{fill:#2c2320} .hair2{fill:#caa15a} .hair3{fill:#9aa0a6}
+  .fSkin{fill:#e7b48f} .fShirt{fill:#3f5c83} .fShirtF{fill:#e0789f}
+  .fHairM{fill:#5b3a1e}
   .dotS{fill:#cfd4da}
   .rug{fill:rgba(176,58,58,.16);stroke:#8e2b26;stroke-width:2;stroke-dasharray:10 7}
   .plex{fill:rgba(165,196,222,.18);stroke:#7f96a8;stroke-width:2;stroke-linejoin:round}
@@ -312,10 +312,8 @@
       </div>
     </div>
     <div id="pVoce" style="display:none;border-top:1px solid #eef0f2;margin-top:10px;padding-top:8px">
-      <label class="chk"><input type="checkbox" id="pDonna"> Donna (capelli lunghi)</label>
-      <label>Capelli</label>
-      <select id="pHair"><option value="0">Castani</option><option value="1">Scuri</option><option value="2">Biondi</option><option value="3">Grigi</option></select>
-      <label class="chk" style="margin-top:6px"><input type="checkbox" id="pMano"> Microfono in mano (invece che su asta)</label>
+      <label class="chk"><input type="checkbox" id="pDonna"> Donna (maglietta rosa)</label>
+      <label class="chk"><input type="checkbox" id="pMano"> Microfono in mano (invece che su asta)</label>
       <label class="chk"><input type="checkbox" id="pLeggioV"> Leggio</label>
     </div>
     <div class="btns">
@@ -636,19 +634,15 @@ function leggioGlyph(y){
 }
 /* Sagoma cantante (vista dall'alto): spalle + testa, rivolto al pubblico (+y).
    Opzioni: it.mano = microfono in mano (altrimenti su asta davanti); it.leggio = leggio davanti. */
-var HAIR_COL=["#5b3a1e","#2c2320","#caa15a","#9aa0a6"];   /* castano · scuro · biondo · grigio */
-/* Sagoma cantante (vista dall'alto), rivolto al pubblico (+y).
-   it.donna = femmina (capelli lunghi, vestito) · it.hair = 0..3 colore capelli
-   it.mano = mic in mano · it.nomic = senza mic (coro) · it.leggio = leggio */
+/* Sagoma cantante (vista dall'alto), rivolto al pubblico (+y). Stessa figura per tutti,
+   capelli marroni; it.donna = maglietta rosa (uomo = blu). it.mano = mic in mano ·
+   it.nomic = senza mic (coro) · it.leggio = leggio. */
 function singer(it){
   it=it||{};
-  var donna=it.donna===true, hair='hair'+((it.hair!=null?it.hair:0)%4);
-  var sleeve=donna?'#a63f62':'#3f5c83';
-  var s='';
-  if(donna) s+='<path class="ic '+hair+'" d="M -16,-5 C -20,-25 -9,-32 0,-32 C 9,-32 20,-25 16,-5 C 15,9 9,16 0,16 C -9,16 -15,9 -16,-5 Z"/>';   /* capelli lunghi */
-  if(donna) s+='<path class="ic fDress" d="M -15,-3 C -16,-12 -9,-16 0,-16 C 9,-16 16,-12 15,-3 C 17,9 12,16 7,14 C 2,13 -2,13 -7,14 C -12,16 -17,9 -15,-3 Z"/>';
-  else      s+='<path class="ic fShirt" d="M -21,-4 C -24,-15 -15,-19 -7,-16 C -2,-14 2,-14 7,-16 C 15,-19 24,-15 21,-4 C 20,5 14,8 8,6 C 3,5 -3,5 -8,6 C -14,8 -20,5 -21,-4 Z"/>';
-  s+=circ(0,5,9.5,'ic '+hair);                                                                  /* nuca / capelli in cima */
+  var donna=it.donna===true;
+  var shirt=donna?'fShirtF':'fShirt', sleeve=donna?'#e0789f':'#3f5c83';
+  var s='<path class="ic '+shirt+'" d="M -21,-4 C -24,-15 -15,-19 -7,-16 C -2,-14 2,-14 7,-16 C 15,-19 24,-15 21,-4 C 20,5 14,8 8,6 C 3,5 -3,5 -8,6 C -14,8 -20,5 -21,-4 Z"/>';
+  s+=circ(0,5,9.5,'ic fHairM');                                                                 /* capelli marroni */
   s+='<path class="ic fSkin" d="M -7,7 A 8 8 0 0 1 7,7 C 5,13.5 2,16.5 0,16.5 C -2,16.5 -5,13.5 -7,7 Z"/>';   /* viso verso il fronte */
   var legY=30;
   if(!it.nomic){
@@ -1106,7 +1100,7 @@ var TYPES = {
   cantante: {nome:"Cantante", dim:"voce", cat:"Voci", w:64,d:90, voce:true, defLabel:"Voce",
              draw:function(it){ return singer(it); }},
   corista:  {nome:"Corista", dim:"voce coro", cat:"Voci", w:54,d:88, voce:true, defLabel:"Coro",
-             draw:function(it){ it=it||{}; return singer({mano:false, nomic:true, leggio:it.leggio!==false, donna:it.donna, hair:it.hair}); }},
+             draw:function(it){ it=it||{}; return singer({mano:false, nomic:true, leggio:it.leggio!==false, donna:it.donna}); }},
   /* --- monitoraggio --- */
   wedge:    {nome:"Wedge monitor", dim:"58×50", cat:"Monitoraggio", w:60,d:52, defLabel:"MIX 1",
              draw:function(){ return '<path class="ic mon fMon" d="M -29,25 L 29,25 L 21,-25 L -21,-25 Z"/>'+
@@ -1388,7 +1382,6 @@ function renderProps(){
   pv.style.display = isVoce ? "block" : "none";
   if(isVoce){
     document.getElementById("pDonna").checked = it.donna===true;
-    document.getElementById("pHair").value = String(it.hair||0);
     document.getElementById("pMano").checked = it.mano===true;
     document.getElementById("pLeggioV").checked = it.leggio!==false;
   }
@@ -1420,7 +1413,6 @@ function applySep(doSave){
 document.getElementById("pSep").addEventListener("input", function(){ applySep(false); });
 document.getElementById("pSep").addEventListener("change", function(){ applySep(true); });
 document.getElementById("pDonna").addEventListener("change", function(){ mutSel(function(it){ it.donna=document.getElementById("pDonna").checked; }); });
-document.getElementById("pHair").addEventListener("change", function(){ mutSel(function(it){ it.hair=parseInt(document.getElementById("pHair").value,10)||0; }); });
 document.getElementById("pMano").addEventListener("change", function(){ mutSel(function(it){ it.mano=document.getElementById("pMano").checked; }); });
 document.getElementById("pLeggioV").addEventListener("change", function(){ mutSel(function(it){
   it.leggio=document.getElementById("pLeggioV").checked;
@@ -2423,15 +2415,14 @@ function buildVoiceOrganicoOut(counts, opts){
   opts=opts||{};
   /* S/C = voci femminili, T/B = maschili; capelli variati per realismo */
   var out=[], rowsDef=[ [["sop","S",true],["con","C",true]], [["ten","T",false],["bas","B",false]] ];   /* davanti S+C, dietro T+B */
-  var sp=64, rowGap=130, frontY=-220, hairF=[0,2,1,0,3], hairM=[1,0,3,0,1], hc=0;
+  var sp=64, rowGap=130, frontY=-220;
   rowsDef.forEach(function(rowSecs, ri){
     var singers=[];
     rowSecs.forEach(function(sec){ var n=counts[sec[0]]||0; for(var i=0;i<n;i++) singers.push({lbl:sec[1]+" "+(i+1), donna:sec[2]}); });
     var m=singers.length; if(!m) return;
     var totW=(m-1)*sp, x0=-totW/2, y=frontY-ri*rowGap;
     if(opts.riser) out.push({type:"pedanacoro", x:0, y:y-12, w:Math.max(400,totW+150), d:120, h:20+ri*20, label:""});
-    singers.forEach(function(s,idx){ var pal=s.donna?hairF:hairM;
-      out.push({type:"corista", x:Math.round(x0+idx*sp), y:y, rot:0, label:s.lbl, donna:s.donna, hair:pal[(hc++)%pal.length]}); });
+    singers.forEach(function(s,idx){ out.push({type:"corista", x:Math.round(x0+idx*sp), y:y, rot:0, label:s.lbl, donna:s.donna}); });
   });
   if(opts.mics) [-260,0,260].forEach(function(x){ out.push({type:"giraffa", x:x, y:frontY+70, rot:180, label:"Coro"}); });
   if(opts.director) out.push({type:"podio", x:0, y:frontY+150, label:"Direttore"});
