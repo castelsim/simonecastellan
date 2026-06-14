@@ -192,22 +192,46 @@
   .clactions .btn{padding:5px 9px;font-size:11.5px}
   .clempty{font-size:11.5px;color:#b6bbc2;margin:2px 0 4px}
   /* ===== FAB + drawer mobile ===== */
-  .fab{display:none;position:fixed;bottom:18px;z-index:62;width:52px;height:52px;border-radius:50%;
-    border:none;background:#1f2937;color:#fff;font-size:22px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.28)}
-  .fab.cat{left:16px} .fab.props{right:16px}
-  #mobBackdrop{display:none;position:fixed;inset:52px 0 0 0;background:rgba(17,24,39,.4);z-index:55}
+  .fab{display:none}
+  #mobBackdrop{display:none;position:fixed;inset:0;background:rgba(17,24,39,.42);z-index:55}
+  /* ===== CHROME MOBILE (visibile solo < 880px) ===== */
+  #mTop,#mBottom,#mMenu{display:none}
+  #mTop{position:fixed;top:0;left:0;right:0;z-index:50;background:#fff;border-bottom:1px solid #e5e7eb;padding:7px 12px 8px}
+  .mtop-r1{display:flex;align-items:center;gap:8px}
+  #mTitle{flex:1;min-width:0;border:1px solid #e5e7eb;border-radius:9px;padding:8px 10px;font-size:15px;font-weight:600;color:#1f2937}
+  #mTitle:focus{outline:none;border-color:#9aa3ad}
+  #mMenuBtn{flex:0 0 auto;width:42px;height:38px;border:1px solid #e5e7eb;border-radius:9px;background:#f1f3f4;font-size:20px;cursor:pointer;color:#1f2937}
+  .mtop-r2{display:flex;align-items:center;gap:9px;margin-top:7px}
+  .mtop-r2 .mlab{font-size:10px;font-weight:800;letter-spacing:.6px;color:#9ca3af}
+  .mtop-r2 label{display:flex;align-items:center;gap:4px;font-size:12.5px;color:#6b7280}
+  .mtop-r2 input{width:50px;border:1px solid #e5e7eb;border-radius:7px;padding:4px 6px;font-size:13px}
+  .mtop-r2 select{border:1px solid #e5e7eb;border-radius:7px;padding:4px;font-size:13px;background:#fff}
+  #mBottom{position:fixed;bottom:0;left:0;right:0;z-index:50;background:#fff;border-top:1px solid #e5e7eb;align-items:center;gap:9px;padding:0 14px;height:58px}
+  #mBottom button{width:46px;height:42px;border:1px solid #e5e7eb;border-radius:11px;background:#f1f3f4;font-size:20px;cursor:pointer;color:#1f2937}
+  #mBottom .mspace{flex:1;border:none;background:none}
+  #mBottom .madd{width:58px;height:48px;border:none;background:#1f2937;color:#fff;border-radius:15px;font-size:28px;box-shadow:0 5px 16px rgba(0,0,0,.25)}
+  .msheet-h{font-weight:700;font-size:12px;color:#9ca3af;text-transform:uppercase;letter-spacing:.7px;margin:2px 0 8px;text-align:center}
+  #mMenu button{display:block;width:100%;text-align:left;border:none;border-bottom:1px solid #f0f1f3;background:none;padding:14px 8px;font-size:15px;cursor:pointer;color:#1f2937}
+  #mMenu button:last-child{border-bottom:none}
+  #mMenu button.danger{color:#b91c1c}
   @media (max-width:880px){
-    body{grid-template-columns:1fr;grid-template-rows:52px 1fr;grid-template-areas:"top" "main"}
-    footer{display:none}
-    header{overflow-x:auto;overflow-y:hidden;gap:8px;padding:0 10px}
-    header .brand{margin-right:6px}
-    .hdr-stage,header .btn{flex:0 0 auto}
-    #catalog,#props{position:fixed;top:52px;bottom:0;width:86vw;max-width:340px;z-index:60;background:#fff;
-      transition:transform .22s ease;box-shadow:0 0 34px rgba(0,0,0,.2)}
-    #catalog{left:0;transform:translateX(-104%)} #catalog.open{transform:none}
-    #props{right:0;transform:translateX(104%)} #props.open{transform:none}
+    header,footer{display:none}
+    body{display:block;height:100%}
+    main{position:fixed;top:84px;left:0;right:0;bottom:58px;background:#fafafa}
+    #mTop{display:block} #mBottom{display:flex}
+    /* catalogo, proprietà e menu = bottom sheet che salgono dal basso */
+    #catalog,#props,#mMenu{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;max-width:none;height:auto;max-height:80vh;
+      z-index:60;background:#fff;border:none;border-radius:16px 16px 0 0;transform:translateY(103%);transition:transform .26s ease;
+      box-shadow:0 -8px 30px rgba(0,0,0,.22);overflow-y:auto;padding:12px 14px 26px}
+    #props{max-height:62vh}
+    #catalog.open,#props.open,#mMenu.open{transform:none}
+    #catalog::before,#props::before,#mMenu::before{content:"";display:block;width:38px;height:4px;border-radius:3px;background:#d1d5db;margin:0 auto 12px}
+    /* su mobile in modalità selezione il pannello mostra SOLO l'elemento */
+    #props #eventoSec,#props #chanlist{display:none}
+    body.mprops-full #props #eventoSec,body.mprops-full #props #chanlist{display:block}
+    body.mprops-full #props #selProps,body.mprops-full #props #groupProps,body.mprops-full #props #noSel{display:none}
     #mobBackdrop.show{display:block}
-    .fab{display:flex;align-items:center;justify-content:center}
+    .mcard{width:auto !important;max-width:94vw;max-height:88vh}
   }
   /* ===== TEMA SCURO ===== (chrome scuro, foglio palco resta chiaro) */
   body.dark{background:#11151c;color:#e5e7eb}
@@ -237,8 +261,14 @@
   body.dark .mcard{background:#1b2230;color:#e5e7eb}
   body.dark .mcard .hint,body.dark .mcard label{color:#94a3b8}
   body.dark .mcard input,body.dark .mcard select{background:#0f141b;border-color:#2b3445;color:#e5e7eb}
-  body.dark .fab{background:#2563eb}
-  body.dark #mobBackdrop{background:rgba(0,0,0,.55)}
+  body.dark #mobBackdrop{background:rgba(0,0,0,.6)}
+  body.dark #mTop,body.dark #mBottom{background:#161b24;border-color:#283142}
+  body.dark #mTitle,body.dark .mtop-r2 input,body.dark .mtop-r2 select{background:#0f141b;border-color:#2b3445;color:#e5e7eb}
+  body.dark #mMenuBtn,body.dark #mBottom button{background:#222b38;border-color:#2b3445;color:#e5e7eb}
+  body.dark #mBottom .madd{background:#2563eb}
+  body.dark #catalog,body.dark #props,body.dark #mMenu{background:#161b24}
+  body.dark #mMenu button{color:#e5e7eb;border-bottom-color:#222b32}
+  body.dark main{background:#0b0e13}
 </style>
 </head>
 <body>
@@ -349,6 +379,37 @@
 <button class="fab cat" id="fabCat" title="Catalogo elementi" aria-label="Apri catalogo">＋</button>
 <button class="fab props" id="fabProps" title="Proprietà e channel list" aria-label="Apri pannello">≡</button>
 <div id="mobBackdrop"></div>
+
+<!-- ===== CHROME MOBILE (solo < 880px) ===== -->
+<div id="mTop">
+  <div class="mtop-r1">
+    <input type="text" id="mTitle" placeholder="Titolo dello stage plot">
+    <button id="mMenuBtn" aria-label="Menu e impostazioni">⋯</button>
+  </div>
+  <div class="mtop-r2">
+    <span class="mlab">PALCO</span>
+    <label>L <input type="number" id="mW" min="1" step="0.5"> m</label>
+    <label>P <input type="number" id="mD" min="1" step="0.5"> m</label>
+    <label>Snap <select id="mSnap"><option value="0">no</option><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></label>
+  </div>
+</div>
+<div id="mBottom">
+  <button id="mUndo" aria-label="Annulla">↶</button>
+  <button id="mRedo" aria-label="Ripeti">↷</button>
+  <button id="mFit" aria-label="Adatta zoom">⤢</button>
+  <span class="mspace"></span>
+  <button id="mAdd" class="madd" aria-label="Aggiungi elemento">＋</button>
+</div>
+<div id="mMenu">
+  <div class="msheet-h">Menu</div>
+  <button data-act="evento">Evento e channel list</button>
+  <button data-act="pdf">Esporta PDF in scala</button>
+  <button data-act="vr">Render 3D / VR</button>
+  <button data-act="theme">Tema chiaro / scuro</button>
+  <button data-act="json">Salva .json</button>
+  <button data-act="import">Apri .json</button>
+  <button data-act="new" class="danger">Nuovo stage plot</button>
+</div>
 
 <footer>
   <span><b>R</b> ruota · <b>⇧R</b> ruota indietro · <b>frecce</b> sposta · <b>⌫</b> elimina · <b>D</b> duplica · <b>Esc</b> deseleziona</span>
@@ -1342,6 +1403,9 @@ function getSel(){ return state.items.find(function(i){ return i.id===sel; }) ||
 function renderProps(){
   document.getElementById("stW").value = state.stage.w/100;
   document.getElementById("stD").value = state.stage.d/100;
+  var mTi=document.getElementById("mTitle"); if(mTi && document.activeElement!==mTi) mTi.value=state.titolo||"";
+  var mWi=document.getElementById("mW"); if(mWi && document.activeElement!==mWi) mWi.value=state.stage.w/100;
+  var mDi=document.getElementById("mD"); if(mDi && document.activeElement!==mDi) mDi.value=state.stage.d/100;
   var n = selIds().length, grp = document.getElementById("groupProps");
   if(n>1){
     grp.hidden=false; document.getElementById("selProps").hidden=true; document.getElementById("noSel").hidden=true;
@@ -1625,21 +1689,51 @@ function addItem(type, over){
 function isMobile(){ return window.matchMedia("(max-width:880px)").matches; }
 function closeMobileDrawers(){
   if(!isMobile()) return;
-  document.getElementById("catalog").classList.remove("open");
-  document.getElementById("props").classList.remove("open");
+  ["catalog","props","mMenu"].forEach(function(id){ var e=document.getElementById(id); if(e) e.classList.remove("open"); });
   document.getElementById("mobBackdrop").classList.remove("show");
+  document.body.classList.remove("mprops-full");
 }
 (function(){
-  var cat=document.getElementById("catalog"), pr=document.getElementById("props"), bd=document.getElementById("mobBackdrop");
-  function openDrawer(which){
-    cat.classList.toggle("open", which==="cat");
-    pr.classList.toggle("open", which==="props");
-    bd.classList.toggle("show", which!=null);
+  var cat=document.getElementById("catalog"), pr=document.getElementById("props"),
+      mm=document.getElementById("mMenu"), bd=document.getElementById("mobBackdrop");
+  function closeAll(){ cat.classList.remove("open"); pr.classList.remove("open"); mm.classList.remove("open");
+    bd.classList.remove("show"); document.body.classList.remove("mprops-full"); }
+  function openSheet(which, full){
+    closeAll();
+    if(which==="catalog") cat.classList.add("open");
+    else if(which==="menu") mm.classList.add("open");
+    else if(which==="props"){ if(full) document.body.classList.add("mprops-full"); pr.classList.add("open"); }
+    bd.classList.add("show");
   }
-  document.getElementById("fabCat").addEventListener("click", function(){ openDrawer(cat.classList.contains("open")?null:"cat"); });
-  document.getElementById("fabProps").addEventListener("click", function(){ openDrawer(pr.classList.contains("open")?null:"props"); });
-  bd.addEventListener("click", function(){ openDrawer(null); });
-  window.openDrawer=openDrawer;
+  bd.addEventListener("click", closeAll);
+  window.openDrawer=function(which){ if(which==="props") openSheet("props"); else if(which==="cat") openSheet("catalog"); else closeAll(); };
+  window.mShowProps=function(){ if(isMobile()) openSheet("props"); };       /* foglio elemento (al tocco) */
+  window.mHideProps=function(){ if(!isMobile()) return; pr.classList.remove("open"); document.body.classList.remove("mprops-full");
+    if(!cat.classList.contains("open")&&!mm.classList.contains("open")) bd.classList.remove("show"); };
+  /* barra alta: titolo + dimensioni palco */
+  var mTitle=document.getElementById("mTitle");
+  mTitle.addEventListener("input", function(){ state.titolo=this.value; var t=document.getElementById("titolo"); if(t) t.value=this.value; save(); });
+  document.getElementById("mW").addEventListener("change", function(){ state.stage.w=Math.round((+this.value||12)*100); render(); save(); });
+  document.getElementById("mD").addEventListener("change", function(){ state.stage.d=Math.round((+this.value||8)*100); render(); save(); });
+  var mSnap=document.getElementById("mSnap"), snapEl=document.getElementById("snap");
+  mSnap.value=snapEl.value;
+  mSnap.addEventListener("change", function(){ snapEl.value=this.value; });
+  /* barra bassa */
+  document.getElementById("mUndo").addEventListener("click", undo);
+  document.getElementById("mRedo").addEventListener("click", redo);
+  document.getElementById("mFit").addEventListener("click", fit);
+  document.getElementById("mAdd").addEventListener("click", function(){ openSheet("catalog"); });
+  /* menu ⋯ → riusa i pulsanti desktop nascosti */
+  document.getElementById("mMenuBtn").addEventListener("click", function(){ openSheet("menu"); });
+  function proxy(id){ var b=document.getElementById(id); if(b) b.click(); }
+  Array.prototype.forEach.call(mm.querySelectorAll("button"), function(b){
+    b.addEventListener("click", function(){
+      var a=b.getAttribute("data-act"); if(!a) return; closeAll();
+      if(a==="evento") openSheet("props", true);
+      else if(a==="pdf") proxy("bPdf"); else if(a==="vr") proxy("bR3d"); else if(a==="theme") proxy("bTheme");
+      else if(a==="json") proxy("bJson"); else if(a==="import") proxy("bImport"); else if(a==="new") proxy("bNew");
+    });
+  });
 })();
 function defaultLabel(type){
   var t=TYPES[type]; if(!t) return "";
@@ -1731,7 +1825,10 @@ svg.addEventListener("pointermove", function(e){
 svg.addEventListener("pointerup", function(e){
   delete pointers[e.pointerId];
   if(pinch){ if(Object.keys(pointers).length<2) pinch=null; svg.classList.remove("dragging"); drag=null; return; }
-  if(drag && drag.mode==="item" && drag.moved){ render(); save(); }
+  if(drag && drag.mode==="item"){
+    if(drag.moved){ render(); save(); }
+    else if(window.mShowProps){ window.mShowProps(); }   /* tap secco su un elemento = apri foglio proprietà (mobile) */
+  }
   else if(drag && drag.mode==="marquee"){
     var r=drag.rect;
     if(r && (r.w>8||r.h>8)){
@@ -1743,6 +1840,7 @@ svg.addEventListener("pointerup", function(e){
   }
   else if(drag && drag.mode==="pan" && Math.abs(e.clientX-drag.px)<4 && Math.abs(e.clientY-drag.py)<4){
     clearSelection(); render();  /* click sullo sfondo = deseleziona */
+    if(window.mHideProps) window.mHideProps();
   }
   svg.classList.remove("dragging");
   drag=null;
