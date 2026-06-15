@@ -1367,7 +1367,7 @@ var COMP = {
     name:function(it){ return "Timpani ×"+parts(it).count; },
     draw:drawTimpani, size:sizeTimpani, explode:explodeTimpani };
   }
-  COMP.timpani=timpCfg(4); COMP.timpani3=timpCfg(3); COMP.timpani2=timpCfg(2);
+  COMP.timpani=timpCfg(2); COMP.timpani3=timpCfg(3); COMP.timpani2=timpCfg(2);
 })();
 var DEFAULT_LABELS = {
   pedana:"PED", scala:"Scala", rampa:"Rampa", parapetto:"Parap.", fondale:"Backdrop", quinta:"Quinta", truss:"Truss", transenna:"Transenna",
@@ -2097,7 +2097,7 @@ var ORCH_DEF = [
   {id:"arp",nome:"Arpa",        def:1,  type:"arpa",        spot:{a:-58, f:0.82}},
   {id:"pf", nome:"Pianoforte",  def:0,  type:"grancoda",    spot:{a:-73, f:1.0}},
   {id:"cel",nome:"Celesta",     def:0,  type:"celesta",     spot:{a:-66, f:1.18}},
-  {id:"tim",nome:"Timpani (set 4)",def:1,type:"timpani",    back:0},
+  {id:"tim",nome:"Timpani (set 4)",def:1,type:"timpani",    back:0, parts:{count:4,layout:"arco",orient:"americano"}},
   {id:"gc", nome:"Gran cassa",  def:1,  type:"grancassa",   back:1},
   {id:"pia",nome:"Piatti",      def:1,  type:"piatticoppia",back:2},
   {id:"rul",nome:"Rullante",    def:1,  type:"rullante",    back:3},
@@ -2221,7 +2221,7 @@ function buildOrchestraOut(counts){
     out.push({type:"pedana", x:0, y:backY, w:Math.max(500,totW+150), d:maxD+90, h:20, label:""});  /* riser percussioni */
     backs.forEach(function(b){
       var w=TYPES[b.type].w;
-      out.push({type:b.type, x:cx+w/2, y:backY, rot:0, label:b.nome});
+      out.push({type:b.type, x:cx+w/2, y:backY, rot:0, label:b.nome, parts:b.parts});
       cx+=w+70;
     });
   }
@@ -2422,6 +2422,7 @@ function placeOut(out, fitStage, clearFirst, force){
     var it={id:uid(), type:o.type, x:Math.round(C.x+o.x), y:Math.round(C.y+o.y),
             rot:Math.round((o.rot||0)/5)*5, w:z.w, d:z.d, label:o.label!=null?o.label:defaultLabel(o.type)};
     if(t.riser) it.h=(o.h!=null?o.h:(t.h||40));
+    if(o.parts){ it.parts=compClone(o.parts); if(COMP[o.type] && COMP[o.type].size){ var cz=COMP[o.type].size(it); it.w=cz[0]; it.d=cz[1]; } }
     ["donna","hair","mano","leggio","sedia","doppia","sep"].forEach(function(k){ if(o[k]!=null) it[k]=o[k]; });   /* flag opzionali dal generatore */
     state.items.push(it);
   });
