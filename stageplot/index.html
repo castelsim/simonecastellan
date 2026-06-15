@@ -90,6 +90,12 @@
   #props .chk input:disabled{opacity:.4} #props .chk:has(input:disabled){color:#b6bbc2}
   #props .btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
   #props .btns .btn{padding:6px 10px;font-size:12px}
+  /* slider rotazione con tacca centrale (0°) */
+  .rotrow{display:flex;align-items:center;gap:8px}
+  .rotrow .btn{flex:0 0 auto}
+  .rotslide{flex:1;position:relative;display:flex;align-items:center}
+  .rotslide input[type=range]{width:100%;margin:0}
+  .rotslide::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:2px;height:13px;background:#9aa3af;border-radius:1px;pointer-events:none}
   footer{grid-area:foot;display:flex;align-items:center;gap:18px;padding:0 14px;border-top:1px solid #e5e7eb;
     font-size:11.5px;color:#6b7280;white-space:nowrap;overflow:hidden}
   /* SVG — palco */
@@ -333,11 +339,11 @@
       <span><label>P (cm)</label><input type="number" id="pD" min="10" step="5"></span>
       <span id="pHwrap"><label>h (cm)</label><input type="number" id="pH" min="0" step="10"></span>
     </div>
-    <label>Rotazione (°)</label>
-    <div class="row">
-      <input type="number" id="pRot" step="5">
-      <button class="btn" id="pRotL">⟲ 15</button>
-      <button class="btn" id="pRotR">⟳ 15</button>
+    <label style="display:flex;justify-content:space-between;align-items:baseline">Rotazione <span id="pRotVal" style="color:#374151;font-weight:600">0°</span></label>
+    <div class="rotrow">
+      <button class="btn" id="pRotL" title="−15°" style="padding:6px 10px">⟲</button>
+      <span class="rotslide"><input type="range" id="pRot" min="-180" max="180" step="5"></span>
+      <button class="btn" id="pRotR" title="+15°" style="padding:6px 10px">⟳</button>
     </div>
     <div id="pPostaz" style="display:none;border-top:1px solid #eef0f2;margin-top:10px;padding-top:8px">
       <div id="pFlags">
@@ -1416,7 +1422,9 @@ function renderProps(){
   var t = TYPES[it.type];
   document.getElementById("selNome").textContent = t.nome;
   document.getElementById("pLabel").value = it.label||"";
-  document.getElementById("pRot").value = it.rot||0;
+  var rNorm=((it.rot||0)%360+360)%360; if(rNorm>180) rNorm-=360;   /* normalizza a -180..180 per lo slider */
+  document.getElementById("pRot").value = rNorm;
+  document.getElementById("pRotVal").textContent = rNorm+"°";
   document.getElementById("pDims").style.display = t.resizable ? "flex" : "none";
   document.getElementById("pHwrap").style.display = t.riser ? "" : "none";
   if(t.resizable){
@@ -1451,7 +1459,14 @@ document.getElementById("pLabel").addEventListener("input", function(){ mutSel(f
 document.getElementById("pW").addEventListener("change", function(){ mutSel(function(it){ it.w=Math.max(10,+document.getElementById("pW").value||it.w); }); });
 document.getElementById("pD").addEventListener("change", function(){ mutSel(function(it){ it.d=Math.max(10,+document.getElementById("pD").value||it.d); }); });
 document.getElementById("pH").addEventListener("change", function(){ mutSel(function(it){ it.h=Math.max(0,+document.getElementById("pH").value||0); }); });
-document.getElementById("pRot").addEventListener("change", function(){ mutSel(function(it){ it.rot=+document.getElementById("pRot").value||0; }); });
+function applyRot(doSave){
+  var it=getSel(); if(!it) return;
+  var v=+document.getElementById("pRot").value||0; it.rot=v;
+  document.getElementById("pRotVal").textContent = v+"°";
+  render(); if(doSave) save();
+}
+document.getElementById("pRot").addEventListener("input", function(){ applyRot(false); });
+document.getElementById("pRot").addEventListener("change", function(){ applyRot(true); });
 document.getElementById("pSedia").addEventListener("change", function(){ mutSel(function(it){ it.sedia=document.getElementById("pSedia").checked; }); });
 document.getElementById("pLeggioCfg").addEventListener("change", function(){ mutSel(function(it){ it.leggio=document.getElementById("pLeggioCfg").checked; }); });
 document.getElementById("pDoppia").addEventListener("change", function(){ mutSel(function(it){
