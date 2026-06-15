@@ -114,6 +114,11 @@
   .stageblk.sel{fill:rgba(37,99,235,.14);stroke-dasharray:none;stroke-width:3}
   .stageblk-lbl{fill:#2563eb;font-size:15px;font-weight:700;pointer-events:none}
   body.stage-edit .item{opacity:.35;pointer-events:none}
+  .rot-handle{cursor:grab}
+  .rot-handle .rh-line{stroke:#2563eb;stroke-width:2}
+  .rot-handle .rh-knob{fill:#fff;stroke:#2563eb;stroke-width:2.5}
+  .rot-handle .rh-ico{fill:none;stroke:#2563eb;stroke-width:2;stroke-linecap:round}
+  .rot-handle .rh-hit{fill:transparent}
   body.stage-edit #eventoSec,body.stage-edit #selProps,body.stage-edit #groupProps,body.stage-edit #noSel,body.stage-edit #chanlist,body.stage-edit #mActions{display:none!important}
   body.stage-edit #bStageShape{background:#2563eb;color:#fff;border-color:#2563eb}
   .grid line{stroke:#eceef0;stroke-width:1}
@@ -1619,6 +1624,17 @@ function itemMarkup(it){
   s += t.draw(it);
   if(t.riser){ s += '<text class="lbl sub" y="5">'+(it.w/100)+'×'+(it.d/100)+' m · h'+it.h+'</text>'; }
   if(it.label && !t.innerLabel){ s += '<text class="lbl" y="'+(bh+16)+'">'+esc(it.label)+'</text>'; }
+  /* maniglia di rotazione: appare sopra l'elemento quando è l'unico selezionato */
+  if(!stageEdit && selSet[it.id] && selIds().length===1){
+    var ky=-(bh+26);
+    s += '<g class="rot-handle" data-id="'+it.id+'">'+
+         '<line class="rh-line" x1="0" y1="'+(-bh)+'" x2="0" y2="'+(ky+9)+'"/>'+
+         '<circle class="rh-hit" cx="0" cy="'+ky+'" r="16"/>'+
+         '<circle class="rh-knob" cx="0" cy="'+ky+'" r="9"/>'+
+         '<path class="rh-ico" d="M '+(-3.5)+' '+(ky-0.5)+' A 4 4 0 1 1 '+(-3.5)+' '+(ky+1.5)+'"/>'+
+         '<path class="rh-ico" d="M '+(-3.5)+' '+(ky-3)+' L '+(-3.5)+' '+(ky-0.2)+' L '+(-0.7)+' '+(ky-0.2)+'"/>'+
+         '</g>';
+  }
   s += '</g>';
   s += '</g>';
   return s;
@@ -2085,6 +2101,12 @@ svg.addEventListener("pointerdown", function(e){
     drag={mode:"pan", px:e.clientX, py:e.clientY, vx:vb.x, vy:vb.y};
     svg.classList.add("dragging"); svg.setPointerCapture(e.pointerId); return;
   }
+  var rh = e.target.closest ? e.target.closest(".rot-handle") : null;
+  if(rh){                                   /* maniglia di rotazione: trascina per ruotare attorno al centro */
+    var rid=rh.getAttribute("data-id"); selectOne(rid); var rit=getSel();
+    if(rit){ drag={mode:"rotate", id:rid, cx:rit.x, cy:rit.y, moved:false}; render(); svg.setPointerCapture(e.pointerId); }
+    return;
+  }
   var g = e.target.closest ? e.target.closest(".item") : null;
   if(g){
     var id = g.getAttribute("data-id");
@@ -2138,6 +2160,11 @@ svg.addEventListener("pointermove", function(e){
       var g=svg.querySelector('[data-id="'+it.id+'"]');
       if(g) g.setAttribute("transform","translate("+it.x+" "+it.y+")");
     });
+  } else if(drag.mode==="rotate"){
+    sp=svgPoint(e); var rit=state.items.find(function(i){ return i.id===drag.id; });
+    if(rit){ var ang=Math.atan2(sp.y-drag.cy, sp.x-drag.cx)*180/Math.PI + 90;   /* maniglia in alto = local up */
+      if(!e.shiftKey) ang=Math.round(ang/5)*5;   /* snap 5°, libero con shift */
+      rit.rot=Math.round(((ang%360)+360)%360); drag.moved=true; render(); }
   } else if(drag.mode==="block"){
     sp=svgPoint(e); var bdx=sp.x-drag.sp0.x, bdy=sp.y-drag.sp0.y; drag.moved=true;
     var r=stageBlocks()[drag.bi]; if(r){ r.x=Math.max(0,snap(drag.x0+bdx)); r.y=Math.max(0,snap(drag.y0+bdy)); recalcStageBBox(); render(); }
@@ -2157,6 +2184,7 @@ svg.addEventListener("pointerup", function(e){
   delete pointers[e.pointerId];
   if(pinch){ if(Object.keys(pointers).length<2) pinch=null; svg.classList.remove("dragging"); drag=null; return; }
   if(drag && drag.mode==="block"){ if(drag.moved){ recalcStageBBox(); save(); } renderStagePanel(); render(); svg.classList.remove("dragging"); drag=null; return; }
+  if(drag && drag.mode==="rotate"){ if(drag.moved) save(); render(); drag=null; return; }
   if(drag && drag.mode==="item" && drag.moved){ render(); save(); }
   else if(drag && drag.mode==="marquee"){
     var r=drag.rect;
@@ -4106,6 +4134,7 @@ if(location.search.indexOf("shapeqa=2")>-1){   /* QA: palco con fronte a semicer
 else if(location.search.indexOf("shapeqa=1")>-1){   /* QA: palco a T quotato + altezza */
   state.stage.blocks=[{x:0,y:0,w:1200,d:800,h:100},{x:500,y:800,w:200,d:300}]; recalcStageBBox(); fit();
 }
+if(location.search.indexOf("rotqa=1")>-1){ demo(); var f=state.items[10]||state.items[0]; if(f){ selectOne(f.id); fit(); } }
 if(location.search.indexOf("icone=1")>-1){ gallery(); }
 else if(location.search.indexOf("export=1")>-1){   /* QA: anteprima del PNG esportato (planimetria + channel list) */
   var ex=buildExportSvg();
