@@ -321,10 +321,6 @@
   <button class="btn" id="bJson">Salva .json</button>
   <button class="btn" id="bImport">Apri .json</button>
   <button class="btn" id="bPdf" title="Esporta un PDF in scala (A4/A3) per la stampa">Esporta PDF</button>
-  <button class="btn primary" id="bR3d" title="Genera un render 3D / VR fotorealistico del palco con ChatGPT" style="display:inline-flex;align-items:center;gap:7px">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.073zM13.2599 22.4307a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6449zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.8956zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.4069-.6765zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg>
-    VR
-  </button>
   <button class="btn danger" id="bNew">Nuovo</button>
   <input type="file" id="fileImport" accept=".json" hidden>
 </header>
@@ -346,7 +342,6 @@
       <button data-act="evento">Evento</button>
       <button data-act="chan">Channel list</button>
       <button data-act="pdf">Esporta PDF</button>
-      <button data-act="vr">Render 3D / VR</button>
       <button data-act="theme">Tema chiaro/scuro</button>
       <button data-act="json">Salva .json</button>
       <button data-act="import">Apri .json</button>
@@ -394,7 +389,7 @@
     <h3 style="margin-bottom:6px">Evento</h3>
     <label>Titolo</label><input type="text" id="titolo" placeholder="Es. Concerto in villa">
     <label>Luogo (per il render)</label><input type="text" id="luogo" placeholder="Es. Teatro Comunale, Vicenza">
-    <div class="hint" style="font-size:11px;color:#9ca3af;margin-top:5px">Titolo e luogo compaiono nell'export e guidano il render 3D.</div>
+    <div class="hint" style="font-size:11px;color:#9ca3af;margin-top:5px">Titolo e luogo compaiono nell'intestazione dell'export.</div>
     <button class="btn primary" id="bEventoDone" style="width:100%;margin-top:10px">Fatto</button>
   </div>
   <div class="sec" id="selProps" hidden>
@@ -625,20 +620,6 @@
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
       <button class="btn" id="ottCancel">Annulla</button>
       <button class="btn primary" id="ottGo">Genera ottoni</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal" id="r3dModal" hidden>
-  <div class="mcard" style="width:520px">
-    <h2>Render 3D con ChatGPT</h2>
-    <p class="hint" style="background:#f0f7ff;border:1px solid #d4e4f7;border-radius:8px;padding:8px 10px;margin-bottom:4px">
-      💡 Se hai compilato il <b>Luogo</b>, ChatGPT cercherà immagini reali di quella sala per ambientare il render.
-      Meglio ancora: incolla anche una <b>foto del palco/locale</b> — il render sarà molto più preciso.</p>
-    <div class="mstatus" id="r3dStatus" style="font-size:12.5px;min-height:16px;margin-top:4px"></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-      <button class="btn" id="r3dCancel">Annulla</button>
-      <button class="btn primary" id="r3dGo">Apri ChatGPT</button>
     </div>
   </div>
 </div>
@@ -2049,7 +2030,7 @@ function closeMobileDrawers(){
       if(a==="palco"){ toggleStageEdit(); return; }
       if(a==="evento"){ toggleEvento(); return; }
       if(a==="chan"){ toggleChan(); return; }
-      if(a==="pdf") proxy("bPdf"); else if(a==="vr") proxy("bR3d"); else if(a==="theme") proxy("bTheme");
+      if(a==="pdf") proxy("bPdf"); else if(a==="theme") proxy("bTheme");
       else if(a==="json") proxy("bJson"); else if(a==="import") proxy("bImport"); else if(a==="new") proxy("bNew");
     });
   });
@@ -3725,7 +3706,7 @@ function renderPng(scale){
     img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(ex.svgStr);
   });
 }
-/* (pulsante "Esporta PNG" rimosso; renderPng resta per VR/Render e per il PDF) */
+/* (pulsante "Esporta PNG" rimosso; renderPng resta per il PDF) */
 
 /* ============ EXPORT PDF IN SCALA (jsPDF, A4/A3 orizzontale) ============ */
 /* mm di carta per cm reali a scala 1:N → cm*10/N. Foglio orizzontale in mm. */
@@ -3971,74 +3952,6 @@ function pdfChannelPage(doc, L, paperKey){
   orient.addEventListener("change", refresh); header.addEventListener("input", refresh);
   document.getElementById("pdfGo").addEventListener("click", function(){ exportPdf(paper.value, scl.value, orient.value, header.value); });
 })();
-/* ============ RENDER 3D (ChatGPT: file scaricati + prompt precompilato) ============ */
-/* Nota tecnica: ChatGPT NON accetta allegati automatici da siti esterni; il massimo
-   possibile è precompilare il prompt via chatgpt.com/?q=… (apre anche l'app su mobile)
-   e copiare il prompt negli appunti. I 2 file vengono scaricati e l'utente li trascina in chat. */
-/* Prompt AUTO-CONTENUTO: tutto lo stage plot dentro il testo (legenda tipi + elenco elementi
-   con coordinate). Nessun file da allegare — basta inviarlo a ChatGPT. */
-function r3dPrompt(){
-  var W=state.stage.w, D=state.stage.d;
-  var titolo=state.titolo||"senza titolo", luogo=state.luogo||"";
-  var used={}, order=[];
-  state.items.forEach(function(it){ if(!TYPES[it.type]||it.type==="testo") return; if(!used[it.type]){ used[it.type]=1; order.push(it.type); } });
-  var legend=order.map(function(tp){ var t=TYPES[tp];
-    var hint = POSTAZ[tp] ? " — postazione: sedia + leggio + strumento ("+t.nome.toLowerCase()+")"
-             : DOUBLE_TYPES[tp] ? " — 2 musicisti affiancati + 1 leggio condiviso ("+t.nome+")"
-             : t.riser ? " — pedana/riser (altezza nel campo h)" : "";
-    return "  · "+tp+" = "+t.nome+" ["+t.w+"×"+t.d+" cm]"+hint;
-  }).join("\n");
-  var risers=state.items.filter(function(r){ return r.type==="pedana"; });
-  function zOf(it){ if(it.type==="pedana") return 0;
-    for(var i=0;i<risers.length;i++){ var r=risers[i]; if(Math.abs(it.x-r.x)<=r.w/2 && Math.abs(it.y-r.y)<=r.d/2) return r.h||40; } return 0; }
-  var items=state.items.map(function(it){ if(!TYPES[it.type]||it.type==="testo") return null;
-    var z=zOf(it), h = it.type==="pedana"?(it.h||40):(H3D[it.type]!=null?H3D[it.type]:80);
-    return "  "+it.type+" | \""+(it.label||"")+"\" | pos "+it.x+","+it.y+(z?" z"+z:"")+" | "+it.w+"×"+it.d+"×"+h+" cm | rot "+(it.rot||0)+"°";
-  }).filter(Boolean).join("\n");
-  var ambient = luogo
-    ? "AMBIENTAZIONE — luogo: \""+luogo+"\". Prima di renderizzare cerca online foto reali di questa sala/palco e ricostruisci fedelmente architettura, fondale, materiali e luci tipiche; il render deve sembrare scattato lì. Se incollo anche una foto del palco, ha la priorità.\n"
-    : "AMBIENTAZIONE: se incollo una foto del palco/locale usala; altrimenti palco generico da concerto, fondo scuro, luci calde frontali + controluce blu/ambra.\n";
-  return ""+
-"Agisci come visualizzatore 3D professionista di produzioni live (concert & stage design). Genera un RENDER 3D FOTOREALISTICO del palco descritto qui sotto. TUTTE le informazioni sono in questo messaggio: NON servono file allegati.\n\n"+
-"PROGETTO: \""+titolo+"\""+(luogo?" — "+luogo:"")+". Palco "+(W/100)+"×"+(D/100)+" m (larghezza × profondità).\n\n"+
-"COORDINATE (unità = cm):\n"+
-"- Origine (0,0) = angolo tra il FONDO palco e il lato DESTRO visto dai musicisti (stage right).\n"+
-"- x cresce verso SINISTRA palco; y cresce verso il PUBBLICO; z = quota da terra (0 = piano palco; se un elemento poggia su una pedana, z = altezza pedana).\n"+
-"- rot in gradi orari, 0 = rivolto al pubblico. Ogni elemento: tipo | etichetta | pos x,y (centro) [z] | ingombro w×d×h | rotazione.\n\n"+
-"LEGENDA TIPI (espandi ogni postazione nei componenti reali, NON disegnare scatole):\n"+legend+"\n\n"+
-"ELEMENTI ("+state.items.length+"):\n"+items+"\n\n"+
-ambient+"\n"+
-"MATERIALI: archi in legno (acero/abete), ottoni lucidi, legni neri/argento, pelli chiare sui tamburi; casse, ampli, sedie e leggii in nero opaco; pedane con frontalino nero.\n\n"+
-"REQUISITI:\n"+
-"- Fedeltà ASSOLUTA a posizioni, rotazioni, scala e quote; non aggiungere né togliere elementi.\n"+
-"- Espandi le postazioni: sedia + leggio + strumento reale (le doppie = 2 musicisti + 1 leggio condiviso).\n"+
-"- Vista prospettica 3/4 dal lato pubblico, camera ~8-10 m, elevazione ~25°, orizzontale.\n"+
-"- Piano palco in legno scuro opaco; pedane con altezza dal campo h.\n"+
-"- Illuminazione da concerto coerente col luogo; haze leggero, fondo scuro.\n"+
-"- Nessuna persona; niente etichette, griglia o tabelle nel render. Massima risoluzione.\n\n"+
-"Se qualcosa è ambiguo, chiedimelo PRIMA di generare.";
-}
-(function(){
-  var modal=document.getElementById("r3dModal");
-  function status(msg){ document.getElementById("r3dStatus").innerHTML=msg||""; }
-  document.getElementById("bR3d").addEventListener("click", function(){ status(""); modal.hidden=false; });
-  document.getElementById("r3dCancel").addEventListener("click", function(){ modal.hidden=true; });
-  modal.addEventListener("click", function(e){ if(e.target===modal) modal.hidden=true; });
-  document.addEventListener("keydown", function(e){ if(!modal.hidden && e.key==="Escape") modal.hidden=true; });
-  document.getElementById("r3dGo").addEventListener("click", function(){
-    if(!state.items.length){ status("⚠ Il palco è vuoto: aggiungi elementi prima del render."); return; }
-    var prompt=r3dPrompt();
-    /* copia il prompt completo negli appunti (fallback universale, nessun file) */
-    try{ if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(prompt); }catch(e){}
-    var enc=encodeURIComponent(prompt), useQ=enc.length<7000;   /* organici piccoli/medi: prompt già scritto via URL */
-    var url=useQ ? "https://chatgpt.com/?q="+enc : "https://chatgpt.com/";
-    window.open(url,"_blank","noopener");
-    status(useQ
-      ? "✓ ChatGPT aperto col <b>prompt già scritto</b> — premi <b>invio</b>.<br><span style='color:#6b7280'>(È anche negli appunti: se risultasse tagliato, cancella e incolla con ⌘V / Ctrl-V.)</span>"
-      : "✓ Prompt <b>copiato negli appunti</b> (organico grande).<br>In ChatGPT <b>incolla con ⌘V / Ctrl-V</b> e premi invio. <a href=\"https://chatgpt.com/\" target=\"_blank\" rel=\"noopener\">Apri ChatGPT</a>");
-  });
-})();
-
 /* ============ DEMO (?demo=1) ============ */
 function demo(){
   state={titolo:"Demo — band + archi",luogo:"",stage:{w:1200,d:800},items:[],inputs:[],outputs:[]};
@@ -4121,7 +4034,6 @@ if(location.search.indexOf("inputaudit=1")>-1){   /* QA: un esemplare di ogni so
   Object.keys(IN_SRC).concat(Object.keys(IN_MULTI)).forEach(function(k){ if(TYPES[k]) addItem(k); });
   autoInputs();
 }
-if(location.search.indexOf("r3d=1")>-1){ document.getElementById("r3dModal").hidden=false; }  /* QA modale render 3D */
 var qPdfUi=(location.search.match(/pdfui=(a[234])/)||[])[1];
 if(qPdfUi){ document.getElementById("pdfPaper").value=qPdfUi;
   var qpo=(location.search.match(/orient=(portrait|landscape)/)||[])[1]; if(qpo) document.getElementById("pdfOrient").value=qpo;
