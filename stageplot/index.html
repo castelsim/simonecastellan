@@ -3238,7 +3238,7 @@ function buildExportSvg(){
   var hasCL = state.inputs.length || state.outputs.length;
   var tableW = hasCL ? 940 : 0;
   var inner = sceneMarkup(); sel=keep; selSet=keepSet;
-  var css = document.querySelector("style").textContent;
+  var css = document.querySelector("style").textContent.replace(/\/\*[\s\S]*?\*\//g,"");   /* via i commenti: un '<' in un commento romperebbe l'SVG */
   var titolo = esc(state.titolo||"Stage plot");
   var luogo = esc(state.luogo||"");
   var oggi = new Date().toLocaleDateString("it-IT");
@@ -3300,20 +3300,24 @@ function stageSceneSvg(){
   var sorted=state.items.slice().sort(function(a,b){ return (TYPES[a.type].z||2)-(TYPES[b.type].z||2); });
   var items=''; sorted.forEach(function(it){ items+=itemMarkup(it); });
   sel=keep; selSet=keepSet;
-  var css=document.querySelector("style").textContent;
+  var css=document.querySelector("style").textContent.replace(/\/\*[\s\S]*?\*\//g,"");   /* via i commenti: un '<' in un commento romperebbe l'SVG */
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+D+'">'+
     '<style>'+css+'</style>'+DEFS+
     '<rect x="0" y="0" width="'+W+'" height="'+D+'" fill="#ffffff"/>'+
     '<rect class="stage-floor" x="0" y="0" width="'+W+'" height="'+D+'"/>'+gridMarkup()+items+'</svg>';
 }
 function svgToDataUrl(svgStr, pxW, pxH){
+  /* iOS Safari rasterizza l'SVG SOLO se il root ha width/height espliciti (non basta il viewBox) */
+  svgStr = svgStr.replace(/^<svg /, '<svg width="'+pxW+'" height="'+pxH+'" ');
   return new Promise(function(res,rej){
     var img=new Image();
     img.onload=function(){
-      var c=document.createElement("canvas"); c.width=pxW; c.height=pxH;
-      var ctx=c.getContext("2d"); ctx.fillStyle="#fff"; ctx.fillRect(0,0,pxW,pxH);
-      ctx.drawImage(img,0,0,pxW,pxH);
-      res(c.toDataURL("image/jpeg", 0.92));   /* JPEG q.alta → file leggero, nitido in stampa */
+      try{
+        var c=document.createElement("canvas"); c.width=pxW; c.height=pxH;
+        var ctx=c.getContext("2d"); ctx.fillStyle="#fff"; ctx.fillRect(0,0,pxW,pxH);
+        ctx.drawImage(img,0,0,pxW,pxH);
+        res(c.toDataURL("image/jpeg", 0.92));   /* JPEG q.alta → file leggero, nitido in stampa */
+      }catch(e){ rej(e); }
     };
     img.onerror=function(){ rej(new Error("SVG→PNG fallito")); };
     img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svgStr);
@@ -3418,6 +3422,19 @@ function buildPdfDoc(paperKey, N, orient, header){
     return doc;
   });
 }
+/* consegna il PDF: su mobile apre il foglio di condivisione (Mail con allegato);
+   altrimenti scarica. Ritorna "share" | "download" | "abort". */
+function deliverPdf(doc){
+  var name=fileName()+".pdf", file=null;
+  try{ file=new File([doc.output("blob")], name, {type:"application/pdf"}); }catch(e){}
+  if(file && navigator.canShare && navigator.canShare({files:[file]})){
+    return navigator.share({ files:[file], title:(state.titolo||"Stage plot"),
+        text:"Stage plot"+(state.titolo?" — "+state.titolo:"")+(state.luogo?" · "+state.luogo:"") })
+      .then(function(){ return "share"; })
+      .catch(function(err){ if(err && err.name==="AbortError") return "abort"; doc.save(name); return "download"; });
+  }
+  doc.save(name); return Promise.resolve("download");
+}
 function exportPdf(paperKey, scaleSel, orient, header){
   var info=document.getElementById("pdfInfo");
   var N=resolveScale(paperKey, scaleSel);
@@ -3429,9 +3446,13 @@ function exportPdf(paperKey, scaleSel, orient, header){
   if(!state.items.length){ info.className="mstatus err"; info.textContent="Il palco è vuoto."; return; }
   info.className="mstatus"; info.textContent="Genero il PDF…";
   buildPdfDoc(paperKey, N, orient, header).then(function(doc){
-    doc.save(fileName()+".pdf");
-    info.className="mstatus ok"; info.textContent="✓ PDF generato ("+paperKey.toUpperCase()+" "+oTxt+", scala 1:"+N+").";
-    setTimeout(function(){ document.getElementById("pdfModal").hidden=true; }, 1200);
+    return deliverPdf(doc);
+  }).then(function(how){
+    info.className="mstatus ok";
+    info.textContent = how==="share" ? "✓ PDF pronto — scegli Mail (o un'app) per inviarlo."
+                     : how==="abort" ? "Condivisione annullata (PDF non inviato)."
+                     : "✓ PDF generato ("+paperKey.toUpperCase()+" "+oTxt+", scala 1:"+N+").";
+    if(how!=="abort") setTimeout(function(){ document.getElementById("pdfModal").hidden=true; }, 1400);
   }).catch(function(e){
     info.className="mstatus err"; info.textContent="Errore: "+(e&&e.message||e);
   });
