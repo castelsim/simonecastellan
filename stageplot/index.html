@@ -2291,7 +2291,14 @@ function blkField(id, key, isPos){
     b[selBlock][key]=v; recalcStageBBox(); render(); save();
   });
 }
-blkField("blkW","w",false); blkField("blkD","d",false); blkField("blkX","x",true); blkField("blkY","y",true);
+blkField("blkD","d",false); blkField("blkX","x",true); blkField("blkY","y",true);
+document.getElementById("blkW").addEventListener("change", function(){
+  var b=stageBlocks(); if(selBlock==null||!b[selBlock]) return;
+  var r=b[selBlock], cx=r.x+r.w/2, nw=Math.max(50, Math.round((+this.value||0)*100));
+  r.w=nw;
+  if(r.shape==="semi") r.x=Math.max(0, Math.round(cx-nw/2));   /* semicerchio: allarga simmetrico attorno al centro */
+  recalcStageBBox(); render(); save();
+});
 document.getElementById("blkH").addEventListener("change", function(){
   var b=stageBlocks(); if(selBlock==null||!b[selBlock]) return;
   b[selBlock].h=Math.max(0,Math.round(+this.value||0)); render(); save();
