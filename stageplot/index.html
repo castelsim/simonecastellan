@@ -92,6 +92,8 @@
   #props .cnt-row .cnt-lab{flex:1;font-size:12.5px;color:#374151}
   #props .cnt-b{padding:1px 11px;font-weight:700;line-height:1.4;min-width:30px}
   #props .cnt-v{min-width:20px;text-align:center;font-weight:600;font-size:13px}
+  #props .comp-sel{font-size:12px;padding:4px 6px;border:1px solid #e5e7eb;border-radius:7px;background:#fff;color:#374151;max-width:58%}
+  body.dark #props .comp-sel{background:#0f141c;border-color:#283142;color:#cbd5e1}
   #props .btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
   #props .btns .btn{padding:6px 10px;font-size:12px}
   /* slider rotazione con tacca centrale (0°) */
@@ -773,14 +775,23 @@ function station(it, glyph, dblKind){
   /* postazione singola: stesso glifo a scala reale identico alla doppia (coerenza dimensionale) */
   return (it.sedia!==false?chairSvg(0):'')+glyph+(it.leggio!==false?leggioGlyph(38):'');
 }
-function timpSpecs(n){
-  return n===2 ? [[-42,18,40],[42,18,37]] :
-    n===3 ? [[-72,7,40],[0,35,37],[72,7,33]] :
-    n>=5 ? [[-120,-6,40],[-62,30,37],[0,40,34],[62,30,31],[120,-6,28]] :
-    [[-95,-9,40],[-36,34,37],[36,34,33],[95,-9,29]];
+/* posizioni [x, y-arco] da sinistra a destra per n timpani */
+var TIMP_POS = {
+  2:[[-42,18],[42,18]],
+  3:[[-72,7],[0,35],[72,7]],
+  4:[[-95,-9],[-36,34],[36,34],[95,-9]],
+  5:[[-120,-6],[-62,30],[0,40],[62,30],[120,-6]]
+};
+/* raggi dal grande al piccolo (32"/29"/26"/23"/20") */
+function timpRadii(n){ return [40,37,33,29,25].slice(0,n); }
+/* layout: "arco" (semicerchio) | "linea" (fila) · orient: "americano" (grave a sx) | "tedesco" (grave a dx) */
+function timpSpecs(n, layout, orient){
+  var pos = TIMP_POS[n] || TIMP_POS[4], radii = timpRadii(n);
+  if(orient==="tedesco") radii = radii.slice().reverse();   /* tamburo grave a destra */
+  return pos.map(function(p,i){ return [p[0], layout==="linea" ? 0 : p[1], radii[i]]; });
 }
-function timpaniSet(n){
-  var specs = timpSpecs(n);
+function timpaniSet(n, layout, orient){
+  var specs = timpSpecs(n, layout, orient);
   var stoolY = n===2 ? -62 : -85;
   var s=circ(0,stoolY,15,'ic fBlack')+circ(0,stoolY,5,'dotS');
   specs.forEach(function(t){ s+=tdrum(t[0],t[1],t[2]); });
@@ -998,11 +1009,11 @@ var TYPES = {
                  lin(30,-6,42,-15,'ic thin')+                                   /* attacco campanaccio */
                  '<path class="ic fBrass" d="M 36,-23 L 54,-20 L 51,-9 L 38,-12 Z"/>'; }},
   timpani:  {nome:"Timpani", dim:"componibile", cat:"Ritmica", sub:"Batteria e percussioni", w:280,d:185,
-             draw:function(it){ return timpaniSet(parts(it).count); }},
+             draw:function(it){ return drawTimpani(it); }},
   timpani3: {nome:"Timpani ×3", dim:"Ø81/74/66", cat:"Ritmica", sub:"Batteria e percussioni", catalog:false, w:220,d:175,
-             draw:function(it){ return timpaniSet(parts(it).count); }},
+             draw:function(it){ return drawTimpani(it); }},
   timpani2: {nome:"Timpani ×2", dim:"Ø81/74", cat:"Ritmica", sub:"Batteria e percussioni", catalog:false, w:165,d:145,
-             draw:function(it){ return timpaniSet(parts(it).count); }},
+             draw:function(it){ return drawTimpani(it); }},
   /* pezzi singoli (solo via "Dividi in elementi", non a catalogo) */
   timpsingolo:{nome:"Timpano", dim:"Ø singolo", cat:"Ritmica", sub:"Batteria e percussioni", catalog:false, resizable:true, w:88,d:88,
              draw:function(it){ var r=Math.max(8,Math.min(it.w,it.d)/2-4); return tdrum(0,0,r)+circ(0,0,3,'ic fill'); }},
@@ -1324,8 +1335,15 @@ function explodeBatteria(it){
   });
   return out;
 }
+function drawTimpani(it){ var p=parts(it); return timpaniSet(p.count, p.layout, p.orient); }
+function sizeTimpani(it){
+  var p=parts(it), sp=timpSpecs(p.count, p.layout, p.orient);
+  var stoolY = p.count===2 ? -62 : -85, minx=-15, maxx=15, miny=stoolY-16, maxy=15;
+  sp.forEach(function(t){ minx=Math.min(minx,t[0]-t[2]); maxx=Math.max(maxx,t[0]+t[2]); miny=Math.min(miny,t[1]-t[2]); maxy=Math.max(maxy,t[1]+t[2]); });
+  return [Math.round((maxx-minx)+24), Math.round((maxy-miny)+24)];
+}
 function explodeTimpani(it){
-  var specs=timpSpecs(parts(it).count), base=it.label?it.label+" ":"", out=[];
+  var p=parts(it), specs=timpSpecs(p.count, p.layout, p.orient), base=it.label?it.label+" ":"", out=[];
   specs.forEach(function(t,i){ var d=Math.round(t[2]*2+8);
     out.push({type:"timpsingolo", dx:t[0], dy:t[1], label:base+"Timp "+(i+1), extra:{w:d,d:d}}); });
   return out;
@@ -1342,10 +1360,12 @@ var COMP = {
 };
 (function(){
   function timpCfg(n){ return {
-    defParts:{count:n},
-    controls:[ {key:"count",label:"Numero timpani",type:"count",min:2,max:5} ],
+    defParts:{count:n, layout:"arco", orient:"americano"},
+    controls:[ {key:"count",label:"Numero timpani",type:"count",min:2,max:5},
+               {key:"layout",label:"Disposizione",type:"choice",options:[["arco","Semicerchio"],["linea","In linea"]]},
+               {key:"orient",label:"Grave (tamburo grande)",type:"choice",options:[["americano","A sinistra (am.)"],["tedesco","A destra (ted.)"]]} ],
     name:function(it){ return "Timpani ×"+parts(it).count; },
-    explode:explodeTimpani };
+    draw:drawTimpani, size:sizeTimpani, explode:explodeTimpani };
   }
   COMP.timpani=timpCfg(4); COMP.timpani3=timpCfg(3); COMP.timpani2=timpCfg(2);
 })();
@@ -1556,6 +1576,13 @@ function buildCompCtl(comp, it){
       cb.addEventListener("change", function(){ setPart(it, c.key, cb.checked); });
       lab.appendChild(cb); lab.appendChild(document.createTextNode(" "+c.label));
       box.appendChild(lab);
+    } else if(c.type==="choice"){
+      var crow=document.createElement("div"); crow.className="cnt-row";
+      var cl=document.createElement("span"); cl.className="cnt-lab"; cl.textContent=c.label;
+      var sel=document.createElement("select"); sel.className="comp-sel";
+      c.options.forEach(function(o){ var op=document.createElement("option"); op.value=o[0]; op.textContent=o[1]; if(p[c.key]===o[0]) op.selected=true; sel.appendChild(op); });
+      sel.addEventListener("change", function(){ setPart(it, c.key, sel.value); });
+      crow.appendChild(cl); crow.appendChild(sel); box.appendChild(crow);
     } else {
       var row=document.createElement("div"); row.className="cnt-row";
       var s=document.createElement("span"); s.className="cnt-lab"; s.textContent=c.label;
