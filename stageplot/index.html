@@ -1579,29 +1579,16 @@ function stageFloorMarkup(){
   var grid='<g clip-path="url(#stageClip)">'+gridMarkup()+'</g>';
   return clip+fills+strokes+fills+grid;   /* fills due volte: il 2° giro copre i tratti di bordo interni alle giunzioni */
 }
-/* quote del palco risultante: ogni spigolo etichettato con la sua lunghezza (a palco finito) */
+/* quote: palco base solo a sinistra (profondità) e in alto/fondo palco (larghezza); ogni blocco aggiunto = la sua misura */
 function stageDimsMarkup(){
-  var b=stageBlocks(), single=(b.length===1 && b[0].shape!=="semi");
-  var W=state.stage.w, D=state.stage.d, s='';
-  if(single){   /* rettangolo classico: larghezza in alto, profondità a sinistra */
-    s += '<line class="dim-line" x1="0" y1="-54" x2="'+W+'" y2="-54"/>'+
-         '<line class="dim-line" x1="-54" y1="0" x2="-54" y2="'+D+'"/>'+
-         '<text class="dim-lbl" x="'+(W/2)+'" y="-64" text-anchor="middle">'+fmtM(W)+'</text>'+
-         '<text class="dim-lbl" transform="translate(-66 '+(D/2)+') rotate(-90)" text-anchor="middle">'+fmtM(D)+'</text>';
-    return s;
+  var b=stageBlocks(), base=b[0], s='';
+  s += '<line class="dim-line" x1="0" y1="-54" x2="'+base.w+'" y2="-54"/>'+
+       '<line class="dim-line" x1="-54" y1="0" x2="-54" y2="'+base.d+'"/>'+
+       '<text class="dim-lbl" x="'+(base.w/2)+'" y="-64" text-anchor="middle">'+fmtM(base.w)+'</text>'+
+       '<text class="dim-lbl" transform="translate(-66 '+(base.d/2)+') rotate(-90)" text-anchor="middle">'+fmtM(base.d)+'</text>';
+  for(var i=1;i<b.length;i++){ var r=b[i];   /* blocchi aggiunti: misura al centro del blocco */
+    s += '<text class="dim-edge" x="'+(r.x+r.w/2)+'" y="'+(r.y+r.d/2)+'" text-anchor="middle" dominant-baseline="middle">'+fmtM(r.w)+' × '+fmtM(r.d)+'</text>';
   }
-  /* forma composita: quota ogni spigolo rettilineo (lunghezza appena fuori dal bordo) */
-  var off=30;
-  stageRectEdges().forEach(function(e){
-    var len=Math.abs(e.x2-e.x1)+Math.abs(e.y2-e.y1); if(len<40) return;   /* salta i micro-spigoli */
-    var mx=(e.x1+e.x2)/2, my=(e.y1+e.y2)/2;
-    if(e.nx!==0){ var lx=mx+e.nx*off; s += '<text class="dim-edge" x="'+lx+'" y="'+my+'" text-anchor="middle" transform="rotate(-90 '+lx+' '+my+')">'+fmtM(len)+'</text>'; }
-    else { var ly=my+(e.ny<0?-off:off+8); s += '<text class="dim-edge" x="'+mx+'" y="'+ly+'" text-anchor="middle">'+fmtM(len)+'</text>'; }
-  });
-  /* semicerchi: corda × sporgenza al centro del blocco */
-  b.forEach(function(r){ if(r.shape!=="semi") return;
-    s += '<text class="dim-edge" x="'+(r.x+r.w/2)+'" y="'+(r.y+r.d/2)+'" text-anchor="middle">⌒ '+fmtM(r.w)+' × '+fmtM(r.d)+'</text>';
-  });
   return s;
 }
 /* overlay interattivo dei blocchi aggiunti (solo in modalità "Modifica palco"); il blocco base = il palco, non un blocco */
@@ -1650,9 +1637,8 @@ function sceneMarkup(){
   var W=state.stage.w, D=state.stage.d;
   var s = stageFloorMarkup();
   s += stageDimsMarkup();
-  var zTop=isSingleRect()?-22:-62, zBot=isSingleRect()?(D+38):(D+72);   /* in forma composita lascia spazio alle quote */
-  s += '<text class="zone-lbl" x="'+(W/2)+'" y="'+zTop+'" text-anchor="middle">FONDO PALCO</text>';
-  s += '<text class="zone-lbl" x="'+(W/2)+'" y="'+zBot+'" text-anchor="middle">PUBBLICO</text>';
+  s += '<text class="zone-lbl" x="'+(stageBlocks()[0].w/2)+'" y="-22" text-anchor="middle">FONDO PALCO</text>';
+  s += '<text class="zone-lbl" x="'+(W/2)+'" y="'+(D+38)+'" text-anchor="middle">PUBBLICO</text>';
   var sorted = state.items.slice().sort(function(a,b){
     return (TYPES[a.type].z||2) - (TYPES[b.type].z||2);
   });
