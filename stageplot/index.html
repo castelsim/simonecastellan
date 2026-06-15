@@ -777,6 +777,7 @@ function station(it, glyph, dblKind){
 }
 /* posizioni [x, y-arco] da sinistra a destra per n timpani */
 var TIMP_POS = {
+  1:[[0,14]],
   2:[[-42,18],[42,18]],
   3:[[-72,7],[0,35],[72,7]],
   4:[[-95,-9],[-36,34],[36,34],[95,-9]],
@@ -792,7 +793,7 @@ function timpSpecs(n, layout, orient){
 }
 function timpaniSet(n, layout, orient){
   var specs = timpSpecs(n, layout, orient);
-  var stoolY = n===2 ? -62 : -85;
+  var stoolY = n<=2 ? -62 : -85;
   var s=circ(0,stoolY,15,'ic fBlack')+circ(0,stoolY,5,'dotS');
   specs.forEach(function(t){ s+=tdrum(t[0],t[1],t[2]); });
   return s;
@@ -1338,7 +1339,7 @@ function explodeBatteria(it){
 function drawTimpani(it){ var p=parts(it); return timpaniSet(p.count, p.layout, p.orient); }
 function sizeTimpani(it){
   var p=parts(it), sp=timpSpecs(p.count, p.layout, p.orient);
-  var stoolY = p.count===2 ? -62 : -85, minx=-15, maxx=15, miny=stoolY-16, maxy=15;
+  var stoolY = p.count<=2 ? -62 : -85, minx=-15, maxx=15, miny=stoolY-16, maxy=15;
   sp.forEach(function(t){ minx=Math.min(minx,t[0]-t[2]); maxx=Math.max(maxx,t[0]+t[2]); miny=Math.min(miny,t[1]-t[2]); maxy=Math.max(maxy,t[1]+t[2]); });
   return [Math.round((maxx-minx)+24), Math.round((maxy-miny)+24)];
 }
@@ -1361,10 +1362,10 @@ var COMP = {
 (function(){
   function timpCfg(n){ return {
     defParts:{count:n, layout:"arco", orient:"americano"},
-    controls:[ {key:"count",label:"Numero timpani",type:"count",min:2,max:5},
+    controls:[ {key:"count",label:"Numero timpani",type:"count",min:1,max:5},
                {key:"layout",label:"Disposizione",type:"choice",options:[["arco","Semicerchio"],["linea","In linea"]]},
                {key:"orient",label:"Grave (tamburo grande)",type:"choice",options:[["americano","A sinistra (am.)"],["tedesco","A destra (ted.)"]]} ],
-    name:function(it){ return "Timpani ×"+parts(it).count; },
+    name:function(it){ var n=parts(it).count; return n===1 ? "Timpano" : "Timpani ×"+n; },
     draw:drawTimpani, size:sizeTimpani, explode:explodeTimpani };
   }
   COMP.timpani=timpCfg(2); COMP.timpani3=timpCfg(3); COMP.timpani2=timpCfg(2);
