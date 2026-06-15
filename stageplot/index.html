@@ -1604,10 +1604,11 @@ function stageDimsMarkup(){
   });
   return s;
 }
-/* overlay interattivo dei blocchi (solo in modalità "Modifica palco") */
+/* overlay interattivo dei blocchi aggiunti (solo in modalità "Modifica palco"); il blocco base = il palco, non un blocco */
 function stageBlocksOverlay(){
   if(!stageEdit) return '';
   return stageBlocks().map(function(r,i){
+    if(i===0) return '';   /* il palco base si modifica dai campi Largh./Prof./Altezza, non è un blocco trascinabile */
     var cx=r.x+r.w/2, cy=r.y+r.d/2, selCls=(selBlock===i?' sel':'');
     var shape = r.shape==="semi"
       ? '<path class="stageblk'+selCls+'" data-block="'+i+'" d="'+semiPath(r)+'"/>'
@@ -2253,7 +2254,7 @@ function renderStagePanel(){
   if(panel) panel.hidden=!stageEdit;
   if(!stageEdit) return;
   var bp=document.getElementById("blkProps"), b=stageBlocks();
-  if(selBlock==null || !b[selBlock]){ bp.hidden=true; return; }
+  if(selBlock==null || selBlock===0 || !b[selBlock]){ bp.hidden=true; return; }   /* il blocco base è il palco, non si edita come blocco */
   bp.hidden=false;
   var r=b[selBlock];
   document.getElementById("blkTitle").textContent = selBlock===0 ? "Blocco base" : "Blocco "+(selBlock+1);
@@ -2270,7 +2271,7 @@ function exitHubModes(except){
   if(except!=="evento" && eventoEdit){ eventoEdit=false; renderEventoPanel(); }
   if(except!=="chan" && chanEdit){ chanEdit=false; renderChanPanel(); }
 }
-function toggleStageEdit(){ stageEdit=!stageEdit; selBlock=stageEdit?0:null; if(stageEdit){ exitHubModes("palco"); clearSelection(); } renderStagePanel(); render(); }
+function toggleStageEdit(){ stageEdit=!stageEdit; selBlock=null; if(stageEdit){ exitHubModes("palco"); clearSelection(); } renderStagePanel(); render(); }
 function renderEventoPanel(){ document.body.classList.toggle("evento-edit", eventoEdit); document.getElementById("eventoSec").hidden=!eventoEdit; }
 function toggleEvento(){ eventoEdit=!eventoEdit; if(eventoEdit){ exitHubModes("evento"); clearSelection(); } renderEventoPanel(); render(); }
 function renderChanPanel(){ document.body.classList.toggle("chan-edit", chanEdit); }
