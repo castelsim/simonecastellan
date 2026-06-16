@@ -461,6 +461,10 @@
       <div id="pCompCtl"></div>
       <button class="btn" id="pCompSplit" style="width:100%;margin-top:9px;font-size:12px">⇱ Dividi in elementi singoli</button>
     </div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" id="pFront" title="Porta sopra agli altri">⬆ Sopra</button>
+      <button class="btn" id="pBack" title="Porta sotto agli altri">⬇ Sotto</button>
+    </div>
     <div class="btns">
       <button class="btn" id="pDup">Duplica</button>
       <button class="btn danger" id="pDel">Elimina</button>
@@ -471,6 +475,10 @@
     <div class="row">
       <button class="btn" id="grpRotL">⟲ 15</button>
       <button class="btn" id="grpRotR">⟳ 15</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" id="grpFront" title="Porta sopra">⬆ Sopra</button>
+      <button class="btn" id="grpBack" title="Porta sotto">⬇ Sotto</button>
     </div>
     <div class="btns">
       <button class="btn" id="grpDup">Duplica</button>
@@ -1736,6 +1744,15 @@ function itemMarkup(it){
 }
 function esc(x){ return String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 function fmtM(cm){ return (cm/100).toLocaleString("it-IT",{maximumFractionDigits:1})+" m"; }
+/* ordine di sovrapposizione: z per tipo, con override manuale it.z (Porta sopra/sotto); stabile sull'ordine d'inserimento */
+function effZ(it){ return it.z!=null ? it.z : ((TYPES[it.type] && TYPES[it.type].z) || 2); }
+function sortedItems(){
+  return state.items.map(function(it,i){ return {it:it,i:i}; })
+    .sort(function(a,b){ return (effZ(a.it)-effZ(b.it)) || (a.i-b.i); })
+    .map(function(o){ return o.it; });
+}
+function bringToFront(){ var its=selItems(); if(!its.length) return; var mx=Math.max.apply(null,state.items.map(effZ)); its.forEach(function(it){ it.z=++mx; }); render(); save(); }
+function sendToBack(){ var its=selItems(); if(!its.length) return; var mn=Math.min.apply(null,state.items.map(effZ)); its.forEach(function(it){ it.z=--mn; }); render(); save(); }
 function sceneMarkup(){
   recalcStageBBox();
   var W=state.stage.w, D=state.stage.d;
@@ -1743,10 +1760,7 @@ function sceneMarkup(){
   s += stageDimsMarkup();
   s += '<text class="zone-lbl" x="'+(W/2)+'" y="-42" text-anchor="middle">FONDO PALCO</text>';
   s += '<text class="zone-lbl" x="'+(W/2)+'" y="'+(D+38)+'" text-anchor="middle">PUBBLICO</text>';
-  var sorted = state.items.slice().sort(function(a,b){
-    return (TYPES[a.type].z||2) - (TYPES[b.type].z||2);
-  });
-  sorted.forEach(function(it){ s += itemMarkup(it); });
+  sortedItems().forEach(function(it){ s += itemMarkup(it); });
   s += stageBlocksOverlay();
   return s;
 }
@@ -1950,6 +1964,10 @@ document.getElementById("grpRotR").addEventListener("click", function(){ rotateS
 document.getElementById("grpDup").addEventListener("click", duplicateSel);
 document.getElementById("grpDel").addEventListener("click", deleteSel);
 function rotateSel(deg){ var its=selItems(); if(!its.length) return; its.forEach(function(it){ it.rot=((it.rot||0)+deg)%360; }); render(); save(); }
+document.getElementById("pFront").addEventListener("click", bringToFront);
+document.getElementById("pBack").addEventListener("click", sendToBack);
+document.getElementById("grpFront").addEventListener("click", bringToFront);
+document.getElementById("grpBack").addEventListener("click", sendToBack);
 /* etichetta del duplicato: incrementa il numero finale o ne aggiunge uno, evitando collisioni */
 function bumpLabel(label){
   if(!label) return label;
@@ -3972,7 +3990,7 @@ function resolveScale(paperKey, scaleSel){
 function stageSceneSvg(){
   recalcStageBBox();
   var W=state.stage.w, D=state.stage.d, keep=sel, keepSet=selSet; sel=null; selSet={};
-  var sorted=state.items.slice().sort(function(a,b){ return (TYPES[a.type].z||2)-(TYPES[b.type].z||2); });
+  var sorted=sortedItems();
   var items=''; sorted.forEach(function(it){ items+=itemMarkup(it); });
   sel=keep; selSet=keepSet;
   var css=document.querySelector("style").textContent.replace(/\/\*[\s\S]*?\*\//g,"");   /* via i commenti: un '<' in un commento romperebbe l'SVG */
