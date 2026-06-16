@@ -2048,6 +2048,20 @@ function miniSvg(k, over){
     });
   });
 })();
+/* ===== Anti-sovrapposizione ===== */
+function itemsCollide(x,y,w,d,gap,ignoreId){
+  return state.items.some(function(it){ if(ignoreId && it.id===ignoreId) return false;
+    return Math.abs(x-it.x) < (w+it.w)/2+gap && Math.abs(y-it.y) < (d+it.d)/2+gap; });
+}
+/* trova una posizione libera vicino a (x,y) cercando a spirale */
+function findFreeSpot(x,y,w,d){
+  if(!itemsCollide(x,y,w,d,15)) return {x:x,y:y};
+  var step=Math.max(45, Math.round((w+d)/4));
+  for(var r=1;r<48;r++){ for(var a=0;a<8;a++){ var ang=a*Math.PI/4;
+    var nx=snap(x+Math.cos(ang)*step*r), ny=snap(y+Math.sin(ang)*step*r);
+    if(!itemsCollide(nx,ny,w,d,15)) return {x:nx,y:ny}; } }
+  return {x:x,y:y};
+}
 function addItem(type, over){
   var t=TYPES[type];
   var it={ id:uid(), type:type, x:snap(vb.x+vb.w/2+addCascade), y:snap(vb.y+vb.h/2+addCascade),
@@ -2057,6 +2071,9 @@ function addItem(type, over){
   if(VOCE[type]){ it.mano=false; it.leggio=(type==="corista"); it.donna=false; }   /* cantante: mic su asta, no leggio · corista: leggio */
   if(COMP[type]){ it.parts=compClone(COMP[type].defParts); if(COMP[type].size){ var sz=COMP[type].size(it); it.w=sz[0]; it.d=sz[1]; } }
   if(over) Object.keys(over).forEach(function(k){ it[k]=over[k]; });
+  if(!(over && over.x!=null)){   /* posizione non esplicita (no drag-drop) → cerca uno spazio libero */
+    var fs=findFreeSpot(it.x, it.y, it.w, it.d); it.x=fs.x; it.y=fs.y;
+  }
   addCascade=(addCascade+25)%150;
   state.items.push(it); selectOne(it.id); render(); save();
   closeMobileDrawers();   /* su mobile: chiudi il catalogo per vedere il palco */
@@ -2760,17 +2777,43 @@ function placeOut(out, fitStage, clearFirst, force){
     return false;
   }
   if(clearFirst) state.items=[];
-  out.forEach(function(o){
+  var news=out.map(function(o){
     var t=TYPES[o.type], z=odim(o);
     var it={id:uid(), type:o.type, x:Math.round(C.x+o.x), y:Math.round(C.y+o.y),
             rot:Math.round((o.rot||0)/5)*5, w:z.w, d:z.d, label:o.label!=null?o.label:defaultLabel(o.type)};
     if(t.riser) it.h=(o.h!=null?o.h:(t.h||40));
     if(o.parts){ it.parts=compClone(o.parts); if(COMP[o.type] && COMP[o.type].size){ var cz=COMP[o.type].size(it); it.w=cz[0]; it.d=cz[1]; } }
     ["donna","hair","mano","leggio","sedia","doppia","sep"].forEach(function(k){ if(o[k]!=null) it[k]=o[k]; });   /* flag opzionali dal generatore */
-    state.items.push(it);
+    return it;
   });
+  if(!clearFirst && state.items.length) avoidGroupOverlap(news);   /* non sovrapporsi a ciò che è già sul palco */
+  news.forEach(function(it){ state.items.push(it); });
   clearSelection(); save();
   return true;
+}
+/* sposta il nuovo gruppo DIETRO gli elementi esistenti che gli stanno davanti; allarga il palco sul fondo se serve */
+function avoidGroupOverlap(news){
+  var gap=45;
+  function box(it){ return {x1:it.x-it.w/2, x2:it.x+it.w/2, y1:it.y-it.d/2, y2:it.y+it.d/2}; }
+  function gbox(arr){ var b=null; arr.forEach(function(it){ var k=box(it);
+    if(!b) b={x1:k.x1,x2:k.x2,y1:k.y1,y2:k.y2};
+    else{ b.x1=Math.min(b.x1,k.x1); b.x2=Math.max(b.x2,k.x2); b.y1=Math.min(b.y1,k.y1); b.y2=Math.max(b.y2,k.y2); } });
+    return b; }
+  var nb=gbox(news); if(!nb) return;
+  var ex=state.items.filter(function(it){ var k=box(it); return k.x2>nb.x1-gap && k.x1<nb.x2+gap; });   /* esistenti che si sovrappongono in larghezza */
+  if(!ex.length) return;
+  var eb=gbox(ex);
+  if(nb.y2 <= eb.y1-gap || nb.y1 >= eb.y2+gap) return;   /* già libero davanti/dietro */
+  var dy=(eb.y1-gap)-nb.y2;   /* negativo: porta il gruppo dietro (verso il fondo) */
+  var newTop=nb.y1+dy;
+  if(newTop < 30){   /* non c'è spazio dietro: allarga il palco sul fondo e sposta tutto in avanti */
+    var grow=Math.ceil((30-newTop)/25)*25;
+    stageBlocks()[0].d=Math.round(stageBlocks()[0].d+grow); recalcStageBBox();
+    state.items.forEach(function(it){ it.y=Math.round(it.y+grow); });
+    dy+=grow;
+  }
+  dy=Math.round(dy);
+  news.forEach(function(it){ it.y+=dy; });
 }
 function genOrchestra(counts, fitStage, clearFirst, force){
   pendingReviewModal="orchModal";
