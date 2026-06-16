@@ -1937,7 +1937,7 @@ function miniSvg(k, over){
   function makeActionBtn(nome, dim, iconType, action){
     var b=document.createElement("button");
     b.innerHTML = miniSvg(iconType||"vln1x2")+'<span>'+esc(nome)+(dim?'<small>'+esc(dim)+'</small>':'')+'</span>';
-    b.addEventListener("click", action);
+    b.addEventListener("click", function(){ closeMobileDrawers(); action(); });   /* mobile: chiudi il catalogo, poi mostra il modale/azione */
     return b;
   }
 
