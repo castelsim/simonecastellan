@@ -823,28 +823,34 @@ function gtrGlyph(kind){
 }
 function gtrHead(kind){ var y=kind==="bass"?-52:kind==="ac"?-45:-44, h=kind==="bass"?15:14; return bar(0,y,9,h,'ic fBlack',2); }
 function ampCombo(){ return bar(0,0,64,26,'ic fMon',3)+bar(0,3,24,6,'ic fill',3)+kn(-15,-8.5,6,6); }
-function gtrLegY(kind){ return kind==="bass"?60:56; }
+function gtrLegY(it,kind){ return it.sedia ? 38 : (kind==="bass"?60:56); }   /* seduto: distanza leggio come postazioni orchestra */
+var GTR_SIDE=42;   /* offset dello strumento di fianco alla sedia */
 function guitarDraw(it,kind){
   it=it||{}; var s='';
-  if(it.ampli) s+='<g transform="translate(0,-66)">'+ampCombo()+'</g>';        /* ampli dietro (verso il fondo) */
-  if(it.sedia) s+=chairSvg(0)+gtrGlyph(kind);                                  /* seduto: sedia + chitarra imbracciata */
-  else s+=gtrHead(kind)+gtrGlyph(kind);                                        /* in piedi: chitarra su stand */
-  if(it.leggio) s+='<g transform="translate(0,'+gtrLegY(kind)+')">'+leggioGlyph(0)+'</g>';   /* leggio davanti */
+  if(it.ampli) s+='<g transform="translate(0,-98)">'+ampCombo()+'</g>';        /* ampli staccato dietro */
+  if(it.sedia){
+    s+=chairSvg(0);                                                            /* sedia (come postazione orchestra) */
+    s+='<g transform="translate('+GTR_SIDE+',6) scale(0.78)">'+gtrHead(kind)+gtrGlyph(kind)+'</g>';   /* strumento di fianco alla sedia */
+  } else {
+    s+=gtrHead(kind)+gtrGlyph(kind);                                           /* in piedi: chitarra su stand */
+  }
+  if(it.leggio) s+='<g transform="translate(0,'+gtrLegY(it,kind)+')">'+leggioGlyph(0)+'</g>';   /* leggio davanti */
   return s;
 }
 function gtrSize(it,t){ var d=t.d, w=t.w;
-  if(it.leggio) d+=44;               /* leggio davanti: l'etichetta resta poco sotto */
-  if(it.ampli) w=Math.max(w,72);     /* ampli dietro: NON allunga la profondità → il nome non si allontana */
+  if(it.sedia){ w=Math.max(w,118); d=it.leggio?120:94; }   /* sedia + strumento di fianco (+ leggio davanti) */
+  else if(it.leggio) d+=44;
+  if(it.ampli) w=Math.max(w,72);     /* ampli dietro: NON allunga la profondità → il nome resta vicino */
   return [w,d];
 }
 /* divide la postazione chitarra nei suoi elementi (chitarra, sedia, leggio, ampli) come item indipendenti */
 function explodeGuitar(){
   var it=getSel(), t=it&&TYPES[it.type]; if(!t||!t.gtr) return;
-  var kind=t.gtr, base=it.label?it.label+" ":"", pcs=[];
-  pcs.push({type:it.type, dx:0, dy:0, label:it.label||"", extra:{sedia:false,leggio:false,ampli:false}});   /* chitarra su stand, senza opzioni */
-  if(it.sedia) pcs.push({type:"sedia",   dx:0, dy:-30, label:""});
-  if(it.leggio) pcs.push({type:"leggio", dx:0, dy:gtrLegY(kind), label:""});
-  if(it.ampli) pcs.push({type:"comboamp",dx:0, dy:-66, label:base+"Ampli"});
+  var kind=t.gtr, base=it.label?it.label+" ":"", pcs=[], seated=it.sedia;
+  pcs.push({type:it.type, dx:seated?GTR_SIDE:0, dy:seated?6:0, label:it.label||"", extra:{sedia:false,leggio:false,ampli:false}});   /* chitarra (di fianco se seduto) */
+  if(seated) pcs.push({type:"sedia", dx:0, dy:0, label:""});
+  if(it.leggio) pcs.push({type:"leggio", dx:0, dy:gtrLegY(it,kind), label:""});
+  if(it.ampli) pcs.push({type:"comboamp",dx:0, dy:-98, label:base+"Ampli"});
   var rot=(it.rot||0)*Math.PI/180, c=Math.cos(rot), s=Math.sin(rot), made=[];
   pcs.forEach(function(pc){ var T=TYPES[pc.type]; if(!T) return;
     var ni={id:uid(), type:pc.type, x:Math.round(it.x+(pc.dx*c-pc.dy*s)), y:Math.round(it.y+(pc.dx*s+pc.dy*c)),
