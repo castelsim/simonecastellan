@@ -29,7 +29,7 @@
     color:#1f2937;background:#fff;display:grid;
     grid-template-rows:52px 1fr 26px;grid-template-columns:250px 1fr 360px;
     grid-template-areas:"top top top" "cat main props" "foot foot foot";overflow:hidden}
-  header{grid-area:top;display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid #e5e7eb}
+  header{grid-area:top;display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid #e5e7eb;overflow-x:auto}
   header .brand{font-weight:700;font-size:15px;letter-spacing:.2px;margin-right:14px}
   .hdr-evt{border:1px solid #e5e7eb;border-radius:8px;padding:6px 9px;font-size:13px;background:#fff;color:#1f2937}
   .hdr-evt::placeholder{color:#9ca3af}
@@ -328,9 +328,17 @@
 <svg id="defs-master" width="0" height="0" style="position:absolute" aria-hidden="true"></svg>
 <header>
   <span class="brand">STAGE PLOT</span>
-  <input type="text" id="titolo" class="hdr-evt" placeholder="Titolo" title="Titolo dell'evento (diventa l'oggetto della mail in condivisione)" style="width:180px">
-  <input type="text" id="luogo" class="hdr-evt" placeholder="Luogo" title="Luogo dell'evento" style="width:150px">
-  <button class="btn" id="bStageShape" title="Dimensioni, altezza e forma del palco" style="padding:7px 12px">▦ Palco</button>
+  <div class="hdr-stage" title="Dimensioni del palco rettangolare e snap alla griglia">
+    <span class="lab">PALCO</span>
+    <label>Largh.<input type="number" id="stW" min="1" max="60" step="0.5"><i>m</i></label>
+    <label>Prof.<input type="number" id="stD" min="1" max="40" step="0.5"><i>m</i></label>
+    <label>Snap
+      <select id="snap"><option value="0">libero</option><option value="25" selected>25 cm</option><option value="50">50 cm</option><option value="100">1 m</option></select>
+    </label>
+  </div>
+  <input type="text" id="titolo" class="hdr-evt" placeholder="Titolo" title="Titolo dell'evento (diventa l'oggetto della mail in condivisione)" style="width:150px">
+  <input type="text" id="luogo" class="hdr-evt" placeholder="Luogo" title="Luogo dell'evento" style="width:130px">
+  <button class="btn" id="bStageShape" title="Comporre il palco a blocchi/pedane (forma personalizzata)" style="padding:7px 12px">▦ Palco</button>
   <span style="flex:1"></span>
   <button class="btn" id="bTheme" title="Tema chiaro / scuro" style="padding:7px 11px">🌙</button>
   <button class="btn" id="bUndo" title="Annulla (⌘Z)" style="padding:7px 11px">↶</button>
@@ -371,9 +379,6 @@
       <button class="btn" id="bAddBlock" style="flex:1">＋ Blocco</button>
       <button class="btn" id="bAddSemi" style="flex:1">＋ Semicerchio</button>
     </div>
-    <label style="margin-top:9px;display:flex;align-items:center;gap:7px;font-size:12.5px">Snap
-      <select id="snap" style="flex:0 0 auto"><option value="0">libero</option><option value="25" selected>25 cm</option><option value="50">50 cm</option><option value="100">1 m</option></select>
-    </label>
     <div id="blkList" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px"></div>
     <div id="blkProps" hidden style="border-top:1px solid #cfe0fb;margin-top:11px;padding-top:9px">
       <label id="blkTitle" style="font-weight:600;color:#1f2937">Blocco</label>
@@ -1678,6 +1683,7 @@ function render(){
 /* ============ PANNELLO PROPRIETÀ ============ */
 function getSel(){ return state.items.find(function(i){ return i.id===sel; }) || null; }
 function renderProps(){
+  updateHeaderStage();
   var n = selIds().length, grp = document.getElementById("groupProps");
   document.body.classList.toggle("m-has-sel", n>0);   /* mobile: pannello = elemento vs channel list */
   if(n>1){
@@ -1881,6 +1887,18 @@ function deleteSel(){
 }
 
 /* ============ PALCO / SNAP ============ */
+/* dimensioni del palco rettangolare nell'header = Blocco 1 (low-friction per la maggior parte dei casi) */
+document.getElementById("stW").addEventListener("change", function(){
+  stageBlocks()[0].w=Math.max(100,Math.round((+this.value||12)*100)); recalcStageBBox(); render(); save(); if(stageEdit) renderStagePanel();
+});
+document.getElementById("stD").addEventListener("change", function(){
+  stageBlocks()[0].d=Math.max(100,Math.round((+this.value||8)*100)); recalcStageBBox(); render(); save(); if(stageEdit) renderStagePanel();
+});
+function updateHeaderStage(){
+  var b0=stageBlocks()[0];
+  var sw=document.getElementById("stW"); if(sw && document.activeElement!==sw) sw.value=b0.w/100;
+  var sd=document.getElementById("stD"); if(sd && document.activeElement!==sd) sd.value=b0.d/100;
+}
 /* Titolo/Luogo: campi nell'header (desktop) + pannello Evento (mobile), sincronizzati con lo stato */
 function setEventInputs(){
   ["titolo","titoloEv"].forEach(function(id){ var e=document.getElementById(id); if(e && document.activeElement!==e) e.value=state.titolo||""; });
@@ -1939,6 +1957,15 @@ function miniSvg(k, over){
     var body=document.createElement("div"); body.className="cat-body";
     var n=0;
     if(c==="Pedane e strutture"){
+      /* BLOCCHI PALCO: compongono il palco (pavimento), moduli standard — per palchi non rettangolari */
+      [["2×1 m",200,100],["1×1 m",100,100],["2×2 m",200,200]].forEach(function(p){
+        var nome="Blocco palco "+p[0];
+        body.appendChild(makeActionBtn(nome, "modulo palco", "pedana", function(){ addCatalogBlock(p[1],p[2]); })); n++;
+        entries.push({nome:nome, dim:"modulo palco", icon:"pedana", action:function(){ addCatalogBlock(p[1],p[2]); }});
+      });
+      body.appendChild(makeActionBtn("Blocco semicerchio", "fronte curvo", "pedana", function(){ addCatalogBlock(400,200,"semi"); })); n++;
+      entries.push({nome:"Blocco semicerchio", dim:"fronte curvo", icon:"pedana", action:function(){ addCatalogBlock(400,200,"semi"); }});
+      /* PEDANE (rialzi che vanno SOPRA il palco) */
       [["2×1 m",200,100],["1×1 m",100,100],["2×0,5 m",200,50]].forEach(function(p){
         var nome="Pedana "+p[0], over={w:p[1],d:p[2]};
         body.appendChild(makeBtn("pedana",nome,over,p[0])); n++;
@@ -2296,6 +2323,17 @@ function addSemicircle(){
   var r={shape:"semi", flat:"top", x:snap(Math.max(0,(W-w)/2)), y:D, w:w, d:d};   /* semicerchio al centro fronte (verso il pubblico) */
   state.stage.blocks.push(r); selBlock=state.stage.blocks.length-1;
   recalcStageBBox(); renderStagePanel(); render(); save();
+}
+/* aggiunge un blocco palco dal catalogo (misura standard) ed entra in modalità Palco per posizionarlo */
+function addCatalogBlock(w,d,shape){
+  recalcStageBBox();
+  var r = shape==="semi"
+    ? {shape:"semi", flat:"top", x:snap(Math.max(0,(state.stage.w-w)/2)), y:state.stage.d, w:w, d:d}
+    : {x:snap(state.stage.w), y:0, w:w, d:d};   /* a destra dell'ingombro, da trascinare */
+  state.stage.blocks.push(r); selBlock=state.stage.blocks.length-1;
+  if(!stageEdit){ stageEdit=true; exitHubModes("palco"); clearSelection(); }
+  recalcStageBBox(); renderStagePanel(); render(); save();
+  closeMobileDrawers();
 }
 function delSelBlock(){
   var b=stageBlocks();
