@@ -2740,8 +2740,11 @@ function applyOrchestraPreset(presetId){
 function placeOut(out, fitStage, clearFirst, force){
   var m=measureOrchestraOut(out), fp=frontPad(m);
   if(fitStage){
-    state.stage.w=Math.max(800, Math.ceil((2*m.maxX+160)/50)*50);
-    state.stage.d=Math.max(600, Math.ceil((-m.minY+fp+60)/50)*50);
+    var nw=Math.max(800, Math.ceil((2*m.maxX+160)/50)*50);
+    var nd=Math.max(600, Math.ceil((-m.minY+fp+60)/50)*50);
+    var h0=stageBlocks()[0].h||0;
+    state.stage.blocks=[{x:0,y:0,w:nw,d:nd,h:h0}];   /* adatta palco = palco rettangolare che contiene l'organico (il bbox è ricalcolato dai blocchi) */
+    state.stage.w=nw; state.stage.d=nd;
   }
   var C={x:state.stage.w/2, y:state.stage.d-fp};
   var assessment=assessOut(out, state.stage.w, state.stage.d, fp);
