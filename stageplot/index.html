@@ -461,10 +461,6 @@
       <div id="pCompCtl"></div>
       <button class="btn" id="pCompSplit" style="width:100%;margin-top:9px;font-size:12px">⇱ Dividi in elementi singoli</button>
     </div>
-    <div class="row" style="margin-top:8px">
-      <button class="btn" id="pFront" title="Porta sopra agli altri">⬆ Sopra</button>
-      <button class="btn" id="pBack" title="Porta sotto agli altri">⬇ Sotto</button>
-    </div>
     <div class="btns">
       <button class="btn" id="pDup">Duplica</button>
       <button class="btn danger" id="pDel">Elimina</button>
@@ -475,10 +471,6 @@
     <div class="row">
       <button class="btn" id="grpRotL">⟲ 15</button>
       <button class="btn" id="grpRotR">⟳ 15</button>
-    </div>
-    <div class="row" style="margin-top:8px">
-      <button class="btn" id="grpFront" title="Porta sopra">⬆ Sopra</button>
-      <button class="btn" id="grpBack" title="Porta sotto">⬇ Sotto</button>
     </div>
     <div class="btns">
       <button class="btn" id="grpDup">Duplica</button>
@@ -1063,7 +1055,7 @@ var TYPES = {
   tavolo:   {nome:"Tavolo", dim:"120×60", cat:"Pedane e strutture", w:120,d:60, resizable:true, z:1,
              draw:function(it){ return rectSvg(it.w,it.d,'ic fWoodL',5)+
                '<rect class="ic thin" fill="none" x="'+(-it.w/2+7)+'" y="'+(-it.d/2+7)+'" width="'+(it.w-14)+'" height="'+(it.d-14)+'" rx="3"/>'; }},
-  sedia:    {nome:"Sedia", dim:"46×46", cat:"Pedane e strutture", w:50,d:55,
+  sedia:    {nome:"Sedia", dim:"46×46", cat:"Pedane e strutture", w:50,d:55, z:1.5,
              draw:function(){ return bar(0,3,46,46,'ic fBlack',9)+bar(0,-22,46,9,'ic fill',4); }},
   sedialeggio:{nome:"Sedia + leggio", dim:"postazione", cat:"Pedane e strutture", w:75,d:105,
              draw:function(){ return bar(0,-22,46,46,'ic fBlack',9)+bar(0,-48,46,9,'ic fill',4)+leggioGlyph(38); }},
@@ -1076,7 +1068,7 @@ var TYPES = {
              draw:function(it){ var s=bar(0,0,it.w,it.d,'ic fFloor',2), n=3, step=it.d/n;
                for(var i=1;i<n;i++){ s+=lin(-it.w/2,-it.d/2+i*step,it.w/2,-it.d/2+i*step,'ic'); }
                return s; }},
-  sgabello: {nome:"Sgabello", dim:"Ø38", cat:"Pedane e strutture", w:40,d:40,
+  sgabello: {nome:"Sgabello", dim:"Ø38", cat:"Pedane e strutture", w:40,d:40, z:1.5,
              draw:function(){ var s=circ(0,0,19,'ic fBlack')+circ(0,0,13,'ic thin fBlack');
                [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(function(c){ s+=circ(c[0]*11.5,c[1]*11.5,1.8,'dotS'); });
                return s; }},
@@ -1751,8 +1743,6 @@ function sortedItems(){
     .sort(function(a,b){ return (effZ(a.it)-effZ(b.it)) || (a.i-b.i); })
     .map(function(o){ return o.it; });
 }
-function bringToFront(){ var its=selItems(); if(!its.length) return; var mx=Math.max.apply(null,state.items.map(effZ)); its.forEach(function(it){ it.z=++mx; }); render(); save(); }
-function sendToBack(){ var its=selItems(); if(!its.length) return; var mn=Math.min.apply(null,state.items.map(effZ)); its.forEach(function(it){ it.z=--mn; }); render(); save(); }
 function sceneMarkup(){
   recalcStageBBox();
   var W=state.stage.w, D=state.stage.d;
@@ -1964,10 +1954,6 @@ document.getElementById("grpRotR").addEventListener("click", function(){ rotateS
 document.getElementById("grpDup").addEventListener("click", duplicateSel);
 document.getElementById("grpDel").addEventListener("click", deleteSel);
 function rotateSel(deg){ var its=selItems(); if(!its.length) return; its.forEach(function(it){ it.rot=((it.rot||0)+deg)%360; }); render(); save(); }
-document.getElementById("pFront").addEventListener("click", bringToFront);
-document.getElementById("pBack").addEventListener("click", sendToBack);
-document.getElementById("grpFront").addEventListener("click", bringToFront);
-document.getElementById("grpBack").addEventListener("click", sendToBack);
 /* etichetta del duplicato: incrementa il numero finale o ne aggiunge uno, evitando collisioni */
 function bumpLabel(label){
   if(!label) return label;
