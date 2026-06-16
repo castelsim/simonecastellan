@@ -2025,35 +2025,50 @@ function miniSvg(k, over){
     var head=document.createElement("button"); head.className="cat-head";
     var body=document.createElement("div"); body.className="cat-body";
     var n=0;
+    var lastSub=null, subList=[], subMap={};
+    function rhythmGroup(sub){
+      if(!subMap[sub]){
+        var sh=document.createElement("button"); sh.className="sub-head"; sh.type="button";
+        var sb=document.createElement("div"); sb.className="sub-body";
+        var group={head:sh, body:sb, count:0, name:sub};
+        sh.addEventListener("click", function(){
+          var willOpen = !sb.classList.contains("open");
+          subList.forEach(function(s){ s.head.classList.remove("open"); s.body.classList.remove("open"); });
+          if(willOpen){ sb.classList.add("open"); sh.classList.add("open"); }
+        });
+        subList.push(group); subMap[sub]=group;
+        body.appendChild(sh); body.appendChild(sb);
+      }
+      return subMap[sub];
+    }
+    function addToGroup(sub, btn){ var g=rhythmGroup(sub); g.count++;
+      g.head.innerHTML='<span class="caret">▸</span><span>'+esc(sub)+'</span><span class="count">'+g.count+'</span>';
+      g.body.appendChild(btn); n++; }
     if(c==="Pedane e strutture"){
-      function subTitle(txt){ var h=document.createElement("h4"); h.textContent=txt; body.appendChild(h); }
       /* — Blocchi palco — (compongono il pavimento del palco; moduli standard) */
-      subTitle("Blocchi palco");
       [["2×1 m",200,100],["1×1 m",100,100],["2×2 m",200,200]].forEach(function(p){
         var nome="Blocco palco "+p[0];
-        body.appendChild(makeActionBtn(nome, "modulo palco", "pedana", function(){ addCatalogBlock(p[1],p[2]); })); n++;
+        addToGroup("Blocchi palco", makeActionBtn(nome, "modulo palco", "pedana", function(){ addCatalogBlock(p[1],p[2]); }));
         entries.push({nome:nome, dim:"modulo palco", icon:"pedana", action:function(){ addCatalogBlock(p[1],p[2]); }});
       });
-      body.appendChild(makeActionBtn("Blocco semicerchio", "fronte curvo", "pedana", function(){ addCatalogBlock(400,200,"semi"); })); n++;
+      addToGroup("Blocchi palco", makeActionBtn("Blocco semicerchio", "fronte curvo", "pedana", function(){ addCatalogBlock(400,200,"semi"); }));
       entries.push({nome:"Blocco semicerchio", dim:"fronte curvo", icon:"pedana", action:function(){ addCatalogBlock(400,200,"semi"); }});
       /* — Pedane e gradoni — (rialzi che vanno SOPRA il palco) */
-      subTitle("Pedane e gradoni");
       [["2×1 m",200,100],["1×1 m",100,100],["2×0,5 m",200,50]].forEach(function(p){
         var nome="Pedana "+p[0], over={w:p[1],d:p[2]};
-        body.appendChild(makeBtn("pedana",nome,over,p[0])); n++;
+        addToGroup("Pedane e gradoni", makeBtn("pedana",nome,over,p[0]));
         entries.push({k:"pedana",nome:nome,over:over,dim:p[0]});
       });
-      if(TYPES.pedanacoro){ body.appendChild(makeBtn("pedanacoro", TYPES.pedanacoro.nome)); n++; entries.push({k:"pedanacoro",nome:TYPES.pedanacoro.nome}); }
+      if(TYPES.pedanacoro){ addToGroup("Pedane e gradoni", makeBtn("pedanacoro", TYPES.pedanacoro.nome)); entries.push({k:"pedanacoro",nome:TYPES.pedanacoro.nome}); }
       /* — restanti gruppi — */
       [["Accessi e sicurezza", ["scala","rampa","parapetto","transenna"]],
        ["Scenografia",         ["fondale","quinta","tappeto"]],
        ["Arredo e leggii",     ["tavolo","sedia","sedialeggio","leggio","podio","sgabello"]],
        ["Varie",               ["ventilatore","testo"]]
       ].forEach(function(g){
-        var keys=g[1].filter(function(k){ return TYPES[k] && TYPES[k].catalog!==false; });
-        if(!keys.length) return;
-        subTitle(g[0]);
-        keys.forEach(function(k){ body.appendChild(makeBtn(k, TYPES[k].nome)); n++; entries.push({k:k,nome:TYPES[k].nome}); });
+        g[1].filter(function(k){ return TYPES[k] && TYPES[k].catalog!==false; }).forEach(function(k){
+          addToGroup(g[0], makeBtn(k, TYPES[k].nome)); entries.push({k:k,nome:TYPES[k].nome});
+        });
       });
     }
     if(c==="Archi"){
@@ -2075,23 +2090,6 @@ function miniSvg(k, over){
       body.appendChild(makeActionBtn("Organico coro", "Soprani · Contralti · Tenori · Bassi", "cantante", openVoiceModal));
       n++;
       entries.push({nome:"Organico coro", dim:"Soprani · Contralti · Tenori · Bassi", action:openVoiceModal, icon:"cantante"});
-    }
-    var lastSub=null, rhythmSubs=[], rhythmMap={};
-    function rhythmGroup(sub){
-      if(!rhythmMap[sub]){
-        var sh=document.createElement("button"); sh.className="sub-head"; sh.type="button";
-        var sb=document.createElement("div"); sb.className="sub-body";
-        var group={head:sh, body:sb, count:0, name:sub};
-        sh.addEventListener("click", function(){
-          var willOpen = !sb.classList.contains("open");
-          rhythmSubs.forEach(function(s){ s.head.classList.remove("open"); s.body.classList.remove("open"); });
-          if(willOpen){ sb.classList.add("open"); sh.classList.add("open"); }
-        });
-        rhythmSubs.push(group);
-        rhythmMap[sub]=group;
-        body.appendChild(sh); body.appendChild(sb);
-      }
-      return rhythmMap[sub];
     }
     cats[c].forEach(function(k){
       if(c==="Pedane e strutture") return;   /* categoria gestita interamente sopra (sottosezioni) */
