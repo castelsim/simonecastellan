@@ -344,8 +344,8 @@
   <button class="btn" id="bUndo" title="Annulla (⌘Z)" style="padding:7px 11px">↶</button>
   <button class="btn" id="bRedo" title="Ripeti (⇧⌘Z)" style="padding:7px 11px">↷</button>
   <button class="btn" id="bFit" title="Adatta lo zoom al palco">⤢ Adatta</button>
-  <button class="btn" id="bPdf" title="Esporta un PDF in scala (A4/A3) per la stampa">Esporta PDF</button>
-  <button class="btn primary" id="bShare" title="Genera un link del progetto da inviare via email/WhatsApp">🔗 Condividi</button>
+  <button class="btn" id="bPdf" hidden>Esporta PDF</button>
+  <button class="btn primary" id="bShare" title="Condividi il link del progetto o esporta il PDF">🔗 Condividi</button>
   <button class="btn danger" id="bNew">Nuovo</button>
 </header>
 
@@ -365,8 +365,7 @@
       <button data-act="palco">▦ Palco</button>
       <button data-act="evento">Evento</button>
       <button data-act="chan">Channel list</button>
-      <button data-act="share">🔗 Condividi</button>
-      <button data-act="pdf">Esporta PDF</button>
+      <button data-act="share">🔗 Condividi / PDF</button>
       <button data-act="theme">Tema chiaro/scuro</button>
       <button data-act="new" class="danger">Nuovo</button>
     </div>
@@ -641,17 +640,25 @@
 
 <div class="modal" id="shareModal" hidden>
   <div class="mcard" style="width:480px;max-width:94vw">
-    <h2>Condividi il progetto</h2>
-    <p class="hint" style="font-size:12.5px;color:#6b7280;margin-bottom:10px">Chi apre il link vede lo stage plot <b>già caricato</b> nel browser — niente file da scaricare.</p>
-    <input type="text" id="shareUrl" readonly style="width:100%;font-size:12px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px" onclick="this.select()">
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-      <button class="btn primary" id="shareNative" hidden>Condividi…</button>
-      <button class="btn" id="shareCopy">Copia link</button>
-      <button class="btn" id="shareEmail">Email</button>
-      <button class="btn" id="shareWa">WhatsApp</button>
+    <h2>Condividi / Esporta</h2>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn primary" id="shareTabLink" style="flex:1">🔗 Link del progetto</button>
+      <button class="btn" id="shareTabPdf" style="flex:1">📄 PDF in scala</button>
+    </div>
+    <div id="shareLinkBox">
+      <p class="hint" style="font-size:12.5px;color:#6b7280;margin-bottom:10px">Chi apre il link vede lo stage plot <b>già caricato</b> nel browser — niente file da scaricare. Invialo a tecnici, musicisti o produzione.</p>
+      <input type="text" id="shareUrl" readonly style="width:100%;font-size:12px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px" onclick="this.select()">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn primary" id="shareNative" hidden>Condividi…</button>
+        <button class="btn" id="shareCopy">Copia link</button>
+        <button class="btn" id="shareEmail">Email</button>
+        <button class="btn" id="shareWa">WhatsApp</button>
+      </div>
+      <div class="mstatus" id="shareStatus" style="font-size:12px;color:#16a34a;margin-top:8px;min-height:14px"></div>
+    </div>
+    <div style="display:flex;margin-top:14px">
       <button class="btn" id="shareClose" style="margin-left:auto">Chiudi</button>
     </div>
-    <div class="mstatus" id="shareStatus" style="font-size:12px;color:#16a34a;margin-top:8px;min-height:14px"></div>
   </div>
 </div>
 
@@ -3759,6 +3766,8 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   }
   document.getElementById("bShare").addEventListener("click", openShare);
   document.getElementById("shareClose").addEventListener("click", function(){ modal.hidden=true; });
+  document.getElementById("shareTabLink").addEventListener("click", function(){ openShare(); });
+  document.getElementById("shareTabPdf").addEventListener("click", function(){ modal.hidden=true; document.getElementById("bPdf").click(); });
   modal.addEventListener("click", function(e){ if(e.target===modal) modal.hidden=true; });
   document.addEventListener("keydown", function(e){ if(!modal.hidden && e.key==="Escape") modal.hidden=true; });
   function copy(){ var url=urlEl.value;
