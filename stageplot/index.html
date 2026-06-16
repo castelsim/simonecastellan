@@ -2416,6 +2416,11 @@ document.addEventListener("keydown", function(e){
   var ottM=document.getElementById("ottoniModal"); if(!ottM.hidden && e.key==="Escape"){ ottM.hidden=true; return; }
   if((e.metaKey||e.ctrlKey) && (e.key==="z"||e.key==="Z")){ e.preventDefault(); if(e.shiftKey) redo(); else undo(); return; }
   if((e.metaKey||e.ctrlKey) && (e.key==="y"||e.key==="Y")){ e.preventDefault(); redo(); return; }
+  /* modalità Palco: Invio = conferma (Fatto), Backspace/Canc = elimina il blocco selezionato */
+  if(stageEdit){
+    if(e.key==="Enter"){ e.preventDefault(); if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); toggleStageEdit(); return; }
+    if((e.key==="Backspace"||e.key==="Delete") && !/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)){ e.preventDefault(); delSelBlock(); return; }
+  }
   if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
   var it=getSel(), step = e.shiftKey?25:5;
   if(e.key==="Escape"){ clearSelection(); render(); }
