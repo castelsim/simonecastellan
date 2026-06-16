@@ -48,31 +48,38 @@
   .btn.primary{background:#1f2937;color:#fff}
   .btn.primary:hover{background:#374151}
   .btn.danger{background:#fee2e2;color:#b91c1c}
-  #catalog{grid-area:cat;overflow-y:auto;border-right:1px solid #e5e7eb;padding:10px}
-  #catalog .cat-head{display:flex;align-items:center;gap:7px;width:100%;text-align:left;background:#fff;
-    border:none;border-bottom:1px solid #e5e7eb;padding:10px 4px 9px;margin-top:4px;cursor:pointer;
-    font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#374151;font-weight:700}
+  #catalog{grid-area:cat;overflow-y:auto;border-right:1px solid #e5e7eb;padding:10px 9px}
+  #catalog .cat-head{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:#f4f5f7;
+    border:1px solid #e9ebee;border-radius:10px;padding:10px 12px;margin-top:6px;cursor:pointer;
+    font-size:11.5px;text-transform:uppercase;letter-spacing:.8px;color:#374151;font-weight:700}
   #catalog .cat-head:first-child{margin-top:0}
-  #catalog .cat-head:hover{color:#111827}
+  #catalog .cat-head:hover{background:#eceef1}
+  #catalog .cat-head.open{background:#1f2937;border-color:#1f2937;color:#fff}
   #catalog .cat-head .caret{font-size:11px;color:#9ca3af;transition:transform .15s ease;display:inline-block;width:10px}
-  #catalog .cat-head.open .caret{transform:rotate(90deg)}
-  #catalog .cat-head .count{margin-left:auto;font-size:10px;font-weight:600;color:#b6bbc2;letter-spacing:0}
-  #catalog .cat-body{display:none;padding:6px 0 4px}
+  #catalog .cat-head.open .caret{transform:rotate(90deg);color:#cbd5e1}
+  #catalog .cat-head .count{margin-left:auto;font-size:10px;font-weight:700;color:#aab0b8;letter-spacing:0;
+    background:#fff;border-radius:999px;padding:1px 8px;min-width:20px;text-align:center}
+  #catalog .cat-head.open .count{background:#374151;color:#cbd5e1}
+  #catalog .cat-body{display:none;padding:7px 3px 10px}
   #catalog .cat-body.open{display:block}
   #catSearch{width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:7px 10px;font-size:13px;margin-bottom:8px}
   #catSearch:focus{outline:none;border-color:#9aa3ad}
   #catResults{display:none}
   #catResults .nores{font-size:12px;color:#9ca3af;padding:8px 4px}
-  #catalog h4{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:#9ca3af;margin:8px 4px 4px}
+  #catalog h4{font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;color:#0e7490;font-weight:700;
+    margin:13px 2px 7px;padding-left:9px;border-left:3px solid #7fc6d2}
   #catalog button{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:#fff;
     border:1px solid #e5e7eb;border-radius:8px;padding:4px 8px;font-size:12.5px;color:#1f2937;
     cursor:pointer;margin-bottom:4px;line-height:1.25}
   #catalog button:hover{background:#f1f3f4;border-color:#d1d5db}
   #catalog button small{color:#9ca3af;font-size:10.5px;display:block}
   #catalog .mini{flex:0 0 auto;display:block;width:34px;height:34px}
-  #catalog .sub-head{border:0;border-bottom:1px solid #eef0f2;border-radius:0;margin:4px 0 6px;padding:8px 4px;
-    font-size:10.5px;text-transform:uppercase;letter-spacing:.65px;color:#6b7280;font-weight:700;background:#fff}
-  #catalog .sub-head:hover{background:#fff;color:#111827;border-color:#e5e7eb}
+  #catalog .sub-head{display:flex;align-items:center;gap:7px;width:100%;text-align:left;
+    border:1px solid #dceaeb;border-radius:8px;margin:10px 0 6px;padding:8px 10px;
+    font-size:10.5px;text-transform:uppercase;letter-spacing:.65px;color:#0e7490;font-weight:700;background:#f2fafb}
+  #catalog .sub-head:hover{background:#e7f5f7}
+  #catalog .sub-head.open{background:#0e7490;border-color:#0e7490;color:#fff}
+  #catalog .sub-head.open .caret,#catalog .sub-head.open .count{color:#bfe3ea}
   #catalog .sub-head .caret{font-size:10px;color:#aab0b8;transition:transform .15s ease;display:inline-block;width:10px}
   #catalog .sub-head.open .caret{transform:rotate(90deg)}
   #catalog .sub-head .count{margin-left:auto;font-size:10px;font-weight:600;color:#b6bbc2;letter-spacing:0}
@@ -294,7 +301,14 @@
   body.dark .btn.primary{background:#2563eb;color:#fff}
   body.dark .btn.danger{background:#3a1d1f;color:#fca5a5}
   body.dark #catalog{background:#161b24;border-right-color:#283142}
-  body.dark #catalog .cat-head,body.dark #catalog .sub-head{background:#161b24;border-bottom-color:#283142;color:#cbd5e1}
+  body.dark #catalog .cat-head{background:#1b2230;border-color:#2b3445;color:#cbd5e1}
+  body.dark #catalog .cat-head:hover{background:#222b38}
+  body.dark #catalog .cat-head.open{background:#2563eb;border-color:#2563eb;color:#fff}
+  body.dark #catalog .cat-head .count{background:#0f141b;color:#9aa6b6}
+  body.dark #catalog .cat-head.open .count{background:#1e40af;color:#dbe4ff}
+  body.dark #catalog h4{color:#5eb8c7;border-left-color:#2b6c78}
+  body.dark #catalog .sub-head{background:#13202a;border-color:#234852;color:#5eb8c7}
+  body.dark #catalog .sub-head.open{background:#0e7490;border-color:#0e7490;color:#fff}
   body.dark #catalog button{background:#1b2230;border-color:#2b3445;color:#e5e7eb}
   body.dark #catalog button:hover{background:#222b38;border-color:#3a4658}
   body.dark #catalog .sub-body{background:#141a23;border-left-color:#2b4a4e}
