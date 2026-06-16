@@ -1604,18 +1604,33 @@ function stageFloorMarkup(){
 }
 /* quote modulari: per ogni blocco larghezza sopra, profondità a sinistra, altezza fuori; + ingombro totale del palco */
 function stageDimsMarkup(){
-  var b=stageBlocks(), W=state.stage.w, D=state.stage.d, s='', off=11;
+  var b=stageBlocks(), W=state.stage.w, D=state.stage.d, s='', o1=16, o2=33;
+  /* un lato del blocco è "aperto" se subito fuori non c'è un altro blocco → la quota ci va lì (sempre esterna al palco) */
+  function open(r,side){
+    var eps=4, mx=r.x+r.w/2, my=r.y+r.d/2, px, py;
+    if(side==="top"){px=mx;py=r.y-eps;} else if(side==="bottom"){px=mx;py=r.y+r.d+eps;}
+    else if(side==="left"){px=r.x-eps;py=my;} else {px=r.x+r.w+eps;py=my;}
+    return !b.some(function(o){ return px>o.x && px<o.x+o.w && py>o.y && py<o.y+o.d; });
+  }
   b.forEach(function(r){
     var cx=r.x+r.w/2, cy=r.y+r.d/2;
-    /* larghezza: sopra il bordo superiore del blocco */
-    s += '<text class="dim-edge" x="'+cx+'" y="'+(r.y-off)+'" text-anchor="middle">'+fmtM(r.w)+'</text>';
-    /* profondità: sul lato sinistro del blocco */
-    s += '<text class="dim-edge" x="'+(r.x-off)+'" y="'+cy+'" text-anchor="middle" transform="rotate(-90 '+(r.x-off)+' '+cy+')">'+fmtM(r.d)+'</text>';
-    /* altezza: fuori dal blocco, a destra, vicino alla quota (solo se rialzata) */
-    if(r.h) s += '<text class="dim-h" x="'+(r.x+r.w+off)+'" y="'+(cy)+'" text-anchor="middle" transform="rotate(-90 '+(r.x+r.w+off)+' '+cy+')">h '+r.h+' cm</text>';
+    /* larghezza: sul lato orizzontale libero (sopra preferito, poi sotto) */
+    var topOpen=open(r,"top"), botOpen=open(r,"bottom");
+    if(topOpen||botOpen){ var up=topOpen;
+      s += '<text class="dim-edge" x="'+cx+'" y="'+(up?r.y-o1:r.y+r.d+o1+6)+'" text-anchor="middle">'+fmtM(r.w)+'</text>';
+    }
+    /* profondità (+ altezza) sul lato verticale libero (sinistra preferita, poi destra) */
+    var leftOpen=open(r,"left"), rightOpen=open(r,"right");
+    if(leftOpen||rightOpen){ var lft=leftOpen, dx=lft?r.x-o1:r.x+r.w+o1;
+      s += '<text class="dim-edge" x="'+dx+'" y="'+cy+'" text-anchor="middle" transform="rotate(-90 '+dx+' '+cy+')">'+fmtM(r.d)+'</text>';
+      if(r.h){ var hx=lft?r.x-o2:r.x+r.w+o2;
+        s += '<text class="dim-h" x="'+hx+'" y="'+cy+'" text-anchor="middle" transform="rotate(-90 '+hx+' '+cy+')">h '+r.h+' cm</text>'; }
+    } else if(r.h && (topOpen||botOpen)){ var hu=topOpen;   /* nessun lato verticale libero: altezza sul lato orizzontale */
+      s += '<text class="dim-h" x="'+cx+'" y="'+(hu?r.y-o2:r.y+r.d+o2+6)+'" text-anchor="middle">h '+r.h+' cm</text>';
+    }
   });
   /* ingombro totale del palco */
-  s += '<text class="dim-tot" x="'+(W/2)+'" y="-66" text-anchor="middle">PALCO '+fmtM(W)+' × '+fmtM(D)+'</text>';
+  s += '<text class="dim-tot" x="'+(W/2)+'" y="-70" text-anchor="middle">PALCO '+fmtM(W)+' × '+fmtM(D)+'</text>';
   return s;
 }
 /* overlay interattivo dei blocchi (solo in modalità "Modifica palco"): ogni blocco è una pedana modulare */
