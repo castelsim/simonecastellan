@@ -437,6 +437,11 @@
       <label class="chk"><input type="checkbox" id="pMano"> Microfono in mano (invece che su asta)</label>
       <label class="chk"><input type="checkbox" id="pLeggioV"> Leggio</label>
     </div>
+    <div id="pGtr" style="display:none;border-top:1px solid #eef0f2;margin-top:10px;padding-top:8px">
+      <label class="chk"><input type="checkbox" id="pGtrPlayer"> Postazione (musicista che suona)</label>
+      <label class="chk"><input type="checkbox" id="pGtrDonna"> Donna</label>
+      <label class="chk"><input type="checkbox" id="pGtrAmp"> Ampli dietro</label>
+    </div>
     <div id="pComp" style="display:none;border-top:1px solid #eef0f2;margin-top:10px;padding-top:8px">
       <div id="pCompCtl"></div>
       <button class="btn" id="pCompSplit" style="width:100%;margin-top:9px;font-size:12px">⇱ Dividi in elementi singoli</button>
@@ -794,6 +799,30 @@ function singer(it){
   }
   if(it.leggio) s+='<g transform="translate(0,'+legY+')">'+leggioGlyph(0)+'</g>';
   return s;
+}
+/* ===== Chitarre/basso: glifo strumento + postazione musicista + ampli ===== */
+function gtrGlyph(kind){
+  if(kind==="ac") return bar(0,-17,5,44,'ic thin fWoodD',1)+'<path class="ic fWoodL" d="M 0,5 C 11,5 16,11 15,19 C 14,25 11,27 12,32 C 14,39 19,42 18,49 C 16,57 7,59 0,59 C -7,59 -16,57 -18,49 C -19,42 -14,39 -12,32 C -11,27 -14,25 -15,19 C -16,11 -11,5 0,5 Z"/>'+circ(0,24,7,'ic thin fBlack')+bar(0,44,16,4,'ic fill',1);
+  if(kind==="bass") return bar(0,-21,5,50,'ic thin fWoodD',1)+'<path class="ic fWood" d="M 0,11 C 11,9 17,16 15,25 C 13,31 16,34 14,40 C 12,48 5,50 0,50 C -5,50 -12,48 -14,40 C -16,34 -13,31 -15,25 C -17,16 -11,9 0,11 Z"/>'+bar(0,24,11,3.5,'ic thin',1)+bar(0,33,11,3.5,'ic thin',1)+bar(0,42,10,3,'ic fill',1);
+  return bar(0,-17,5,42,'ic thin fWoodD',1)+'<path class="ic fRed" d="M -6,6 C -13,2 -20,7 -20,15 C -20,23 -16,26 -17,32 C -19,42 -11,50 0,50 C 11,50 19,42 17,32 C 16,26 20,23 20,15 C 20,7 13,2 6,6 C 3,8 -3,8 -6,6 Z"/>'+bar(0,20,13,4,'ic thin',1)+bar(0,29,13,4,'ic thin',1)+bar(0,40,12,3.5,'ic fill',1);
+}
+function gtrHead(kind){ var y=kind==="bass"?-52:kind==="ac"?-45:-44, h=kind==="bass"?15:14; return bar(0,y,9,h,'ic fBlack',2); }
+function ampCombo(){ return bar(0,0,64,26,'ic fMon',3)+bar(0,3,24,6,'ic fill',3)+kn(-15,-8.5,6,6); }
+function guitarDraw(it,kind){
+  it=it||{}; var s='';
+  if(it.ampli) s+='<g transform="translate(0,-60)">'+ampCombo()+'</g>';                       /* ampli dietro (verso il fondo) */
+  if(it.player){
+    s+=singer({nomic:true, donna:it.donna});                                                  /* musicista in piedi */
+    s+='<g transform="translate(3,24) rotate(-24) scale(0.82)">'+gtrGlyph(kind)+'</g>';        /* chitarra imbracciata */
+  } else {
+    s+=gtrHead(kind)+gtrGlyph(kind);                                                           /* chitarra su stand */
+  }
+  return s;
+}
+function gtrSize(it,t){ var w=t.w, d=t.d;
+  if(it.player){ w=Math.max(w,74); d=Math.max(d,140); }
+  if(it.ampli){ d+=72; }
+  return [w,d];
 }
 function celloPost(){
   return shadow(42,58,0,8)+bar(0,-36,44,44,'ic fBlack',9)+bar(0,-60,44,8,'ic fill',4)+
@@ -1161,19 +1190,12 @@ var TYPES = {
                [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(function(c){ s+=circ(c[0]*30,c[1]*10.5,1.8,'dotS'); });
                return s; }},
   /* --- ritmica: chitarre --- */
-  gtstand:  {nome:"Chitarra elettrica su stand", dim:"~40×100", cat:"Ritmica", sub:"Chitarre", w:44,d:104,
-             draw:function(){ return bar(0,-44,9,14,'ic fBlack',2)+bar(0,-17,5,42,'ic thin fWoodD',1)+
-               /* corpo double-cutaway in proporzione reale (33×46) */
-               '<path class="ic fRed" d="M -6,6 C -13,2 -20,7 -20,15 C -20,23 -16,26 -17,32 C -19,42 -11,50 0,50 C 11,50 19,42 17,32 C 16,26 20,23 20,15 C 20,7 13,2 6,6 C 3,8 -3,8 -6,6 Z"/>'+
-               bar(0,20,13,4,'ic thin',1)+bar(0,29,13,4,'ic thin',1)+bar(0,40,12,3.5,'ic fill',1); }},
-  gtacustica:{nome:"Chitarra acustica su stand", dim:"~42×105", cat:"Ritmica", sub:"Chitarre", w:46,d:110,
-             draw:function(){ return bar(0,-45,9,14,'ic fBlack',2)+bar(0,-17,5,44,'ic thin fWoodD',1)+
-               '<path class="ic fWoodL" d="M 0,5 C 11,5 16,11 15,19 C 14,25 11,27 12,32 C 14,39 19,42 18,49 C 16,57 7,59 0,59 C -7,59 -16,57 -18,49 C -19,42 -14,39 -12,32 C -11,27 -14,25 -15,19 C -16,11 -11,5 0,5 Z"/>'+
-               circ(0,24,7,'ic thin fBlack')+bar(0,44,16,4,'ic fill',1); }},
-  bassstand:{nome:"Basso su stand", dim:"~42×118", cat:"Ritmica", sub:"Chitarre", w:46,d:120,
-             draw:function(){ return bar(0,-52,9,15,'ic fBlack',2)+bar(0,-21,5,50,'ic thin fWoodD',1)+
-               '<path class="ic fWood" d="M 0,11 C 11,9 17,16 15,25 C 13,31 16,34 14,40 C 12,48 5,50 0,50 C -5,50 -12,48 -14,40 C -16,34 -13,31 -15,25 C -17,16 -11,9 0,11 Z"/>'+
-               bar(0,24,11,3.5,'ic thin',1)+bar(0,33,11,3.5,'ic thin',1)+bar(0,42,10,3,'ic fill',1); }},
+  gtstand:  {nome:"Chitarra elettrica", dim:"stand · postazione", cat:"Ritmica", sub:"Chitarre", w:44,d:104, gtr:"el",
+             draw:function(it){ return guitarDraw(it,"el"); }},
+  gtacustica:{nome:"Chitarra acustica", dim:"stand · postazione", cat:"Ritmica", sub:"Chitarre", w:46,d:110, gtr:"ac",
+             draw:function(it){ return guitarDraw(it,"ac"); }},
+  bassstand:{nome:"Basso elettrico", dim:"stand · postazione", cat:"Ritmica", sub:"Chitarre", w:46,d:120, gtr:"bass",
+             draw:function(it){ return guitarDraw(it,"bass"); }},
   djset:    {nome:"DJ set su tavolo", dim:"180×60", cat:"Tecnica", w:182,d:64, defLabel:"DJ",
              draw:function(){ return bar(0,0,180,60,'ic fBlack',4)+
                bar(-58,0,36,32,'ic fGrey',3)+circ(-58,2,11,'ic thin fSilver')+
@@ -1752,6 +1774,13 @@ function renderProps(){
     document.getElementById("pMano").checked = it.mano===true;
     document.getElementById("pLeggioV").checked = it.leggio!==false;
   }
+  var pg=document.getElementById("pGtr"), isGtr=!!t.gtr;
+  pg.style.display = isGtr ? "block" : "none";
+  if(isGtr){
+    document.getElementById("pGtrPlayer").checked = it.player===true;
+    document.getElementById("pGtrDonna").checked = it.donna===true;
+    document.getElementById("pGtrAmp").checked = it.ampli===true;
+  }
   var pc=document.getElementById("pComp"), comp=COMP[it.type];
   pc.style.display = comp ? "block" : "none";
   if(comp){
@@ -1852,6 +1881,10 @@ document.getElementById("pLeggioV").addEventListener("change", function(){ mutSe
   it.leggio=document.getElementById("pLeggioV").checked;
   if(it.type==="cantante") it.d = it.leggio?122:90;   /* fa spazio al leggio davanti */
 }); });
+function gtrApply(it){ var sz=gtrSize(it, TYPES[it.type]); it.w=sz[0]; it.d=sz[1]; }
+document.getElementById("pGtrPlayer").addEventListener("change", function(){ mutSel(function(it){ it.player=document.getElementById("pGtrPlayer").checked; gtrApply(it); }); });
+document.getElementById("pGtrAmp").addEventListener("change", function(){ mutSel(function(it){ it.ampli=document.getElementById("pGtrAmp").checked; gtrApply(it); }); });
+document.getElementById("pGtrDonna").addEventListener("change", function(){ mutSel(function(it){ it.donna=document.getElementById("pGtrDonna").checked; }); });
 /* Dividi una postazione doppia (×2 del generatore o doppia-da-flag) in 2 postazioni singole */
 var SINGLE_OF_KIND={vln1:"vlnpost", vln2:"vlnpost", vla:"violapost", vc:"violoncello", cb:"contrabbasso"};
 function splitDouble(){
