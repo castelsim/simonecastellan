@@ -10,11 +10,17 @@
 <link rel="canonical" href="https://simonecastellan.com/stageplot/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Stage Plot — editor di stage plot in scala">
-<meta property="og:description" content="Crea stage plot professionali per concerti: palco in scala, pedane modulabili, band e orchestra sinfonica completa, export PNG. Gratuito.">
+<meta property="og:title" content="Stage Plot — crea e condividi il tuo palco">
+<meta property="og:description" content="Stage plot in scala per spettacoli dal vivo: palco modulare a pedane, strumenti e organici, channel list, PDF. Apri il link e vedi il progetto già caricato.">
 <meta property="og:url" content="https://simonecastellan.com/stageplot/">
-<meta property="og:image" content="https://simonecastellan.com/og-image.png?v=2">
+<meta property="og:site_name" content="Stage Plot">
+<meta property="og:image" content="https://simonecastellan.com/stageplot/preview.png?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Stage Plot — crea e condividi il tuo palco">
+<meta name="twitter:description" content="Stage plot in scala per spettacoli dal vivo. Apri il link e vedi il progetto già caricato.">
+<meta name="twitter:image" content="https://simonecastellan.com/stageplot/preview.png?v=1">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
@@ -25,6 +31,8 @@
     grid-template-areas:"top top top" "cat main props" "foot foot foot";overflow:hidden}
   header{grid-area:top;display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid #e5e7eb}
   header .brand{font-weight:700;font-size:15px;letter-spacing:.2px;margin-right:14px}
+  .hdr-evt{border:1px solid #e5e7eb;border-radius:8px;padding:6px 9px;font-size:13px;background:#fff;color:#1f2937}
+  .hdr-evt::placeholder{color:#9ca3af}
   .hdr-stage{display:flex;align-items:center;gap:10px;background:#f6f7f9;border:1px solid #e5e7eb;
     border-radius:10px;padding:5px 11px}
   .hdr-stage .lab{font-size:10px;font-weight:800;letter-spacing:.7px;color:#9ca3af;text-transform:uppercase}
@@ -320,8 +328,9 @@
 <svg id="defs-master" width="0" height="0" style="position:absolute" aria-hidden="true"></svg>
 <header>
   <span class="brand">STAGE PLOT</span>
+  <input type="text" id="titolo" class="hdr-evt" placeholder="Titolo" title="Titolo dell'evento (diventa l'oggetto della mail in condivisione)" style="width:180px">
+  <input type="text" id="luogo" class="hdr-evt" placeholder="Luogo" title="Luogo dell'evento" style="width:150px">
   <button class="btn" id="bStageShape" title="Dimensioni, altezza e forma del palco" style="padding:7px 12px">▦ Palco</button>
-  <button class="btn" id="bEvento" title="Titolo e luogo dell'evento" style="padding:7px 12px">Evento</button>
   <span style="flex:1"></span>
   <button class="btn" id="bTheme" title="Tema chiaro / scuro" style="padding:7px 11px">🌙</button>
   <button class="btn" id="bUndo" title="Annulla (⌘Z)" style="padding:7px 11px">↶</button>
@@ -388,8 +397,8 @@
   </div>
   <div class="sec" id="eventoSec" hidden style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:10px 11px;margin-bottom:14px">
     <h3 style="margin-bottom:6px">Evento</h3>
-    <label>Titolo</label><input type="text" id="titolo" placeholder="Es. Concerto in villa">
-    <label>Luogo (per il render)</label><input type="text" id="luogo" placeholder="Es. Teatro Comunale, Vicenza">
+    <label>Titolo</label><input type="text" id="titoloEv" placeholder="Es. Concerto in villa">
+    <label>Luogo</label><input type="text" id="luogoEv" placeholder="Es. Teatro Comunale, Vicenza">
     <div class="hint" style="font-size:11px;color:#9ca3af;margin-top:5px">Titolo e luogo compaiono nell'intestazione dell'export.</div>
     <button class="btn primary" id="bEventoDone" style="width:100%;margin-top:10px">Fatto</button>
   </div>
@@ -1475,8 +1484,7 @@ function resetHistory(){ lastSnap=JSON.stringify(state); undoStack.length=0; red
 function applyHistory(json){
   state=normalizeState(JSON.parse(json)); lastSnap=json; sel=null; selSet={};
   nextId=1; state.items.forEach(function(it){ var n=parseInt(it.id.slice(1),10); if(n>=nextId) nextId=n+1; });
-  var ti=document.getElementById("titolo"), lu=document.getElementById("luogo");
-  if(ti) ti.value=state.titolo||""; if(lu) lu.value=state.luogo||"";
+  setEventInputs();
   try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
   render(); renderChannels();
 }
@@ -1873,8 +1881,13 @@ function deleteSel(){
 }
 
 /* ============ PALCO / SNAP ============ */
-document.getElementById("titolo").addEventListener("input", function(){ state.titolo=this.value; var mt=document.getElementById("mTitle"); if(mt && document.activeElement!==mt) mt.value=this.value; save(); });
-document.getElementById("luogo").addEventListener("input", function(){ state.luogo=this.value; save(); });
+/* Titolo/Luogo: campi nell'header (desktop) + pannello Evento (mobile), sincronizzati con lo stato */
+function setEventInputs(){
+  ["titolo","titoloEv"].forEach(function(id){ var e=document.getElementById(id); if(e && document.activeElement!==e) e.value=state.titolo||""; });
+  ["luogo","luogoEv"].forEach(function(id){ var e=document.getElementById(id); if(e && document.activeElement!==e) e.value=state.luogo||""; });
+}
+["titolo","titoloEv"].forEach(function(id){ var e=document.getElementById(id); if(e) e.addEventListener("input", function(){ state.titolo=this.value; setEventInputs(); save(); }); });
+["luogo","luogoEv"].forEach(function(id){ var e=document.getElementById(id); if(e) e.addEventListener("input", function(){ state.luogo=this.value; setEventInputs(); save(); }); });
 function snapVal(){ return +document.getElementById("snap").value; }
 function snap(v){ var s=snapVal(); return s? Math.round(v/s)*s : Math.round(v); }
 
@@ -2316,7 +2329,6 @@ document.getElementById("blkFlat").addEventListener("change", function(){
 });
 document.getElementById("bStageShape").addEventListener("click", toggleStageEdit);
 document.getElementById("bStageDone").addEventListener("click", toggleStageEdit);
-document.getElementById("bEvento").addEventListener("click", toggleEvento);
 document.getElementById("bEventoDone").addEventListener("click", toggleEvento);
 document.getElementById("bChanDone").addEventListener("click", toggleChan);
 document.getElementById("bAddBlock").addEventListener("click", addStageBlock);
@@ -3420,7 +3432,7 @@ document.getElementById("bNew").addEventListener("click", function(){
   if(!confirm("Nuovo stage plot? Quello attuale verrà cancellato (usa prima \"Condividi\" se vuoi conservarlo).")) return;
   state={titolo:"",luogo:"",stage:{w:1200,d:800,blocks:[{x:0,y:0,w:1200,d:800}]},items:[],inputs:[],outputs:[]};
   stageEdit=false; selBlock=null; eventoEdit=false; renderStagePanel(); renderEventoPanel(); clearSelection(); save(); fit();
-  document.getElementById("titolo").value=""; document.getElementById("luogo").value=""; renderChannels();
+  setEventInputs(); renderChannels();
 });
 /* ============ JSON DI PROGETTO formato 3 — pronto per render 3D ============
    items arricchiti (z, h, components relativi, render{}), librerie assets/materials,
@@ -3634,7 +3646,8 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
 (function(){
   var modal=document.getElementById("shareModal"), urlEl=document.getElementById("shareUrl");
   function status(m){ document.getElementById("shareStatus").textContent=m||""; }
-  function shareText(){ return "Stage plot"+(state.titolo?" — "+state.titolo:"")+(state.luogo?" · "+state.luogo:""); }
+  function shareText(){ var t=state.titolo||"", l=state.luogo||"";
+    return (t||l) ? (t+(t&&l?" · ":"")+l) : "Stage plot"; }   /* oggetto mail = titolo · luogo */
   function openShare(){
     var url=buildShareUrl(); urlEl.value=url; status("");
     document.getElementById("shareNative").hidden = !navigator.share;
@@ -4055,8 +4068,7 @@ if(qForm){
     state.outputs=qd.outp.map(normalizeChannelRow);
     linkChannelsToItems(); }   /* aggancia patch→oggetti per il test del link */
 }
-document.getElementById("titolo").value = state.titolo||"";
-document.getElementById("luogo").value = state.luogo||"";
+setEventInputs();
 normalizeState(state); renderChannels();
 if(location.search.indexOf("inputaudit=1")>-1){   /* QA: un esemplare di ogni sorgente + Auto */
   state.items=[];
