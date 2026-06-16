@@ -2015,6 +2015,7 @@ function snap(v){ var s=snapVal(); return s? Math.round(v/s)*s : Math.round(v); 
 function miniSvg(k, over){
   var t=TYPES[k];
   var it={type:k, w:(over&&over.w)||t.w, d:(over&&over.d)||t.d, h:(over&&over.h)||t.h||40};
+  if(over) Object.keys(over).forEach(function(kk){ if(it[kk]==null) it[kk]=over[kk]; });   /* flag (sedia/leggio/ampli…) → anteprima coerente */
   var ext=Math.max(it.w,it.d)+26;
   return '<svg class="mini" viewBox="'+(-ext/2)+' '+(-ext/2)+' '+ext+' '+ext+'" width="32" height="32" aria-hidden="true">'+t.draw(it)+'</svg>';
 }
@@ -2128,18 +2129,20 @@ function miniSvg(k, over){
       if(c==="Pedane e strutture") return;   /* categoria gestita interamente sopra (sottosezioni) */
       if(k==="pedana") return;
       var sub=TYPES[k].sub||null;
-      var target=body;
-      if(c==="Ritmica" && sub){
-        var group=rhythmGroup(sub);
-        group.count++;
-        group.head.innerHTML='<span class="caret">▸</span><span>'+esc(sub)+'</span><span class="count">'+group.count+'</span>';
-        target=group.body;
-      } else if(sub && sub!==lastSub){
-        var h4=document.createElement("h4"); h4.textContent=sub; body.appendChild(h4);
-      }
+      var target=body, group=null;
+      if(c==="Ritmica" && sub){ group=rhythmGroup(sub); target=group.body; }
+      else if(sub && sub!==lastSub){ var h4=document.createElement("h4"); h4.textContent=sub; body.appendChild(h4); }
       lastSub=sub;
-      target.appendChild(makeBtn(k, TYPES[k].nome)); n++;
-      entries.push({k:k,nome:TYPES[k].nome,over:null});
+      function addBtn(nome, over, dim){
+        target.appendChild(makeBtn(k, nome, over, dim)); n++;
+        if(group){ group.count++; group.head.innerHTML='<span class="caret">▸</span><span>'+esc(group.name)+'</span><span class="count">'+group.count+'</span>'; }
+        entries.push({k:k, nome:nome, over:over||null, dim:dim});
+      }
+      addBtn(TYPES[k].nome);
+      if(TYPES[k].gtr){   /* postazione pronta: chitarra + sedia + leggio + ampli */
+        var pov={sedia:true, leggio:true, ampli:true}; var gz=gtrSize(pov, TYPES[k]); pov.w=gz[0]; pov.d=gz[1];
+        addBtn("Postazione "+TYPES[k].nome.toLowerCase(), pov, "sedia · leggio · ampli");
+      }
     });
     head.innerHTML='<span class="caret">▸</span><span>'+esc(c)+'</span><span class="count">'+n+'</span>';
     head.addEventListener("click", function(){
