@@ -827,7 +827,7 @@ function gtrLegY(it,kind){ return it.sedia ? 38 : (kind==="bass"?60:56); }   /* 
 var GTR_HALF=30;   /* metà separazione sedia↔strumento (composizione centrata, scala reale) */
 function guitarDraw(it,kind){
   it=it||{}; var s='';
-  if(it.ampli) s+='<g transform="translate(0,-98)">'+ampCombo()+'</g>';        /* ampli staccato dietro */
+  if(it.ampli) s+='<g transform="translate(-34,-94) rotate(-24)">'+ampCombo()+'</g>';   /* ampli staccato dietro, angolato verso il musicista */
   if(it.sedia){
     s+=chairSvg(-GTR_HALF);                                                    /* sedia a sinistra */
     s+='<g transform="translate('+(GTR_HALF+8)+',4)">'+gtrHead(kind)+gtrGlyph(kind)+'</g>';   /* strumento di fianco, SCALA REALE */
@@ -851,11 +851,11 @@ function explodeGuitar(){
   pcs.push({type:it.type, dx:seated?(GTR_HALF+8):0, dy:seated?4:0, label:it.label||"", extra:{sedia:false,leggio:false,ampli:false}});   /* chitarra (di fianco se seduto, scala reale) */
   if(seated) pcs.push({type:"sedia", dx:-GTR_HALF, dy:-25, label:""});
   if(it.leggio) pcs.push({type:"leggio", dx:seated?-GTR_HALF:0, dy:gtrLegY(it,kind), label:""});
-  if(it.ampli) pcs.push({type:"comboamp",dx:0, dy:-98, label:base+"Ampli"});
+  if(it.ampli) pcs.push({type:"comboamp",dx:-34, dy:-94, rot:-24, label:base+"Ampli"});
   var rot=(it.rot||0)*Math.PI/180, c=Math.cos(rot), s=Math.sin(rot), made=[];
   pcs.forEach(function(pc){ var T=TYPES[pc.type]; if(!T) return;
     var ni={id:uid(), type:pc.type, x:Math.round(it.x+(pc.dx*c-pc.dy*s)), y:Math.round(it.y+(pc.dx*s+pc.dy*c)),
-            rot:it.rot||0, w:T.w, d:T.d, label:pc.label||""};
+            rot:((it.rot||0)+(pc.rot||0)), w:T.w, d:T.d, label:pc.label||""};
     if(T.riser) ni.h=T.h||40;
     if(pc.extra) Object.keys(pc.extra).forEach(function(k){ ni[k]=pc.extra[k]; });
     made.push(ni);
@@ -2138,10 +2138,11 @@ function miniSvg(k, over){
         if(group){ group.count++; group.head.innerHTML='<span class="caret">▸</span><span>'+esc(group.name)+'</span><span class="count">'+group.count+'</span>'; }
         entries.push({k:k, nome:nome, over:over||null, dim:dim});
       }
-      addBtn(TYPES[k].nome);
-      if(TYPES[k].gtr){   /* postazione pronta: chitarra + sedia + leggio + ampli */
+      if(TYPES[k].gtr){   /* chitarre: solo postazione pronta (sedia + strumento + leggio + ampli) */
         var pov={sedia:true, leggio:true, ampli:true}; var gz=gtrSize(pov, TYPES[k]); pov.w=gz[0]; pov.d=gz[1];
         addBtn("Postazione "+TYPES[k].nome.toLowerCase(), pov, "sedia · leggio · ampli");
+      } else {
+        addBtn(TYPES[k].nome);
       }
     });
     head.innerHTML='<span class="caret">▸</span><span>'+esc(c)+'</span><span class="count">'+n+'</span>';
