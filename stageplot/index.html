@@ -452,7 +452,7 @@
       <label class="chk"><input type="checkbox" id="pLeggioV"> Leggio</label>
     </div>
     <div id="pGtr" style="display:none;border-top:1px solid #eef0f2;margin-top:10px;padding-top:8px">
-      <label class="chk"><input type="checkbox" id="pGtrSedia"> Sedia (seduto)</label>
+      <label class="chk"><input type="checkbox" id="pGtrSedia"> Sedia</label>
       <label class="chk"><input type="checkbox" id="pGtrLeggio"> Leggio</label>
       <label class="chk"><input type="checkbox" id="pGtrAmp"> Ampli</label>
       <button class="btn" id="pGtrSplit" style="width:100%;margin-top:9px;font-size:12px">⇱ Dividi in elementi</button>
@@ -833,8 +833,8 @@ function guitarDraw(it,kind){
   return s;
 }
 function gtrSize(it,t){ var d=t.d, w=t.w;
-  if(it.ampli){ d+=92; w=Math.max(w,70); }
-  if(it.leggio) d+=58;
+  if(it.leggio) d+=44;               /* leggio davanti: l'etichetta resta poco sotto */
+  if(it.ampli) w=Math.max(w,72);     /* ampli dietro: NON allunga la profondità → il nome non si allontana */
   return [w,d];
 }
 /* divide la postazione chitarra nei suoi elementi (chitarra, sedia, leggio, ampli) come item indipendenti */
