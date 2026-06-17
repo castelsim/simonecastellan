@@ -1402,13 +1402,12 @@ var TYPES = {
                lin(-18,-10,-28,-22,'ic mon')+circ(-28,-22,2.5,'mon fill')+
                lin(18,-10,28,-22,'ic mon')+circ(28,-22,2.5,'mon fill')+
                bar(-12,4,12,8,'sil',1)+circ(13,4,5,'sil')+circ(13,4,1.6,'mon fill'); }},
-  hearback: {nome:"Hearback / personal mixer", dim:"13×24 cm + asta nana", cat:"Monitoraggio", w:30,d:50, defLabel:"HEARBACK",
+  hearback: {nome:"Hearback / personal mixer", dim:"13×24 cm", cat:"Monitoraggio", w:15,d:26, defLabel:"HEARBACK",
              draw:function(){
-               /* asta nana: base tonda Ø28 + paletto · unità personal mixer 13×24 cm (scala reale) */
-               var s=circ(0,20,13,'ic fBlack')+circ(0,20,4.5,'dotS')+lin(0,20,0,-2,'ic thin');
-               s+='<rect class="ic mon fMon" x="-6.5" y="-18" width="13" height="24" rx="2.5"/>';   /* unità 13×24 */
-               s+=bar(0,-13.5,9,4,'sil',1);                                                           /* display */
-               for(var r=0;r<3;r++)for(var c=0;c<2;c++){ s+=circ(-3+c*6,-6+r*5.5,1.5,'mon fill'); }   /* manopole */
+               /* sola unità personal mixer 13×24 cm (scala reale), senza asta */
+               var s='<rect class="ic mon fMon" x="-6.5" y="-12" width="13" height="24" rx="2.5"/>';   /* unità 13×24 */
+               s+=bar(0,-7.5,9,4,'sil',1);                                                             /* display */
+               for(var r=0;r<3;r++)for(var c=0;c<2;c++){ s+=circ(-3+c*6,0+r*5.5,1.5,'mon fill'); }     /* manopole */
                return s; }},
   /* --- tecnica --- */
   dimono:   {nome:"DI mono", dim:"simbolo", cat:"Tecnica", w:28,d:28, defLabel:"DI",
