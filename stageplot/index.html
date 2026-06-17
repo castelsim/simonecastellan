@@ -361,8 +361,8 @@
   <button class="btn" id="bRedo" title="Ripeti (⇧⌘Z)" style="padding:7px 11px">↷</button>
   <button class="btn" id="bFit" title="Adatta lo zoom al palco">⤢ Adatta</button>
   <button class="btn" id="bPdf" hidden>Esporta PDF</button>
-  <button class="btn primary" id="bAi" title="Descrivi il palco a ChatGPT e ricevi il link già pronto" style="display:inline-flex;align-items:center;gap:6px">🤖 Crea con AI</button>
-  <button class="btn primary" id="bShare" title="Condividi il link del progetto o esporta il PDF">🔗 Condividi</button>
+  <button class="btn primary" id="bAi" hidden title="Descrivi il palco a ChatGPT e ricevi il link già pronto" style="display:none;align-items:center;gap:6px">🤖 Crea con AI</button>
+  <button class="btn primary" id="bShare" title="Salva/esporta il progetto in JSON o scarica il PDF">💾 Salva / Esporta</button>
   <button class="btn danger" id="bNew">Nuovo</button>
 </header>
 
@@ -382,7 +382,7 @@
       <button data-act="palco">▦ Palco</button>
       <button data-act="evento">Evento</button>
       <button data-act="chan">Channel list</button>
-      <button data-act="share">🔗 Condividi / PDF</button>
+      <button data-act="share">💾 Salva / Esporta</button>
       <button data-act="theme">Tema chiaro/scuro</button>
       <button data-act="new" class="danger">Nuovo</button>
     </div>
@@ -685,30 +685,32 @@
 
 <div class="modal" id="shareModal" hidden>
   <div class="mcard" style="width:480px;max-width:94vw">
-    <h2>Condividi / Esporta</h2>
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button class="btn primary" id="shareTabLink" style="flex:1">🔗 Link del progetto</button>
-      <button class="btn" id="shareTabPdf" style="flex:1">📄 PDF in scala</button>
+    <h2>Salva / Esporta</h2>
+    <!-- CONDIVISIONE LINK: messa da parte, da reimplementare più avanti. Elementi tenuti (hidden) perché la logica li usa. -->
+    <div id="shareTabs" hidden style="display:none">
+      <button class="btn primary" id="shareTabLink">🔗 Link del progetto</button>
+      <button class="btn" id="shareTabPdf">📄 PDF in scala</button>
     </div>
-    <div id="shareLinkBox">
-      <p class="hint" style="font-size:12.5px;color:#6b7280;margin-bottom:10px">Chi apre il link vede lo stage plot <b>già caricato</b> nel browser — niente file da scaricare. Invialo a tecnici, musicisti o produzione.</p>
-      <input type="text" id="shareUrl" readonly style="width:100%;font-size:12px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px" onclick="this.select()">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-        <button class="btn primary" id="shareNative" hidden>Condividi…</button>
-        <button class="btn" id="shareCopy">Copia link</button>
-        <button class="btn" id="shareEmail">Email</button>
-        <button class="btn" id="shareWa">WhatsApp</button>
-      </div>
-      <div class="mstatus" id="shareStatus" style="font-size:12px;color:#16a34a;margin-top:8px;min-height:14px"></div>
+    <div id="shareLinkBox" hidden style="display:none">
+      <input type="text" id="shareUrl" readonly onclick="this.select()">
+      <button class="btn primary" id="shareNative" hidden>Condividi…</button>
+      <button class="btn" id="shareCopy">Copia link</button>
+      <button class="btn" id="shareEmail">Email</button>
+      <button class="btn" id="shareWa">WhatsApp</button>
+      <div id="shareStatus"></div>
     </div>
-    <div style="border-top:1px solid #eef0f3;margin-top:14px;padding-top:12px">
+    <div>
       <p class="hint" style="font-size:12.5px;color:#6b7280;margin-bottom:10px">Salva il progetto come file <b>.json</b> (backup/archivio) e ricaricalo quando vuoi.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn" id="saveJson">💾 Salva .json</button>
+        <button class="btn primary" id="saveJson">💾 Salva .json</button>
         <button class="btn" id="importJson">📂 Importa .json</button>
       </div>
       <input type="file" id="importFile" accept="application/json,.json" hidden>
       <div class="mstatus" id="ioStatus" style="font-size:12px;color:#16a34a;margin-top:8px;min-height:14px"></div>
+    </div>
+    <div style="border-top:1px solid #eef0f3;margin-top:14px;padding-top:12px">
+      <p class="hint" style="font-size:12.5px;color:#6b7280;margin-bottom:10px">Esporta la planimetria in <b>scala</b> + channel list in PDF.</p>
+      <button class="btn" id="shareGoPdf">📄 Scarica PDF</button>
     </div>
     <div style="display:flex;margin-top:14px">
       <button class="btn" id="shareClose" style="margin-left:auto">Chiudi</button>
@@ -3793,7 +3795,7 @@ document.getElementById("outAuto").addEventListener("click", autoOutputs);
 
 /* ============ FILE: nuovo / json / png ============ */
 document.getElementById("bNew").addEventListener("click", function(){
-  if(!confirm("Nuovo stage plot? Quello attuale verrà cancellato (usa prima \"Condividi\" se vuoi conservarlo).")) return;
+  if(!confirm("Nuovo stage plot? Quello attuale verrà cancellato (usa prima \"Salva / Esporta\" se vuoi conservarlo).")) return;
   state={titolo:"",luogo:"",stage:{w:1200,d:800,blocks:[{x:0,y:0,w:1200,d:800}]},items:[],inputs:[],outputs:[]};
   stageEdit=false; selBlock=null; eventoEdit=false; renderStagePanel(); renderEventoPanel(); clearSelection(); save(); fit();
   setEventInputs(); renderChannels();
@@ -4021,6 +4023,7 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   document.getElementById("shareClose").addEventListener("click", function(){ modal.hidden=true; });
   document.getElementById("shareTabLink").addEventListener("click", function(){ openShare(); });
   document.getElementById("shareTabPdf").addEventListener("click", function(){ modal.hidden=true; document.getElementById("bPdf").click(); });
+  document.getElementById("shareGoPdf").addEventListener("click", function(){ modal.hidden=true; document.getElementById("bPdf").click(); });
   modal.addEventListener("click", function(e){ if(e.target===modal) modal.hidden=true; });
   document.addEventListener("keydown", function(e){ if(!modal.hidden && e.key==="Escape") modal.hidden=true; });
   function copy(){ var url=urlEl.value;
