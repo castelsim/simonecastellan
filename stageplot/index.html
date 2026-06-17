@@ -664,7 +664,7 @@
     <h2>🤖 Crea con l'AI</h2>
     <ol class="hint" style="font-size:12.5px;color:#374151;margin:0 0 12px 18px;line-height:1.5">
       <li>Premi <b>Apri ChatGPT</b>: si apre con il prompt già pronto. <b>Invia</b> quel messaggio.</li>
-      <li>Nel messaggio successivo <b>descrivi il tuo palco</b> (strumenti, posizioni, microfoni…).</li>
+      <li>Nel messaggio successivo <b>descrivi il tuo palco</b> (strumenti, posizioni, microfoni…). Puoi anche partire da un template salvato: es. <i>"come Morricone Pove e aggiungi la tastiera"</i>.</li>
       <li>ChatGPT ti restituisce un <b>link</b>: cliccalo (o incollalo qui sotto) e il palco si apre già pronto.</li>
     </ol>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -3936,6 +3936,28 @@ function aiTypeLegend(){
   Object.keys(TYPES).forEach(function(k){ var t=TYPES[k]; if(t.catalog===false) return; (byCat[t.cat]=byCat[t.cat]||[]).push(k+"="+t.nome); });
   return Object.keys(byCat).map(function(c){ return "• "+c+": "+byCat[c].join("; "); }).join("\n");
 }
+/* ===== LIBRERIA TEMPLATE (curata, nel codice) =====
+   Ogni voce: { name:"Nome luogo/evento", desc:"breve nota", state:{ titolo,luogo,stage:{blocks:[...]},items:[...],inputs:[],outputs:[] } }
+   Per aggiungerne uno: crea il palco nell'app → Condividi → manda il link + il nome; verrà incollato qui.
+   L'utente in ChatGPT potrà dire es. "come Morricone Pove e aggiungi la tastiera": l'AI parte dal template e lo modifica. */
+var AI_TEMPLATES = [
+  /* esempio dimostrativo (sostituibile): */
+  { name:"Band base", desc:"batteria, basso, 2 chitarre, tastiera, voce + wedge", state:{
+      stage:{blocks:[{x:0,y:0,w:1200,d:800}]},
+      items:[
+        {type:"batteria",x:600,y:200,rot:0,label:"Drums"},
+        {type:"bassstand",x:300,y:300,rot:0,label:"Basso",sedia:false,leggio:false,ampli:true},
+        {type:"gtstand",x:900,y:300,rot:0,label:"Chitarra",ampli:true},
+        {type:"stagepiano",x:300,y:520,rot:0,label:"Tastiere"},
+        {type:"astamic",x:600,y:600,rot:0,label:"Voce"},
+        {type:"wedge",x:600,y:680,rot:0,label:"MIX 1"}
+      ], inputs:[], outputs:[] } }
+];
+function aiTemplatesBlock(){
+  if(!AI_TEMPLATES.length) return "";
+  return "\nTEMPLATE DISPONIBILI — se l'utente cita un template per nome (es. \"come <nome>\"), PARTI da quel JSON e applica SOLO le modifiche richieste (aggiungi/togli/sposta), mantenendo il resto. Poi genera il link.\n"+
+    AI_TEMPLATES.map(function(t){ return "### "+t.name+(t.desc?" — "+t.desc:"")+"\n"+JSON.stringify(t.state); }).join("\n");
+}
 function aiSpecPrompt(){
   return [
 "Sei un assistente che trasforma la descrizione di un palco in uno STAGE PLOT in scala per l'app Stage Plot (https://simonecastellan.com/stageplot/).",
@@ -3958,7 +3980,8 @@ function aiSpecPrompt(){
 aiTypeLegend(),
 "",
 "OPZIONI item: postazioni archi/voci → \"sedia\":true,\"leggio\":true; chitarre → \"sedia\":true,\"leggio\":true,\"ampli\":true.",
-"Esempio: {\"type\":\"batteria\",\"x\":600,\"y\":200,\"rot\":0,\"label\":\"Drums\"}"
+"Esempio: {\"type\":\"batteria\",\"x\":600,\"y\":200,\"rot\":0,\"label\":\"Drums\"}",
+aiTemplatesBlock()
   ].join("\n");
 }
 (function(){
