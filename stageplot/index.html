@@ -701,6 +701,15 @@
       </div>
       <div class="mstatus" id="shareStatus" style="font-size:12px;color:#16a34a;margin-top:8px;min-height:14px"></div>
     </div>
+    <div style="border-top:1px solid #eef0f3;margin-top:14px;padding-top:12px">
+      <p class="hint" style="font-size:12.5px;color:#6b7280;margin-bottom:10px">Salva il progetto come file <b>.json</b> (backup/archivio) e ricaricalo quando vuoi.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="saveJson">💾 Salva .json</button>
+        <button class="btn" id="importJson">📂 Importa .json</button>
+      </div>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+      <div class="mstatus" id="ioStatus" style="font-size:12px;color:#16a34a;margin-top:8px;min-height:14px"></div>
+    </div>
     <div style="display:flex;margin-top:14px">
       <button class="btn" id="shareClose" style="margin-left:auto">Chiudi</button>
     </div>
@@ -1593,6 +1602,19 @@ function applyHistory(json){
 }
 function undo(){ if(!undoStack.length) return; redoStack.push(lastSnap); applyHistory(undoStack.pop()); }
 function redo(){ if(!redoStack.length) return; undoStack.push(lastSnap); applyHistory(redoStack.pop()); }
+/* ===== Importa progetto da file .json (annullabile) ===== */
+function importProject(json){
+  var s=JSON.parse(json);                                   /* lancia se non è JSON valido */
+  if(!s || typeof s!=="object") throw new Error("Formato non valido");
+  undoStack.push(JSON.stringify(state)); if(undoStack.length>120) undoStack.shift(); redoStack.length=0;   /* importazione annullabile con Ctrl+Z */
+  state=normalizeState(s);
+  state.items=(state.items||[]).filter(function(it){ return it && TYPES[it.type]; });   /* scarta elementi di tipo sconosciuto */
+  nextId=1; state.items.forEach(function(it){ if(!it.id) it.id=uid(); var n=parseInt(String(it.id).slice(1),10); if(n>=nextId) nextId=n+1; });
+  lastSnap=JSON.stringify(state); sel=null; selSet={};
+  setEventInputs();
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
+  render(); renderChannels(); fit();
+}
 function normalizeChannelRow(r){
   r=r||{};
   var out={src:r.src||"", mic:r.mic||"", stand:r.stand||"", p48:!!r.p48, notes:r.notes||""};
@@ -4011,6 +4033,24 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   });
   document.getElementById("shareNative").addEventListener("click", function(){
     if(navigator.share) navigator.share({title:shareText(), text:shareText(), url:urlEl.value}).catch(function(){});
+  });
+  /* ----- Salva / Importa progetto (.json) ----- */
+  function io(m,err){ var el=document.getElementById("ioStatus"); el.textContent=m||""; el.style.color=err?"#dc2626":"#16a34a"; }
+  document.getElementById("saveJson").addEventListener("click", function(){
+    var name=((state.titolo||state.luogo||"stageplot").replace(/[^\w\-]+/g,"_").replace(/^_+|_+$/g,"").slice(0,40)||"stageplot")+".json";
+    var blob=new Blob([JSON.stringify(state)],{type:"application/json"}), url=URL.createObjectURL(blob);
+    dl(url,name); setTimeout(function(){ URL.revokeObjectURL(url); },3000);
+    io("✓ Progetto salvato: "+name);
+  });
+  document.getElementById("importJson").addEventListener("click", function(){ document.getElementById("importFile").click(); });
+  document.getElementById("importFile").addEventListener("change", function(e){
+    var f=e.target.files && e.target.files[0]; e.target.value="";
+    if(!f) return;
+    var rd=new FileReader();
+    rd.onload=function(){ try{ importProject(String(rd.result)); io(""); modal.hidden=true; }
+                          catch(err){ io("✗ File non valido: non è un progetto Stage Plot.", true); } };
+    rd.onerror=function(){ io("✗ Impossibile leggere il file.", true); };
+    rd.readAsText(f);
   });
 })();
 /* ===== Crea con AI: prompt precompilato per ChatGPT + caricamento del link/JSON restituito ===== */
