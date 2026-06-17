@@ -4264,7 +4264,7 @@ function stageSceneSvg(){
     '<rect x="0" y="0" width="'+W+'" height="'+D+'" fill="#ffffff"/>'+
     stageFloorMarkup()+items+'</svg>';
 }
-function svgToDataUrl(svgStr, pxW, pxH){
+function svgToDataUrl(svgStr, pxW, pxH, type){
   /* iOS Safari rasterizza l'SVG SOLO se il root ha width/height espliciti (non basta il viewBox) */
   svgStr = svgStr.replace(/^<svg /, '<svg width="'+pxW+'" height="'+pxH+'" ');
   return new Promise(function(res,rej){
@@ -4274,21 +4274,58 @@ function svgToDataUrl(svgStr, pxW, pxH){
         var c=document.createElement("canvas"); c.width=pxW; c.height=pxH;
         var ctx=c.getContext("2d"); ctx.fillStyle="#fff"; ctx.fillRect(0,0,pxW,pxH);
         ctx.drawImage(img,0,0,pxW,pxH);
-        res(c.toDataURL("image/jpeg", 0.92));   /* JPEG q.alta → file leggero, nitido in stampa */
+        res(type==="image/png" ? c.toDataURL("image/png") : c.toDataURL("image/jpeg", 0.95));
       }catch(e){ rej(e); }
     };
     img.onerror=function(){ rej(new Error("SVG→PNG fallito")); };
     img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svgStr);
   });
 }
-function loadJsPDF(){
+function loadScriptOnce(src, ready){
   return new Promise(function(res,rej){
-    if(window.jspdf && window.jspdf.jsPDF) return res();
-    var s=document.createElement("script");
-    s.src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js";
-    s.onload=function(){ (window.jspdf&&window.jspdf.jsPDF)?res():rej(new Error("jsPDF non disponibile")); };
-    s.onerror=function(){ rej(new Error("download jsPDF fallito (serve connessione)")); };
+    if(ready()) return res();
+    var s=document.createElement("script"); s.src=src;
+    s.onload=function(){ ready()?res():rej(new Error("script non disponibile: "+src)); };
+    s.onerror=function(){ rej(new Error("download fallito (serve connessione)")); };
     document.head.appendChild(s);
+  });
+}
+function loadJsPDF(){ return loadScriptOnce("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js", function(){ return window.jspdf && window.jspdf.jsPDF; }); }
+function svg2pdfFn(){ var s=window.svg2pdf; if(typeof s==="function") return s; if(s && typeof s.svg2pdf==="function") return s.svg2pdf; return null; }
+function loadSvg2Pdf(){ return loadJsPDF().then(function(){ return loadScriptOnce("https://cdn.jsdelivr.net/npm/svg2pdf.js@2.2.3/dist/svg2pdf.umd.min.js", function(){ return !!svg2pdfFn(); }); }); }
+/* svg2pdf non applica il CSS <style>: appiattisco gli stili del testo (font, colore, allineamento)
+   in attributi inline leggendo lo stile calcolato. Niente stroke → niente contorno bianco sopra il testo. */
+function flattenTextStyles(rootEl){
+  var t=rootEl.querySelectorAll("text,tspan");
+  for(var i=0;i<t.length;i++){ var el=t[i], cs=getComputedStyle(el);
+    if(el.tagName.toLowerCase()==="text" && !el.hasAttribute("x")) el.setAttribute("x","0");   /* svg2pdf salta i <text> senza x */
+    if(el.tagName.toLowerCase()==="text" && !el.hasAttribute("y")) el.setAttribute("y","0");
+    var fs=parseFloat(cs.fontSize); if(fs) el.setAttribute("font-size", fs);
+    el.setAttribute("font-family", "helvetica");   /* svg2pdf conosce solo i font PDF standard: lo stack di sistema verrebbe scartato */
+    if(cs.fontWeight) el.setAttribute("font-weight", (parseInt(cs.fontWeight,10)>=600?"bold":"normal"));
+    if(cs.fontStyle && cs.fontStyle!=="normal") el.setAttribute("font-style", cs.fontStyle);
+    if(cs.textAnchor) el.setAttribute("text-anchor", cs.textAnchor);
+    if(/^rgb/.test(cs.fill)) el.setAttribute("fill", cs.fill);
+    if(cs.fillOpacity!=="" && +cs.fillOpacity<1) el.setAttribute("fill-opacity", cs.fillOpacity);
+    var ls=parseFloat(cs.letterSpacing); if(ls) el.setAttribute("letter-spacing", ls);
+    el.setAttribute("stroke","none");          /* il contorno bianco (.lbl) coprirebbe il testo (svg2pdf ignora paint-order) */
+    el.removeAttribute("class");               /* via la classe: così il <style> non riapplica lo stroke bianco sopra gli attributi inline */
+  }
+}
+/* disegna la planimetria come VETTORE puro nel PDF (qualità infinita). Style isolato in shadow DOM per non toccare la pagina. */
+function drawStageVector(doc, ix, iy, wMm, hMm){
+  return loadSvg2Pdf().then(function(){
+    var host=document.createElement("div");
+    host.style.cssText="position:fixed;left:-99999px;top:0;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none";
+    document.body.appendChild(host);
+    var root=host.attachShadow ? host.attachShadow({mode:"open"}) : host;
+    root.innerHTML=stageSceneSvg();
+    var svgEl=root.querySelector("svg");
+    flattenTextStyles(svgEl);
+    var fn=svg2pdfFn();
+    var ret = (typeof doc.svg==="function") ? doc.svg(svgEl,{x:ix,y:iy,width:wMm,height:hMm})
+                                            : fn(svgEl, doc, {x:ix,y:iy,width:wMm,height:hMm});
+    return Promise.resolve(ret).then(function(){ host.remove(); }, function(e){ host.remove(); throw e; });
   });
 }
 function niceBarMeters(N){            /* barra di scala: ~25-40 mm sul foglio */
@@ -4356,12 +4393,16 @@ function buildPdfDoc(paperKey, N, orient, header){
   var L=pdfLayout(paperKey, orient);
   var stMmW=state.stage.w*10/N, stMmH=state.stage.d*10/N;
   var ix=L.drawX+(L.drawW-stMmW)/2, iy=L.drawY+(L.drawH-stMmH)/2;
-  var pxW=Math.round(stMmW/25.4*220), pxH=Math.round(stMmH/25.4*220);   /* 220 DPI */
-  return Promise.all([ loadJsPDF(), svgToDataUrl(stageSceneSvg(), pxW, pxH) ]).then(function(r){
-    var dataUrl=r[1], jsPDF=window.jspdf.jsPDF;
-    var doc=new jsPDF({orientation:L.orient, unit:"mm", format:paperKey});
-    /* --- PAG 1: planimetria in scala --- */
-    doc.addImage(dataUrl, "JPEG", ix, iy, stMmW, stMmH);
+  return loadJsPDF().then(function(){
+    var jsPDF=window.jspdf.jsPDF;
+    var doc=new jsPDF({orientation:L.orient, unit:"mm", format:paperKey, compress:true});
+    /* --- PAG 1: planimetria in scala — VETTORE puro; se fallisce, raster ad alta risoluzione --- */
+    return drawStageVector(doc, ix, iy, stMmW, stMmH)
+      .catch(function(){
+        var pxW=Math.round(stMmW/25.4*320), pxH=Math.round(stMmH/25.4*320);   /* fallback: 320 DPI PNG lossless */
+        return svgToDataUrl(stageSceneSvg(), pxW, pxH, "image/png").then(function(dataUrl){ doc.addImage(dataUrl, "PNG", ix, iy, stMmW, stMmH); });
+      })
+      .then(function(){
     if(isSingleRect()){ doc.setDrawColor(31,41,55); doc.setLineWidth(0.5); doc.rect(ix, iy, stMmW, stMmH); }   /* forma composita/curva: il contorno è già nell'immagine */
     doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(150,150,150);
     doc.text("FONDO PALCO", ix+stMmW/2, iy-3, {align:"center"});
@@ -4378,6 +4419,7 @@ function buildPdfDoc(paperKey, N, orient, header){
       pdfChannelPage(doc, L, paperKey);
     }
     return doc;
+      });
   });
 }
 /* consegna il PDF: se è stata scelta una destinazione (handle) la scrive lì;
