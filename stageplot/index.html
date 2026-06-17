@@ -359,6 +359,7 @@
   <button class="btn" id="bRedo" title="Ripeti (⇧⌘Z)" style="padding:7px 11px">↷</button>
   <button class="btn" id="bFit" title="Adatta lo zoom al palco">⤢ Adatta</button>
   <button class="btn" id="bPdf" hidden>Esporta PDF</button>
+  <button class="btn primary" id="bAi" title="Descrivi il palco a ChatGPT e ricevi il link già pronto" style="display:inline-flex;align-items:center;gap:6px">🤖 Crea con AI</button>
   <button class="btn primary" id="bShare" title="Condividi il link del progetto o esporta il PDF">🔗 Condividi</button>
   <button class="btn danger" id="bNew">Nuovo</button>
 </header>
@@ -655,6 +656,28 @@
       <button class="btn" id="ottCancel">Annulla</button>
       <button class="btn primary" id="ottGo">Genera ottoni</button>
     </div>
+  </div>
+</div>
+
+<div class="modal" id="aiModal" hidden>
+  <div class="mcard" style="width:520px;max-width:94vw">
+    <h2>🤖 Crea con l'AI</h2>
+    <ol class="hint" style="font-size:12.5px;color:#374151;margin:0 0 12px 18px;line-height:1.5">
+      <li>Premi <b>Apri ChatGPT</b>: si apre con il prompt già pronto. <b>Invia</b> quel messaggio.</li>
+      <li>Nel messaggio successivo <b>descrivi il tuo palco</b> (strumenti, posizioni, microfoni…).</li>
+      <li>ChatGPT ti restituisce un <b>link</b>: cliccalo (o incollalo qui sotto) e il palco si apre già pronto.</li>
+    </ol>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn primary" id="aiOpen">Apri ChatGPT (prompt pronto)</button>
+      <button class="btn" id="aiCopy">Copia prompt</button>
+    </div>
+    <label style="display:block;margin-top:14px;font-size:12px;color:#6b7280">Incolla qui il link (o il JSON) che ti dà ChatGPT:</label>
+    <textarea id="aiPaste" rows="3" style="width:100%;font-size:12px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-family:Menlo,monospace" placeholder="https://simonecastellan.com/stageplot/#d=…  oppure  {…JSON…}"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn primary" id="aiLoad">Carica nel palco</button>
+      <button class="btn" id="aiClose" style="margin-left:auto">Chiudi</button>
+    </div>
+    <div class="mstatus" id="aiStatus" style="font-size:12px;color:#16a34a;margin-top:8px;min-height:14px"></div>
   </div>
 </div>
 
@@ -1602,11 +1625,33 @@ function load(){
 /* ===== LZString (compressToEncodedURIComponent / decompress) — per il link di condivisione ===== */
 var LZString=(function(){var f=String.fromCharCode;var keyStrUriSafe="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$";var baseReverseDic={};function getBaseValue(alphabet,character){if(!baseReverseDic[alphabet]){baseReverseDic[alphabet]={};for(var i=0;i<alphabet.length;i++){baseReverseDic[alphabet][alphabet.charAt(i)]=i}}return baseReverseDic[alphabet][character]}var LZString={compressToEncodedURIComponent:function(input){if(input==null)return"";return LZString._compress(input,6,function(a){return keyStrUriSafe.charAt(a)})},decompressFromEncodedURIComponent:function(input){if(input==null)return"";if(input=="")return null;input=input.replace(/ /g,"+");return LZString._decompress(input.length,32,function(index){return getBaseValue(keyStrUriSafe,input.charAt(index))})},_compress:function(uncompressed,bitsPerChar,getCharFromInt){if(uncompressed==null)return"";var i,value,context_dictionary={},context_dictionaryToCreate={},context_c="",context_wc="",context_w="",context_enlargeIn=2,context_dictSize=3,context_numBits=2,context_data=[],context_data_val=0,context_data_position=0,ii;for(ii=0;ii<uncompressed.length;ii+=1){context_c=uncompressed.charAt(ii);if(!Object.prototype.hasOwnProperty.call(context_dictionary,context_c)){context_dictionary[context_c]=context_dictSize++;context_dictionaryToCreate[context_c]=true}context_wc=context_w+context_c;if(Object.prototype.hasOwnProperty.call(context_dictionary,context_wc)){context_w=context_wc}else{if(Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)){if(context_w.charCodeAt(0)<256){for(i=0;i<context_numBits;i++){context_data_val=(context_data_val<<1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}}value=context_w.charCodeAt(0);for(i=0;i<8;i++){context_data_val=(context_data_val<<1)|(value&1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=value>>1}}else{value=1;for(i=0;i<context_numBits;i++){context_data_val=(context_data_val<<1)|value;if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=0}value=context_w.charCodeAt(0);for(i=0;i<16;i++){context_data_val=(context_data_val<<1)|(value&1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=value>>1}}context_enlargeIn--;if(context_enlargeIn==0){context_enlargeIn=Math.pow(2,context_numBits);context_numBits++}delete context_dictionaryToCreate[context_w]}else{value=context_dictionary[context_w];for(i=0;i<context_numBits;i++){context_data_val=(context_data_val<<1)|(value&1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=value>>1}}context_enlargeIn--;if(context_enlargeIn==0){context_enlargeIn=Math.pow(2,context_numBits);context_numBits++}context_dictionary[context_wc]=context_dictSize++;context_w=String(context_c)}}if(context_w!==""){if(Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)){if(context_w.charCodeAt(0)<256){for(i=0;i<context_numBits;i++){context_data_val=(context_data_val<<1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}}value=context_w.charCodeAt(0);for(i=0;i<8;i++){context_data_val=(context_data_val<<1)|(value&1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=value>>1}}else{value=1;for(i=0;i<context_numBits;i++){context_data_val=(context_data_val<<1)|value;if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=0}value=context_w.charCodeAt(0);for(i=0;i<16;i++){context_data_val=(context_data_val<<1)|(value&1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=value>>1}}context_enlargeIn--;if(context_enlargeIn==0){context_enlargeIn=Math.pow(2,context_numBits);context_numBits++}delete context_dictionaryToCreate[context_w]}else{value=context_dictionary[context_w];for(i=0;i<context_numBits;i++){context_data_val=(context_data_val<<1)|(value&1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=value>>1}}context_enlargeIn--;if(context_enlargeIn==0){context_enlargeIn=Math.pow(2,context_numBits);context_numBits++}}value=2;for(i=0;i<context_numBits;i++){context_data_val=(context_data_val<<1)|(value&1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=value>>1}while(true){context_data_val=(context_data_val<<1);if(context_data_position==bitsPerChar-1){context_data.push(getCharFromInt(context_data_val));break}else context_data_position++}return context_data.join("")},_decompress:function(length,resetValue,getNextValue){var dictionary=[],next,enlargeIn=4,dictSize=4,numBits=3,entry="",result=[],i,w,bits,resb,maxpower,power,c,data={val:getNextValue(0),position:resetValue,index:1};for(i=0;i<3;i+=1){dictionary[i]=i}bits=0;maxpower=Math.pow(2,2);power=1;while(power!=maxpower){resb=data.val&data.position;data.position>>=1;if(data.position==0){data.position=resetValue;data.val=getNextValue(data.index++)}bits|=(resb>0?1:0)*power;power<<=1}switch(next=bits){case 0:bits=0;maxpower=Math.pow(2,8);power=1;while(power!=maxpower){resb=data.val&data.position;data.position>>=1;if(data.position==0){data.position=resetValue;data.val=getNextValue(data.index++)}bits|=(resb>0?1:0)*power;power<<=1}c=f(bits);break;case 1:bits=0;maxpower=Math.pow(2,16);power=1;while(power!=maxpower){resb=data.val&data.position;data.position>>=1;if(data.position==0){data.position=resetValue;data.val=getNextValue(data.index++)}bits|=(resb>0?1:0)*power;power<<=1}c=f(bits);break;case 2:return""}dictionary[3]=c;w=c;result.push(c);while(true){if(data.index>length){return""}bits=0;maxpower=Math.pow(2,numBits);power=1;while(power!=maxpower){resb=data.val&data.position;data.position>>=1;if(data.position==0){data.position=resetValue;data.val=getNextValue(data.index++)}bits|=(resb>0?1:0)*power;power<<=1}switch(c=bits){case 0:bits=0;maxpower=Math.pow(2,8);power=1;while(power!=maxpower){resb=data.val&data.position;data.position>>=1;if(data.position==0){data.position=resetValue;data.val=getNextValue(data.index++)}bits|=(resb>0?1:0)*power;power<<=1}dictionary[dictSize++]=f(bits);c=dictSize-1;enlargeIn--;break;case 1:bits=0;maxpower=Math.pow(2,16);power=1;while(power!=maxpower){resb=data.val&data.position;data.position>>=1;if(data.position==0){data.position=resetValue;data.val=getNextValue(data.index++)}bits|=(resb>0?1:0)*power;power<<=1}dictionary[dictSize++]=f(bits);c=dictSize-1;enlargeIn--;break;case 2:return result.join("")}if(enlargeIn==0){enlargeIn=Math.pow(2,numBits);numBits++}if(dictionary[c]){entry=dictionary[c]}else{if(c===dictSize){entry=w+w.charAt(0)}else{return null}}result.push(entry);dictionary[dictSize++]=w+entry.charAt(0);enlargeIn--;w=entry;if(enlargeIn==0){enlargeIn=Math.pow(2,numBits);numBits++}}}};return LZString})();
 function buildShareUrl(){ var base=location.href.split("#")[0].split("?")[0]; return base+"#p="+LZString.compressToEncodedURIComponent(JSON.stringify(state)); }
+function b64urlToStr(s){ s=String(s).replace(/-/g,"+").replace(/_/g,"/"); while(s.length%4) s+="="; return decodeURIComponent(escape(atob(s))); }
+/* normalizza item "grezzi" (es. generati dall'AI): chiavi valide, dimensioni/parts di default, id garantito */
+function sanitizeItems(arr){
+  return (arr||[]).map(function(o){ var t=TYPES[o.type]; if(!t) return null;
+    var it={ id:o.id||uid(), type:o.type, x:Math.round(+o.x||0), y:Math.round(+o.y||0), rot:Math.round(+o.rot||0),
+             w:+o.w||t.w, d:+o.d||t.d, label:(o.label!=null?o.label:defaultLabel(o.type)) };
+    if(t.riser) it.h=(o.h!=null?+o.h:(t.h||40));
+    if(COMP[o.type]) it.parts=o.parts?compClone(o.parts):compClone(COMP[o.type].defParts);
+    ["sedia","leggio","doppia","sep","ampli","donna","mano","nomic","z"].forEach(function(k){ if(o[k]!=null) it[k]=o[k]; });
+    if(t.gtr){ var gz=gtrSize(it,t); it.w=gz[0]; it.d=gz[1]; }
+    return it;
+  }).filter(Boolean);
+}
 function loadFromHash(){
-  try{ var hm=(location.hash.match(/[#&]p=([^&]+)/)||[])[1]; if(!hm) return false;
-    var js=LZString.decompressFromEncodedURIComponent(hm); if(!js) return false;
-    state=normalizeState(JSON.parse(js));
-    state.items.forEach(function(it){ var n=parseInt(it.id.slice(1),10); if(n>=nextId) nextId=n+1; });
+  try{
+    var pm=(location.hash.match(/[#&]p=([^&]+)/)||[])[1];        /* formato compatto (Condividi) */
+    var dm=(location.hash.match(/[#&]d=([^&]+)/)||[])[1];        /* formato JSON base64 (generato dall'AI) */
+    if(!pm && !dm) return false;
+    var raw;
+    if(pm) raw=LZString.decompressFromEncodedURIComponent(pm);
+    else   raw=b64urlToStr(dm);
+    if(!raw) return false;
+    var obj=JSON.parse(raw);
+    if(dm) obj.items=sanitizeItems(obj.items);                   /* JSON AI: ripulisci e rendi validi gli elementi */
+    state=normalizeState(obj);
+    state.items.forEach(function(it){ if(!it.id) it.id=uid(); });
+    state.items.forEach(function(it){ var n=parseInt((""+it.id).replace(/\D/g,""),10); if(n>=nextId) nextId=n+1; });
     history.replaceState(null,"",location.pathname+location.search);   /* via l'hash: gli edit poi vanno in localStorage */
     return true;
   }catch(e){ return false; }
@@ -3883,6 +3928,67 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   });
   document.getElementById("shareNative").addEventListener("click", function(){
     if(navigator.share) navigator.share({title:shareText(), text:shareText(), url:urlEl.value}).catch(function(){});
+  });
+})();
+/* ===== Crea con AI: prompt precompilato per ChatGPT + caricamento del link/JSON restituito ===== */
+function aiTypeLegend(){
+  var byCat={};
+  Object.keys(TYPES).forEach(function(k){ var t=TYPES[k]; if(t.catalog===false) return; (byCat[t.cat]=byCat[t.cat]||[]).push(k+"="+t.nome); });
+  return Object.keys(byCat).map(function(c){ return "• "+c+": "+byCat[c].join("; "); }).join("\n");
+}
+function aiSpecPrompt(){
+  return [
+"Sei un assistente che trasforma la descrizione di un palco in uno STAGE PLOT in scala per l'app Stage Plot (https://simonecastellan.com/stageplot/).",
+"",
+"COME RISPONDERE:",
+"1) A QUESTO messaggio rispondi SOLO: \"Pronto — descrivimi il tuo palco: strumenti, posizioni, palco, microfoni…\". Non generare altro adesso.",
+"2) Quando l'utente descrive il palco, costruisci un JSON con lo schema sotto, codificalo in base64 URL-safe (usa lo strumento di codice) e restituisci SOLO un link cliccabile, senza altro testo dopo:",
+"   https://simonecastellan.com/stageplot/#d=<BASE64URL_DEL_JSON>",
+"",
+"SCHEMA JSON (unità = cm, scala reale):",
+"{\"titolo\":\"\",\"luogo\":\"\",\"stage\":{\"blocks\":[{\"x\":0,\"y\":0,\"w\":1200,\"d\":800,\"h\":0}]},\"items\":[{\"type\":\"<chiave>\",\"x\":0,\"y\":0,\"rot\":0,\"label\":\"\"}],\"inputs\":[],\"outputs\":[]}",
+"",
+"COORDINATE:",
+"- x: 0 = lato sinistro del palco, cresce verso destra (max = larghezza).",
+"- y: 0 = FONDO palco (dietro), cresce verso il PUBBLICO (max = profondità).",
+"- rot: gradi orari, 0 = rivolto al pubblico. Posiziona ogni elemento al suo CENTRO, dentro il palco, distanziando le postazioni ~120-150 cm.",
+"- Palco di default 1200×800; per palchi più grandi aumenta w/d del blocco.",
+"",
+"CHIAVI ELEMENTI VALIDE (type=chiave [larghezza×profondità cm]) — usa SOLO queste:",
+aiTypeLegend(),
+"",
+"OPZIONI item: postazioni archi/voci → \"sedia\":true,\"leggio\":true; chitarre → \"sedia\":true,\"leggio\":true,\"ampli\":true.",
+"Esempio: {\"type\":\"batteria\",\"x\":600,\"y\":200,\"rot\":0,\"label\":\"Drums\"}"
+  ].join("\n");
+}
+(function(){
+  var modal=document.getElementById("aiModal");
+  function status(m){ document.getElementById("aiStatus").textContent=m||""; }
+  document.getElementById("bAi").addEventListener("click", function(){ status(""); document.getElementById("aiPaste").value=""; modal.hidden=false; });
+  document.getElementById("aiClose").addEventListener("click", function(){ modal.hidden=true; });
+  modal.addEventListener("click", function(e){ if(e.target===modal) modal.hidden=true; });
+  document.addEventListener("keydown", function(e){ if(!modal.hidden && e.key==="Escape") modal.hidden=true; });
+  document.getElementById("aiOpen").addEventListener("click", function(){
+    var p=aiSpecPrompt(), enc=encodeURIComponent(p);
+    try{ if(navigator.clipboard) navigator.clipboard.writeText(p); }catch(e){}
+    window.open(enc.length<7000 ? "https://chatgpt.com/?q="+enc : "https://chatgpt.com/","_blank","noopener");
+    status(enc.length<7000 ? "✓ ChatGPT aperto col prompt pronto — premi invio." : "✓ Prompt copiato: in ChatGPT incolla (⌘V) e invia.");
+  });
+  document.getElementById("aiCopy").addEventListener("click", function(){
+    try{ navigator.clipboard.writeText(aiSpecPrompt()).then(function(){ status("✓ Prompt copiato."); }, function(){ status("Copia non riuscita."); }); }catch(e){ status("Copia non riuscita."); }
+  });
+  document.getElementById("aiLoad").addEventListener("click", function(){
+    var v=(document.getElementById("aiPaste").value||"").trim(); if(!v){ status("Incolla il link o il JSON."); return; }
+    try{
+      var obj=null, m;
+      if((m=v.match(/#d=([^&\s]+)/))) obj=JSON.parse(b64urlToStr(m[1]));
+      else if((m=v.match(/#p=([^&\s]+)/))) obj=JSON.parse(LZString.decompressFromEncodedURIComponent(m[1]));
+      else obj=JSON.parse(v);
+      obj.items=sanitizeItems(obj.items);
+      state=normalizeState(obj);
+      state.items.forEach(function(it){ if(!it.id) it.id=uid(); });
+      clearSelection(); setEventInputs(); renderChannels(); save(); fit(); modal.hidden=true;
+    }catch(e){ status("Non riconosciuto: incolla il link #d=… o il JSON che ti dà ChatGPT."); }
   });
 })();
 function dl(href,name){ var a=document.createElement("a"); a.href=href; a.download=name; document.body.appendChild(a); a.click(); a.remove(); }
