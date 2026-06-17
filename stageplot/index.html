@@ -426,6 +426,7 @@
   <div class="sec" id="selProps" hidden>
     <h3 id="selNome">Elemento</h3>
     <label>Etichetta</label><input type="text" id="pLabel">
+    <div id="pLabel2Wrap" style="display:none"><label>Etichetta 2 (secondo strumento)</label><input type="text" id="pLabel2"></div>
     <div class="row" id="pDims">
       <span><label>L (cm)</label><input type="number" id="pW" min="10" step="5"></span>
       <span><label>P (cm)</label><input type="number" id="pD" min="10" step="5"></span>
@@ -433,9 +434,7 @@
     </div>
     <label style="display:flex;justify-content:space-between;align-items:baseline">Rotazione <span id="pRotVal" style="color:#374151;font-weight:600">0°</span></label>
     <div class="rotrow">
-      <button class="btn" id="pRotL" title="−15°" style="padding:6px 10px">⟲</button>
       <span class="rotslide"><input type="range" id="pRot" min="-180" max="180" step="5"></span>
-      <button class="btn" id="pRotR" title="+15°" style="padding:6px 10px">⟳</button>
     </div>
     <div id="pPostaz" style="display:none;border-top:1px solid #eef0f2;margin-top:10px;padding-top:8px">
       <div id="pFlags">
@@ -444,8 +443,8 @@
         <label class="chk"><input type="checkbox" id="pDoppia"> Postazione a 2 (2 strumenti + 1 leggio)</label>
       </div>
       <div id="pSepWrap" style="display:none;margin-top:6px">
-        <label style="display:flex;justify-content:space-between;align-items:baseline">Distanza tra i 2 <span id="pSepVal" style="color:#374151;font-weight:600">90 cm</span></label>
-        <input type="range" id="pSep" min="20" max="300" step="5" style="width:100%;padding:0">
+        <label style="display:flex;justify-content:space-between;align-items:baseline">Distanza tra i 2 <span id="pSepVal" style="color:#374151;font-weight:600">65 cm</span></label>
+        <input type="range" id="pSep" min="65" max="300" step="5" style="width:100%;padding:0">
         <button class="btn" id="pSplit" style="width:100%;margin-top:9px;font-size:12px">⇔ Dividi in 2 postazioni singole</button>
       </div>
     </div>
@@ -458,7 +457,11 @@
       <label class="chk"><input type="checkbox" id="pGtrSedia"> Sedia</label>
       <label class="chk"><input type="checkbox" id="pGtrLeggio"> Leggio</label>
       <label class="chk"><input type="checkbox" id="pGtrAmp"> Ampli</label>
+      <label class="chk"><input type="checkbox" id="pGtrPedal"> Pedaliera</label>
       <button class="btn" id="pGtrSplit" style="width:100%;margin-top:9px;font-size:12px">⇱ Dividi in elementi</button>
+    </div>
+    <div id="pDir" style="display:none;border-top:1px solid #eef0f2;margin-top:10px;padding-top:8px">
+      <label class="chk"><input type="checkbox" id="pDirPodio"> Podio</label>
     </div>
     <div id="pComp" style="display:none;border-top:1px solid #eef0f2;margin-top:10px;padding-top:8px">
       <div id="pCompCtl"></div>
@@ -796,6 +799,9 @@ function lin(x1,y1,x2,y2,cls){ return '<line class="'+(cls||'ic')+'" x1="'+x1+'"
 function sring(x,y,r,cls){ return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" class="'+cls+'"/>'; }
 function rimlight(x,y,r){ var rr=r-2; return '<path class="hilite" d="M '+(x-rr*0.72)+','+(y-rr*0.42)+' A '+rr+' '+rr+' 0 0 1 '+(x+rr*0.42)+','+(y-rr*0.72)+'"/>'; }
 function shadow(rx,ry,cx,cy){ return ''; }
+/* cono altoparlante (per i monitor): cestello scuro + cono + cupola blu */
+function speakerCone(cx,cy,r){ return circ(cx,cy,r,'ic thin fBlack')+circ(cx,cy,r*0.66,'sil')+circ(cx,cy,r*0.3,'mon fill'); }
+function hornTweeter(cx,cy,w,h){ return '<path class="ic thin fBlack" d="M '+(cx-w/2)+','+(cy-h/2)+' L '+(cx+w/2)+','+(cy-h/2)+' L '+(cx+w*0.28)+','+(cy+h/2)+' L '+(cx-w*0.28)+','+(cy+h/2)+' Z"/>'+lin(cx,cy-h/2,cx,cy+h/2,'sil'); }
 function drum(x,y,r){ return circ(x,y,r,'ic fSilver')+circ(x,y,r-3.5,'ic thin fHead')+rimlight(x,y,r); }   /* cromo + pelle + glint */
 function tdrum(x,y,r){ return circ(x,y,r,'ic fCopper')+circ(x,y,r-7,'ic thin fHead')+rimlight(x,y,r); }    /* rame + pelle + glint */
 function cym(x,y,r){ return circ(x,y,r,'ic thin fCym')+sring(x,y,r*0.62,'lathe')+sring(x,y,r*0.34,'lathe')+circ(x,y,2.5,'ic fill'); } /* bronzo + tornitura */
@@ -873,14 +879,33 @@ function guitarDraw(it,kind){
     s+=gtrHead(kind)+gtrGlyph(kind);                                             /* in piedi: chitarra su stand */
     if(it.leggio) s+='<g transform="translate(0,'+gtrLegY(it,kind)+')">'+leggioGlyph(0)+'</g>';
   }
+  if(it.pedaliera) s+='<g transform="translate(0,'+(it.sedia?72:64)+')">'+pedalGlyph()+'</g>';   /* pedaliera ai piedi, davanti */
   return s;
 }
 function gtrSize(it,t){ var d=t.d, w=t.w;
   if(it.sedia){ w=Math.max(w,2*(GTR_GX+t.w/2)); d=Math.max(d,it.leggio?120:104); }   /* sedia + strumento di fianco a scala reale */
   else if(it.leggio) d+=44;
   if(it.ampli) w=Math.max(w,80);     /* ampli dietro: NON allunga la profondità → il nome resta vicino */
+  if(it.pedaliera) d=Math.max(d, (it.sedia?150:130));   /* pedaliera davanti, ai piedi */
   return [w,d];
 }
+/* pedaliera (pedalboard) vista dall'alto: ~50×30 cm con 4 pedali */
+function pedalGlyph(){ var s=bar(0,0,50,30,'ic fBlack',3);
+  [-16.5,-5.5,5.5,16.5].forEach(function(x){ s+=bar(x,0,9,17,'ic thin fGrey',2)+circ(x,5,1.8,'dotS'); });
+  return s; }
+/* Direttore d'orchestra (vista dall'alto): busto + testa rivolta all'orchestra (-y) + braccia aperte + bacchetta */
+function conductor(){
+  var sleeve='#3f5c83';
+  var s='<ellipse class="ic fShirt" cx="0" cy="7" rx="15" ry="13"/>';                                           /* busto (schiena verso il pubblico) */
+  s+='<path d="M -12,0 Q -27,-9 -34,-21" fill="none" stroke="'+sleeve+'" stroke-width="6" stroke-linecap="round"/>';   /* braccio sx aperto */
+  s+='<path d="M 12,0 Q 27,-9 34,-21" fill="none" stroke="'+sleeve+'" stroke-width="6" stroke-linecap="round"/>';      /* braccio dx aperto */
+  s+=lin(34,-21,48,-31,'sil');                                                                                  /* bacchetta */
+  s+=circ(0,-9,9.5,'ic fHairM');                                                                                /* testa rivolta all'orchestra */
+  s+='<path class="ic fSkin" d="M -7,-11 A 8 8 0 0 1 7,-11 C 5,-4.5 2,-1.5 0,-1.5 C -2,-1.5 -5,-4.5 -7,-11 Z"/>';
+  return s;
+}
+function podioPlatform(){ return bar(0,0,100,100,'ic fFloor',3)+bar(0,0,84,84,'ic thin',2); }
+function dirSize(it){ return it&&it.podio ? [100,100] : [84,72]; }
 /* divide la postazione chitarra nei suoi elementi (chitarra, sedia, leggio, ampli) come item indipendenti */
 function explodeGuitar(){
   var it=getSel(), t=it&&TYPES[it.type]; if(!t||!t.gtr) return;
@@ -889,6 +914,7 @@ function explodeGuitar(){
   if(seated) pcs.push({type:"sedia", dx:0, dy:-25, label:""});
   if(it.leggio) pcs.push({type:"leggio", dx:0, dy:gtrLegY(it,kind), label:""});
   if(it.ampli) pcs.push({type:"comboamp",dx:-43, dy:-88, rot:-30, label:base+"Ampli"});
+  if(it.pedaliera) pcs.push({type:"pedaliera", dx:0, dy:(seated?72:64), label:base+"Pedalboard"});
   var rot=(it.rot||0)*Math.PI/180, c=Math.cos(rot), s=Math.sin(rot), made=[];
   pcs.forEach(function(pc){ var T=TYPES[pc.type]; if(!T) return;
     var ni={id:uid(), type:pc.type, x:Math.round(it.x+(pc.dx*c-pc.dy*s)), y:Math.round(it.y+(pc.dx*s+pc.dy*c)),
@@ -903,32 +929,27 @@ function explodeGuitar(){
   selSet={}; made.forEach(function(n){ selSet[n.id]=true; }); sel=made[made.length-1].id;
   render(); save();
 }
+/* postazione singola cello/basso CENTRATA (sgabello al centro dietro lo strumento) → la doppia resta simmetrica */
 function celloPost(){
   return shadow(42,58,0,8)+bar(0,-36,44,44,'ic fBlack',9)+bar(0,-60,44,8,'ic fill',4)+
     '<g transform="translate(0,22) rotate(-24)">'+violino(1.0,'fWood')+'</g>';
 }
 function bassPost(){
-  return shadow(54,60,0,6)+circ(-42,-42,16,'ic fBlack')+
-    '<g transform="translate(6,14) rotate(-12)">'+violino(1.45,'fWoodD')+'</g>';
+  return shadow(54,60,0,6)+circ(0,-44,16,'ic fBlack')+circ(0,-44,5,'dotS')+
+    '<g transform="translate(0,14) rotate(-12)">'+violino(1.45,'fWoodD')+'</g>';
 }
 function doubleStringPost(kind, dx){
-  var left='', right='', legY=38;
-  if(kind==="vln1"||kind==="vln2"){ dx=dx||45;
-    left='<g transform="translate('+(-dx)+',0) rotate(-8)">'+postaz(gVln(0.45))+'</g>';
-    right='<g transform="translate('+dx+',0) rotate(8)">'+postaz(gVln(0.45))+'</g>';
-  } else if(kind==="vla"){ dx=dx||45;
-    left='<g transform="translate('+(-dx)+',0) rotate(-8)">'+postaz(gVln(0.53))+'</g>';
-    right='<g transform="translate('+dx+',0) rotate(8)">'+postaz(gVln(0.53))+'</g>';
-  } else if(kind==="vc"){
-    dx=dx||55; legY=54;
-    left='<g transform="translate('+(-dx)+',4) rotate(-7)">'+celloPost()+'</g>';
-    right='<g transform="translate('+dx+',4) rotate(7)">'+celloPost()+'</g>';
-  } else {
-    dx=dx||70; legY=58;
-    left='<g transform="translate('+(-dx)+',7) rotate(-7)">'+bassPost()+'</g>';
-    right='<g transform="translate('+dx+',7) rotate(7)">'+bassPost()+'</g>';
-  }
-  return left+right+'<g transform="translate(0,'+legY+')">'+leggioGlyph(0)+'</g>';
+  dx=dx||33;   /* sep/2 di default = 65/2 ≈ 33 */
+  /* il secondo strumento è SPECCHIATO (scale(-1,1)) → coppia perfettamente simmetrica, distanza = sep */
+  function pair(inner, ty){ var t=ty||0;
+    return '<g transform="translate('+(-dx)+','+t+')">'+inner+'</g>'+
+           '<g transform="translate('+dx+','+t+') scale(-1,1)">'+inner+'</g>'; }
+  var lr, legY=38;
+  if(kind==="vln1"||kind==="vln2"){ lr=pair('<g transform="rotate(-8)">'+postaz(gVln(0.45))+'</g>'); }
+  else if(kind==="vla"){ lr=pair('<g transform="rotate(-8)">'+postaz(gVln(0.53))+'</g>'); }
+  else if(kind==="vc"){ legY=54; lr=pair('<g transform="rotate(-7)">'+celloPost()+'</g>',4); }
+  else { legY=58; lr=pair('<g transform="rotate(-7)">'+bassPost()+'</g>',7); }   /* cb */
+  return lr+'<g transform="translate(0,'+legY+')">'+leggioGlyph(0)+'</g>';
 }
 /* sedia singola (vista dall'alto) */
 function chairSvg(cx){ return bar(cx,-22,46,46,'ic fBlack',9)+bar(cx,-48,46,9,'ic fill',4); }
@@ -1140,11 +1161,11 @@ var TYPES = {
              draw:function(it){ return station(it, gClar(), "wind"); }},
   fagotto:  {nome:"Fagotto", dim:"postazione", cat:"Legni", w:95,d:110,
              draw:function(it){ return station(it, gFag(), "wind"); }},
-  saxalto:  {nome:"Sax alto", dim:"postazione", cat:"Ottoni", w:95,d:105,
+  saxalto:  {nome:"Sax alto", dim:"postazione", cat:"Legni", w:95,d:105,
              draw:function(it){ return station(it, gSax(1), "wind"); }},
-  saxtenore:{nome:"Sax tenore", dim:"postazione", cat:"Ottoni", w:100,d:108,
+  saxtenore:{nome:"Sax tenore", dim:"postazione", cat:"Legni", w:100,d:108,
              draw:function(it){ return station(it, gSax(1.13), "wind"); }},
-  saxbaritono:{nome:"Sax baritono", dim:"postazione", cat:"Ottoni", w:105,d:112,
+  saxbaritono:{nome:"Sax baritono", dim:"postazione", cat:"Legni", w:105,d:112,
              draw:function(it){ return station(it, gSax(1.25), "wind"); }},
   /* --- ritmica: batteria e percussioni --- */
   batteria: {nome:"Batteria", dim:"componibile", cat:"Ritmica", sub:"Batteria e percussioni", w:240,d:200,
@@ -1275,6 +1296,8 @@ var TYPES = {
              draw:function(it){ return guitarDraw(it,"ac"); }},
   bassstand:{nome:"Basso elettrico", dim:"sedia · leggio · ampli", cat:"Ritmica", sub:"Chitarre", w:46,d:120, gtr:"bass",
              draw:function(it){ return guitarDraw(it,"bass"); }},
+  pedaliera:{nome:"Pedaliera", dim:"50×30", cat:"Ritmica", sub:"Chitarre", w:52,d:32, defLabel:"Pedalboard",
+             draw:function(){ return pedalGlyph(); }},
   djset:    {nome:"DJ set su tavolo", dim:"180×60", cat:"Tecnica", w:182,d:64, defLabel:"DJ",
              draw:function(){ return bar(0,0,180,60,'ic fBlack',4)+
                bar(-58,0,36,32,'ic fGrey',3)+circ(-58,2,11,'ic thin fSilver')+
@@ -1299,15 +1322,15 @@ var TYPES = {
              draw:function(it){ return doubleStringPost("vln1", it&&it.sep?it.sep/2:null); }},
   violoncello:{nome:"Violoncello", dim:"postazione", cat:"Archi", w:110,d:130,
              draw:function(it){ it=it||{};
-               if(it.doppia) return doubleStringPost("vc");
+               if(it.doppia) return doubleStringPost("vc", it.sep?it.sep/2:null);
                return (it.sedia!==false ? shadow(42,58,0,8)+bar(0,-36,44,44,'ic fBlack',9)+bar(0,-60,44,8,'ic fill',4) : '')+
                  '<g transform="translate(0,22) rotate(-24)">'+violino(1.0,'fWood')+'</g>'+
                  (it.leggio!==false ? leggioGlyph(58) : ''); }},
   contrabbasso:{nome:"Contrabbasso", dim:"postazione", cat:"Archi", w:120,d:140,
              draw:function(it){ it=it||{};
-               if(it.doppia) return doubleStringPost("cb");
-               return (it.sedia!==false ? shadow(54,60,0,6)+circ(-42,-42,16,'ic fBlack') : '')+
-                 '<g transform="translate(6,14) rotate(-12)">'+violino(1.45,'fWoodD')+'</g>'+
+               if(it.doppia) return doubleStringPost("cb", it.sep?it.sep/2:null);
+               return (it.sedia!==false ? shadow(54,60,0,6)+circ(0,-44,16,'ic fBlack')+circ(0,-44,5,'dotS') : '')+
+                 '<g transform="translate(0,14) rotate(-12)">'+violino(1.45,'fWoodD')+'</g>'+
                  (it.leggio!==false ? leggioGlyph(60) : ''); }},
   arpa:     {nome:"Arpa da concerto", dim:"55×120 +panca", cat:"Ritmica", sub:"Tastiere e arpa", w:75,d:140,
              draw:function(){
@@ -1347,32 +1370,44 @@ var TYPES = {
              draw:function(){ return '<path class="ic fWoodL" d="M -30,22 L 30,22 L 21,-22 L -21,-22 Z"/>'+
                '<path class="ic thin" fill="none" d="M -24,16 L 24,16 L 17,-16 L -17,-16 Z"/>'+
                circ(0,-8,2.5,'ic fill')+lin(0,-8,0,0,'ic thin'); }},
-  cantante: {nome:"Cantante", dim:"voce", cat:"Voci", w:64,d:90, voce:true, defLabel:"Voce",
+  cantante: {nome:"Cantante", dim:"voce", cat:"Voci", w:70,d:90, voce:true, defLabel:"Voce",
              draw:function(it){ return singer(it); }},
-  corista:  {nome:"Corista", dim:"voce coro", cat:"Voci", w:54,d:88, voce:true, defLabel:"Coro",
+  corista:  {nome:"Corista", dim:"voce coro", cat:"Voci", w:70,d:88, voce:true, defLabel:"Coro",
              draw:function(it){ it=it||{}; return singer({mano:false, nomic:true, leggio:it.leggio!==false, donna:it.donna}); }},
+  direttore:{nome:"Direttore", dim:"braccia aperte", cat:"Voci", w:84,d:72, dir:true, defLabel:"M°",
+             draw:function(it){ it=it||{}; return (it.podio?podioPlatform():'')+conductor(); }},
   /* --- monitoraggio --- */
   wedge:    {nome:"Wedge monitor", dim:"58×50", cat:"Monitoraggio", w:60,d:52, defLabel:"MIX 1",
-             draw:function(){ return '<path class="ic mon fMon" d="M -29,25 L 29,25 L 21,-25 L -21,-25 Z"/>'+
-               '<path class="sil" d="M -23,19 L 23,19 L 17,-19 L -17,-19 Z"/>'+
-               circ(0,5,11,'sil')+bar(0,-11,14,8,'sil',1); }},
+             draw:function(){
+               /* monitor da pavimento: cassa trapezoidale + baffle ribassato + woofer e tweeter */
+               return '<path class="ic mon fMon" d="M -30,26 L 30,26 L 22,-24 L -22,-24 Z"/>'+
+                 '<path class="sil" d="M -25,20 L 25,20 L 18,-18 L -18,-18 Z"/>'+
+                 speakerCone(0,5,12)+hornTweeter(0,-12,15,7); }},
   sidefill: {nome:"Side fill", dim:"58×68", cat:"Monitoraggio", w:60,d:70, defLabel:"SIDE",
-             draw:function(){ return bar(0,0,58,68,'ic mon fMon',3)+circ(0,14,14,'sil')+circ(0,14,5,'sil')+bar(0,-16,20,11,'sil',1); }},
+             draw:function(){
+               /* colonna 2 vie: woofer grande + tromba in alto */
+               return bar(0,0,58,68,'ic mon fMon',5)+bar(0,2,48,58,'sil',3)+
+                 speakerCone(0,16,16)+hornTweeter(0,-16,26,12); }},
   drumfill: {nome:"Drum fill", dim:"62×62", cat:"Monitoraggio", w:64,d:64, defLabel:"DRUM FILL",
-             draw:function(){ return bar(0,0,62,62,'ic mon fMon',3)+circ(0,10,15,'sil')+bar(0,-16,18,10,'sil',1); }},
+             draw:function(){
+               /* coppia di wedge accostati (tipico drum fill) */
+               return bar(0,0,62,62,'ic mon fMon',5)+bar(0,0,52,52,'sil',3)+
+                 speakerCone(-13,6,13)+speakerCone(13,6,13)+hornTweeter(0,-18,22,9); }},
   iem:      {nome:"IEM beltpack", dim:"simbolo", cat:"Monitoraggio", w:24,d:18, defLabel:"IEM",
-             draw:function(){ return bar(0,1,18,13,'ic mon fMon',2)+lin(7,-5,13,-13,'ic mon')+circ(13,-13,2,'mon fill'); }},
+             draw:function(){ return bar(0,1,18,14,'ic mon fMon',2)+bar(0,-1,11,7,'sil',1)+
+               lin(8,-6,13,-13,'ic mon')+circ(13,-13,2,'mon fill'); }},
   iemant:   {nome:"Rack TX in-ear", dim:"rack+antenne", cat:"Monitoraggio", w:60,d:46, defLabel:"TX IEM",
-             draw:function(){ return bar(0,4,46,28,'ic mon fMon',3)+
+             draw:function(){ return bar(0,4,48,28,'ic mon fMon',4)+
                lin(-18,-10,-28,-22,'ic mon')+circ(-28,-22,2.5,'mon fill')+
                lin(18,-10,28,-22,'ic mon')+circ(28,-22,2.5,'mon fill')+
-               circ(-14,8,2,'dotS')+circ(-6,8,2,'dotS'); }},
-  hearback: {nome:"Hearback / personal mixer", dim:"mixer cuffia", cat:"Monitoraggio", w:48,d:62, defLabel:"HEARBACK",
-             draw:function(){ var s=bar(0,0,42,56,'ic mon fMon',4)+bar(0,-21,32,7,'ic thin fBlack',2);
-               for(var r=0;r<2;r++)for(var c=0;c<4;c++){ s+=circ(-13+c*8,-8+r*13,3,'dotS'); }
-               s+=bar(-10,21,8,5,'ic thin fBlack',1)+circ(9,21,4,'ic thin fBlack')+
-                 '<path class="ic mon thin" fill="none" d="M 18,20 C 33,22 31,39 17,42"/>'+
-                 '<path class="ic mon thin" fill="none" d="M -18,-25 C -33,-36 -29,-48 -12,-45"/>';
+               bar(-12,4,12,8,'sil',1)+circ(13,4,5,'sil')+circ(13,4,1.6,'mon fill'); }},
+  hearback: {nome:"Hearback / personal mixer", dim:"13×24 cm + asta nana", cat:"Monitoraggio", w:30,d:50, defLabel:"HEARBACK",
+             draw:function(){
+               /* asta nana: base tonda Ø28 + paletto · unità personal mixer 13×24 cm (scala reale) */
+               var s=circ(0,20,13,'ic fBlack')+circ(0,20,4.5,'dotS')+lin(0,20,0,-2,'ic thin');
+               s+='<rect class="ic mon fMon" x="-6.5" y="-18" width="13" height="24" rx="2.5"/>';   /* unità 13×24 */
+               s+=bar(0,-13.5,9,4,'sil',1);                                                           /* display */
+               for(var r=0;r<3;r++)for(var c=0;c<2;c++){ s+=circ(-3+c*6,-6+r*5.5,1.5,'mon fill'); }   /* manopole */
                return s; }},
   /* --- tecnica --- */
   dimono:   {nome:"DI mono", dim:"simbolo", cat:"Tecnica", w:28,d:28, defLabel:"DI",
@@ -1425,6 +1460,8 @@ var TYPES = {
                lin(0,2,-22,28,'ic thin')+lin(0,2,22,28,'ic thin')+lin(0,2,0,32,'ic thin')+circ(0,2,3,'ic fill'); }}
 };
 var CAT_ORDER = ["Pedane e strutture","Ottoni","Legni","Ritmica","Archi","Voci","Microfoni","Monitoraggio","Tecnica","Video"];
+/* distanza interna di default (e minima) per TUTTE le postazioni doppie: la più stretta disponibile */
+var DEFAULT_SEP = 65;
 /* postazioni configurabili (sedia/leggio/doppia). s=[w,d] singola, d=[w,d] doppia.
    La doppia condivide il leggio → cambia SOLO la larghezza, la profondità resta = singola. */
 var POSTAZ = {
@@ -1548,7 +1585,7 @@ var DEFAULT_LABELS = {
   tamtam:"Tam-tam", glockenspiel:"Glock.", xilofono:"Xylo", vibrafono:"Vibes", marimba:"Marimba",
   comboamp:"Gtr amp", stack:"Gtr stack", bassamp:"Bass amp", keysamp:"Keys amp", leslie:"Leslie",
   grancoda:"Grand", mezzacoda:"Baby grand", pianoverticale:"Upright", stagepiano:"Keys", doppiatastiera:"2 Keys", celesta:"Celesta", panchetta:"Panca",
-  gtstand:"Gtr", gtacustica:"Ac. gtr", bassstand:"Bass", djset:"DJ",
+  gtstand:"Gtr", gtacustica:"Ac. gtr", bassstand:"Bass", pedaliera:"Pedalboard", djset:"DJ", direttore:"M°",
   vlnpost:"Vln", violapost:"Vla", vln1x2:"Vln I x2", vln2x2:"Vln II x2", violax2:"Vla x2", cellix2:"Vc x2", cbx2:"Cb x2",
   archi2leggio:"Vln x2", violoncello:"Vc", contrabbasso:"Cb", arpa:"Arpa",
   astamic:"Mic", giraffa:"Boom", astabassa:"Low mic", coppiast:"ST L/R", wireless:"WL", headset:"HS", podiosp:"Speaker", cantante:"Voce", corista:"Coro",
@@ -1660,7 +1697,7 @@ function sanitizeItems(arr){
              w:+o.w||t.w, d:+o.d||t.d, label:(o.label!=null?o.label:defaultLabel(o.type)) };
     if(t.riser) it.h=(o.h!=null?+o.h:(t.h||40));
     if(COMP[o.type]) it.parts=o.parts?compClone(o.parts):compClone(COMP[o.type].defParts);
-    ["sedia","leggio","doppia","sep","ampli","donna","mano","nomic","z"].forEach(function(k){ if(o[k]!=null) it[k]=o[k]; });
+    ["sedia","leggio","doppia","sep","ampli","pedaliera","donna","mano","nomic","z","vsec","label2","podio"].forEach(function(k){ if(o[k]!=null) it[k]=o[k]; });
     if(t.gtr){ var gz=gtrSize(it,t); it.w=gz[0]; it.d=gz[1]; }
     return it;
   }).filter(Boolean);
@@ -1805,8 +1842,18 @@ function itemMarkup(it){
   s += '<rect class="hit" x="'+(-hw)+'" y="'+(-hd)+'" width="'+(2*hw)+'" height="'+(2*hd)+'"/>';
   s += '<rect class="selbox" x="'+(-bw)+'" y="'+(-bh)+'" width="'+(2*bw)+'" height="'+(2*bh)+'" rx="6"/>';
   s += t.draw(it);
-  if(t.riser){ s += '<text class="lbl sub" y="5">'+(it.w/100)+'×'+(it.d/100)+' m · h'+it.h+'</text>'; }
-  if(it.label && !t.innerLabel){ s += '<text class="lbl" y="'+(bh+16)+'">'+esc(it.label)+'</text>'; }
+  if(t.riser){ s += '<text class="lbl sub" y="'+(-(it.d/2)-10)+'">'+(it.w/100)+'×'+(it.d/100)+' m · h'+it.h+'</text>'; }   /* misure FUORI dalla pedana (sopra il bordo) per non essere coperte */
+  if(!t.innerLabel){
+    var isDbl = it.doppia===true || !!DOUBLE_TYPES[it.type];
+    if(isDbl){                                  /* postazione a 2 → un nome per ciascuno strumento (riferito al singolo) */
+      var dc=sepCfg(it), dhalf=(it.sep || (dc&&dc.sep) || DEFAULT_SEP)/2;
+      var lx=Math.max(dhalf, 58);               /* distanzia i nomi così non si sovrappongono con sep stretto */
+      if(it.label)  s += '<text class="lbl" x="'+(-lx)+'" y="'+(bh+16)+'">'+esc(it.label)+'</text>';
+      if(it.label2) s += '<text class="lbl" x="'+lx+'" y="'+(bh+16)+'">'+esc(it.label2)+'</text>';
+    } else if(it.label){
+      s += '<text class="lbl" y="'+(bh+16)+'">'+esc(it.label)+'</text>';
+    }
+  }
   /* maniglia di rotazione: appare sopra l'elemento quando è l'unico selezionato */
   if(!stageEdit && selSet[it.id] && selIds().length===1){
     var ky=-(bh+26);
@@ -1870,6 +1917,10 @@ function renderProps(){
   var t = TYPES[it.type];
   document.getElementById("selNome").textContent = t.nome;
   document.getElementById("pLabel").value = it.label||"";
+  var isDbl2 = it.doppia===true || !!DOUBLE_TYPES[it.type];
+  document.getElementById("pLabel2Wrap").style.display = isDbl2 ? "block" : "none";
+  document.getElementById("pLabel2").value = it.label2||"";
+  document.getElementById("pLabel").placeholder = (POSTAZ[it.type] && t.cat==="Legni") ? "es. Clarinetto / Sax" : "";
   var rNorm=((it.rot||0)%360+360)%360; if(rNorm>180) rNorm-=360;   /* normalizza a -180..180 per lo slider */
   document.getElementById("pRot").value = rNorm;
   document.getElementById("pRotVal").textContent = rNorm+"°";
@@ -1891,7 +1942,7 @@ function renderProps(){
     document.getElementById("pDoppia").checked = dbl;
   }
   var sw=document.getElementById("pSepWrap");
-  if(cfg){ sw.style.display="block"; var sv=it.sep || cfg.sep;
+  if(cfg){ sw.style.display="block"; var sv=it.sep || DEFAULT_SEP;
     document.getElementById("pSep").value = sv; document.getElementById("pSepVal").textContent = sv+" cm"; }
   else sw.style.display="none";
   var pv=document.getElementById("pVoce"), isVoce=!!VOCE[it.type];
@@ -1907,7 +1958,11 @@ function renderProps(){
     document.getElementById("pGtrSedia").checked = it.sedia===true;
     document.getElementById("pGtrLeggio").checked = it.leggio===true;
     document.getElementById("pGtrAmp").checked = it.ampli===true;
+    document.getElementById("pGtrPedal").checked = it.pedaliera===true;
   }
+  var pdir=document.getElementById("pDir"), isDir=!!t.dir;
+  pdir.style.display = isDir ? "block" : "none";
+  if(isDir){ document.getElementById("pDirPodio").checked = it.podio===true; }
   var pc=document.getElementById("pComp"), comp=COMP[it.type];
   pc.style.display = comp ? "block" : "none";
   if(comp){
@@ -1971,6 +2026,7 @@ function explodeComposite(){
 }
 function mutSel(fn){ var it=getSel(); if(!it) return; fn(it); render(); save(); }
 document.getElementById("pLabel").addEventListener("input", function(){ mutSel(function(it){ it.label=document.getElementById("pLabel").value; }); });
+document.getElementById("pLabel2").addEventListener("input", function(){ mutSel(function(it){ it.label2=document.getElementById("pLabel2").value; }); });
 document.getElementById("pW").addEventListener("change", function(){ mutSel(function(it){ it.w=Math.max(10,+document.getElementById("pW").value||it.w); }); });
 document.getElementById("pD").addEventListener("change", function(){ mutSel(function(it){ it.d=Math.max(10,+document.getElementById("pD").value||it.d); }); });
 document.getElementById("pH").addEventListener("change", function(){ mutSel(function(it){ it.h=Math.max(0,+document.getElementById("pH").value||0); }); });
@@ -1988,14 +2044,18 @@ document.getElementById("pDoppia").addEventListener("change", function(){ mutSel
   it.doppia=document.getElementById("pDoppia").checked;
   var P=POSTAZ[it.type];
   if(P){
-    if(it.doppia){ it.sep=it.sep||P.sep; it.w=sepToW(P, it.sep); it.d=P.dbl[1]; }
+    if(it.doppia){ it.sep=it.sep||DEFAULT_SEP; it.w=sepToW(P, it.sep); it.d=P.dbl[1]; }
     else { it.w=P.s[0]; it.d=P.s[1]; }
   }
+  if(it.doppia){
+    if(it.vsec && !it.label2){ var m=(it.label||"").match(/(\d+)\s*$/); it.label2="Violino "+it.vsec+" "+(m?(+m[1]+1):(vlnSeats(it.vsec)+1)); }
+  } else { it.label2=""; }
+  renderProps();
 }); });
 /* slider distanza: aggiornamento live su "input" (senza salvare ad ogni tacca), salva una volta su "change" */
 function applySep(doSave){
   var it=getSel(), cfg=sepCfg(it); if(!cfg) return;
-  it.sep=Math.max(20, Math.min(300, +document.getElementById("pSep").value||cfg.sep));
+  it.sep=Math.max(DEFAULT_SEP, Math.min(300, +document.getElementById("pSep").value||DEFAULT_SEP));
   it.w=sepToW(cfg, it.sep);
   document.getElementById("pSepVal").textContent = it.sep+" cm";
   render(); if(doSave) save();
@@ -2012,6 +2072,8 @@ function gtrApply(it){ var sz=gtrSize(it, TYPES[it.type]); it.w=sz[0]; it.d=sz[1
 document.getElementById("pGtrSedia").addEventListener("change", function(){ mutSel(function(it){ it.sedia=document.getElementById("pGtrSedia").checked; gtrApply(it); }); });
 document.getElementById("pGtrLeggio").addEventListener("change", function(){ mutSel(function(it){ it.leggio=document.getElementById("pGtrLeggio").checked; gtrApply(it); }); });
 document.getElementById("pGtrAmp").addEventListener("change", function(){ mutSel(function(it){ it.ampli=document.getElementById("pGtrAmp").checked; gtrApply(it); }); });
+document.getElementById("pGtrPedal").addEventListener("change", function(){ mutSel(function(it){ it.pedaliera=document.getElementById("pGtrPedal").checked; gtrApply(it); }); });
+document.getElementById("pDirPodio").addEventListener("change", function(){ mutSel(function(it){ it.podio=document.getElementById("pDirPodio").checked; var sz=dirSize(it); it.w=sz[0]; it.d=sz[1]; }); });
 document.getElementById("pGtrSplit").addEventListener("click", explodeGuitar);
 /* Dividi una postazione doppia (×2 del generatore o doppia-da-flag) in 2 postazioni singole */
 var SINGLE_OF_KIND={vln1:"vlnpost", vln2:"vlnpost", vla:"violapost", vc:"violoncello", cb:"contrabbasso"};
@@ -2033,8 +2095,6 @@ function splitDouble(){
 }
 document.getElementById("pSplit").addEventListener("click", splitDouble);
 document.getElementById("pCompSplit").addEventListener("click", explodeComposite);
-document.getElementById("pRotL").addEventListener("click", function(){ rotateSel(-15); });
-document.getElementById("pRotR").addEventListener("click", function(){ rotateSel(15); });
 document.getElementById("pDup").addEventListener("click", duplicateSel);
 document.getElementById("pDel").addEventListener("click", deleteSel);
 document.getElementById("grpRotL").addEventListener("click", function(){ rotateSel(-15); });
@@ -2190,6 +2250,10 @@ function miniSvg(k, over){
       body.appendChild(makeActionBtn("Organico archi", "Vln I · Vln II · Viole · Vc · Cb", "vln1x2", openStringModal));
       n++;
       entries.push({nome:"Organico archi", dim:"Vln I · Vln II · Viole · Vc · Cb", action:openStringModal, icon:"vln1x2"});
+      body.appendChild(makeActionBtn("Violino I", "postazione · nome progressivo", "vlnpost", function(){ addViolin(1); })); n++;
+      body.appendChild(makeActionBtn("Violino II", "postazione · nome progressivo", "vlnpost", function(){ addViolin(2); })); n++;
+      entries.push({nome:"Violino I", dim:"postazione", icon:"vlnpost", action:function(){ addViolin(1); }});
+      entries.push({nome:"Violino II", dim:"postazione", icon:"vlnpost", action:function(){ addViolin(2); }});
     }
     if(c==="Legni"){
       body.appendChild(makeActionBtn("Organico legni", "Flauti · Oboi · Clarinetti · Fagotti", "flauto", openLegniModal));
@@ -2205,10 +2269,14 @@ function miniSvg(k, over){
       body.appendChild(makeActionBtn("Organico coro", "Soprani · Contralti · Tenori · Bassi", "cantante", openVoiceModal));
       n++;
       entries.push({nome:"Organico coro", dim:"Soprani · Contralti · Tenori · Bassi", action:openVoiceModal, icon:"cantante"});
+      var dirPov={podio:true, w:100, d:100};
+      body.appendChild(makeBtn("direttore","Direttore su podio", dirPov, "con podio")); n++;
+      entries.push({k:"direttore", nome:"Direttore su podio", over:dirPov, dim:"con podio"});
     }
     cats[c].forEach(function(k){
       if(c==="Pedane e strutture") return;   /* categoria gestita interamente sopra (sottosezioni) */
       if(k==="pedana") return;
+      if(k==="vlnpost") return;   /* violini gestiti sopra (Violino I / II con nome progressivo) */
       var sub=TYPES[k].sub||null;
       var target=body, group=null;
       if(c==="Ritmica" && sub){ group=rhythmGroup(sub); target=group.body; }
@@ -2219,9 +2287,9 @@ function miniSvg(k, over){
         if(group){ group.count++; group.head.innerHTML='<span class="caret">▸</span><span>'+esc(group.name)+'</span><span class="count">'+group.count+'</span>'; }
         entries.push({k:k, nome:nome, over:over||null, dim:dim});
       }
-      if(TYPES[k].gtr){   /* chitarre: solo postazione pronta (sedia + strumento + leggio + ampli) */
-        var pov={sedia:true, leggio:true, ampli:true}; var gz=gtrSize(pov, TYPES[k]); pov.w=gz[0]; pov.d=gz[1];
-        addBtn("Postazione "+TYPES[k].nome.toLowerCase(), pov, "sedia · leggio · ampli");
+      if(TYPES[k].gtr){   /* chitarre: postazione completa (sedia + strumento + leggio + ampli + pedaliera) */
+        var pov={sedia:true, leggio:true, ampli:true, pedaliera:true}; var gz=gtrSize(pov, TYPES[k]); pov.w=gz[0]; pov.d=gz[1];
+        addBtn("Postazione "+TYPES[k].nome.toLowerCase(), pov, "sedia·leggio·ampli·pedaliera");
       } else {
         addBtn(TYPES[k].nome);
       }
@@ -2268,7 +2336,9 @@ function addItem(type, over){
   var it={ id:uid(), type:type, x:snap(vb.x+vb.w/2+addCascade), y:snap(vb.y+vb.h/2+addCascade),
            rot:0, w:t.w, d:t.d, label:defaultLabel(type) };
   if(t.riser) it.h=t.h||40;
-  if(POSTAZ[type]){ it.sedia=true; it.leggio=true; it.doppia=false; }
+  if(POSTAZ[type]){ it.sedia=true; it.leggio=true; it.doppia=false; it.sep=DEFAULT_SEP; }
+  if(DOUBLE_TYPES[type]){ it.sep=DEFAULT_SEP; it.w=sepToW(DOUBLE_TYPES[type], it.sep); it.d=DOUBLE_TYPES[type].dbl[1]; }
+  if(t.dir){ it.podio=false; }
   if(VOCE[type]){ it.mano=false; it.leggio=(type==="corista"); it.donna=false; }   /* cantante: mic su asta, no leggio · corista: leggio */
   if(COMP[type]){ it.parts=compClone(COMP[type].defParts); if(COMP[type].size){ var sz=COMP[type].size(it); it.w=sz[0]; it.d=sz[1]; } }
   if(over) Object.keys(over).forEach(function(k){ it[k]=over[k]; });
@@ -2280,6 +2350,9 @@ function addItem(type, over){
   closeMobileDrawers();   /* su mobile: chiudi il catalogo per vedere il palco */
   return it;
 }
+/* numerazione progressiva violini per sezione (1 = Violini I, 2 = Violini II); le doppie contano 2 leggii */
+function vlnSeats(sec){ var n=0; state.items.forEach(function(x){ if(x.type==="vlnpost" && x.vsec===sec) n += (x.doppia?2:1); }); return n; }
+function addViolin(sec){ var base=vlnSeats(sec); addItem("vlnpost",{vsec:sec, label:"Violino "+sec+" "+(base+1)}); }
 /* ===== Drawer mobile (catalogo / pannello) ===== */
 function isMobile(){ return window.matchMedia("(max-width:880px)").matches; }
 function closeMobileDrawers(){
@@ -2775,7 +2848,7 @@ function presetCounts(id){
    Restituisce il raggio esterno (per posizionare legni/ottoni dietro). */
 var STR_R0=290, STR_DR=150;
 function layoutStrings(counts, out){
-  var secs=[["v1","Violini I","vlnpost","Vln I"],["v2","Violini II","vlnpost","Vln II"],
+  var secs=[["v1","Violini I","vlnpost","Violino 1"],["v2","Violini II","vlnpost","Violino 2"],
             ["vle","Viole","violapost","Vla"],["vc","Violoncelli","violoncello","Vc"]];
   var sizes=secs.map(function(s){ return counts[s[0]]||0; });
   var total=sizes.reduce(function(a,b){ return a+b; },0);
@@ -2794,14 +2867,16 @@ function layoutStrings(counts, out){
     var rowSeats=[];
     secs.forEach(function(s,i){
       var k=split[i][r];
-      for(var j=0;j<k;j++){ secCount[i]++; rowSeats.push({type:s[2], lbl:s[3]+" "+secCount[i]}); }
+      for(var j=0;j<k;j++){ secCount[i]++; rowSeats.push({type:s[2], lbl:s[3]+" "+secCount[i], vsec:(i===0?1:i===1?2:0)}); }
     });
     var m=rowSeats.length; if(!m) continue;
     var R=STR_R0+STR_DR*r;
     for(var idx=0; idx<m; idx++){
       var a=(idx-(m-1)/2)*P, x=R*Math.sin(a), y=-R*Math.cos(a);
-      out.push({type:rowSeats[idx].type, x:Math.round(x), y:Math.round(y),
-        rot:Math.round(a*180/Math.PI), label:rowSeats[idx].lbl});
+      var o={type:rowSeats[idx].type, x:Math.round(x), y:Math.round(y),
+        rot:Math.round(a*180/Math.PI), label:rowSeats[idx].lbl};
+      if(rowSeats[idx].vsec) o.vsec=rowSeats[idx].vsec;
+      out.push(o);
     }
   }
   /* Contrabbassi: arco corto dietro/destra dei violoncelli */
@@ -3065,7 +3140,7 @@ function placeOut(out, fitStage, clearFirst, force){
             rot:Math.round((o.rot||0)/5)*5, w:z.w, d:z.d, label:o.label!=null?o.label:defaultLabel(o.type)};
     if(t.riser) it.h=(o.h!=null?o.h:(t.h||40));
     if(o.parts){ it.parts=compClone(o.parts); if(COMP[o.type] && COMP[o.type].size){ var cz=COMP[o.type].size(it); it.w=cz[0]; it.d=cz[1]; } }
-    ["donna","hair","mano","leggio","sedia","doppia","sep"].forEach(function(k){ if(o[k]!=null) it[k]=o[k]; });   /* flag opzionali dal generatore */
+    ["donna","hair","mano","leggio","sedia","doppia","sep","ampli","pedaliera","vsec","label2","podio","nomic"].forEach(function(k){ if(o[k]!=null) it[k]=o[k]; });   /* flag opzionali dal generatore */
     return it;
   });
   if(!clearFirst && state.items.length) avoidGroupOverlap(news);   /* non sovrapporsi a ciò che è già sul palco */
