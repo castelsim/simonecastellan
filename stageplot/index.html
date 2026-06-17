@@ -4009,7 +4009,7 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   function shareText(){ var t=state.titolo||"", l=state.luogo||"";
     return (t||l) ? (t+(t&&l?" · ":"")+l) : "Stage plot"; }   /* oggetto mail = titolo · luogo */
   function openShare(){
-    var url=buildShareUrl(); urlEl.value=url; status("");
+    var url=buildShareUrl(); urlEl.value=url; status(""); document.getElementById("ioStatus").textContent="";
     document.getElementById("shareNative").hidden = !navigator.share;
     modal.hidden=false; setTimeout(function(){ try{ urlEl.focus(); urlEl.select(); }catch(e){} },40);
   }
