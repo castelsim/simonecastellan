@@ -360,7 +360,7 @@
   <button class="btn" id="bUndo" title="Annulla (⌘Z)" style="padding:7px 11px">↶</button>
   <button class="btn" id="bRedo" title="Ripeti (⇧⌘Z)" style="padding:7px 11px">↷</button>
   <button class="btn" id="bFit" title="Adatta lo zoom al palco">⤢ Adatta</button>
-  <button class="btn" id="bPdf" hidden>Esporta PDF</button>
+  <button class="btn" id="bPdf" hidden>Salva PDF</button>
   <button class="btn primary" id="bAi" hidden title="Descrivi il palco a ChatGPT e ricevi il link già pronto" style="display:none;align-items:center;gap:6px">🤖 Crea con AI</button>
   <button class="btn primary" id="bShare" title="Salva/esporta il progetto in JSON o scarica il PDF">💾 Salva / Esporta</button>
   <button class="btn danger" id="bNew">Nuovo</button>
@@ -709,8 +709,8 @@
       <div class="mstatus" id="ioStatus" style="font-size:12px;color:#16a34a;margin-top:8px;min-height:14px"></div>
     </div>
     <div style="border-top:1px solid #eef0f3;margin-top:14px;padding-top:12px">
-      <p class="hint" style="font-size:12.5px;color:#6b7280;margin-bottom:10px">Esporta la planimetria in <b>scala</b> + channel list in PDF.</p>
-      <button class="btn" id="shareGoPdf">📄 Scarica PDF</button>
+      <p class="hint" style="font-size:12.5px;color:#6b7280;margin-bottom:10px">Salva la planimetria in <b>scala</b> + channel list in PDF.</p>
+      <button class="btn" id="shareGoPdf">📄 Salva PDF</button>
     </div>
     <div style="display:flex;margin-top:14px">
       <button class="btn" id="shareClose" style="margin-left:auto">Chiudi</button>
@@ -720,7 +720,7 @@
 
 <div class="modal" id="pdfModal" hidden>
   <div class="mcard" style="width:820px;max-width:94vw">
-    <h2>Esporta PDF in scala</h2>
+    <h2>Salva PDF in scala</h2>
     <p class="hint" style="margin-bottom:10px">Pag. 1 = planimetria in <b>scala</b> · Pag. 2 = channel list. Stampa a <b>100% / dimensioni reali</b> (non "adatta alla pagina").</p>
     <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
       <div style="flex:1 1 280px;min-width:260px">
@@ -747,7 +747,7 @@
         <div class="mstatus" id="pdfInfo" style="font-size:12.5px;min-height:18px;margin-top:10px"></div>
         <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
           <button class="btn" id="pdfCancel">Annulla</button>
-          <button class="btn primary" id="pdfGo">Esporta PDF</button>
+          <button class="btn primary" id="pdfGo">Salva PDF</button>
         </div>
       </div>
       <div style="flex:1 1 340px;min-width:300px">
