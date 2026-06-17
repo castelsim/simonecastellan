@@ -2499,7 +2499,11 @@ svg.addEventListener("pointercancel", function(e){   /* touch interrotto: ripuli
 });
 svg.addEventListener("wheel", function(e){
   e.preventDefault();
-  var sp=svgPoint(e), f = e.deltaY>0 ? 1.12 : 0.89, maxW=fitVbW();
+  var sp=svgPoint(e), maxW=fitVbW();
+  /* passo proporzionale all'entità dello scroll: fluido sul trackpad, max ~6%/evento → zoom controllato */
+  var unit = e.deltaMode===1 ? 16 : (e.deltaMode===2 ? 100 : 1);   /* righe/pagine → pixel */
+  var d = e.deltaY*unit, mag = Math.min(Math.abs(d), 120)/120;     /* 0..1, satura sugli scatti bruschi */
+  var f = Math.exp((d>0?1:-1) * 0.06 * mag);
   var nw=vb.w*f;
   if(nw>maxW) nw=maxW;            /* solo zoom-in: non si va oltre il "tutto visibile" */
   if(nw<300) nw=300;
