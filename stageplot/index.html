@@ -2297,17 +2297,27 @@ function svgPoint(e){
   var p=svg.createSVGPoint(); p.x=e.clientX; p.y=e.clientY;
   return p.matrixTransform(svg.getScreenCTM().inverse());
 }
-var drag=null, pointers={}, pinch=null;
+var drag=null, pointers={}, pinch=null, lastDown=null;
 svg.addEventListener("pointerdown", function(e){
   pointers[e.pointerId]={x:e.clientX, y:e.clientY};
   if(Object.keys(pointers).length===2){            /* due dita = pinch zoom: annulla drag in corso */
     if(drag && drag.el && drag.el.parentNode) drag.el.parentNode.removeChild(drag.el);
-    drag=null; svg.classList.remove("dragging");
+    drag=null; svg.classList.remove("dragging"); lastDown=null;
     var ids=Object.keys(pointers), pa=pointers[ids[0]], pb=pointers[ids[1]];
     var mx=(pa.x+pb.x)/2, my=(pa.y+pb.y)/2;
     pinch={ d0:Math.hypot(pb.x-pa.x, pb.y-pa.y), mid0:svgPoint({clientX:mx, clientY:my}), startW:vb.w, ratio:vb.h/vb.w };
     svg.setPointerCapture(e.pointerId); return;
   }
+  /* doppio-click manuale: robusto al re-render dell'SVG (il dblclick nativo si perde perché render() ricrea il bersaglio) */
+  var dcG = e.target.closest ? e.target.closest(".item") : null;
+  var dcId = dcG ? dcG.getAttribute("data-id") : null;
+  if(lastDown && Date.now()-lastDown.t<400 && Math.abs(e.clientX-lastDown.x)<10 && Math.abs(e.clientY-lastDown.y)<10 && lastDown.id===dcId){
+    lastDown=null;
+    if(dcId){ selectOne(dcId); render(); var inp=document.getElementById("pLabel"); if(inp){ inp.focus(); inp.select(); } }
+    else { toggleStageEdit(); }
+    return;
+  }
+  lastDown={t:Date.now(), x:e.clientX, y:e.clientY, id:dcId};
   var sp = svgPoint(e);
   if(stageEdit){                            /* modalità forma palco: trascina i blocchi / i lati per ridimensionare */
     var edge = e.target.closest ? e.target.closest(".blk-edge") : null;
@@ -2475,15 +2485,8 @@ svg.addEventListener("drop", function(e){
   over.x=snap(p.x); over.y=snap(p.y);
   addItem(data.k, over);
 });
-svg.addEventListener("dblclick", function(e){
-  var g = e.target.closest ? e.target.closest(".item") : null;
-  if(g){   /* doppio click su un elemento = modifica etichetta */
-    selectOne(g.getAttribute("data-id")); render();
-    var inp = document.getElementById("pLabel"); if(inp){ inp.focus(); inp.select(); }
-    return;
-  }
-  toggleStageEdit();   /* doppio click sul palco/sfondo = modifica palco */
-});
+/* il doppio-click è gestito manualmente nel pointerdown (vedi lastDown): il dblclick nativo
+   non scatta perché render() ricrea il bersaglio del primo click. */
 /* riquadro di TUTTO il contenuto (palco + elementi) per "vedere sempre tutto" */
 function contentBounds(){
   recalcStageBBox();
