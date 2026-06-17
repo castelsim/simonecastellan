@@ -2052,7 +2052,8 @@ document.getElementById("pDoppia").addEventListener("change", function(){ mutSel
     else { it.w=P.s[0]; it.d=P.s[1]; }
   }
   if(it.doppia){
-    if(it.vsec && !it.label2){ var m=(it.label||"").match(/(\d+)\s*$/); it.label2="Violino "+it.vsec+" "+(m?(+m[1]+1):(vlnSeats(it.vsec)+1)); }
+    if(it.vsec){ if(!it.label2){ var m=(it.label||"").match(/(\d+)\s*$/); it.label2="Violino "+it.vsec+" "+(m?(+m[1]+1):(vlnSeats(it.vsec)+1)); } }
+    else if(autoNumbered(it.type) && !it.label2){ var b=instrBase(it.type), mm=(it.label||"").match(/(\d+)\s*$/); it.label2=b+" "+(mm?(+mm[1]+1):(instrSeats(it.type)+1)); }
   } else { it.label2=""; }
   renderProps();
 }); });
@@ -2335,7 +2336,14 @@ function autoNumbered(type){ var t=TYPES[type]; if(!t) return false;
   if(t.gtr || POSTAZ[type] || VOCE[type] || t.dir) return true;
   return ["Legni","Ottoni","Archi","Ritmica","Persone"].indexOf(t.cat)>=0;
 }
-function nextInstrLabel(type){ var n=0; state.items.forEach(function(x){ if(x.type===type) n++; }); return TYPES[type].nome+" "+(n+1); }
+/* nomi abbreviati per la numerazione (es. nelle postazioni a 2) */
+var INSTR_ABBR = { violoncello:"Cello", contrabbasso:"Contra", cellix2:"Cello", cbx2:"Contra" };
+function instrBase(type){ return INSTR_ABBR[type] || (TYPES[type]&&TYPES[type].nome) || ""; }
+/* "posti" già usati per quello strumento (una postazione a 2 conta 2) */
+function instrSeats(type){ var base=instrBase(type), n=0;
+  state.items.forEach(function(x){ if(x.type && autoNumbered(x.type) && instrBase(x.type)===base) n += (x.doppia?2:1); });
+  return n; }
+function nextInstrLabel(type){ return instrBase(type)+" "+(instrSeats(type)+1); }
 function addItem(type, over){
   var t=TYPES[type];
   var it={ id:uid(), type:type, x:snap(vb.x+vb.w/2+addCascade), y:snap(vb.y+vb.h/2+addCascade),
@@ -2344,7 +2352,11 @@ function addItem(type, over){
   if(POSTAZ[type]){ it.sedia=true; it.leggio=true; it.doppia=false; it.sep=minSepType(type); }
   if(DOUBLE_TYPES[type]){ it.sep=minSepType(type); it.w=sepToW(DOUBLE_TYPES[type], it.sep); it.d=DOUBLE_TYPES[type].dbl[1]; }
   if(t.dir){ it.podio=false; }
-  if(autoNumbered(type)) it.label=nextInstrLabel(type);   /* nome progressivo: Flauto 1, Flauto 2, … */
+  if(autoNumbered(type)){   /* nome progressivo: Flauto 1, Flauto 2, … (doppie = 2 nomi) */
+    var seats0=instrSeats(type), base0=instrBase(type);
+    it.label=base0+" "+(seats0+1);
+    if(DOUBLE_TYPES[type]) it.label2=base0+" "+(seats0+2);
+  }
   if(VOCE[type]){ it.mano=false; it.leggio=(type==="corista"); it.donna=false; }   /* cantante: mic su asta, no leggio · corista: leggio */
   if(COMP[type]){ it.parts=compClone(COMP[type].defParts); if(COMP[type].size){ var sz=COMP[type].size(it); it.w=sz[0]; it.d=sz[1]; } }
   if(over) Object.keys(over).forEach(function(k){ it[k]=over[k]; });
