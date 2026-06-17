@@ -128,6 +128,8 @@
   .stageblk{fill:rgba(37,99,235,.06);stroke:#2563eb;stroke-width:2;stroke-dasharray:7 5;cursor:move}
   .stageblk.sel{fill:rgba(37,99,235,.14);stroke-dasharray:none;stroke-width:3}
   .stageblk-lbl{fill:#2563eb;font-size:15px;font-weight:700;pointer-events:none}
+  .blk-edge{fill:rgba(37,99,235,.45);stroke:#2563eb;stroke-width:1.5}
+  .blk-edge.ew{cursor:ew-resize} .blk-edge.ns{cursor:ns-resize}
   .blkchip{border:1px solid #cfe0fb;background:#fff;color:#1f2937;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
   .blkchip.sel{background:#2563eb;border-color:#2563eb;color:#fff;font-weight:600}
   body.dark .blkchip{background:#0f141c;border-color:#283142;color:#cbd5e1}
@@ -352,7 +354,7 @@
   </div>
   <input type="text" id="titolo" class="hdr-evt" placeholder="Titolo" title="Titolo dell'evento (diventa l'oggetto della mail in condivisione)" style="width:150px">
   <input type="text" id="luogo" class="hdr-evt" placeholder="Luogo" title="Luogo dell'evento" style="width:130px">
-  <button class="btn" id="bStageShape" title="Comporre il palco a blocchi/pedane (forma personalizzata)" style="padding:7px 12px">▦ Palco</button>
+  <button class="btn" id="bStageShape" hidden>▦ Palco</button>
   <span style="flex:1"></span>
   <button class="btn" id="bTheme" title="Tema chiaro / scuro" style="padding:7px 11px">🌙</button>
   <button class="btn" id="bUndo" title="Annulla (⌘Z)" style="padding:7px 11px">↶</button>
@@ -1568,6 +1570,7 @@ function itemsOnRiser(r){
   });
 }
 var vb = {x:-100,y:-150,w:1500,h:1100};
+var userZoomed = false;   /* true = l'utente ha zoomato dentro (niente auto-adatta); false = panoramica (tutto visibile) */
 var svg = document.getElementById("svg");
 
 function uid(){ return "i"+(nextId++); }
@@ -1758,7 +1761,15 @@ function stageBlocksOverlay(){
     var shape = r.shape==="semi"
       ? '<path class="stageblk'+selCls+'" data-block="'+i+'" d="'+semiPath(r)+'"/>'
       : '<rect class="stageblk'+selCls+'" data-block="'+i+'" x="'+r.x+'" y="'+r.y+'" width="'+r.w+'" height="'+r.d+'"/>';
-    return shape+'<text class="stageblk-lbl" x="'+cx+'" y="'+cy+'" text-anchor="middle" dominant-baseline="middle">Blocco '+(i+1)+'</text>';
+    var edges='';
+    if(selBlock===i && r.shape!=="semi"){   /* maniglie sui lati: trascina per ridimensionare */
+      var T=16;
+      edges+='<rect class="blk-edge ew" data-edge="r" data-block="'+i+'" x="'+(r.x+r.w-T/2)+'" y="'+r.y+'" width="'+T+'" height="'+r.d+'"/>'+
+             '<rect class="blk-edge ew" data-edge="l" data-block="'+i+'" x="'+(r.x-T/2)+'" y="'+r.y+'" width="'+T+'" height="'+r.d+'"/>'+
+             '<rect class="blk-edge ns" data-edge="b" data-block="'+i+'" x="'+r.x+'" y="'+(r.y+r.d-T/2)+'" width="'+r.w+'" height="'+T+'"/>'+
+             '<rect class="blk-edge ns" data-edge="t" data-block="'+i+'" x="'+r.x+'" y="'+(r.y-T/2)+'" width="'+r.w+'" height="'+T+'"/>';
+    }
+    return shape+edges+'<text class="stageblk-lbl" x="'+cx+'" y="'+cy+'" text-anchor="middle" dominant-baseline="middle">Blocco '+(i+1)+'</text>';
   }).join('');
 }
 function itemMarkup(it){
@@ -2241,7 +2252,7 @@ function addItem(type, over){
     var fs=findFreeSpot(it.x, it.y, it.w, it.d); it.x=fs.x; it.y=fs.y;
   }
   addCascade=(addCascade+25)%150;
-  state.items.push(it); selectOne(it.id); render(); save();
+  state.items.push(it); selectOne(it.id); render(); save(); ensureVisible();
   closeMobileDrawers();   /* su mobile: chiudi il catalogo per vedere il palco */
   return it;
 }
@@ -2298,7 +2309,13 @@ svg.addEventListener("pointerdown", function(e){
     svg.setPointerCapture(e.pointerId); return;
   }
   var sp = svgPoint(e);
-  if(stageEdit){                            /* modalità forma palco: trascina i blocchi, lo sfondo fa pan */
+  if(stageEdit){                            /* modalità forma palco: trascina i blocchi / i lati per ridimensionare */
+    var edge = e.target.closest ? e.target.closest(".blk-edge") : null;
+    if(edge){                               /* trascina un LATO per ingrandire/ridurre il blocco */
+      var ei=+edge.getAttribute("data-block"), er=stageBlocks()[ei]; selBlock=ei; renderStagePanel();
+      drag={mode:"blkresize", bi:ei, edge:edge.getAttribute("data-edge"), x0:er.x, y0:er.y, w0:er.w, d0:er.d, sp0:{x:sp.x,y:sp.y}, moved:false};
+      render(); svg.setPointerCapture(e.pointerId); return;
+    }
     var blk = e.target.closest ? e.target.closest(".stageblk") : null;
     if(blk){
       var bi=+blk.getAttribute("data-block"); selBlock=bi; renderStagePanel();
@@ -2351,11 +2368,12 @@ svg.addEventListener("pointermove", function(e){
     var pa=pointers[ids[0]], pb=pointers[ids[1]];
     var d=Math.hypot(pb.x-pa.x, pb.y-pa.y); if(d<=0) return;
     var f=pinch.d0/d, rect=svg.getBoundingClientRect();
-    var nw=Math.max(300, Math.min(12000, pinch.startW*f)), nh=nw*pinch.ratio;
+    var nw=Math.max(300, Math.min(fitVbW(), pinch.startW*f)), nh=nw*pinch.ratio;   /* solo zoom-in: max = tutto visibile */
     var mx=(pa.x+pb.x)/2, my=(pa.y+pb.y)/2;
     vb.w=nw; vb.h=nh;
     vb.x=pinch.mid0.x - (mx-rect.left)/rect.width*nw;
     vb.y=pinch.mid0.y - (my-rect.top)/rect.height*nh;
+    userZoomed = nw < fitVbW()-1;
     svg.setAttribute("viewBox", vb.x+" "+vb.y+" "+vb.w+" "+vb.h);
     return;
   }
@@ -2377,6 +2395,15 @@ svg.addEventListener("pointermove", function(e){
   } else if(drag.mode==="block"){
     sp=svgPoint(e); var bdx=sp.x-drag.sp0.x, bdy=sp.y-drag.sp0.y; drag.moved=true;
     var r=stageBlocks()[drag.bi]; if(r){ r.x=Math.max(0,snap(drag.x0+bdx)); r.y=Math.max(0,snap(drag.y0+bdy)); recalcStageBBox(); render(); }
+  } else if(drag.mode==="blkresize"){
+    sp=svgPoint(e); var r=stageBlocks()[drag.bi]; drag.moved=true;
+    if(r){ var MIN=100;
+      if(drag.edge==="r"){ r.w=Math.max(MIN, snap(sp.x-r.x)); }
+      else if(drag.edge==="b"){ r.d=Math.max(MIN, snap(sp.y-r.y)); }
+      else if(drag.edge==="l"){ var nx=Math.max(0, Math.min(snap(sp.x), drag.x0+drag.w0-MIN)); r.w=drag.x0+drag.w0-nx; r.x=nx; }
+      else if(drag.edge==="t"){ var ny=Math.max(0, Math.min(snap(sp.y), drag.y0+drag.d0-MIN)); r.d=drag.y0+drag.d0-ny; r.y=ny; }
+      recalcStageBBox(); renderStagePanel(); render();
+    }
   } else if(drag.mode==="marquee"){
     sp=svgPoint(e);
     var x=Math.min(sp.x,drag.x0), y=Math.min(sp.y,drag.y0), w=Math.abs(sp.x-drag.x0), h=Math.abs(sp.y-drag.y0);
@@ -2392,9 +2419,10 @@ svg.addEventListener("pointermove", function(e){
 svg.addEventListener("pointerup", function(e){
   delete pointers[e.pointerId];
   if(pinch){ if(Object.keys(pointers).length<2) pinch=null; svg.classList.remove("dragging"); drag=null; return; }
-  if(drag && drag.mode==="block"){ if(drag.moved){ recalcStageBBox(); save(); } renderStagePanel(); render(); svg.classList.remove("dragging"); drag=null; return; }
+  if(drag && drag.mode==="block"){ if(drag.moved){ recalcStageBBox(); save(); } renderStagePanel(); render(); svg.classList.remove("dragging"); drag=null; ensureVisible(); return; }
+  if(drag && drag.mode==="blkresize"){ if(drag.moved){ recalcStageBBox(); save(); } renderStagePanel(); render(); drag=null; ensureVisible(); return; }
   if(drag && drag.mode==="rotate"){ if(drag.moved) save(); render(); drag=null; return; }
-  if(drag && drag.mode==="item" && drag.moved){ render(); save(); }
+  if(drag && drag.mode==="item" && drag.moved){ render(); save(); ensureVisible(); }
   else if(drag && drag.mode==="marquee"){
     var r=drag.rect;
     if(r && (r.w>8||r.h>8)){
@@ -2404,8 +2432,9 @@ svg.addEventListener("pointerup", function(e){
     if(drag.el && drag.el.parentNode) drag.el.parentNode.removeChild(drag.el);
     render();
   }
-  else if(drag && drag.mode==="pan" && Math.abs(e.clientX-drag.px)<4 && Math.abs(e.clientY-drag.py)<4){
-    clearSelection(); render();  /* click sullo sfondo = deseleziona (pannello torna a channel list) */
+  else if(drag && drag.mode==="pan"){
+    if(Math.abs(e.clientX-drag.px)<4 && Math.abs(e.clientY-drag.py)<4){ clearSelection(); render(); }  /* click sullo sfondo = deseleziona */
+    else ensureVisible();   /* pan in panoramica: non lasciare elementi fuori */
   }
   svg.classList.remove("dragging");
   drag=null;
@@ -2416,9 +2445,15 @@ svg.addEventListener("pointercancel", function(e){   /* touch interrotto: ripuli
 });
 svg.addEventListener("wheel", function(e){
   e.preventDefault();
-  var sp=svgPoint(e), f = e.deltaY>0 ? 1.12 : 0.89;
-  if(vb.w*f<300 || vb.w*f>12000) return;
+  var sp=svgPoint(e), f = e.deltaY>0 ? 1.12 : 0.89, maxW=fitVbW();
+  var nw=vb.w*f;
+  if(nw>maxW) nw=maxW;            /* solo zoom-in: non si va oltre il "tutto visibile" */
+  if(nw<300) nw=300;
+  if(Math.abs(nw-vb.w)<0.5){ if(e.deltaY>0) ensureVisible(); return; }
+  f=nw/vb.w;
   vb.x = sp.x-(sp.x-vb.x)*f; vb.y = sp.y-(sp.y-vb.y)*f; vb.w*=f; vb.h*=f;
+  if(nw>=maxW){ fit(); return; }   /* allo zoom-out massimo → centra tutto */
+  userZoomed=true;
   svg.setAttribute("viewBox", vb.x+" "+vb.y+" "+vb.w+" "+vb.h);
 }, {passive:false});
 /* drag-and-drop dal catalogo: rilascia l'elemento dove vuoi sul palco (desktop) */
@@ -2440,19 +2475,42 @@ svg.addEventListener("drop", function(e){
   over.x=snap(p.x); over.y=snap(p.y);
   addItem(data.k, over);
 });
-svg.addEventListener("dblclick", function(e){   /* doppio click su un elemento = modifica etichetta */
-  var g = e.target.closest ? e.target.closest(".item") : null; if(!g) return;
-  var id = g.getAttribute("data-id");
-  selectOne(id); render();
-  var inp = document.getElementById("pLabel");
-  if(inp){ inp.focus(); inp.select(); }
+svg.addEventListener("dblclick", function(e){
+  var g = e.target.closest ? e.target.closest(".item") : null;
+  if(g){   /* doppio click su un elemento = modifica etichetta */
+    selectOne(g.getAttribute("data-id")); render();
+    var inp = document.getElementById("pLabel"); if(inp){ inp.focus(); inp.select(); }
+    return;
+  }
+  toggleStageEdit();   /* doppio click sul palco/sfondo = modifica palco */
 });
+/* riquadro di TUTTO il contenuto (palco + elementi) per "vedere sempre tutto" */
+function contentBounds(){
+  recalcStageBBox();
+  var x0=0,y0=0,x1=state.stage.w,y1=state.stage.d;
+  state.items.forEach(function(it){ var hw=Math.max(it.w||0,it.d||0)/2, hd=hw;
+    x0=Math.min(x0,it.x-hw); y0=Math.min(y0,it.y-hd); x1=Math.max(x1,it.x+hw); y1=Math.max(y1,it.y+hd); });
+  return {x0:x0,y0:y0,x1:x1,y1:y1};
+}
+function fitMargin(){ return isMobile()?45:140; }
+/* larghezza viewBox che mostra TUTTO (= massimo zoom-out consentito) */
+function fitVbW(){
+  var b=contentBounds(), m=fitMargin(), ar=svg.clientWidth/svg.clientHeight;
+  var W=(b.x1-b.x0)+2*m, D=(b.y1-b.y0)+2*m;
+  return (W/D>ar)? W : D*ar;
+}
 function fit(){
-  var mob=isMobile(), m=mob?45:180, W=state.stage.w+2*m, D=state.stage.d+2*m;
-  var ar = svg.clientWidth/svg.clientHeight;
-  if(W/D > ar){ var h=W/ar; vb={x:-m, y: mob ? -m : -m-(h-D-m)/2, w:W, h:h}; }   /* mobile: palco in alto */
-  else { vb={x:-m-(D*ar-W-m)/2, y:-m, w:D*ar, h:D}; }
-  render();
+  var b=contentBounds(), mob=isMobile(), m=fitMargin();
+  var W=(b.x1-b.x0)+2*m, D=(b.y1-b.y0)+2*m, ar=svg.clientWidth/svg.clientHeight;
+  if(W/D>ar){ var h=W/ar; vb={x:b.x0-m, y: mob ? b.y0-m : b.y0-m-(h-D)/2, w:W, h:h}; }
+  else { vb={x:b.x0-m-(D*ar-W)/2, y:b.y0-m, w:D*ar, h:D}; }
+  userZoomed=false; render();
+}
+/* in panoramica: se un elemento esce dalla visuale → riadatta (si vede sempre tutto). Se l'utente ha zoomato dentro, non disturba. */
+function ensureVisible(){
+  if(userZoomed) return;
+  var b=contentBounds(), eps=1;
+  if(b.x0<vb.x-eps || b.y0<vb.y-eps || b.x1>vb.x+vb.w+eps || b.y1>vb.y+vb.h+eps) fit();
 }
 document.getElementById("bFit").addEventListener("click", fit);
 /* ===== Modifica palco (forma a blocchi) ===== */
@@ -2601,7 +2659,7 @@ document.addEventListener("keydown", function(e){
     if(e.key==="ArrowLeft") dx=-step; if(e.key==="ArrowRight") dx=step;
     if(e.key==="ArrowUp") dy=-step; if(e.key==="ArrowDown") dy=step;
     selItems().forEach(function(s){ s.x+=dx; s.y+=dy; });
-    render(); save();
+    render(); save(); ensureVisible();
   }
 });
 
