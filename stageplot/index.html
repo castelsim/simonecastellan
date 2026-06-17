@@ -4045,7 +4045,15 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   function io(m,err){ var el=document.getElementById("ioStatus"); el.textContent=m||""; el.style.color=err?"#dc2626":"#16a34a"; }
   document.getElementById("saveJson").addEventListener("click", function(){
     var name=((state.titolo||state.luogo||"stageplot").replace(/[^\w\-]+/g,"_").replace(/^_+|_+$/g,"").slice(0,40)||"stageplot")+".json";
-    var blob=new Blob([JSON.stringify(state)],{type:"application/json"}), url=URL.createObjectURL(blob);
+    var data=JSON.stringify(state);
+    if(typeof window.showSaveFilePicker==="function" && !isMobile()){   /* apre il selettore "dove salvare" */
+      window.showSaveFilePicker({ suggestedName:name, types:[{description:"Progetto Stage Plot", accept:{"application/json":[".json"]}}] })
+        .then(function(h){ return h.createWritable().then(function(w){ return w.write(data).then(function(){ return w.close(); }); }).then(function(){ io("✓ Progetto salvato sul dispositivo."); }); })
+        .catch(function(e){ if(e && e.name==="AbortError"){ io("Salvataggio annullato."); return; }
+          var url=URL.createObjectURL(new Blob([data],{type:"application/json"})); dl(url,name); setTimeout(function(){ URL.revokeObjectURL(url); },3000); io("✓ Progetto salvato: "+name); });
+      return;
+    }
+    var url=URL.createObjectURL(new Blob([data],{type:"application/json"}));
     dl(url,name); setTimeout(function(){ URL.revokeObjectURL(url); },3000);
     io("✓ Progetto salvato: "+name);
   });
@@ -4372,10 +4380,17 @@ function buildPdfDoc(paperKey, N, orient, header){
     return doc;
   });
 }
-/* consegna il PDF: su mobile apre il foglio di condivisione (Mail con allegato);
-   altrimenti scarica. Ritorna "share" | "download" | "abort". */
-function deliverPdf(doc){
-  var name=fileName()+".pdf", file=null;
+/* consegna il PDF: se è stata scelta una destinazione (handle) la scrive lì;
+   su mobile apre il foglio di condivisione; altrimenti scarica.
+   Ritorna "saved" | "share" | "download" | "abort". */
+function deliverPdf(doc, handle){
+  var name=fileName()+".pdf";
+  if(handle && handle.createWritable){            /* destinazione scelta dall'utente (File System Access API) */
+    return handle.createWritable()
+      .then(function(w){ return w.write(doc.output("blob")).then(function(){ return w.close(); }); })
+      .then(function(){ return "saved"; });
+  }
+  var file=null;
   try{ file=new File([doc.output("blob")], name, {type:"application/pdf"}); }catch(e){}
   if(file && navigator.canShare && navigator.canShare({files:[file]})){
     return navigator.share({ files:[file], title:(state.titolo||"Stage plot"),
@@ -4383,7 +4398,7 @@ function deliverPdf(doc){
       .then(function(){ return "share"; })
       .catch(function(err){ if(err && err.name==="AbortError") return "abort"; doc.save(name); return "download"; });
   }
-  doc.save(name); return Promise.resolve("download");
+  doc.save(name); return Promise.resolve("download");   /* scarica nella cartella Download */
 }
 function exportPdf(paperKey, scaleSel, orient, header){
   var info=document.getElementById("pdfInfo");
@@ -4394,16 +4409,24 @@ function exportPdf(paperKey, scaleSel, orient, header){
     info.className="mstatus err"; info.textContent="A 1:"+N+" il palco sfora il foglio "+paperKey.toUpperCase()+" "+oTxt+". Scegli Automatica o un foglio più grande."; return;
   }
   if(!state.items.length){ info.className="mstatus err"; info.textContent="Il palco è vuoto."; return; }
+  var name=fileName()+".pdf";
+  /* chiedi SUBITO dove salvare (mentre c'è il gesto utente): su desktop con browser compatibili apre il selettore di sistema */
+  var pick = (typeof window.showSaveFilePicker==="function" && !isMobile())
+    ? window.showSaveFilePicker({ suggestedName:name, types:[{description:"PDF", accept:{"application/pdf":[".pdf"]}}] })
+        .catch(function(e){ if(e && e.name==="AbortError") throw e; return null; })   /* non supportato/negato → fallback download */
+    : Promise.resolve(null);
   info.className="mstatus"; info.textContent="Genero il PDF…";
-  buildPdfDoc(paperKey, N, orient, header).then(function(doc){
-    return deliverPdf(doc);
+  pick.then(function(handle){
+    return buildPdfDoc(paperKey, N, orient, header).then(function(doc){ return deliverPdf(doc, handle); });
   }).then(function(how){
     info.className="mstatus ok";
-    info.textContent = how==="share" ? "✓ PDF pronto — scegli Mail (o un'app) per inviarlo."
-                     : how==="abort" ? "Condivisione annullata (PDF non inviato)."
-                     : "✓ PDF generato ("+paperKey.toUpperCase()+" "+oTxt+", scala 1:"+N+").";
+    info.textContent = how==="saved"  ? "✓ PDF salvato sul dispositivo."
+                     : how==="share"  ? "✓ PDF pronto — scegli Mail (o un'app) per inviarlo."
+                     : how==="abort"  ? "Condivisione annullata (PDF non inviato)."
+                     : "✓ PDF scaricato ("+paperKey.toUpperCase()+" "+oTxt+", scala 1:"+N+").";
     if(how!=="abort") setTimeout(function(){ document.getElementById("pdfModal").hidden=true; }, 1400);
   }).catch(function(e){
+    if(e && e.name==="AbortError"){ info.className="mstatus"; info.textContent="Salvataggio annullato."; return; }
     info.className="mstatus err"; info.textContent="Errore: "+(e&&e.message||e);
   });
 }
