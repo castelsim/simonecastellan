@@ -2107,24 +2107,32 @@ document.getElementById("grpRotR").addEventListener("click", function(){ rotateS
 document.getElementById("grpDup").addEventListener("click", duplicateSel);
 document.getElementById("grpDel").addEventListener("click", deleteSel);
 function rotateSel(deg){ var its=selItems(); if(!its.length) return; its.forEach(function(it){ it.rot=((it.rot||0)+deg)%360; }); render(); save(); }
-/* etichetta del duplicato: incrementa il numero finale o ne aggiunge uno, evitando collisioni */
-function bumpLabel(label){
+/* etichetta del duplicato: incrementa il numero finale o ne aggiunge uno, evitando collisioni.
+   extra = etichette già riservate in questa stessa duplicazione (per non collidere tra label e label2). */
+function bumpLabel(label, extra){
   if(!label) return label;
   var m=label.match(/^(.*?)(\d+)(\s*)$/), prefix, sep, n;
   if(m){ prefix=m[1]; n=parseInt(m[2],10); sep=m[3]; }
   else { prefix=label+" "; n=1; sep=""; }
-  var used={}; state.items.forEach(function(i){ if(i.label) used[i.label]=true; });
+  var used={}; state.items.forEach(function(i){ if(i.label) used[i.label]=true; if(i.label2) used[i.label2]=true; });
+  if(extra) Object.keys(extra).forEach(function(k){ used[k]=true; });
   var cand; do { n++; cand=prefix+n+sep; } while(used[cand]);
   return cand;
 }
+/* incrementa entrambe le etichette di una postazione (label e, se presente, label2 della doppia) */
+function bumpItemLabels(c){
+  var reserved={};
+  c.label=bumpLabel(c.label, reserved); if(c.label) reserved[c.label]=true;
+  if(c.label2){ c.label2=bumpLabel(c.label2, reserved); reserved[c.label2]=true; }
+}
 function duplicateSel(){
   var its=selItems(); if(!its.length) return;
-  var copies=its.map(function(it){ var c=JSON.parse(JSON.stringify(it)); c.id=uid(); c.x+=40; c.y+=40; c.label=bumpLabel(c.label); state.items.push(c); return c; });
+  var copies=its.map(function(it){ var c=JSON.parse(JSON.stringify(it)); c.id=uid(); c.x+=40; c.y+=40; bumpItemLabels(c); state.items.push(c); return c; });
   selSet={}; copies.forEach(function(c){ selSet[c.id]=true; }); sel=copies.length?copies[copies.length-1].id:null;
   render(); save();
 }
 function duplicateItem(it, dx, dy){
-  var c=JSON.parse(JSON.stringify(it)); c.id=uid(); c.x+=(dx||0); c.y+=(dy||0); c.label=bumpLabel(c.label);
+  var c=JSON.parse(JSON.stringify(it)); c.id=uid(); c.x+=(dx||0); c.y+=(dy||0); bumpItemLabels(c);
   state.items.push(c); selectOne(c.id); render(); save();
   return c;
 }
