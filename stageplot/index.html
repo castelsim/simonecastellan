@@ -505,7 +505,7 @@
 
 <footer>
   <span><b>R</b> ruota · <b>⇧R</b> ruota indietro · <b>frecce</b> sposta · <b>⌫</b> elimina · <b>D</b> duplica · <b>Esc</b> deseleziona</span>
-  <span>rotella = zoom · trascina lo sfondo = sposta vista</span>
+  <span>rotella = zoom · trascina lo sfondo = sposta vista · <b>⌘/Ctrl</b> trascina = fuori snap</span>
   <span id="scaleInfo"></span>
 </footer>
 
@@ -2498,9 +2498,11 @@ svg.addEventListener("pointermove", function(e){
   var sp;
   if(drag.mode==="item"){
     sp=svgPoint(e); var ddx=sp.x-drag.sp0.x, ddy=sp.y-drag.sp0.y; drag.moved=true;
+    var freeMove = e.metaKey || e.ctrlKey;   /* Cmd (Mac) / Ctrl (Win) tenuto premuto = movimento libero, fuori dallo snap */
     drag.items.forEach(function(d){
       var it=state.items.find(function(i){ return i.id===d.id; }); if(!it) return;
-      it.x=snap(d.x0+ddx); it.y=snap(d.y0+ddy);
+      it.x = freeMove ? Math.round(d.x0+ddx) : snap(d.x0+ddx);
+      it.y = freeMove ? Math.round(d.y0+ddy) : snap(d.y0+ddy);
       var g=svg.querySelector('[data-id="'+it.id+'"]');
       if(g) g.setAttribute("transform","translate("+it.x+" "+it.y+")");
     });
