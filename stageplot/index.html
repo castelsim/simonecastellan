@@ -940,15 +940,18 @@ function bassPost(){
 }
 function doubleStringPost(kind, dx){
   dx=dx||33;   /* sep/2 di default = 65/2 ≈ 33 */
-  /* il secondo strumento è SPECCHIATO (scale(-1,1)) → coppia perfettamente simmetrica, distanza = sep */
-  function pair(inner, ty){ var t=ty||0;
+  var lr, legY=38;
+  /* violini/viole: strumenti PARALLELI (entrambi su spalla sinistra) → realistico, niente cluster al centro */
+  function parallel(inner){ return '<g transform="translate('+(-dx)+',0) rotate(-8)">'+inner+'</g>'+
+                                   '<g transform="translate('+dx+',0) rotate(8)">'+inner+'</g>'; }
+  /* celli/contrabbassi: strumento centrato sul musicista → il 2° è SPECCHIATO per simmetria */
+  function mirrored(inner, ty){ var t=ty||0;
     return '<g transform="translate('+(-dx)+','+t+')">'+inner+'</g>'+
            '<g transform="translate('+dx+','+t+') scale(-1,1)">'+inner+'</g>'; }
-  var lr, legY=38;
-  if(kind==="vln1"||kind==="vln2"){ lr=pair('<g transform="rotate(-8)">'+postaz(gVln(0.45))+'</g>'); }
-  else if(kind==="vla"){ lr=pair('<g transform="rotate(-8)">'+postaz(gVln(0.53))+'</g>'); }
-  else if(kind==="vc"){ legY=54; lr=pair('<g transform="rotate(-7)">'+celloPost()+'</g>',4); }
-  else { legY=58; lr=pair('<g transform="rotate(-7)">'+bassPost()+'</g>',7); }   /* cb */
+  if(kind==="vln1"||kind==="vln2"){ lr=parallel(postaz(gVln(0.45))); }
+  else if(kind==="vla"){ lr=parallel(postaz(gVln(0.53))); }
+  else if(kind==="vc"){ legY=54; lr=mirrored('<g transform="rotate(-7)">'+celloPost()+'</g>',4); }
+  else { legY=58; lr=mirrored('<g transform="rotate(-7)">'+bassPost()+'</g>',7); }   /* cb */
   return lr+'<g transform="translate(0,'+legY+')">'+leggioGlyph(0)+'</g>';
 }
 /* sedia singola (vista dall'alto) */
