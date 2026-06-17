@@ -995,51 +995,100 @@ function timpaniSet(n, layout, orient){
 }
 /* Glifi strumento in scala (cm reali) */
 function gVln(s){ return '<g transform="translate(28,-14) rotate(38)">'+violino(s,'fWood')+'</g>'; }
-function gFlauto(){ return '<g transform="translate(5,-1) rotate(73)">'+bar(0,0,5,66,'ic fSilver',2.5)+
-  circ(0,-24,1.5,'ic fill')+circ(0,-16,1.5,'ic fill')+circ(0,-8,1.5,'ic fill')+'</g>'; }
-function gOboe(){ return '<g transform="translate(9,1) rotate(14)"><path class="ic fBlack" d="M -2.5,-30 L 2.5,-30 L 4.5,24 Q 0,29 -4.5,24 Z"/>'+
-  circ(0,-6,1.4,'dotS')+circ(0,0,1.4,'dotS')+circ(0,6,1.4,'dotS')+'</g>'; }
-function gClar(){ return '<g transform="translate(9,1) rotate(12)">'+bar(0,-5,6,50,'ic fBlack',3)+
-  '<path class="ic fBlack" d="M -3,20 L 3,20 L 6.5,29 L -6.5,29 Z"/>'+
-  circ(0,-13,1.4,'dotS')+circ(0,-6,1.4,'dotS')+circ(0,1,1.4,'dotS')+'</g>'; }
-function gFag(){ return '<g transform="translate(18,-4) rotate(10)">'+bar(-5,0,5,88,'ic fWoodD',2.5)+bar(4.5,-12,5,80,'ic fWoodD',2.5)+
-  '<path class="ic thin" fill="none" d="M -7.5,44 A 8 8 0 0 0 7,28"/>'+lin(-5,-44,-13,-50,'sil')+'</g>'; }
-function gCorno(){ return '<g transform="translate(0,-18)"><circle class="ic" fill="url(#gBrassR)" cx="0" cy="0" r="15"/>'+circ(0,0,8.5,'ic thin fBrass')+
-  circ(9,7,5.5,'ic thin fBrass')+'<circle cx="-5" cy="-5" r="3.2" fill="rgba(255,255,255,.5)"/>'+lin(-13,-7,-19,-13,'ic thin')+'</g>'; }
-function gTromba(){ return '<g transform="translate(7,4)">'+bar(0,-6,5,40,'ic fBrass',2.5)+
-  circ(0,-13,1.6,'ic fill')+circ(0,-8,1.6,'ic fill')+circ(0,-3,1.6,'ic fill')+
-  lin(-2.5,14,-7,26,'ic thin')+lin(2.5,14,7,26,'ic thin')+'<ellipse class="ic thin" fill="url(#gBrassR)" cx="0" cy="27" rx="7.5" ry="2.8"/></g>'; }
-function gTrombone(){ return '<g transform="translate(12,10) rotate(8)">'+bar(-3.5,-14,4,72,'ic fBrass',2)+bar(3.5,-26,4,48,'ic fBrass',2)+
-  '<path class="ic thin" fill="none" d="M -5.5,-50 A 5.5 5.5 0 0 1 5.5,-50"/>'+
-  lin(-5.5,22,-10,34,'ic thin')+lin(-1.5,22,3,34,'ic thin')+'<ellipse class="ic thin fBrass" cx="-3.5" cy="35" rx="7" ry="2.6"/></g>'; }
-function gTuba(){ return '<g transform="translate(2,-15)"><ellipse class="ic fBrass" cx="0" cy="0" rx="17" ry="22"/>'+
-  circ(-2,-7,10,'ic thin fBrass')+'<path class="ic thin" fill="none" d="M 12,14 Q 18,2 12,-10"/></g>'; }
+/* file di chiavi/tasti laterali (vista dall'alto) */
+function woodKeys(ys, cx, r, cls){ return ys.map(function(y){ return '<circle class="ic thin '+(cls||'fSilver')+'" cx="'+cx+'" cy="'+y+'" r="'+r+'"/>'; }).join(''); }
+function gFlauto(){ return '<g transform="translate(4,0) rotate(72)">'+
+  bar(0,1,4.6,64,'ic fSilver',2.3)+                                              /* corpo argento */
+  '<ellipse class="ic thin fBlack" cx="0" cy="-27" rx="2" ry="2.6"/>'+           /* foro imboccatura (testata) */
+  woodKeys([-15,-9,-3,4,10,16,22], 3, 1.7, 'fSilver')+'</g>'; }
+function gOboe(){ return '<g transform="translate(8,1) rotate(13)">'+
+  '<path class="ic fBlack" d="M -2.4,-30 L 2.4,-30 L 4.8,22 Q 0,27 -4.8,22 Z"/>'+ /* corpo conico nero */
+  lin(0,-30,0,-37,'sil')+                                                         /* ancia doppia */
+  woodKeys([-20,-13,-6,1,8,15], 2.7, 1.3, 'fSilver')+'</g>'; }
+function gClar(){ return '<g transform="translate(8,1) rotate(12)">'+
+  bar(0,-30,3.6,8,'ic fBlack',1.5)+                                               /* bocchino */
+  bar(0,-3,5.6,52,'ic fBlack',2.6)+                                               /* corpo nero */
+  '<path class="ic fBlack" d="M -5,21 L 5,21 L 8.5,31 L -8.5,31 Z"/>'+            /* campana svasata */
+  woodKeys([-22,-15,-8,-1,6,13], 3, 1.6, 'fSilver')+'</g>'; }
+function gFag(){ return '<g transform="translate(16,-4) rotate(9)">'+
+  bar(-5,2,5.5,86,'ic fWoodD',2.5)+bar(5,-8,5.5,78,'ic fWoodD',2.5)+              /* due canne parallele */
+  '<path class="ic thin" fill="none" d="M -7.8,46 A 8.5 8.5 0 0 0 7.5,31"/>'+    /* U di fondo */
+  '<path class="sil" fill="none" d="M -5,-42 C -14,-50 -19,-43 -14,-37"/>'+      /* bocal a S */
+  woodKeys([-30,-21,-12,-3,6,15,24], -5, 1.4, 'fSilver')+'</g>'; }
+/* corno francese (vista dall'alto): campana circolare + spire + valvole rotative */
+function gCorno(){ return '<g transform="translate(0,-12)">'+
+  '<circle class="ic" fill="url(#gBrassR)" cx="0" cy="0" r="17"/>'+               /* campana */
+  '<circle class="ic thin" fill="none" cx="0" cy="0" r="11.5"/>'+
+  circ(0,0,7,'ic thin fBrass')+'<circle class="ic thin" fill="none" cx="0" cy="0" r="3.4"/>'+   /* spire */
+  woodKeys([-4,1,6],-13,2,'fBrass')+                                              /* valvole rotative */
+  lin(-15,9,-23,16,'ic thin')+                                                   /* leadpipe/bocchino */
+  '<circle cx="-6" cy="-7" r="3.6" fill="rgba(255,255,255,.45)"/></g>'; }         /* luce */
+/* tromba (vista dall'alto): corpo + 3 pistoni + campana svasata */
+function gTromba(){ return '<g transform="translate(6,2)">'+
+  bar(0,-10,5,34,'ic fBrass',2.3)+                                               /* corpo */
+  circ(-3.6,4,2.4,'ic thin fBrass')+circ(0,4,2.4,'ic thin fBrass')+circ(3.6,4,2.4,'ic thin fBrass')+   /* 3 pistoni */
+  circ(-3.6,4,1,'ic fill')+circ(0,4,1,'ic fill')+circ(3.6,4,1,'ic fill')+
+  lin(-3,14,-7,26,'ic thin')+lin(3,14,7,26,'ic thin')+
+  '<ellipse class="ic thin" fill="url(#gBrassR)" cx="0" cy="28" rx="8.5" ry="3.3"/></g>'; }   /* campana */
+/* trombone (vista dall'alto): coulisse doppia + campana */
+function gTrombone(){ return '<g transform="translate(11,9) rotate(8)">'+
+  bar(-3.5,-13,4,74,'ic fBrass',2)+bar(3.5,-25,4,50,'ic fBrass',2)+              /* coulisse */
+  '<path class="ic thin fBrass" d="M -5.5,-50 A 5.5 5.5 0 0 1 5.5,-50 L 5.5,-46 L -5.5,-46 Z"/>'+   /* U coulisse */
+  lin(-5.5,24,-10,36,'ic thin')+lin(-1.5,24,3,36,'ic thin')+
+  '<ellipse class="ic thin" fill="url(#gBrassR)" cx="-3.5" cy="37" rx="8" ry="3"/></g>'; }   /* campana */
+/* tuba (vista dall'alto): campana grande verso l'alto + spira + 4 valvole */
+function gTuba(){ return '<g transform="translate(0,-12)">'+
+  '<ellipse class="ic" fill="url(#gBrassR)" cx="0" cy="0" rx="19" ry="24"/>'+    /* campana */
+  '<ellipse class="ic thin fBrass" cx="0" cy="3" rx="12" ry="15"/>'+
+  '<ellipse class="ic thin" fill="none" cx="0" cy="4" rx="6.5" ry="8"/>'+
+  woodKeys([-6,-1,4,9],-16,2.2,'fBrass')+                                        /* 4 valvole */
+  '<circle cx="-7" cy="-9" r="4.2" fill="rgba(255,255,255,.4)"/></g>'; }
+/* sax (vista dall'alto): corpo curvo + campana svasata + chiavi madreperla */
 function gSax(scale){
   var s=scale||1;
   return '<g transform="translate(8,-6) scale('+s+') rotate(12)">'+
     '<path class="ic fBrass" d="M -4,-28 C 6,-25 10,-15 5,-4 L -5,18 C -8,25 -2,31 6,28 C 15,25 15,12 7,9"/>'+
     '<path class="ic thin" fill="none" d="M -1,-24 C 9,-12 3,-2 0,6"/>'+
-    '<ellipse class="ic thin fBrass" cx="10" cy="22" rx="11" ry="7"/>'+
-    circ(1,-11,1.5,'ic fill')+circ(-1,-3,1.5,'ic fill')+circ(-3,5,1.5,'ic fill')+
-  '</g>';
+    '<ellipse class="ic thin" fill="url(#gBrassR)" cx="11" cy="22" rx="12" ry="8"/>'+   /* campana */
+    circ(2,-18,1.4,'ic fill')+circ(1,-11,1.4,'ic fill')+circ(-1,-3,1.4,'ic fill')+circ(-3,5,1.4,'ic fill')+   /* chiavi */
+    lin(-3,-30,-1,-26,'sil')+'</g>';   /* collo/bocchino */
 }
 
-/* Corpo violino/cello/contrabbasso (scala s: 1 = cello) + manico */
+/* Corpo violino/cello/contrabbasso (vista dall'alto, scala s: 1 = cello). Tutto vettoriale, in scala.
+   Dettaglio: cassa con punte/centro, tastiera in ebano, 4 corde, ponticello, cordiera, riccio, f-fori. */
 function violino(s,woodCls){
   function n(v){ return Math.round(v*s*10)/10; }
-  return '<path class="ic '+(woodCls||'fWood')+'" d="M 0,'+n(-40)+' C '+n(14)+','+n(-40)+' '+n(20)+','+n(-31)+' '+n(18)+','+n(-22)+
+  var sw=Math.max(0.45, Math.round(0.7*s*10)/10);   /* spessore corda in scala */
+  var body='<path class="ic '+(woodCls||'fWood')+'" d="M 0,'+n(-40)+' C '+n(14)+','+n(-40)+' '+n(20)+','+n(-31)+' '+n(18)+','+n(-22)+
     ' C '+n(17)+','+n(-15)+' '+n(11)+','+n(-13)+' '+n(12)+','+n(-7)+
     ' C '+n(14)+','+n(-1)+' '+n(21)+','+n(2)+' '+n(22)+','+n(11)+
     ' C '+n(23)+','+n(24)+' '+n(12)+','+n(30)+' 0,'+n(30)+
     ' C '+n(-12)+','+n(30)+' '+n(-23)+','+n(24)+' '+n(-22)+','+n(11)+
     ' C '+n(-21)+','+n(2)+' '+n(-14)+','+n(-1)+' '+n(-12)+','+n(-7)+
     ' C '+n(-11)+','+n(-13)+' '+n(-17)+','+n(-15)+' '+n(-18)+','+n(-22)+
-    ' C '+n(-20)+','+n(-31)+' '+n(-14)+','+n(-40)+' 0,'+n(-40)+' Z"/>'+
-    lin(0,n(-40),0,n(-56),'fb')+circ(0,n(-58),n(3),'ic fill')+
-    bar(0,n(8),n(15),n(3),'ic fill',1)+
-    '<path class="fhole" d="M '+n(-7)+','+n(-3)+' q '+n(-2.5)+','+n(7)+' 0,'+n(13)+'"/>'+
-    '<path class="fhole" d="M '+n(7)+','+n(-3)+' q '+n(2.5)+','+n(7)+' 0,'+n(13)+'"/>'+
-    lin(0,n(30),0,n(38),'ic thin');
+    ' C '+n(-20)+','+n(-31)+' '+n(-14)+','+n(-40)+' 0,'+n(-40)+' Z"/>';
+  /* bordo interno (filetto) per profondità */
+  var purf='<path class="ic thin" fill="none" opacity="0.45" d="M 0,'+n(-37)+' C '+n(12)+','+n(-37)+' '+n(16)+','+n(-30)+' '+n(15)+','+n(-22)+
+    ' C '+n(14)+','+n(-14)+' '+n(9)+','+n(-12)+' '+n(10)+','+n(-7)+
+    ' C '+n(11)+','+n(0)+' '+n(18)+','+n(3)+' '+n(19)+','+n(11)+
+    ' C '+n(20)+','+n(22)+' '+n(10)+','+n(27)+' 0,'+n(27)+
+    ' C '+n(-10)+','+n(27)+' '+n(-20)+','+n(22)+' '+n(-19)+','+n(11)+
+    ' C '+n(-18)+','+n(3)+' '+n(-11)+','+n(0)+' '+n(-10)+','+n(-7)+
+    ' C '+n(-9)+','+n(-12)+' '+n(-14)+','+n(-14)+' '+n(-15)+','+n(-22)+
+    ' C '+n(-16)+','+n(-30)+' '+n(-12)+','+n(-37)+' 0,'+n(-37)+' Z"/>';
+  /* tastiera in ebano: dal ponticello al capotasto (oltre la cassa) */
+  var fingerboard='<path class="ic fill" d="M '+n(-3)+','+n(-2)+' C '+n(-3.4)+','+n(-22)+' '+n(-2.5)+','+n(-46)+' '+n(-2.3)+','+n(-54)+
+    ' L '+n(2.3)+','+n(-54)+' C '+n(2.5)+','+n(-46)+' '+n(3.4)+','+n(-22)+' '+n(3)+','+n(-2)+' Z"/>';
+  /* riccio + cavigliere */
+  var scroll='<circle class="ic fWoodL" cx="0" cy="'+n(-57)+'" r="'+n(4)+'"/><circle class="ic thin" fill="none" cx="0" cy="'+n(-57)+'" r="'+n(1.8)+'"/>';
+  /* 4 corde dal cordiera al capotasto (si restringono verso l'alto) */
+  var strings='';
+  [-1.9,-0.65,0.65,1.9].forEach(function(xx){ strings+='<line x1="'+n(xx)+'" y1="'+n(27)+'" x2="'+n(xx*0.45)+'" y2="'+n(-53)+'" stroke="#efe7d2" stroke-width="'+sw+'" stroke-linecap="round"/>'; });
+  var bridge=bar(0,n(7),n(15),n(2.6),'ic fill',1);
+  var tail='<path class="ic fill" d="M '+n(-3.4)+','+n(26)+' L '+n(3.4)+','+n(26)+' L '+n(2)+','+n(38)+' L '+n(-2)+','+n(38)+' Z"/>';
+  var fholes='<path class="fhole" d="M '+n(-7)+','+n(-3)+' q '+n(-2.5)+','+n(7)+' 0,'+n(13)+'"/>'+
+    '<path class="fhole" d="M '+n(7)+','+n(-3)+' q '+n(2.5)+','+n(7)+' 0,'+n(13)+'"/>';
+  return body+purf+fholes+fingerboard+scroll+strings+bridge+tail;
 }
 /* Piano a coda parametrico — pianta reale: fascia (spine) DRITTA a sx, coda arrotondata
    al fondo, bentside a destra con ansa a S verso il blocchetto tastiera. Ancore normalizzate
