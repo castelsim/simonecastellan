@@ -134,6 +134,9 @@
   .blkchip.sel{background:#2563eb;border-color:#2563eb;color:#fff;font-weight:600}
   body.dark .blkchip{background:#0f141c;border-color:#283142;color:#cbd5e1}
   body.stage-edit .item{opacity:.35;pointer-events:none}
+  .rs-handle{fill:#fff;stroke:#2563eb;stroke-width:2}
+  .rs-l,.rs-r{cursor:ew-resize} .rs-t,.rs-b{cursor:ns-resize}
+  .rs-tl,.rs-br{cursor:nwse-resize} .rs-tr,.rs-bl{cursor:nesw-resize}
   .rot-handle{cursor:grab}
   .rot-handle .rh-line{stroke:#2563eb;stroke-width:2}
   .rot-handle .rh-knob{fill:#fff;stroke:#2563eb;stroke-width:2.5}
@@ -270,7 +273,7 @@
     body{display:block;height:100%}
     #mTop{display:block}
     /* bande: barra alta (titolo + ↶↷⤢ + palco) | palco | pannello-hub fisso in basso */
-    main{position:fixed;top:0;left:0;right:0;bottom:46vh;background:#fafafa}
+    main{position:fixed;top:86px;left:0;right:0;bottom:46vh;background:#fafafa}
     /* PANNELLO-HUB fisso: niente selezione = aggiungi+menu+channel list; elemento = sue opzioni */
     #props{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;max-width:none;height:46vh;z-index:30;
       background:#fff;border:none;border-top:1px solid #e5e7eb;transform:none;overflow-y:auto;padding:10px 14px 22px;box-shadow:0 -4px 16px rgba(0,0,0,.08)}
@@ -342,6 +345,20 @@
 </head>
 <body>
 <svg id="defs-master" width="0" height="0" style="position:absolute" aria-hidden="true"></svg>
+<div id="mTop">
+  <div class="mtop-r1">
+    <input type="text" id="mTitle" placeholder="Titolo">
+    <button class="mtbtn" id="mMenuBtn" aria-label="Menu">⋯</button>
+  </div>
+  <div class="mtop-r2">
+    <span class="mlab">PALCO</span>
+    <label>L<input type="number" id="mW" min="1" max="60" step="0.5"><span>m</span></label>
+    <label>P<input type="number" id="mD" min="1" max="40" step="0.5"><span>m</span></label>
+    <label>Snap
+      <select id="mSnap"><option value="0">libero</option><option value="25" selected>25 cm</option><option value="50">50 cm</option><option value="100">1 m</option></select>
+    </label>
+  </div>
+</div>
 <header>
   <span class="brand">STAGE PLOT</span>
   <div class="hdr-stage" title="Dimensioni del palco rettangolare e snap alla griglia">
@@ -434,6 +451,25 @@
       <span><label>P (cm)</label><input type="number" id="pD" min="10" step="5"></span>
       <span id="pHwrap"><label>h (cm)</label><input type="number" id="pH" min="0" step="10"></span>
     </div>
+    <div id="pDimSideWrap" style="display:none">
+      <label>Lato quota</label>
+      <select id="pDimSide">
+        <option value="auto">Automatico (lato visibile)</option>
+        <option value="top">Sopra</option>
+        <option value="bottom">Sotto</option>
+        <option value="left">Sinistra</option>
+        <option value="right">Destra</option>
+      </select>
+    </div>
+    <div id="pKeysWrap" style="display:none"><label class="chk"><input type="checkbox" id="pPanca"> Sgabello</label></div>
+    <div id="pFillWrap" style="display:none;border-top:1px solid #eef0f2;margin-top:10px;padding-top:8px">
+      <label>Riempi la pedana (copie equidistanti)</label>
+      <div class="row">
+        <select id="pFillType" style="flex:1"></select>
+        <input type="number" id="pFillN" min="1" max="120" value="12" style="width:62px">
+      </div>
+      <button class="btn" id="pFillGo" style="width:100%;margin-top:8px;font-size:12px">▦ Distribuisci sulla pedana</button>
+    </div>
     <label style="display:flex;justify-content:space-between;align-items:baseline">Rotazione <span id="pRotVal" style="color:#374151;font-weight:600">0°</span></label>
     <div class="rotrow">
       <span class="rotslide"><input type="range" id="pRot" min="-180" max="180" step="5"></span>
@@ -454,6 +490,7 @@
       <label class="chk"><input type="checkbox" id="pDonna"> Donna (maglietta rosa)</label>
       <label class="chk"><input type="checkbox" id="pMano"> Microfono in mano (invece che su asta)</label>
       <label class="chk"><input type="checkbox" id="pLeggioV"> Leggio</label>
+      <label class="chk" id="pSediaVWrap"><input type="checkbox" id="pSediaV"> Sedia</label>
     </div>
     <div id="pGtr" style="display:none;border-top:1px solid #eef0f2;margin-top:10px;padding-top:8px">
       <label class="chk"><input type="checkbox" id="pGtrSedia"> Sedia</label>
@@ -480,11 +517,15 @@
       <button class="btn" id="grpRotL">⟲ 15</button>
       <button class="btn" id="grpRotR">⟳ 15</button>
     </div>
+    <div class="row">
+      <button class="btn" id="grpGroup">▣ Unisci in blocco</button>
+      <button class="btn" id="grpUngroup">⤢ Dividi blocco</button>
+    </div>
     <div class="btns">
       <button class="btn" id="grpDup">Duplica</button>
       <button class="btn danger" id="grpDel">Elimina</button>
     </div>
-    <div class="hint" style="font-size:11px;color:#9ca3af;margin-top:8px">Shift-click per aggiungere/togliere. Trascina per spostare il gruppo.</div>
+    <div class="hint" style="font-size:11px;color:#9ca3af;margin-top:8px">Shift-click per aggiungere/togliere. <b>Unisci in blocco</b>: si muovono e selezionano insieme. Trascina per spostare il gruppo.</div>
   </div>
   <div class="sec" id="noSel" style="font-size:12.5px;color:#9ca3af">
     <button class="btn" id="bResume" hidden>↩ Riprendi ultima sessione</button>
@@ -846,7 +887,8 @@ function singer(it){
   it=it||{};
   var donna=it.donna===true;
   var shirt=donna?'fShirtF':'fShirt', sleeve=donna?'#e0789f':'#3f5c83';
-  var s='<path class="ic '+shirt+'" d="M -21,-4 C -24,-15 -15,-19 -7,-16 C -2,-14 2,-14 7,-16 C 15,-19 24,-15 21,-4 C 20,5 14,8 8,6 C 3,5 -3,5 -8,6 C -14,8 -20,5 -21,-4 Z"/>';
+  var s=(it.sedia===true ? seatLight(0) : '');   /* coristi: sedia opzionale (contorno chiaro dietro la persona) */
+  s+='<path class="ic '+shirt+'" d="M -21,-4 C -24,-15 -15,-19 -7,-16 C -2,-14 2,-14 7,-16 C 15,-19 24,-15 21,-4 C 20,5 14,8 8,6 C 3,5 -3,5 -8,6 C -14,8 -20,5 -21,-4 Z"/>';
   s+=circ(0,5,9.5,'ic fHairM');                                                                 /* capelli marroni */
   s+='<path class="ic fSkin" d="M -7,7 A 8 8 0 0 1 7,7 C 5,13.5 2,16.5 0,16.5 C -2,16.5 -5,13.5 -7,7 Z"/>';   /* viso verso il fronte */
   var legY=30;
@@ -1218,7 +1260,7 @@ var TYPES = {
   corno:    {nome:"Corno", dim:"postazione", cat:"Ottoni", w:95,d:105,
              draw:function(it){ return station(it, gCorno(), "wind", true); }},
   tromba:   {nome:"Tromba", dim:"postazione", cat:"Ottoni", w:95,d:105,
-             draw:function(it){ return station(it, '<g transform="scale(1.7)">'+libIcon('tromba')+'</g>', "wind", true); }},
+             draw:function(it){ return station(it, '<g transform="rotate(90) scale(1.35)">'+libIcon('tromba')+'</g>', "wind", true); }},
   trombone: {nome:"Trombone", dim:"postazione", cat:"Ottoni", w:95,d:112,
              draw:function(it){ return station(it, libIcon('trombone'), "wind", true); }},
   tuba:     {nome:"Tuba", dim:"postazione", cat:"Ottoni", w:95,d:105,
@@ -1232,11 +1274,11 @@ var TYPES = {
              draw:function(it){ return station(it, libIcon('clarinetto'), "wind", true); }},
   fagotto:  {nome:"Fagotto", dim:"postazione", cat:"Legni", w:95,d:110,
              draw:function(it){ return station(it, libIcon('fagotto'), "wind", true); }},
-  saxalto:  {nome:"Sax alto", dim:"postazione", cat:"Legni", w:95,d:105,
+  saxalto:  {nome:"Sax alto", dim:"postazione", cat:"Ottoni", w:95,d:105,
              draw:function(it){ return station(it, libIcon('sax'), "wind", true); }},
-  saxtenore:{nome:"Sax tenore", dim:"postazione", cat:"Legni", w:100,d:108,
+  saxtenore:{nome:"Sax tenore", dim:"postazione", cat:"Ottoni", w:100,d:108,
              draw:function(it){ return station(it, '<g transform="scale(1.23)">'+libIcon('sax')+'</g>', "wind", true); }},
-  saxbaritono:{nome:"Sax baritono", dim:"postazione", cat:"Legni", w:105,d:112,
+  saxbaritono:{nome:"Sax baritono", dim:"postazione", cat:"Ottoni", w:105,d:112,
              draw:function(it){ return station(it, '<g transform="scale(1.6)">'+libIcon('sax')+'</g>', "wind", true); }},
   /* --- ritmica: batteria e percussioni --- */
   batteria: {nome:"Batteria", dim:"componibile", cat:"Ritmica", sub:"Batteria e percussioni", w:240,d:200,
@@ -1395,8 +1437,8 @@ var TYPES = {
              draw:function(it){ return station(it, libIcon('violoncello'), "vc", true); }},
   contrabbasso:{nome:"Contrabbasso", dim:"postazione", cat:"Archi", w:120,d:140,
              draw:function(it){ return station(it, libIcon('contrabbasso'), "cb", true); }},
-  arpa:     {nome:"Arpa da concerto", dim:"70×185", cat:"Ritmica", sub:"Tastiere e arpa", w:70,d:185,
-             draw:function(){ return libIcon('arpa'); }},
+  arpa:     {nome:"Arpa da concerto", dim:"50×133", cat:"Ritmica", sub:"Tastiere e arpa", w:54,d:134,
+             draw:function(){ return '<g transform="scale(-0.72,0.72)">'+libIcon('arpa')+'</g>'; }},
   /* --- voci / microfoni --- */
   astamic:  {nome:"Asta microfono", dim:"base Ø32", cat:"Microfoni", w:38,d:52,
              draw:function(){
@@ -1419,15 +1461,15 @@ var TYPES = {
                '<path class="ic thin" fill="none" d="M 11,-11 A 16 16 0 0 1 15,-6"/><path class="ic thin" fill="none" d="M 14,-15 A 21 21 0 0 1 19,-9"/>'; }},
   headset:  {nome:"Headset", dim:"", cat:"Microfoni", w:32,d:32, defLabel:"HS",
              draw:function(){ return '<path class="ic" fill="none" d="M -10,5 A 11 11 0 1 1 10,5"/>'+lin(10,5,13,9,'ic thin')+circ(13,9,3.5,'ic fill'); }},
-  podiosp:  {nome:"Podio speaker", dim:"60×45", cat:"Persone", w:62,d:48,
+  podiosp:  {nome:"Podio speaker", dim:"60×45", cat:"Voci", w:62,d:48,
              draw:function(){ return '<path class="ic fWoodL" d="M -30,22 L 30,22 L 21,-22 L -21,-22 Z"/>'+
                '<path class="ic thin" fill="none" d="M -24,16 L 24,16 L 17,-16 L -17,-16 Z"/>'+
                circ(0,-8,2.5,'ic fill')+lin(0,-8,0,0,'ic thin'); }},
-  cantante: {nome:"Cantante", dim:"voce", cat:"Persone", w:70,d:90, voce:true, defLabel:"Voce",
+  cantante: {nome:"Cantante", dim:"voce", cat:"Voci", w:70,d:90, voce:true, defLabel:"Voce",
              draw:function(it){ return singer(it); }},
-  corista:  {nome:"Corista", dim:"voce coro", cat:"Persone", w:70,d:88, voce:true, defLabel:"Coro",
-             draw:function(it){ it=it||{}; return singer({mano:false, nomic:true, leggio:it.leggio!==false, donna:it.donna}); }},
-  direttore:{nome:"Direttore", dim:"braccia aperte", cat:"Persone", w:84,d:72, dir:true, defLabel:"M°",
+  corista:  {nome:"Corista", dim:"voce coro", cat:"Voci", w:70,d:88, voce:true, defLabel:"Coro",
+             draw:function(it){ it=it||{}; return singer({mano:false, nomic:true, leggio:it.leggio!==false, donna:it.donna, sedia:it.sedia===true}); }},
+  direttore:{nome:"Direttore", dim:"braccia aperte", cat:"Voci", w:84,d:72, dir:true, defLabel:"M°",
              draw:function(it){ it=it||{}; return (it.podio?podioPlatform():'')+conductor(); }},
   /* --- monitoraggio --- */
   wedge:    {nome:"Wedge monitor", dim:"58×50", cat:"Monitoraggio", w:60,d:52, defLabel:"MIX 1",
@@ -1511,7 +1553,7 @@ var TYPES = {
              draw:function(){ return bar(0,-10,34,20,'ic fBlack',3)+bar(25,-10,16,12,'ic fGrey',2)+
                lin(0,2,-22,28,'ic thin')+lin(0,2,22,28,'ic thin')+lin(0,2,0,32,'ic thin')+circ(0,2,3,'ic fill'); }}
 };
-var CAT_ORDER = ["Pedane e strutture","Ottoni","Legni","Ritmica","Archi","Persone","Microfoni","Monitoraggio","Tecnica","Video"];
+var CAT_ORDER = ["Pedane e strutture","Ottoni","Legni","Ritmica","Archi","Voci","Microfoni","Monitoraggio","Tecnica","Video"];
 /* distanza interna di default (e minima) per le postazioni doppie: la più stretta disponibile.
    Gli strumenti larghi (contrabbasso, violoncello) hanno un minimo maggiore per non sovrapporsi. */
 var DEFAULT_SEP = 65;
@@ -1551,7 +1593,6 @@ function parts(it){ if(!it.parts){ var c=COMP[it.type]; it.parts = c ? compClone
 /* lista pezzi della batteria in coord. glifo (pre-scala 1.32) derivata dalle parti scelte */
 function batteriaParts(it){
   var p=parts(it), L=[];
-  L.push({k:"stool",x:0,y:-58,r:16});
   L.push({k:"kick",x:0,y:16,r:28});
   if(p.kick2) L.push({k:"kick",x:58,y:16,r:26});
   L.push({k:"snare",x:-36,y:2,r:18});
@@ -1567,10 +1608,9 @@ function batteriaParts(it){
   return L;
 }
 function drawBatteria(it){
-  var L=batteriaParts(it), s='<g transform="scale(1.32)">';
+  var L=batteriaParts(it), s='<g transform="scale(1.32) rotate(180)">';   /* kit ruotato 180°, senza sgabello */
   L.forEach(function(e){
-    if(e.k==="stool") s+=circ(e.x,e.y,e.r,'ic fBlack')+circ(e.x,e.y,5,'dotS');
-    else if(e.k==="kick") s+=circ(e.x,e.y,e.r,'ic fBlack')+circ(e.x,e.y,e.r-5,'ic thin fHead')+rimlight(e.x,e.y,e.r-1);
+    if(e.k==="kick") s+=circ(e.x,e.y,e.r,'ic fBlack')+circ(e.x,e.y,e.r-5,'ic thin fHead')+rimlight(e.x,e.y,e.r-1);
     else if(e.k==="snare"||e.k==="tom"||e.k==="floor") s+=drum(e.x,e.y,e.r);
     else s+=cym(e.x,e.y,e.r)+(e.k==="hihat"?sring(e.x,e.y,e.r*0.65,'lathe'):'');
   });
@@ -1661,6 +1701,13 @@ function selIds(){ return Object.keys(selSet); }
 function selItems(){ return state.items.filter(function(i){ return selSet[i.id]; }); }
 function selectOne(id){ sel=id; selSet={}; if(id) selSet[id]=true; }
 function clearSelection(){ sel=null; selSet={}; }
+/* gruppi (blocco unico): membri con stesso it.grp si selezionano e si muovono insieme */
+function groupMembers(id){ var it=state.items.find(function(i){ return i.id===id; });
+  if(!it || !it.grp) return [id];
+  return state.items.filter(function(i){ return i.grp===it.grp; }).map(function(i){ return i.id; }); }
+function selectClick(id){ var ids=groupMembers(id); selSet={}; ids.forEach(function(x){ selSet[x]=true; }); sel=id; }
+function groupSel(){ var its=selItems(); if(its.length<2) return; var gid="g"+uid(); its.forEach(function(it){ it.grp=gid; }); render(); save(); }
+function ungroupSel(){ selItems().forEach(function(it){ delete it.grp; }); render(); save(); }
 function toggleSelId(id){ if(selSet[id]){ delete selSet[id]; if(sel===id) sel=selIds()[selIds().length-1]||null; } else { selSet[id]=true; sel=id; } }
 /* elementi che poggiano su una pedana (centro dentro al rettangolo, con rotazione) */
 function itemsOnRiser(r){
@@ -1687,9 +1734,20 @@ function recordHistory(){
   lastSnap=s; redoStack.length=0;
 }
 function resetHistory(){ lastSnap=JSON.stringify(state); undoStack.length=0; redoStack.length=0; }
+function itemIdNum(id){ var n=parseInt(String(id||"").replace(/\D/g,""),10); return isFinite(n)?n:0; }
+function syncNextId(){
+  nextId=1;
+  state.items.forEach(function(it){ var n=itemIdNum(it.id); if(n>=nextId) nextId=n+1; });
+}
+function ensureItemIds(){
+  var seen={}, max=0;
+  state.items.forEach(function(it){ var n=itemIdNum(it.id); if(n>max) max=n; });
+  nextId=max+1;
+  state.items.forEach(function(it){ if(!it.id || seen[it.id]) it.id=uid(); seen[it.id]=true; });
+  syncNextId();
+}
 function applyHistory(json){
-  state=normalizeState(JSON.parse(json)); lastSnap=json; sel=null; selSet={};
-  nextId=1; state.items.forEach(function(it){ var n=parseInt(it.id.slice(1),10); if(n>=nextId) nextId=n+1; });
+  state=normalizeState(JSON.parse(json)); ensureItemIds(); lastSnap=JSON.stringify(state); sel=null; selSet={};
   setEventInputs();
   try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
   render(); renderChannels();
@@ -1703,7 +1761,7 @@ function importProject(json){
   undoStack.push(JSON.stringify(state)); if(undoStack.length>120) undoStack.shift(); redoStack.length=0;   /* importazione annullabile con Ctrl+Z */
   state=normalizeState(s);
   state.items=(state.items||[]).filter(function(it){ return it && TYPES[it.type]; });   /* scarta elementi di tipo sconosciuto */
-  nextId=1; state.items.forEach(function(it){ if(!it.id) it.id=uid(); var n=parseInt(String(it.id).slice(1),10); if(n>=nextId) nextId=n+1; });
+  ensureItemIds();
   lastSnap=JSON.stringify(state); sel=null; selSet={};
   setEventInputs();
   try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
@@ -1737,7 +1795,7 @@ function load(){
   try{
     var raw = localStorage.getItem(LS_KEY);
     if(raw){ state = normalizeState(JSON.parse(raw));
-      state.items.forEach(function(it){ var n=parseInt(it.id.slice(1),10); if(n>=nextId) nextId=n+1; });
+      ensureItemIds();
     }
   }catch(e){}
 }
@@ -1769,8 +1827,7 @@ function loadFromHash(){
     var obj=JSON.parse(raw);
     if(dm) obj.items=sanitizeItems(obj.items);                   /* JSON AI: ripulisci e rendi validi gli elementi */
     state=normalizeState(obj);
-    state.items.forEach(function(it){ if(!it.id) it.id=uid(); });
-    state.items.forEach(function(it){ var n=parseInt((""+it.id).replace(/\D/g,""),10); if(n>=nextId) nextId=n+1; });
+    ensureItemIds();
     history.replaceState(null,"",location.pathname+location.search);   /* via l'hash: gli edit poi vanno in localStorage */
     return true;
   }catch(e){ return false; }
@@ -1888,6 +1945,22 @@ function stageBlocksOverlay(){
     return shape+edges+'<text class="stageblk-lbl" x="'+cx+'" y="'+cy+'" text-anchor="middle" dominant-baseline="middle">Blocco '+(i+1)+'</text>';
   }).join('');
 }
+/* tastiere/pianoforti che hanno lo sgabello di default (togglabile con it.panca=false) */
+var KEYS_BENCH = { grancoda:1, mezzacoda:1, pianoverticale:1, stagepiano:1, doppiatastiera:1, celesta:1 };
+function pianoBench(it){
+  var by=it.d/2+18, s=bar(0,by,72,30,'ic fBlack',6);
+  [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(function(c){ s+=circ(c[0]*29, by+c[1]*10.5, 1.8,'dotS'); });
+  return s;
+}
+/* lato su cui mettere la quota della pedana: scelto, oppure auto = lato col bordo palco più libero (più visibile) */
+function riserDimSide(it){
+  if(it.dimSide && it.dimSide!=="auto") return it.dimSide;
+  var W=state.stage.w, D=state.stage.d;
+  var m={ bottom: D-(it.y+it.d/2), top: it.y-it.d/2, right: W-(it.x+it.w/2), left: it.x-it.w/2 };
+  var best="bottom", bv=-1e9;
+  ["bottom","top","right","left"].forEach(function(k){ if(m[k]>bv+1){ bv=m[k]; best=k; } });
+  return best;
+}
 function itemMarkup(it){
   var t = TYPES[it.type]; if(!t) return '';
   var hw = Math.max(it.w,70)/2 + 8, hd = Math.max(it.d,30)/2 + 8;   /* area di click generosa */
@@ -1897,7 +1970,15 @@ function itemMarkup(it){
   s += '<rect class="hit" x="'+(-hw)+'" y="'+(-hd)+'" width="'+(2*hw)+'" height="'+(2*hd)+'"/>';
   s += '<rect class="selbox" x="'+(-bw)+'" y="'+(-bh)+'" width="'+(2*bw)+'" height="'+(2*bh)+'" rx="6"/>';
   s += t.draw(it);
-  if(t.riser){ s += '<text class="lbl sub" y="'+(-(it.d/2)-10)+'">'+(it.w/100)+'×'+(it.d/100)+' m · h'+it.h+'</text>'; }   /* misure FUORI dalla pedana (sopra il bordo) per non essere coperte */
+  if(KEYS_BENCH[it.type] && it.panca!==false){ s += pianoBench(it); }   /* sgabello tastiere/piano (di default) */
+  if(t.riser){                                       /* quota pedana sul lato scelto/auto (più visibile) */
+    var dimT=(it.w/100)+'×'+(it.d/100)+' m · h'+it.h, rside=riserDimSide(it), roff=10, rdx=0, rdy=0, ranc='middle';
+    if(rside==="top"){ rdy=-(it.d/2)-roff; }
+    else if(rside==="bottom"){ rdy=(it.d/2)+roff+9; }
+    else if(rside==="left"){ rdx=-(it.w/2)-roff; rdy=4; ranc='end'; }
+    else { rdx=(it.w/2)+roff; rdy=4; ranc='start'; }   /* right */
+    s += '<text class="lbl sub" x="'+rdx+'" y="'+rdy+'" text-anchor="'+ranc+'">'+dimT+'</text>';
+  }
   if(!t.innerLabel){
     var fsz = it.lblSize || 14;                 /* dimensione etichetta regolabile (cm reali) */
     var fst = ' style="font-size:'+fsz+'px"';
@@ -1922,6 +2003,13 @@ function itemMarkup(it){
          '<path class="rh-ico" d="M '+(-3.5)+' '+(ky-0.5)+' A 4 4 0 1 1 '+(-3.5)+' '+(ky+1.5)+'"/>'+
          '<path class="rh-ico" d="M '+(-3.5)+' '+(ky-3)+' L '+(-3.5)+' '+(ky-0.2)+' L '+(-0.7)+' '+(ky-0.2)+'"/>'+
          '</g>';
+  }
+  /* maniglie di ridimensionamento (lati + angoli) per gli elementi resizable, selezionati singolarmente */
+  if(!stageEdit && t.resizable && selSet[it.id] && selIds().length===1){
+    var H=9, hpts=[["l",-bw,0],["r",bw,0],["t",0,-bh],["b",0,bh],["tl",-bw,-bh],["tr",bw,-bh],["bl",-bw,bh],["br",bw,bh]];
+    hpts.forEach(function(p){
+      s += '<rect class="rs-handle rs-'+p[0]+'" data-id="'+it.id+'" data-edge="'+p[0]+'" x="'+(p[1]-H)+'" y="'+(p[2]-H)+'" width="'+(2*H)+'" height="'+(2*H)+'" rx="2"/>';
+    });
   }
   s += '</g>';
   s += '</g>';
@@ -1980,7 +2068,7 @@ function renderProps(){
   document.getElementById("pLabel2").value = it.label2||"";
   document.getElementById("pLblSize").value = it.lblSize || 14;
   document.getElementById("pLblSizeVal").textContent = it.lblSize || 14;
-  document.getElementById("pLabel").placeholder = (POSTAZ[it.type] && t.cat==="Legni") ? "es. Clarinetto / Sax" : "";
+  document.getElementById("pLabel").placeholder = (POSTAZ[it.type] && (t.cat==="Legni" || t.cat==="Ottoni")) ? "es. Clarinetto / Sax" : "";
   var rNorm=((it.rot||0)%360+360)%360; if(rNorm>180) rNorm-=360;   /* normalizza a -180..180 per lo slider */
   document.getElementById("pRot").value = rNorm;
   document.getElementById("pRotVal").textContent = rNorm+"°";
@@ -1991,6 +2079,12 @@ function renderProps(){
     document.getElementById("pD").value = it.d;
     if(t.riser) document.getElementById("pH").value = it.h;
   }
+  document.getElementById("pDimSideWrap").style.display = t.riser ? "block" : "none";
+  if(t.riser) document.getElementById("pDimSide").value = it.dimSide || "auto";
+  document.getElementById("pFillWrap").style.display = t.riser ? "block" : "none";
+  var isKeys=!!KEYS_BENCH[it.type];
+  document.getElementById("pKeysWrap").style.display = isKeys ? "block" : "none";
+  if(isKeys) document.getElementById("pPanca").checked = it.panca!==false;
   var pp=document.getElementById("pPostaz"), cfg=sepCfg(it);
   var isPostaz=!!POSTAZ[it.type];
   pp.style.display = (isPostaz || cfg) ? "block" : "none";
@@ -2012,6 +2106,8 @@ function renderProps(){
     document.getElementById("pDonna").checked = it.donna===true;
     document.getElementById("pMano").checked = it.mano===true;
     document.getElementById("pLeggioV").checked = it.leggio!==false;
+    document.getElementById("pSediaVWrap").style.display = (it.type==="corista") ? "block" : "none";   /* sedia solo per coristi */
+    document.getElementById("pSediaV").checked = it.sedia===true;
   }
   var pg=document.getElementById("pGtr"), isGtr=!!t.gtr;
   pg.style.display = isGtr ? "block" : "none";
@@ -2089,6 +2185,18 @@ function mutSel(fn){ var it=getSel(); if(!it) return; fn(it); render(); save(); 
 document.getElementById("pLabel").addEventListener("input", function(){ mutSel(function(it){ it.label=document.getElementById("pLabel").value; }); });
 document.getElementById("pLabel2").addEventListener("input", function(){ mutSel(function(it){ it.label2=document.getElementById("pLabel2").value; }); });
 document.getElementById("pLblSize").addEventListener("input", function(){ var v=+document.getElementById("pLblSize").value; document.getElementById("pLblSizeVal").textContent=v; mutSel(function(it){ it.lblSize=v; }); });
+document.getElementById("pDimSide").addEventListener("change", function(){ var v=document.getElementById("pDimSide").value; mutSel(function(it){ it.dimSide=v; }); });
+(function(){   /* opzioni del "Riempi pedana": elementi tipicamente ripetuti */
+  var sel2=document.getElementById("pFillType");
+  ["corista","sedia","sedialeggio","leggio","sgabello","cantante","astamic"].forEach(function(k){
+    if(!TYPES[k]) return; var o=document.createElement("option"); o.value=k; o.textContent=TYPES[k].nome; sel2.appendChild(o);
+  });
+})();
+document.getElementById("pFillGo").addEventListener("click", function(){
+  var it=getSel(); if(!it || !(TYPES[it.type]&&TYPES[it.type].riser)) return;
+  distributeOnRiser(it, document.getElementById("pFillType").value, +document.getElementById("pFillN").value);
+});
+document.getElementById("pPanca").addEventListener("change", function(){ var v=document.getElementById("pPanca").checked; mutSel(function(it){ it.panca=v; }); });
 document.getElementById("pW").addEventListener("change", function(){ mutSel(function(it){ it.w=Math.max(10,+document.getElementById("pW").value||it.w); }); });
 document.getElementById("pD").addEventListener("change", function(){ mutSel(function(it){ it.d=Math.max(10,+document.getElementById("pD").value||it.d); }); });
 document.getElementById("pH").addEventListener("change", function(){ mutSel(function(it){ it.h=Math.max(0,+document.getElementById("pH").value||0); }); });
@@ -2131,6 +2239,7 @@ document.getElementById("pLeggioV").addEventListener("change", function(){ mutSe
   it.leggio=document.getElementById("pLeggioV").checked;
   if(it.type==="cantante") it.d = it.leggio?122:90;   /* fa spazio al leggio davanti */
 }); });
+document.getElementById("pSediaV").addEventListener("change", function(){ mutSel(function(it){ it.sedia=document.getElementById("pSediaV").checked; }); });
 function gtrApply(it){ var sz=gtrSize(it, TYPES[it.type]); it.w=sz[0]; it.d=sz[1]; }
 document.getElementById("pGtrSedia").addEventListener("change", function(){ mutSel(function(it){ it.sedia=document.getElementById("pGtrSedia").checked; gtrApply(it); }); });
 document.getElementById("pGtrLeggio").addEventListener("change", function(){ mutSel(function(it){ it.leggio=document.getElementById("pGtrLeggio").checked; gtrApply(it); }); });
@@ -2164,6 +2273,8 @@ document.getElementById("grpRotL").addEventListener("click", function(){ rotateS
 document.getElementById("grpRotR").addEventListener("click", function(){ rotateSel(15); });
 document.getElementById("grpDup").addEventListener("click", duplicateSel);
 document.getElementById("grpDel").addEventListener("click", deleteSel);
+document.getElementById("grpGroup").addEventListener("click", groupSel);
+document.getElementById("grpUngroup").addEventListener("click", ungroupSel);
 function rotateSel(deg){ var its=selItems(); if(!its.length) return; its.forEach(function(it){ it.rot=((it.rot||0)+deg)%360; }); render(); save(); }
 /* etichetta del duplicato: incrementa il numero finale o ne aggiunge uno, evitando collisioni.
    extra = etichette già riservate in questa stessa duplicazione (per non collidere tra label e label2). */
@@ -2185,9 +2296,42 @@ function bumpItemLabels(c){
 }
 function duplicateSel(){
   var its=selItems(); if(!its.length) return;
-  var copies=its.map(function(it){ var c=JSON.parse(JSON.stringify(it)); c.id=uid(); c.x+=40; c.y+=40; bumpItemLabels(c); state.items.push(c); return c; });
+  var gmap={};   /* le copie di un blocco formano un NUOVO blocco (non si fondono con l'originale) */
+  var copies=its.map(function(it){ var c=JSON.parse(JSON.stringify(it)); c.id=uid(); c.x+=40; c.y+=40; bumpItemLabels(c);
+    if(c.grp){ if(!gmap[c.grp]) gmap[c.grp]="g"+uid(); c.grp=gmap[c.grp]; }
+    state.items.push(c); return c; });
   selSet={}; copies.forEach(function(c){ selSet[c.id]=true; }); sel=copies.length?copies[copies.length-1].id:null;
   render(); save();
+}
+/* distribuisce n copie di un elemento equidistanti in griglia dentro la pedana (coro numeroso, ecc.) */
+function distributeOnRiser(riser, type, n){
+  var t=TYPES[type]; if(!riser || !t) return;
+  n=Math.max(1, Math.min(120, n|0));
+  var pad=16, W=Math.max(40, riser.w-2*pad), D=Math.max(40, riser.d-2*pad);
+  var ew=Math.max(t.w||50,36)+8, ed=Math.max(t.d||50,36)+8;            /* cella minima per non sovrapporre */
+  var maxCols=Math.max(1, Math.floor(W/ew)), maxRows=Math.max(1, Math.floor(D/ed));
+  var cols=Math.max(1, Math.round(Math.sqrt(n*(W*ed)/(D*ew))));        /* griglia proporzionata al rettangolo */
+  cols=Math.min(cols, maxCols, n);
+  var rows=Math.ceil(n/cols);
+  if(rows>maxRows){ rows=maxRows; cols=Math.min(maxCols, Math.ceil(n/rows)); rows=Math.ceil(n/cols); }
+  var sx=W/cols, sy=D/Math.max(rows,1), gid="g"+uid(), made=0;
+  var auto=autoNumbered(type), base=auto?instrBase(type):"", start=auto?instrSeats(type):0;
+  for(var r=0; r<rows && made<n; r++){
+    var inRow=Math.min(cols, n-r*cols), x0=riser.x - (inRow*sx)/2 + sx/2;
+    for(var c=0; c<inRow; c++){
+      var it={ id:uid(), type:type, rot:0, w:t.w, d:t.d, grp:gid,
+               x:Math.round(x0 + c*sx), y:Math.round(riser.y - (rows*sy)/2 + sy/2 + r*sy),
+               label:defaultLabel(type) };
+      if(t.riser) it.h=t.h||40;
+      if(KEYS_BENCH[type]) it.panca=true;
+      if(POSTAZ[type]){ it.sedia=true; it.leggio=true; it.doppia=false; it.sep=minSepType(type); }
+      if(VOCE[type]){ it.mano=false; it.leggio=(type==="corista"); it.donna=false; }
+      if(auto) it.label=base+" "+(start+made+1);
+      state.items.push(it); made++;
+    }
+  }
+  if(made){ selSet={}; state.items.slice(-made).forEach(function(x){ selSet[x.id]=true; }); sel=state.items[state.items.length-1].id; }
+  render(); save(); ensureVisible();
 }
 function duplicateItem(it, dx, dy){
   var c=JSON.parse(JSON.stringify(it)); c.id=uid(); c.x+=(dx||0); c.y+=(dy||0); bumpItemLabels(c);
@@ -2202,24 +2346,35 @@ function deleteSel(){
 
 /* ============ PALCO / SNAP ============ */
 /* dimensioni del palco rettangolare nell'header = Blocco 1 (low-friction per la maggior parte dei casi) */
-document.getElementById("stW").addEventListener("change", function(){
-  stageBlocks()[0].w=Math.max(100,Math.round((+this.value||12)*100)); recalcStageBBox(); render(); save(); if(stageEdit) renderStagePanel();
-});
-document.getElementById("stD").addEventListener("change", function(){
-  stageBlocks()[0].d=Math.max(100,Math.round((+this.value||8)*100)); recalcStageBBox(); render(); save(); if(stageEdit) renderStagePanel();
-});
+function applyStageWidth(v){
+  stageBlocks()[0].w=Math.max(100,Math.round((+v||12)*100));
+  recalcStageBBox(); render(); save(); if(stageEdit) renderStagePanel();
+}
+function applyStageDepth(v){
+  stageBlocks()[0].d=Math.max(100,Math.round((+v||8)*100));
+  recalcStageBBox(); render(); save(); if(stageEdit) renderStagePanel();
+}
+document.getElementById("stW").addEventListener("change", function(){ applyStageWidth(this.value); });
+document.getElementById("stD").addEventListener("change", function(){ applyStageDepth(this.value); });
 function updateHeaderStage(){
   var b0=stageBlocks()[0];
-  var sw=document.getElementById("stW"); if(sw && document.activeElement!==sw) sw.value=b0.w/100;
-  var sd=document.getElementById("stD"); if(sd && document.activeElement!==sd) sd.value=b0.d/100;
+  ["stW","mW"].forEach(function(id){ var e=document.getElementById(id); if(e && document.activeElement!==e) e.value=b0.w/100; });
+  ["stD","mD"].forEach(function(id){ var e=document.getElementById(id); if(e && document.activeElement!==e) e.value=b0.d/100; });
+  var snap=document.getElementById("snap"), ms=document.getElementById("mSnap");
+  if(snap && ms && document.activeElement!==ms) ms.value=snap.value;
 }
 /* Titolo/Luogo: campi nell'header (desktop) + pannello Evento (mobile), sincronizzati con lo stato */
 function setEventInputs(){
-  ["titolo","titoloEv"].forEach(function(id){ var e=document.getElementById(id); if(e && document.activeElement!==e) e.value=state.titolo||""; });
+  ["titolo","titoloEv","mTitle"].forEach(function(id){ var e=document.getElementById(id); if(e && document.activeElement!==e) e.value=state.titolo||""; });
   ["luogo","luogoEv"].forEach(function(id){ var e=document.getElementById(id); if(e && document.activeElement!==e) e.value=state.luogo||""; });
 }
-["titolo","titoloEv"].forEach(function(id){ var e=document.getElementById(id); if(e) e.addEventListener("input", function(){ state.titolo=this.value; setEventInputs(); save(); }); });
+["titolo","titoloEv","mTitle"].forEach(function(id){ var e=document.getElementById(id); if(e) e.addEventListener("input", function(){ state.titolo=this.value; setEventInputs(); save(); }); });
 ["luogo","luogoEv"].forEach(function(id){ var e=document.getElementById(id); if(e) e.addEventListener("input", function(){ state.luogo=this.value; setEventInputs(); save(); }); });
+document.getElementById("mW").addEventListener("change", function(){ applyStageWidth(this.value); });
+document.getElementById("mD").addEventListener("change", function(){ applyStageDepth(this.value); });
+document.getElementById("mSnap").addEventListener("change", function(){ document.getElementById("snap").value=this.value; });
+document.getElementById("snap").addEventListener("change", function(){ updateHeaderStage(); });
+document.getElementById("mMenuBtn").addEventListener("click", function(){ closeMobileDrawers(); try{ document.getElementById("props").scrollTo({top:0,behavior:"smooth"}); }catch(e){} });
 function snapVal(){ return +document.getElementById("snap").value; }
 function snap(v){ var s=snapVal(); return s? Math.round(v/s)*s : Math.round(v); }
 
@@ -2323,7 +2478,7 @@ function miniSvg(k, over){
       entries.push({nome:"Violino I", dim:"postazione", icon:"vlnpost", action:function(){ addViolin(1); }});
       entries.push({nome:"Violino II", dim:"postazione", icon:"vlnpost", action:function(){ addViolin(2); }});
     }
-    if(c==="Persone"){
+    if(c==="Voci"){
       body.appendChild(makeActionBtn("Organico coro", "Soprani · Contralti · Tenori · Bassi", "cantante", openVoiceModal));
       n++;
       entries.push({nome:"Organico coro", dim:"Soprani · Contralti · Tenori · Bassi", action:openVoiceModal, icon:"cantante"});
@@ -2392,7 +2547,7 @@ function findFreeSpot(x,y,w,d){
 /* strumenti/persone con nome progressivo automatico (Flauto 1, Tromba 2, …) */
 function autoNumbered(type){ var t=TYPES[type]; if(!t) return false;
   if(t.gtr || POSTAZ[type] || VOCE[type] || t.dir) return true;
-  return ["Legni","Ottoni","Archi","Ritmica","Persone"].indexOf(t.cat)>=0;
+  return ["Legni","Ottoni","Archi","Ritmica","Voci"].indexOf(t.cat)>=0;
 }
 /* nomi abbreviati per la numerazione (es. nelle postazioni a 2) */
 var INSTR_ABBR = {
@@ -2412,6 +2567,7 @@ function addItem(type, over){
   var it={ id:uid(), type:type, x:snap(vb.x+vb.w/2+addCascade), y:snap(vb.y+vb.h/2+addCascade),
            rot:0, w:t.w, d:t.d, label:defaultLabel(type) };
   if(t.riser) it.h=t.h||40;
+  if(KEYS_BENCH[type]) it.panca=true;   /* tastiere/piano: sgabello di default */
   if(POSTAZ[type]){ it.sedia=true; it.leggio=true; it.doppia=false; it.sep=minSepType(type); }
   if(DOUBLE_TYPES[type]){ it.sep=minSepType(type); it.w=sepToW(DOUBLE_TYPES[type], it.sep); it.d=DOUBLE_TYPES[type].dbl[1]; }
   if(t.dir){ it.podio=false; }
@@ -2467,6 +2623,7 @@ function closeMobileDrawers(){
 })();
 function defaultLabel(type){
   var t=TYPES[type]; if(!t) return "";
+  if(t.riser) return "";   /* le pedane nascono senza nome (solo quota) */
   return DEFAULT_LABELS[type] || t.defLabel || t.nome || "";
 }
 
@@ -2525,6 +2682,16 @@ svg.addEventListener("pointerdown", function(e){
     drag={mode:"pan", px:e.clientX, py:e.clientY, vx:vb.x, vy:vb.y};
     svg.classList.add("dragging"); svg.setPointerCapture(e.pointerId); return;
   }
+  var rsh = e.target.closest ? e.target.closest(".rs-handle") : null;
+  if(rsh){                                  /* maniglia di ridimensionamento: trascina lato/angolo */
+    var rsid=rsh.getAttribute("data-id"); selectOne(rsid); var rsit=getSel();
+    if(rsit){ var sp3=svgPoint(e);
+      drag={mode:"itemresize", id:rsid, edge:rsh.getAttribute("data-edge"),
+            x0:rsit.x, y0:rsit.y, w0:rsit.w, d0:rsit.d, rot:(rsit.rot||0)*Math.PI/180, sp0:{x:sp3.x,y:sp3.y}, moved:false};
+      render(); svg.setPointerCapture(e.pointerId);
+    }
+    return;
+  }
   var rh = e.target.closest ? e.target.closest(".rot-handle") : null;
   if(rh){                                   /* maniglia di rotazione: trascina per ruotare attorno al centro */
     var rid=rh.getAttribute("data-id"); selectOne(rid); var rit=getSel();
@@ -2538,7 +2705,7 @@ svg.addEventListener("pointerdown", function(e){
     if(e.shiftKey){                       /* shift-click: aggiungi/togli dalla selezione, senza drag */
       e.preventDefault(); toggleSelId(id); render(); svg.setPointerCapture(e.pointerId); drag={mode:"none"}; return;
     }
-    if(!selSet[id]) selectOne(id);        /* click su elemento non selezionato → selezione singola */
+    if(!selSet[id]) selectClick(id);      /* click su elemento non selezionato → selezione (gruppo se fa parte di un blocco) */
     if(e.altKey){ e.preventDefault(); duplicateSel(); }   /* alt = duplica la selezione e trascina le copie */
     var moving=selItems().slice();
     moving.slice().forEach(function(it){      /* le pedane trascinano gli elementi che ci poggiano sopra */
@@ -2593,6 +2760,25 @@ svg.addEventListener("pointermove", function(e){
     if(rit){ var ang=Math.atan2(sp.y-drag.cy, sp.x-drag.cx)*180/Math.PI + 90;   /* maniglia in alto = local up */
       if(!e.shiftKey) ang=Math.round(ang/5)*5;   /* snap 5°, libero con shift */
       rit.rot=Math.round(((ang%360)+360)%360); drag.moved=true; render(); }
+  } else if(drag.mode==="itemresize"){
+    sp=svgPoint(e); var rzit=state.items.find(function(i){ return i.id===drag.id; });
+    if(rzit){
+      var gdx=sp.x-drag.sp0.x, gdy=sp.y-drag.sp0.y;
+      var cn=Math.cos(-drag.rot), sn=Math.sin(-drag.rot);
+      var ldx=gdx*cn - gdy*sn, ldy=gdx*sn + gdy*cn;     /* delta nel frame locale dell'elemento */
+      var free=e.metaKey||e.ctrlKey, MIN=20, ed=drag.edge, nw=drag.w0, nd=drag.d0, shx=0, shy=0;
+      if(ed.indexOf("r")>=0){ nw=Math.max(MIN, drag.w0+ldx); shx=(nw-drag.w0)/2; }
+      if(ed.indexOf("l")>=0){ nw=Math.max(MIN, drag.w0-ldx); shx=-(nw-drag.w0)/2; }
+      if(ed.indexOf("b")>=0){ nd=Math.max(MIN, drag.d0+ldy); shy=(nd-drag.d0)/2; }
+      if(ed.indexOf("t")>=0){ nd=Math.max(MIN, drag.d0-ldy); shy=-(nd-drag.d0)/2; }
+      if(!free){ nw=snap(nw); nd=snap(nd); }
+      rzit.w=nw; rzit.d=nd;
+      var cc=Math.cos(drag.rot), ss=Math.sin(drag.rot);   /* riporta lo shift locale in coordinate globali (lato opposto fermo) */
+      rzit.x = drag.x0 + (shx*cc - shy*ss);
+      rzit.y = drag.y0 + (shx*ss + shy*cc);
+      if(!free){ rzit.x=snap(rzit.x); rzit.y=snap(rzit.y); }
+      drag.moved=true; render();
+    }
   } else if(drag.mode==="block"){
     sp=svgPoint(e); var bdx=sp.x-drag.sp0.x, bdy=sp.y-drag.sp0.y; drag.moved=true;
     var r=stageBlocks()[drag.bi]; if(r){ r.x=Math.max(0,snap(drag.x0+bdx)); r.y=Math.max(0,snap(drag.y0+bdy)); recalcStageBBox(); render(); }
@@ -2634,6 +2820,7 @@ svg.addEventListener("pointerup", function(e){
     drag=null; return;
   }
   if(drag && drag.mode==="rotate"){ if(drag.moved) save(); render(); drag=null; return; }
+  if(drag && drag.mode==="itemresize"){ if(drag.moved) save(); render(); drag=null; return; }
   if(drag && drag.mode==="item" && drag.moved){ render(); save(); ensureVisible(); }
   else if(drag && drag.mode==="marquee"){
     var r=drag.rect;
@@ -4305,7 +4492,7 @@ aiTemplatesBlock()
       else obj=JSON.parse(v);
       obj.items=sanitizeItems(obj.items);
       state=normalizeState(obj);
-      state.items.forEach(function(it){ if(!it.id) it.id=uid(); });
+      ensureItemIds();
       clearSelection(); setEventInputs(); renderChannels(); save(); fit(); modal.hidden=true;
     }catch(e){ status("Non riconosciuto: incolla il link #d=… o il JSON che ti dà ChatGPT."); }
   });
@@ -4351,13 +4538,16 @@ function buildExportSvg(){
   var m=130, W=state.stage.w, D=state.stage.d, head=70;
   var hasCL = state.inputs.length || state.outputs.length;
   var tableW = hasCL ? 940 : 0;
+  var tableRows = state.inputs.length + state.outputs.length;
+  var tableSections = (state.inputs.length?1:0) + (state.outputs.length?1:0);
+  var tableH = hasCL ? 16 + tableSections*90 + tableRows*34 : 0;
   var keepEdit=stageEdit; stageEdit=false;          /* mai l'overlay di "modifica palco" nell'export */
   var inner = sceneMarkup(); stageEdit=keepEdit; sel=keep; selSet=keepSet;
   var css = document.querySelector("style").textContent.replace(/\/\*[\s\S]*?\*\//g,"");   /* via i commenti: un '<' in un commento romperebbe l'SVG */
   var titolo = esc(state.titolo||"Stage plot");
   var luogo = esc(state.luogo||"");
   var oggi = new Date().toLocaleDateString("it-IT");
-  var vbW = W+2*m+tableW, vbH = D+2*m+head;
+  var vbW = W+2*m+tableW, vbH = Math.max(D+2*m+head, tableH);
   var svgStr = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+(-m)+' '+(-m-head)+' '+vbW+' '+vbH+'">'+
     '<style>'+css+'</style>'+DEFS+
     '<rect x="'+(-m)+'" y="'+(-m-head)+'" width="'+vbW+'" height="'+vbH+'" fill="#ffffff"/>'+
@@ -4406,8 +4596,8 @@ function autoScale(paperKey, orient){
   for(var i=0;i<SCALES.length;i++){ if(scaleFits(SCALES[i],paperKey,orient)) return SCALES[i]; }
   return 0;  /* non entra nemmeno a 1:200 */
 }
-function resolveScale(paperKey, scaleSel){
-  return scaleSel==="auto" ? autoScale(paperKey) : parseInt(scaleSel,10);
+function resolveScale(paperKey, scaleSel, orient){
+  return scaleSel==="auto" ? autoScale(paperKey, orient) : parseInt(scaleSel,10);
 }
 /* SVG del solo palco (rettangolo + griglia + elementi), viewBox in cm, niente etichette/quote */
 function stageSceneSvg(){
@@ -4628,10 +4818,10 @@ function deliverPdf(doc, handle){
 }
 function exportPdf(paperKey, scaleSel, orient, header){
   var info=document.getElementById("pdfInfo");
-  var N=resolveScale(paperKey, scaleSel);
+  var N=resolveScale(paperKey, scaleSel, orient);
   var oTxt=(orient==="portrait"?"verticale":"orizzontale");
   if(!N){ info.className="mstatus err"; info.textContent="Il palco non entra nemmeno a 1:200 su "+paperKey.toUpperCase()+" "+oTxt+". Prova un foglio più grande, l'altro orientamento o riduci il palco."; return; }
-  if(scaleSel!=="auto" && !scaleFits(N, paperKey, orient)){
+  if(!scaleFits(N, paperKey, orient)){
     info.className="mstatus err"; info.textContent="A 1:"+N+" il palco sfora il foglio "+paperKey.toUpperCase()+" "+oTxt+". Scegli Automatica o un foglio più grande."; return;
   }
   if(!state.items.length){ info.className="mstatus err"; info.textContent="Il palco è vuoto."; return; }
@@ -4666,7 +4856,7 @@ function pdfChannelPage(doc, L, paperKey){
   var cols=[ {t:"CH",w:10}, {t:"SORGENTE / MIX",w:70}, {t:"MIC / TIPO",w:38}, {t:"STAND / PATCH",w:42}, {t:"48V",w:12}, {t:"NOTE",w:0} ];
   cols[cols.length-1].w = colW - cols.reduce(function(a,c){return a+c.w;},0);
   function section(title, rows){
-    if(y>L.ph-16){ doc.addPage(paperKey,"landscape"); y=M+10; }
+    if(y>L.ph-16){ doc.addPage(paperKey,L.orient); y=M+10; }
     doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.setTextColor(17,24,39);
     doc.text(title, x, y); y+=2; doc.setDrawColor(17,24,39); doc.setLineWidth(0.4); doc.line(x,y,pw-M,y); y+=4.5;
     doc.setFont("helvetica","bold"); doc.setFontSize(7.5); doc.setTextColor(120,120,120);
@@ -4674,7 +4864,7 @@ function pdfChannelPage(doc, L, paperKey){
     y+=4;
     doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(17,24,39);
     rows.forEach(function(r,i){
-      if(y>L.ph-10){ doc.addPage(paperKey,"landscape"); y=M+10;
+      if(y>L.ph-10){ doc.addPage(paperKey,L.orient); y=M+10;
         doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(17,24,39); }
       if(i%2===1){ doc.setFillColor(244,245,247); doc.rect(x-1.5, y-3.4, colW+3, 5.4, "F"); }
       var cx2=x;
@@ -4693,7 +4883,7 @@ function pdfChannelPage(doc, L, paperKey){
       scl=document.getElementById("pdfScale"), orient=document.getElementById("pdfOrient"), header=document.getElementById("pdfHeader");
   function refresh(){
     var info=document.getElementById("pdfInfo");
-    var N=resolveScale(paper.value, scl.value);
+    var N=resolveScale(paper.value, scl.value, orient.value);
     var oTxt=orient.value==="portrait"?"verticale":"orizzontale";
     if(!N){ info.className="mstatus err"; info.textContent="Non entra nemmeno a 1:200 su "+paper.value.toUpperCase()+" "+oTxt+" — prova un foglio più grande o l'altro orientamento."; }
     else {
@@ -4803,8 +4993,9 @@ if(qPdfUi){ document.getElementById("pdfPaper").value=qPdfUi;
 var qPdfGen=(location.search.match(/pdfgen=(a[234])/)||[])[1];
 if(qPdfGen){ if(!state.items.length){ demo(); }   /* demo() popola gia' input/output list */
   var qgo=(location.search.match(/orient=(portrait|landscape)/)||[])[1]||"landscape";
-  var gn=resolveScale(qPdfGen,"auto");
-  buildPdfDoc(qPdfGen, gn, qgo, "QA header test").then(function(doc){ document.title="PDFOK pages="+doc.internal.getNumberOfPages()+" scale=1:"+gn+" bytes="+doc.output("arraybuffer").byteLength;
+  var gn=resolveScale(qPdfGen,"auto",qgo);
+  if(!gn){ document.title="PDFERR no-scale"; }
+  else buildPdfDoc(qPdfGen, gn, qgo, "QA header test").then(function(doc){ document.title="PDFOK pages="+doc.internal.getNumberOfPages()+" scale=1:"+gn+" bytes="+doc.output("arraybuffer").byteLength;
     if(location.search.indexOf("dump=1")>-1){ var ta=document.createElement("div"); ta.id="pdfb64"; ta.style.display="none"; ta.textContent=doc.output("datauristring"); document.body.appendChild(ta); } })
     .catch(function(e){ document.title="PDFERR "+(e&&e.message||e); }); }
 if(location.search.indexOf("shapeqa=2")>-1){   /* QA: palco con fronte a semicerchio */
