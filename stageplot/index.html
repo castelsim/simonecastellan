@@ -1846,7 +1846,7 @@ function sanitizeItems(arr){
              w:+o.w||t.w, d:+o.d||t.d, label:(o.label!=null?o.label:defaultLabel(o.type)) };
     if(t.riser) it.h=(o.h!=null?+o.h:(t.h||40));
     if(COMP[o.type]) it.parts=o.parts?compClone(o.parts):compClone(COMP[o.type].defParts);
-    ["sedia","leggio","doppia","sep","ampli","pedaliera","donna","mano","nomic","z","vsec","label2","podio"].forEach(function(k){ if(o[k]!=null) it[k]=o[k]; });
+    ["sedia","leggio","doppia","sep","ampli","pedaliera","donna","mano","nomic","z","vsec","label2","podio","grp","distOf","distType","dimSide","lblSize","panca","flat"].forEach(function(k){ if(o[k]!=null) it[k]=o[k]; });
     if(t.gtr){ var gz=gtrSize(it,t); it.w=gz[0]; it.d=gz[1]; }
     return it;
   }).filter(Boolean);
@@ -2022,7 +2022,7 @@ function itemMarkup(it){
     var isDbl = it.doppia===true || !!DOUBLE_TYPES[it.type];
     if(isDbl){                                  /* postazione a 2 → un nome per ciascuno strumento (riferito al singolo) */
       var dc=sepCfg(it), dhalf=(it.sep || (dc&&dc.sep) || DEFAULT_SEP)/2;
-      var lx=Math.max(dhalf, 40);               /* sotto ciascuno strumento */
+      var lx=Math.max(dhalf, 40, fsz*1.4);      /* sotto ciascuno strumento; min cresce col font per non sovrapporre */
       if(it.label)  s += '<text class="lbl" x="'+(-lx)+'" y="'+ly+'"'+fst+'>'+esc(it.label)+'</text>';
       if(it.label2) s += '<text class="lbl" x="'+lx+'" y="'+ly+'"'+fst+'>'+esc(it.label2)+'</text>';
     } else if(it.label){
@@ -2218,11 +2218,11 @@ function setPart(it, key, val){
 /* "Dividi in elementi singoli": esplode un componibile nei suoi pezzi come item indipendenti */
 function explodeComposite(){
   var it=getSel(); if(!it) return; var comp=COMP[it.type]; if(!comp||!comp.explode) return;
-  var pieces=comp.explode(it), rot=(it.rot||0)*Math.PI/180, c=Math.cos(rot), s=Math.sin(rot), made=[];
+  var pieces=comp.explode(it), rot=(it.rot||0)*Math.PI/180, c=Math.cos(rot), s=Math.sin(rot), made=[], gid="g"+uid();
   pieces.forEach(function(pc){
     var T=TYPES[pc.type]; if(!T) return;
     var wx=it.x+(pc.dx*c - pc.dy*s), wy=it.y+(pc.dx*s + pc.dy*c);
-    var ni={id:uid(), type:pc.type, x:Math.round(wx), y:Math.round(wy), rot:it.rot||0, w:T.w, d:T.d, label:pc.label||""};
+    var ni={id:uid(), type:pc.type, x:Math.round(wx), y:Math.round(wy), rot:it.rot||0, w:T.w, d:T.d, label:pc.label||"", grp:gid};
     if(T.riser) ni.h=T.h||40;
     if(pc.extra) Object.keys(pc.extra).forEach(function(k){ ni[k]=pc.extra[k]; });
     made.push(ni);
@@ -2299,9 +2299,11 @@ function splitDouble(){
   if(!single || !TYPES[single] || !POSTAZ[single]) return;
   var cfg=sepCfg(it), half=(it.sep||cfg.sep)/2, rot=(it.rot||0)*Math.PI/180;
   var ox=Math.cos(rot)*half, oy=Math.sin(rot)*half, P=POSTAZ[single], base=it.label||"";
-  function mk(cx,cy,suf){ return {id:uid(), type:single, x:Math.round(cx), y:Math.round(cy), rot:it.rot||0,
-    w:P.s[0], d:P.s[1], label:base?base+suf:"", sedia:true, leggio:true, doppia:false}; }
-  var a=mk(it.x-ox, it.y-oy, "a"), b=mk(it.x+ox, it.y+oy, "b");
+  function mk(cx,cy,lab){ var o={id:uid(), type:single, x:Math.round(cx), y:Math.round(cy), rot:it.rot||0,
+    w:P.s[0], d:P.s[1], label:lab||"", sedia:true, leggio:true, doppia:false};
+    if(it.grp) o.grp=it.grp; if(it.vsec!=null) o.vsec=it.vsec; return o; }
+  /* mantieni i due nomi distinti della doppia (label / label2) */
+  var a=mk(it.x-ox, it.y-oy, it.label||""), b=mk(it.x+ox, it.y+oy, it.label2 || (base?base+" b":""));
   state.items=state.items.filter(function(x){ return x.id!==it.id; });
   state.items.push(a,b);
   selSet={}; selSet[a.id]=true; selSet[b.id]=true; sel=b.id;
@@ -2381,18 +2383,21 @@ function applyDistribute(riser, template, n, eq){
     var inRow=Math.min(perRow, n-r*perRow), x0=riser.x - (inRow-1)*spX/2, y=Math.round(riser.y - (rows-1)*spY/2 + r*spY);
     for(var c=0; c<inRow; c++){
       var x=Math.round(x0 + c*spX), it;
-      if(made===0){ it=template; it.x=x; it.y=y; it.rot=0; }   /* il template ancora la 1ª posizione */
+      if(made===0){ it=template; it.x=x; it.y=y; it.rot=0; }   /* il template ancora la 1ª posizione, etichetta invariata */
       else {
         it={ id:uid(), type:type, rot:0, w:t.w, d:t.d, label:defaultLabel(type) };
         if(t.riser) it.h=t.h||40;
         if(KEYS_BENCH[type]) it.panca=true;
         if(POSTAZ[type]){ it.sedia=template.sedia!==false; it.leggio=template.leggio!==false; it.doppia=false; it.sep=template.sep||minSepType(type); }
         if(VOCE[type]){ it.mano=template.mano===true; it.leggio=template.leggio!==false; it.donna=template.donna===true; it.sedia=template.sedia===true; }
+        if(COMP[type]){ it.parts=compClone(template.parts||COMP[type].defParts); if(COMP[type].size){ var sz=COMP[type].size(it); it.w=sz[0]; it.d=sz[1]; } }
+        if(template.vsec!=null) it.vsec=template.vsec;
         it.x=x; it.y=y;
+        if(auto) it.label=base+" "+(instrSeats(type)+1);   /* numerazione CONTINUA dopo gli strumenti già presenti */
+        it.grp=gid; it.distOf=riser.id; it.distType=type;
         state.items.push(it);
       }
-      it.grp=gid; it.distOf=riser.id; it.distType=type;
-      if(auto) it.label=base+" "+(made+1);
+      if(made===0){ it.grp=gid; it.distOf=riser.id; it.distType=type; }
       made++;
     }
   }
@@ -2624,7 +2629,7 @@ var INSTR_ABBR = {
 function instrBase(type){ return INSTR_ABBR[type] || (TYPES[type]&&TYPES[type].nome) || ""; }
 /* "posti" già usati per quello strumento (una postazione a 2 conta 2) */
 function instrSeats(type){ var base=instrBase(type), n=0;
-  state.items.forEach(function(x){ if(x.type && autoNumbered(x.type) && instrBase(x.type)===base) n += (x.doppia?2:1); });
+  state.items.forEach(function(x){ if(x.type && autoNumbered(x.type) && instrBase(x.type)===base) n += ((x.doppia||DOUBLE_TYPES[x.type])?2:1); });
   return n; }
 function nextInstrLabel(type){ return instrBase(type)+" "+(instrSeats(type)+1); }
 function addItem(type, over){
@@ -2831,13 +2836,14 @@ svg.addEventListener("pointermove", function(e){
       var gdx=sp.x-drag.sp0.x, gdy=sp.y-drag.sp0.y;
       var cn=Math.cos(-drag.rot), sn=Math.sin(-drag.rot);
       var ldx=gdx*cn - gdy*sn, ldy=gdx*sn + gdy*cn;     /* delta nel frame locale dell'elemento */
-      var free=e.metaKey||e.ctrlKey, MIN=20, ed=drag.edge, nw=drag.w0, nd=drag.d0, shx=0, shy=0;
-      if(ed.indexOf("r")>=0){ nw=Math.max(MIN, drag.w0+ldx); shx=(nw-drag.w0)/2; }
-      if(ed.indexOf("l")>=0){ nw=Math.max(MIN, drag.w0-ldx); shx=-(nw-drag.w0)/2; }
-      if(ed.indexOf("b")>=0){ nd=Math.max(MIN, drag.d0+ldy); shy=(nd-drag.d0)/2; }
-      if(ed.indexOf("t")>=0){ nd=Math.max(MIN, drag.d0-ldy); shy=-(nd-drag.d0)/2; }
+      var free=e.metaKey||e.ctrlKey, MIN=20, ed=drag.edge, nw=drag.w0, nd=drag.d0, sgx=0, sgy=0;
+      if(ed.indexOf("r")>=0){ nw=Math.max(MIN, drag.w0+ldx); sgx=1; }
+      if(ed.indexOf("l")>=0){ nw=Math.max(MIN, drag.w0-ldx); sgx=-1; }
+      if(ed.indexOf("b")>=0){ nd=Math.max(MIN, drag.d0+ldy); sgy=1; }
+      if(ed.indexOf("t")>=0){ nd=Math.max(MIN, drag.d0-ldy); sgy=-1; }
       if(!free){ nw=snap(nw); nd=snap(nd); }
       rzit.w=nw; rzit.d=nd;
+      var shx=sgx*(nw-drag.w0)/2, shy=sgy*(nd-drag.d0)/2;   /* shift calcolato sui valori (eventualmente) snappati → lato opposto davvero fermo */
       var cc=Math.cos(drag.rot), ss=Math.sin(drag.rot);   /* riporta lo shift locale in coordinate globali (lato opposto fermo) */
       rzit.x = drag.x0 + (shx*cc - shy*ss);
       rzit.y = drag.y0 + (shx*ss + shy*cc);
@@ -2884,8 +2890,8 @@ svg.addEventListener("pointerup", function(e){
     } else render();
     drag=null; return;
   }
-  if(drag && drag.mode==="rotate"){ if(drag.moved) save(); render(); drag=null; return; }
-  if(drag && drag.mode==="itemresize"){ if(drag.moved) save(); render(); drag=null; return; }
+  if(drag && drag.mode==="rotate"){ if(drag.moved){ save(); ensureVisible(); } render(); drag=null; return; }
+  if(drag && drag.mode==="itemresize"){ if(drag.moved){ save(); ensureVisible(); } render(); drag=null; return; }
   if(drag && drag.mode==="item" && drag.moved){ render(); save(); ensureVisible(); }
   else if(drag && drag.mode==="marquee"){
     var r=drag.rect;
@@ -4924,20 +4930,22 @@ function pdfChannelPage(doc, L, paperKey){
   y+=8;
   var cols=[ {t:"CH",w:10}, {t:"SORGENTE / MIX",w:70}, {t:"MIC / TIPO",w:38}, {t:"STAND / PATCH",w:42}, {t:"48V",w:12}, {t:"NOTE",w:0} ];
   cols[cols.length-1].w = colW - cols.reduce(function(a,c){return a+c.w;},0);
-  function section(title, rows){
-    if(y>L.ph-16){ doc.addPage(paperKey,L.orient); y=M+10; }
-    doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.setTextColor(17,24,39);
-    doc.text(title, x, y); y+=2; doc.setDrawColor(17,24,39); doc.setLineWidth(0.4); doc.line(x,y,pw-M,y); y+=4.5;
+  function fitText(v,w){ var s=String(v==null?"":v); if(!s) return s; var lines=doc.splitTextToSize(s, w-2); return lines.length>1 ? (lines[0].replace(/\s+\S*$/,"")+"…") : lines[0]; }
+  function colHeader(){   /* intestazioni di colonna (ripetute a ogni pagina) */
     doc.setFont("helvetica","bold"); doc.setFontSize(7.5); doc.setTextColor(120,120,120);
     var cx=x; cols.forEach(function(c){ doc.text(c.t, c.t==="48V"?cx+c.w/2:cx, y, c.t==="48V"?{align:"center"}:undefined); cx+=c.w; });
-    y+=4;
-    doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(17,24,39);
+    y+=4; doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(17,24,39);
+  }
+  function section(title, rows){
+    if(y>L.ph-22){ doc.addPage(paperKey,L.orient); y=M+10; }
+    doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.setTextColor(17,24,39);
+    doc.text(title, x, y); y+=2; doc.setDrawColor(17,24,39); doc.setLineWidth(0.4); doc.line(x,y,pw-M,y); y+=4.5;
+    colHeader();
     rows.forEach(function(r,i){
-      if(y>L.ph-10){ doc.addPage(paperKey,L.orient); y=M+10;
-        doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(17,24,39); }
+      if(y>L.ph-10){ doc.addPage(paperKey,L.orient); y=M+10; colHeader(); }
       if(i%2===1){ doc.setFillColor(244,245,247); doc.rect(x-1.5, y-3.4, colW+3, 5.4, "F"); }
       var cx2=x;
-      function cell(v,c,al){ var s=String(v==null?"":v); doc.text(s, al==="c"?cx2+c.w/2:cx2, y, al==="c"?{align:"center"}:undefined); cx2+=c.w; }
+      function cell(v,c,al){ var s=fitText(v, c.w); doc.text(s, al==="c"?cx2+c.w/2:cx2, y, al==="c"?{align:"center"}:undefined); cx2+=c.w; }
       cell(i+1, cols[0]); cell(r.src, cols[1]); cell(r.mic, cols[2]); cell(r.stand, cols[3]);
       cell(r.p48?"sì":"", cols[4], "c"); cell(r.notes, cols[5]);
       y+=5.4;
