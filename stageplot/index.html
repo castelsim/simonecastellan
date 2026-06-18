@@ -2624,7 +2624,9 @@ var INSTR_ABBR = {
   vlnpost:"Vln", violapost:"Vla", violoncello:"Cello", contrabbasso:"Contra",
   vln1x2:"Vln I", vln2x2:"Vln II", violax2:"Vla", cellix2:"Cello", cbx2:"Contra", archi2leggio:"Archi",
   corno:"Cor", tromba:"Tr", trombone:"Trb", tuba:"Tuba",
-  flauto:"Fl", oboe:"Ob", clarinetto:"Cl", fagotto:"Fag", saxalto:"Sax A", saxtenore:"Sax T", saxbaritono:"Sax B"
+  flauto:"Fl", oboe:"Ob", clarinetto:"Cl", fagotto:"Fag", saxalto:"Sax A", saxtenore:"Sax T", saxbaritono:"Sax B",
+  gtstand:"Chitarra", gtacustica:"Chit. ac.", bassstand:"Basso", comboamp:"Combo", stack:"Stack", bassamp:"Ampli b.", keysamp:"Ampli k.",
+  stagepiano:"Stage piano", grancoda:"Piano", mezzacoda:"Piano", pianoverticale:"Piano vert.", doppiatastiera:"Tastiere"
 };
 function instrBase(type){ return INSTR_ABBR[type] || (TYPES[type]&&TYPES[type].nome) || ""; }
 /* "posti" già usati per quello strumento (una postazione a 2 conta 2) */
@@ -2959,7 +2961,13 @@ function contentBounds(){
     /* bounding box REALE (rettangolare), ruotato: niente più approssimazione "quadrata" che gonfiava il lato corto */
     var rot=(it.rot||0)*Math.PI/180, c=Math.abs(Math.cos(rot)), s=Math.abs(Math.sin(rot));
     var w=it.w||0, d=it.d||0, hw=(w*c+d*s)/2, hd=(w*s+d*c)/2;
-    x0=Math.min(x0,it.x-hw); y0=Math.min(y0,it.y-hd); x1=Math.max(x1,it.x+hw); y1=Math.max(y1,it.y+hd); });
+    var ax0=it.x-hw, ax1=it.x+hw, ay0=it.y-hd, ay1=it.y+hd;
+    /* tieni dentro anche l'etichetta (sotto l'elemento), così non viene tagliata ai bordi */
+    var lab=it.label||it.label2;
+    if(lab){ var fs=(it.lblSize||14); ay1 += fs+10;
+      var halfTxt=Math.max(String(it.label||"").length, String(it.label2||"").length)*fs*0.28;
+      ax0=Math.min(ax0, it.x-halfTxt); ax1=Math.max(ax1, it.x+halfTxt); }
+    x0=Math.min(x0,ax0); y0=Math.min(y0,ay0); x1=Math.max(x1,ax1); y1=Math.max(y1,ay1); });
   return {x0:x0,y0:y0,x1:x1,y1:y1};
 }
 /* margine di fit proporzionato al palco: un margine fisso (140cm) rimpiccioliva troppo i palchi piccoli */
