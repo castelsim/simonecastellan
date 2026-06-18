@@ -427,6 +427,8 @@
     <h3 id="selNome">Elemento</h3>
     <label>Etichetta</label><input type="text" id="pLabel">
     <div id="pLabel2Wrap" style="display:none"><label>Etichetta 2 (secondo strumento)</label><input type="text" id="pLabel2"></div>
+    <label style="display:flex;justify-content:space-between;align-items:baseline">Dimensione etichetta <span id="pLblSizeVal" style="color:#374151;font-weight:600">14</span></label>
+    <input type="range" id="pLblSize" min="8" max="34" step="1" style="width:100%;padding:0">
     <div class="row" id="pDims">
       <span><label>L (cm)</label><input type="number" id="pW" min="10" step="5"></span>
       <span><label>P (cm)</label><input type="number" id="pD" min="10" step="5"></span>
@@ -969,10 +971,9 @@ function station(it, glyph, dblKind, realistic){
   if(it.doppia){
     var half = it.sep ? it.sep/2 : null;
     if(/^(vln1|vln2|vla|vc|cb)$/.test(dblKind||"")) return realistic ? doubleStringPostLib(dblKind, half) : doubleStringPost(dblKind, half);
-    var dx = half || 45;
-    return seat(-dx)+seat(dx)+
-      '<g transform="translate('+(-dx)+',0)">'+glyph+'</g>'+
-      '<g transform="translate('+dx+',0)">'+glyph+'</g>'+
+    var dx = half || 45, conv=12;   /* sedie convergenti verso il centro */
+    return '<g transform="translate('+(-dx)+',0) rotate('+(-conv)+')">'+seat(0)+glyph+'</g>'+
+      '<g transform="translate('+dx+',0) rotate('+conv+')">'+seat(0)+glyph+'</g>'+
       '<g transform="translate(0,38)">'+leggioGlyph(0)+'</g>';
   }
   /* postazione singola: stesso glifo a scala reale identico alla doppia (coerenza dimensionale) */
@@ -982,10 +983,9 @@ function station(it, glyph, dblKind, realistic){
 function doubleStringPostLib(kind, dx){
   dx=dx||33;
   var key={vln1:'violino',vln2:'violino',vla:'viola',vc:'violoncello',cb:'contrabbasso'}[kind]||'violino';
-  var g=libIcon(key);
-  return seatLight(-dx)+seatLight(dx)+
-    '<g transform="translate('+(-dx)+',0)">'+g+'</g>'+
-    '<g transform="translate('+dx+',0)">'+g+'</g>'+
+  var g=libIcon(key), conv=12;   /* sedie convergenti verso il centro */
+  return '<g transform="translate('+(-dx)+',0) rotate('+(-conv)+')">'+seatLight(0)+g+'</g>'+
+    '<g transform="translate('+dx+',0) rotate('+conv+')">'+seatLight(0)+g+'</g>'+
     '<g transform="translate(0,38)">'+leggioGlyph(0)+'</g>';
 }
 /* posizioni [x, y-arco] da sinistra a destra per n timpani */
@@ -1218,7 +1218,7 @@ var TYPES = {
   corno:    {nome:"Corno", dim:"postazione", cat:"Ottoni", w:95,d:105,
              draw:function(it){ return station(it, gCorno(), "wind", true); }},
   tromba:   {nome:"Tromba", dim:"postazione", cat:"Ottoni", w:95,d:105,
-             draw:function(it){ return station(it, libIcon('tromba'), "wind", true); }},
+             draw:function(it){ return station(it, '<g transform="scale(1.7)">'+libIcon('tromba')+'</g>', "wind", true); }},
   trombone: {nome:"Trombone", dim:"postazione", cat:"Ottoni", w:95,d:112,
              draw:function(it){ return station(it, libIcon('trombone'), "wind", true); }},
   tuba:     {nome:"Tuba", dim:"postazione", cat:"Ottoni", w:95,d:105,
@@ -1899,14 +1899,17 @@ function itemMarkup(it){
   s += t.draw(it);
   if(t.riser){ s += '<text class="lbl sub" y="'+(-(it.d/2)-10)+'">'+(it.w/100)+'×'+(it.d/100)+' m · h'+it.h+'</text>'; }   /* misure FUORI dalla pedana (sopra il bordo) per non essere coperte */
   if(!t.innerLabel){
+    var fsz = it.lblSize || 14;                 /* dimensione etichetta regolabile (cm reali) */
+    var fst = ' style="font-size:'+fsz+'px"';
+    var ly  = it.d/2 + fsz*0.55 + 5;            /* etichetta più vicina allo strumento (segue la dimensione) */
     var isDbl = it.doppia===true || !!DOUBLE_TYPES[it.type];
     if(isDbl){                                  /* postazione a 2 → un nome per ciascuno strumento (riferito al singolo) */
       var dc=sepCfg(it), dhalf=(it.sep || (dc&&dc.sep) || DEFAULT_SEP)/2;
-      var lx=Math.max(dhalf, 58);               /* distanzia i nomi così non si sovrappongono con sep stretto */
-      if(it.label)  s += '<text class="lbl" x="'+(-lx)+'" y="'+(bh+16)+'">'+esc(it.label)+'</text>';
-      if(it.label2) s += '<text class="lbl" x="'+lx+'" y="'+(bh+16)+'">'+esc(it.label2)+'</text>';
+      var lx=Math.max(dhalf, 40);               /* sotto ciascuno strumento */
+      if(it.label)  s += '<text class="lbl" x="'+(-lx)+'" y="'+ly+'"'+fst+'>'+esc(it.label)+'</text>';
+      if(it.label2) s += '<text class="lbl" x="'+lx+'" y="'+ly+'"'+fst+'>'+esc(it.label2)+'</text>';
     } else if(it.label){
-      s += '<text class="lbl" y="'+(bh+16)+'">'+esc(it.label)+'</text>';
+      s += '<text class="lbl" y="'+ly+'"'+fst+'>'+esc(it.label)+'</text>';
     }
   }
   /* maniglia di rotazione: appare sopra l'elemento quando è l'unico selezionato */
@@ -1975,6 +1978,8 @@ function renderProps(){
   var isDbl2 = it.doppia===true || !!DOUBLE_TYPES[it.type];
   document.getElementById("pLabel2Wrap").style.display = isDbl2 ? "block" : "none";
   document.getElementById("pLabel2").value = it.label2||"";
+  document.getElementById("pLblSize").value = it.lblSize || 14;
+  document.getElementById("pLblSizeVal").textContent = it.lblSize || 14;
   document.getElementById("pLabel").placeholder = (POSTAZ[it.type] && t.cat==="Legni") ? "es. Clarinetto / Sax" : "";
   var rNorm=((it.rot||0)%360+360)%360; if(rNorm>180) rNorm-=360;   /* normalizza a -180..180 per lo slider */
   document.getElementById("pRot").value = rNorm;
@@ -2083,6 +2088,7 @@ function explodeComposite(){
 function mutSel(fn){ var it=getSel(); if(!it) return; fn(it); render(); save(); }
 document.getElementById("pLabel").addEventListener("input", function(){ mutSel(function(it){ it.label=document.getElementById("pLabel").value; }); });
 document.getElementById("pLabel2").addEventListener("input", function(){ mutSel(function(it){ it.label2=document.getElementById("pLabel2").value; }); });
+document.getElementById("pLblSize").addEventListener("input", function(){ var v=+document.getElementById("pLblSize").value; document.getElementById("pLblSizeVal").textContent=v; mutSel(function(it){ it.lblSize=v; }); });
 document.getElementById("pW").addEventListener("change", function(){ mutSel(function(it){ it.w=Math.max(10,+document.getElementById("pW").value||it.w); }); });
 document.getElementById("pD").addEventListener("change", function(){ mutSel(function(it){ it.d=Math.max(10,+document.getElementById("pD").value||it.d); }); });
 document.getElementById("pH").addEventListener("change", function(){ mutSel(function(it){ it.h=Math.max(0,+document.getElementById("pH").value||0); }); });
@@ -2389,7 +2395,12 @@ function autoNumbered(type){ var t=TYPES[type]; if(!t) return false;
   return ["Legni","Ottoni","Archi","Ritmica","Persone"].indexOf(t.cat)>=0;
 }
 /* nomi abbreviati per la numerazione (es. nelle postazioni a 2) */
-var INSTR_ABBR = { violoncello:"Cello", contrabbasso:"Contra", cellix2:"Cello", cbx2:"Contra" };
+var INSTR_ABBR = {
+  vlnpost:"Vln", violapost:"Vla", violoncello:"Cello", contrabbasso:"Contra",
+  vln1x2:"Vln I", vln2x2:"Vln II", violax2:"Vla", cellix2:"Cello", cbx2:"Contra", archi2leggio:"Archi",
+  corno:"Cor", tromba:"Tr", trombone:"Trb", tuba:"Tuba",
+  flauto:"Fl", oboe:"Ob", clarinetto:"Cl", fagotto:"Fag", saxalto:"Sax A", saxtenore:"Sax T", saxbaritono:"Sax B"
+};
 function instrBase(type){ return INSTR_ABBR[type] || (TYPES[type]&&TYPES[type].nome) || ""; }
 /* "posti" già usati per quello strumento (una postazione a 2 conta 2) */
 function instrSeats(type){ var base=instrBase(type), n=0;
@@ -4459,6 +4470,31 @@ function flattenTextStyles(rootEl){
     el.removeAttribute("class");               /* via la classe: così il <style> non riapplica lo stroke bianco sopra gli attributi inline */
   }
 }
+/* svg2pdf emette i gradienti SVG come shading/pattern PDF, che alcuni viewer (Chrome/PDFium) rendono male
+   (strumenti con colori sbagliati). Appiattisco ogni fill/stroke a gradiente in un colore pieno rappresentativo
+   (stop centrale del gradiente) → nessuno shading nel PDF → colori identici su tutti i viewer. */
+function gradSolidColor(rootEl, id, depth){
+  if(depth>4) return null;
+  var g=rootEl.querySelector('[id="'+id+'"]'); if(!g) return null;
+  var stops=g.querySelectorAll("stop");
+  if(!stops.length){
+    var href=g.getAttribute("href")||g.getAttributeNS("http://www.w3.org/1999/xlink","href");
+    return href ? gradSolidColor(rootEl, href.replace("#",""), (depth||0)+1) : null;
+  }
+  var st=stops[Math.floor(stops.length/2)];
+  return getComputedStyle(st).stopColor || st.getAttribute("stop-color") || null;
+}
+function flattenGradients(rootEl){
+  var all=rootEl.querySelectorAll("*");
+  for(var i=0;i<all.length;i++){ var el=all[i], cs=getComputedStyle(el);
+    ["fill","stroke"].forEach(function(prop){
+      var v=cs[prop]; if(!v || v.indexOf("url(")<0) return;
+      var m=v.match(/url\(["']?#([^"')]+)/); if(!m) return;
+      var solid=gradSolidColor(rootEl, m[1], 0);
+      if(solid){ el.style[prop]=solid; el.setAttribute(prop, solid); }
+    });
+  }
+}
 /* disegna la planimetria come VETTORE puro nel PDF (qualità infinita). Style isolato in shadow DOM per non toccare la pagina. */
 function drawStageVector(doc, ix, iy, wMm, hMm){
   return loadSvg2Pdf().then(function(){
@@ -4469,6 +4505,7 @@ function drawStageVector(doc, ix, iy, wMm, hMm){
     root.innerHTML=stageSceneSvg();
     var svgEl=root.querySelector("svg");
     flattenTextStyles(svgEl);
+    flattenGradients(svgEl);
     var fn=svg2pdfFn();
     var ret = (typeof doc.svg==="function") ? doc.svg(svgEl,{x:ix,y:iy,width:wMm,height:hMm})
                                             : fn(svgEl, doc, {x:ix,y:iy,width:wMm,height:hMm});
