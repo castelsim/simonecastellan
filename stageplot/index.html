@@ -445,7 +445,7 @@
     <label>Etichetta</label><input type="text" id="pLabel">
     <div id="pLabel2Wrap" style="display:none"><label>Etichetta 2 (secondo strumento)</label><input type="text" id="pLabel2"></div>
     <label style="display:flex;justify-content:space-between;align-items:baseline">Dimensione etichetta <span id="pLblSizeVal" style="color:#374151;font-weight:600">14</span></label>
-    <input type="range" id="pLblSize" min="8" max="34" step="1" style="width:100%;padding:0">
+    <input type="range" id="pLblSize" min="0" max="34" step="1" style="width:100%;padding:0">
     <div class="row" id="pDims">
       <span><label>L (cm)</label><input type="number" id="pW" min="10" step="5"></span>
       <span><label>P (cm)</label><input type="number" id="pD" min="10" step="5"></span>
@@ -513,7 +513,7 @@
     </div>
     <div id="grpLblWrap" style="display:none;margin-bottom:8px">
       <label style="display:flex;justify-content:space-between;align-items:baseline">Dimensione etichetta (tutti) <span id="grpLblSizeVal" style="color:#374151;font-weight:600">14</span></label>
-      <input type="range" id="grpLblSize" min="8" max="34" step="1" value="14" style="width:100%;padding:0">
+      <input type="range" id="grpLblSize" min="0" max="34" step="1" value="14" style="width:100%;padding:0">
     </div>
     <div id="grpDist" style="display:none;border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin-bottom:8px;background:#f8fafc">
       <div class="hint" style="font-size:11.5px;color:#374151;margin-bottom:6px"><b id="grpDistTitle">Distribuisci sulla pedana</b></div>
@@ -2028,8 +2028,9 @@ function itemMarkup(it){
     else { rdx=(it.w/2)+roff; ranc='middle'; rtr=' transform="rotate(90 '+rdx+' 0)"'; }                       /* ruotata, lato dx */
     s += '<text class="lbl sub" x="'+rdx+'" y="'+rdy+'" text-anchor="'+ranc+'"'+rtr+'>'+dimT+'</text>';
   }
-  if(!t.innerLabel){
-    var fsz = it.lblSize || 14;                 /* dimensione etichetta regolabile (cm reali) */
+  var fsz0 = (it.lblSize==null) ? 14 : it.lblSize;   /* 0 = etichetta nascosta */
+  if(!t.innerLabel && fsz0>0){
+    var fsz = fsz0;                             /* dimensione etichetta regolabile (cm reali) */
     var fst = ' style="font-size:'+fsz+'px"';
     var ly  = it.d/2 + fsz*0.55 + 5;            /* etichetta più vicina allo strumento (segue la dimensione) */
     var isDbl = it.doppia===true || !!DOUBLE_TYPES[it.type];
@@ -2112,7 +2113,7 @@ function renderProps(){
     if(allLeggio) document.getElementById("grpLeggio").checked = its.every(function(it){ return it.leggio!==false; });
     /* --- dimensione etichetta per tutti (normalizza) --- */
     document.getElementById("grpLblWrap").style.display="block";
-    var cs=its[0].lblSize||14; document.getElementById("grpLblSize").value=cs; document.getElementById("grpLblSizeVal").textContent=cs;
+    var cs=(its[0].lblSize==null?14:its[0].lblSize); document.getElementById("grpLblSize").value=cs; document.getElementById("grpLblSizeVal").textContent=cs;
     /* --- distribuzione: pedana + elemento(i) dello stesso tipo --- */
     var risers=its.filter(function(it){ return TYPES[it.type]&&TYPES[it.type].riser; });
     var others=its.filter(function(it){ return !(TYPES[it.type]&&TYPES[it.type].riser); });
@@ -2135,8 +2136,9 @@ function renderProps(){
   var isDbl2 = it.doppia===true || !!DOUBLE_TYPES[it.type];
   document.getElementById("pLabel2Wrap").style.display = isDbl2 ? "block" : "none";
   document.getElementById("pLabel2").value = it.label2||"";
-  document.getElementById("pLblSize").value = it.lblSize || 14;
-  document.getElementById("pLblSizeVal").textContent = it.lblSize || 14;
+  var lblv=(it.lblSize==null?14:it.lblSize);
+  document.getElementById("pLblSize").value = lblv;
+  document.getElementById("pLblSizeVal").textContent = lblv;
   document.getElementById("pLabel").placeholder = (POSTAZ[it.type] && (t.cat==="Legni" || t.cat==="Ottoni")) ? "es. Clarinetto / Sax" : "";
   var rNorm=((it.rot||0)%360+360)%360; if(rNorm>180) rNorm-=360;   /* normalizza a -180..180 per lo slider */
   document.getElementById("pRot").value = rNorm;
@@ -3018,8 +3020,9 @@ function contentBounds(){
     var w=it.w||0, d=it.d||0, hw=(w*c+d*s)/2, hd=(w*s+d*c)/2;
     var ax0=it.x-hw, ax1=it.x+hw, ay0=it.y-hd, ay1=it.y+hd;
     /* tieni dentro anche l'etichetta (sotto l'elemento), così non viene tagliata ai bordi */
-    var lab=it.label||it.label2;
-    if(lab){ var fs=(it.lblSize||14); ay1 += fs+10;
+    var fs=(it.lblSize==null)?14:it.lblSize;
+    var lab=(it.label||it.label2) && fs>0;       /* etichetta nascosta (size 0) non occupa spazio */
+    if(lab){ ay1 += fs+10;
       var halfTxt=Math.max(String(it.label||"").length, String(it.label2||"").length)*fs*0.28;
       ax0=Math.min(ax0, it.x-halfTxt); ax1=Math.max(ax1, it.x+halfTxt); }
     x0=Math.min(x0,ax0); y0=Math.min(y0,ay0); x1=Math.max(x1,ax1); y1=Math.max(y1,ay1); });
