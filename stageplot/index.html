@@ -1009,8 +1009,8 @@ function podioBase(){ return bar(0,0,100,100,'ic fFloor',3)+bar(0,0,84,84,'ic th
 function dirSize(it){
   var w=84, d=72;
   if(it&&it.podio){ w=100; d=100; }
-  if(it&&it.leggio) d=Math.max(d, (it&&it.podio)?116:92);   /* leggìo estende verso l'orchestra (-y) */
-  if(it&&it.sgab)   d=Math.max(d, (it&&it.podio)?120:82);   /* sgabello estende verso il pubblico (+y) */
+  if(it&&it.leggio) d=Math.max(d, (it&&it.podio)?116:92);    /* leggìo estende verso l'orchestra (-y) */
+  if(it&&it.sgab)   d=Math.max(d, (it&&it.podio)?150:82);   /* sgabello: con podio a y=56+r17=73 → d/2≥73 */
   return [w,d];
 }
 /* divide la postazione chitarra nei suoi elementi (chitarra, sedia, leggio, ampli) come item indipendenti */
@@ -1551,9 +1551,11 @@ var TYPES = {
   direttore:{nome:"Direttore", dim:"braccia aperte", cat:"Persone", w:84,d:72, dir:true, defLabel:"M°",
              draw:function(it){ it=it||{};
                var s='';
-               if(it.sgab) s+=circ(0,22,17,'ic soft')+circ(0,22,5,'dotS');           /* sgabello: indipendente da podio */
-               s+=(it.podio?podioBase():'')+conductor();                               /* podio = sola piattaforma */
-               if(it.leggio) s+='<g transform="translate(0,'+(it.podio?-56:-44)+')">'+leggioGlyph(0)+'</g>';  /* leggìo: indipendente da podio */
+               s+=(it.podio?podioBase():'')+conductor();
+               /* leggìo davanti (verso orchestra) — con podio esce fuori dalla piattaforma */
+               if(it.leggio) s+='<g transform="translate(0,'+(it.podio?-56:-44)+')">'+leggioGlyph(0)+'</g>';
+               /* sgabello dietro (verso pubblico) — con podio posizionato fuori dalla piattaforma */
+               if(it.sgab){ var sy=it.podio?56:22; s+=circ(0,sy,17,'ic soft')+circ(0,sy,5,'dotS'); }
                return s; }},
   /* --- monitoraggio --- */
   wedge:    {nome:"Wedge monitor", dim:"58×50", cat:"Monitoraggio", w:60,d:52, defLabel:"MIX 1",
