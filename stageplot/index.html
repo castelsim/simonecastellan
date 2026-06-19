@@ -1852,9 +1852,9 @@ function selectClick(id){ var ids=groupMembers(id); selSet={}; ids.forEach(funct
 function groupSel(){ var its=selItems(); if(its.length<2) return; var gid="g"+uid(); its.forEach(function(it){ it.grp=gid; }); render(); save(); }
 function ungroupSel(){ selItems().forEach(function(it){ delete it.grp; }); render(); save(); }
 /* opzioni applicabili in multi-selezione */
-function supportsSedia(it){ return !!POSTAZ[it.type] || it.type==="corista" || !!(TYPES[it.type]&&TYPES[it.type].gtr); }
-function supportsLeggio(it){ return !!POSTAZ[it.type] || it.type==="corista" || !!(TYPES[it.type]&&TYPES[it.type].gtr); }
-function optSedia(it){ return (TYPES[it.type]&&TYPES[it.type].gtr) || it.type==="corista" ? it.sedia===true : it.sedia!==false; }
+function supportsSedia(it){ return !!POSTAZ[it.type] || !!VOCE[it.type] || !!(TYPES[it.type]&&TYPES[it.type].gtr); }
+function supportsLeggio(it){ return !!POSTAZ[it.type] || !!VOCE[it.type] || !!(TYPES[it.type]&&TYPES[it.type].gtr); }
+function optSedia(it){ return (TYPES[it.type]&&TYPES[it.type].gtr) || !!VOCE[it.type] ? it.sedia===true : it.sedia!==false; }
 function applyOptAll(key, val){
   selItems().forEach(function(it){
     if(key==="sedia"){ if(!supportsSedia(it)) return; it.sedia=val; if(TYPES[it.type]&&TYPES[it.type].gtr){ var sz=gtrSize(it,TYPES[it.type]); it.w=sz[0]; it.d=sz[1]; } }
@@ -1877,11 +1877,12 @@ var vb = {x:-100,y:-150,w:1500,h:1100};
 var svg = document.getElementById("svg");
 
 function uid(){ return "i"+(nextId++); }
+/* replacer per serializzare lo state SENZA il file immagine della planimetria (richiesto al ricaricamento) */
+function stateReplacer(k,v){ return (k==='_dataUrl'||k==='_imgW'||k==='_imgH')?undefined:v; }
+function stateToJSON(){ return JSON.stringify(state, stateReplacer); }
 function save(){
   try{
-    /* serializza state senza venue._dataUrl (file immagine: richiesto al ricaricamento) */
-    var toSave=JSON.parse(JSON.stringify(state, function(k,v){ return k==='_dataUrl'||k==='_imgW'||k==='_imgH'?undefined:v; }));
-    localStorage.setItem(LS_KEY, JSON.stringify(toSave));
+    localStorage.setItem(LS_KEY, stateToJSON());
   }catch(e){}
   recordHistory();
 }
@@ -1909,7 +1910,7 @@ function ensureItemIds(){
 function applyHistory(json){
   state=normalizeState(JSON.parse(json)); ensureItemIds(); lastSnap=JSON.stringify(state); sel=null; selSet={};
   setEventInputs();
-  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
+  try{ localStorage.setItem(LS_KEY, stateToJSON()); }catch(e){}
   render(); renderChannels();
 }
 function undo(){ if(!undoStack.length) return; redoStack.push(lastSnap); applyHistory(undoStack.pop()); }
@@ -1924,7 +1925,7 @@ function importProject(json){
   ensureItemIds();
   lastSnap=JSON.stringify(state); sel=null; selSet={};
   setEventInputs();
-  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
+  try{ localStorage.setItem(LS_KEY, stateToJSON()); }catch(e){}
   render(); renderChannels(); fit();
 }
 function normalizeChannelRow(r){
@@ -1962,8 +1963,23 @@ function load(){
 }
 /* ===== LZString (compressToEncodedURIComponent / decompress) — per il link di condivisione ===== */
 var LZString=(function(){var f=String.fromCharCode;var keyStrUriSafe="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$";var baseReverseDic={};function getBaseValue(alphabet,character){if(!baseReverseDic[alphabet]){baseReverseDic[alphabet]={};for(var i=0;i<alphabet.length;i++){baseReverseDic[alphabet][alphabet.charAt(i)]=i}}return baseReverseDic[alphabet][character]}var LZString={compressToEncodedURIComponent:function(input){if(input==null)return"";return LZString._compress(input,6,function(a){return keyStrUriSafe.charAt(a)})},decompressFromEncodedURIComponent:function(input){if(input==null)return"";if(input=="")return null;input=input.replace(/ /g,"+");return LZString._decompress(input.length,32,function(index){return getBaseValue(keyStrUriSafe,input.charAt(index))})},_compress:function(uncompressed,bitsPerChar,getCharFromInt){if(uncompressed==null)return"";var i,value,context_dictionary={},context_dictionaryToCreate={},context_c="",context_wc="",context_w="",context_enlargeIn=2,context_dictSize=3,context_numBits=2,context_data=[],context_data_val=0,context_data_position=0,ii;for(ii=0;ii<uncompressed.length;ii+=1){context_c=uncompressed.charAt(ii);if(!Object.prototype.hasOwnProperty.call(context_dictionary,context_c)){context_dictionary[context_c]=context_dictSize++;context_dictionaryToCreate[context_c]=true}context_wc=context_w+context_c;if(Object.prototype.hasOwnProperty.call(context_dictionary,context_wc)){context_w=context_wc}else{if(Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)){if(context_w.charCodeAt(0)<256){for(i=0;i<context_numBits;i++){context_data_val=(context_data_val<<1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}}value=context_w.charCodeAt(0);for(i=0;i<8;i++){context_data_val=(context_data_val<<1)|(value&1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=value>>1}}else{value=1;for(i=0;i<context_numBits;i++){context_data_val=(context_data_val<<1)|value;if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=0}value=context_w.charCodeAt(0);for(i=0;i<16;i++){context_data_val=(context_data_val<<1)|(value&1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=value>>1}}context_enlargeIn--;if(context_enlargeIn==0){context_enlargeIn=Math.pow(2,context_numBits);context_numBits++}delete context_dictionaryToCreate[context_w]}else{value=context_dictionary[context_w];for(i=0;i<context_numBits;i++){context_data_val=(context_data_val<<1)|(value&1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=value>>1}}context_enlargeIn--;if(context_enlargeIn==0){context_enlargeIn=Math.pow(2,context_numBits);context_numBits++}context_dictionary[context_wc]=context_dictSize++;context_w=String(context_c)}}if(context_w!==""){if(Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)){if(context_w.charCodeAt(0)<256){for(i=0;i<context_numBits;i++){context_data_val=(context_data_val<<1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}}value=context_w.charCodeAt(0);for(i=0;i<8;i++){context_data_val=(context_data_val<<1)|(value&1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=value>>1}}else{value=1;for(i=0;i<context_numBits;i++){context_data_val=(context_data_val<<1)|value;if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=0}value=context_w.charCodeAt(0);for(i=0;i<16;i++){context_data_val=(context_data_val<<1)|(value&1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=value>>1}}context_enlargeIn--;if(context_enlargeIn==0){context_enlargeIn=Math.pow(2,context_numBits);context_numBits++}delete context_dictionaryToCreate[context_w]}else{value=context_dictionary[context_w];for(i=0;i<context_numBits;i++){context_data_val=(context_data_val<<1)|(value&1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=value>>1}}context_enlargeIn--;if(context_enlargeIn==0){context_enlargeIn=Math.pow(2,context_numBits);context_numBits++}}value=2;for(i=0;i<context_numBits;i++){context_data_val=(context_data_val<<1)|(value&1);if(context_data_position==bitsPerChar-1){context_data_position=0;context_data.push(getCharFromInt(context_data_val));context_data_val=0}else{context_data_position++}value=value>>1}while(true){context_data_val=(context_data_val<<1);if(context_data_position==bitsPerChar-1){context_data.push(getCharFromInt(context_data_val));break}else context_data_position++}return context_data.join("")},_decompress:function(length,resetValue,getNextValue){var dictionary=[],next,enlargeIn=4,dictSize=4,numBits=3,entry="",result=[],i,w,bits,resb,maxpower,power,c,data={val:getNextValue(0),position:resetValue,index:1};for(i=0;i<3;i+=1){dictionary[i]=i}bits=0;maxpower=Math.pow(2,2);power=1;while(power!=maxpower){resb=data.val&data.position;data.position>>=1;if(data.position==0){data.position=resetValue;data.val=getNextValue(data.index++)}bits|=(resb>0?1:0)*power;power<<=1}switch(next=bits){case 0:bits=0;maxpower=Math.pow(2,8);power=1;while(power!=maxpower){resb=data.val&data.position;data.position>>=1;if(data.position==0){data.position=resetValue;data.val=getNextValue(data.index++)}bits|=(resb>0?1:0)*power;power<<=1}c=f(bits);break;case 1:bits=0;maxpower=Math.pow(2,16);power=1;while(power!=maxpower){resb=data.val&data.position;data.position>>=1;if(data.position==0){data.position=resetValue;data.val=getNextValue(data.index++)}bits|=(resb>0?1:0)*power;power<<=1}c=f(bits);break;case 2:return""}dictionary[3]=c;w=c;result.push(c);while(true){if(data.index>length){return""}bits=0;maxpower=Math.pow(2,numBits);power=1;while(power!=maxpower){resb=data.val&data.position;data.position>>=1;if(data.position==0){data.position=resetValue;data.val=getNextValue(data.index++)}bits|=(resb>0?1:0)*power;power<<=1}switch(c=bits){case 0:bits=0;maxpower=Math.pow(2,8);power=1;while(power!=maxpower){resb=data.val&data.position;data.position>>=1;if(data.position==0){data.position=resetValue;data.val=getNextValue(data.index++)}bits|=(resb>0?1:0)*power;power<<=1}dictionary[dictSize++]=f(bits);c=dictSize-1;enlargeIn--;break;case 1:bits=0;maxpower=Math.pow(2,16);power=1;while(power!=maxpower){resb=data.val&data.position;data.position>>=1;if(data.position==0){data.position=resetValue;data.val=getNextValue(data.index++)}bits|=(resb>0?1:0)*power;power<<=1}dictionary[dictSize++]=f(bits);c=dictSize-1;enlargeIn--;break;case 2:return result.join("")}if(enlargeIn==0){enlargeIn=Math.pow(2,numBits);numBits++}if(dictionary[c]){entry=dictionary[c]}else{if(c===dictSize){entry=w+w.charAt(0)}else{return null}}result.push(entry);dictionary[dictSize++]=w+entry.charAt(0);enlargeIn--;w=entry;if(enlargeIn==0){enlargeIn=Math.pow(2,numBits);numBits++}}}};return LZString})();
-function buildShareUrl(){ var base=location.href.split("#")[0].split("?")[0]; return base+"#p="+LZString.compressToEncodedURIComponent(JSON.stringify(state)); }
+function buildShareUrl(){ var base=location.href.split("#")[0].split("?")[0]; return base+"#p="+LZString.compressToEncodedURIComponent(stateToJSON()); }
 function b64urlToStr(s){ s=String(s).replace(/-/g,"+").replace(/_/g,"/"); while(s.length%4) s+="="; return decodeURIComponent(escape(atob(s))); }
+/* ricalcola w/d di un item dalla sua configurazione (doppia/sep, podio/leggio/sgab, gtr, parti componibili, voce).
+   Centralizza la logica usata negli handler di edit così che anche gli item "grezzi" (AI/import) abbiano ingombri corretti. */
+function recalcItemDims(it){
+  var t=TYPES[it.type]; if(!t) return;
+  if(t.gtr){ var g=gtrSize(it,t); it.w=g[0]; it.d=g[1]; return; }
+  if(t.dir || it.type==="direttore"){ var ds=dirSize(it); it.w=ds[0]; it.d=ds[1]; return; }
+  if(DOUBLE_TYPES[it.type]){ var cfgD=DOUBLE_TYPES[it.type]; if(it.sep==null) it.sep=minSepType(it.type);
+    it.sep=Math.max(minSepType(it.type), Math.min(300, it.sep)); it.w=sepToW(cfgD, it.sep); it.d=cfgD.dbl[1]; return; }
+  if(POSTAZ[it.type]){ var P=POSTAZ[it.type];
+    if(it.doppia){ if(it.sep==null) it.sep=minSepOf(it); it.sep=Math.max(minSepOf(it), Math.min(300, it.sep)); it.w=sepToW(P, it.sep); it.d=P.dbl[1]; }
+    else { it.w=P.s[0]; it.d=P.s[1]; }
+    return; }
+  if(COMP[it.type] && COMP[it.type].size){ var sz=COMP[it.type].size(it); it.w=sz[0]; it.d=sz[1]; return; }
+  if(it.type==="cantante"){ it.d = it.leggio?122:90; return; }
+}
 /* normalizza item "grezzi" (es. generati dall'AI): chiavi valide, dimensioni/parts di default, id garantito */
 function sanitizeItems(arr){
   return (arr||[]).map(function(o){ var t=TYPES[o.type]; if(!t) return null;
@@ -1971,8 +1987,8 @@ function sanitizeItems(arr){
              w:+o.w||t.w, d:+o.d||t.d, label:(o.label!=null?o.label:defaultLabel(o.type)) };
     if(t.riser) it.h=(o.h!=null?+o.h:(t.h||40));
     if(COMP[o.type]) it.parts=o.parts?compClone(o.parts):compClone(COMP[o.type].defParts);
-    ["sedia","leggio","doppia","sep","ampli","pedaliera","donna","mano","nomic","z","vsec","label2","podio","grp","distOf","distType","dimSide","lblSize","panca","flat"].forEach(function(k){ if(o[k]!=null) it[k]=o[k]; });
-    if(t.gtr){ var gz=gtrSize(it,t); it.w=gz[0]; it.d=gz[1]; }
+    ["sedia","leggio","doppia","sep","ampli","pedaliera","donna","mano","nomic","z","vsec","label2","podio","sgab","grp","distOf","distType","dimSide","lblSize","panca","flat"].forEach(function(k){ if(o[k]!=null) it[k]=o[k]; });
+    recalcItemDims(it);   /* ingombri coerenti con i flag (doppia/sep, podio/leggio/sgab, gtr, parti, voce) */
     return it;
   }).filter(Boolean);
 }
@@ -4641,6 +4657,10 @@ function venueCalibApply(){
   var d=Math.sqrt((p2.x-p1.x)*(p2.x-p1.x)+(p2.y-p1.y)*(p2.y-p1.y));
   if(d<1) return;
   var scale=realCm/d;   /* scala: 1 unità display = scale cm reali */
+  /* scala attorno al midpoint dei due punti così che restino fissi sotto il cursore (la scala è scalare → vale anche con rotazione) */
+  var ax=(p1.x+p2.x)/2, ay=(p1.y+p2.y)/2;
+  state.venue.x = ax-(ax-state.venue.x)*scale;
+  state.venue.y = ay-(ay-state.venue.y)*scale;
   state.venue.w=state.venue.w*scale;
   state.venue.h=state.venue.h*scale;
   state.venue.calibration={p1:p1,p2:p2,realCm:realCm};
@@ -4671,11 +4691,7 @@ document.getElementById("venueBtnDel").addEventListener("click", function(){
   state.venue=null; venueCalibCancel(); save(); renderVenuePanel(); render();
 });
 
-/* mobile hub "Planimetria" */
-(function(){
-  var mob=document.querySelector("[data-act='venue']");
-  if(mob) mob.addEventListener("click", toggleVenueEdit);
-})();
+/* nota: il bottone mobile [data-act='venue'] è già gestito dal click handler di #mActions (toggleVenueEdit) */
 
 /* ============ FILE: nuovo / json / png ============ */
 document.getElementById("bNew").addEventListener("click", function(){
@@ -4929,7 +4945,7 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   function io(m,err){ var el=document.getElementById("ioStatus"); el.textContent=m||""; el.style.color=err?"#dc2626":"#16a34a"; }
   document.getElementById("saveJson").addEventListener("click", function(){
     var name=((state.titolo||state.luogo||"stageplot").replace(/[^\w\-]+/g,"_").replace(/^_+|_+$/g,"").slice(0,40)||"stageplot")+".json";
-    var data=JSON.stringify(state);
+    var data=stateToJSON();
     if(typeof window.showSaveFilePicker==="function" && !isMobile()){   /* apre il selettore "dove salvare" */
       window.showSaveFilePicker({ suggestedName:name, types:[{description:"Progetto Stage Plot", accept:{"application/json":[".json"]}}] })
         .then(function(h){ return h.createWritable().then(function(w){ return w.write(data).then(function(){ return w.close(); }); }).then(function(){ io("✓ Progetto salvato sul dispositivo."); }); })
