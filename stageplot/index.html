@@ -2425,6 +2425,27 @@ function duplicateSel(){
   selSet={}; copies.forEach(function(c){ selSet[c.id]=true; }); sel=copies.length?copies[copies.length-1].id:null;
   render(); save();
 }
+/* ===== Copia / Incolla (Cmd/Ctrl+C · Cmd/Ctrl+V) ===== */
+var clipboard=[], clipPastes=0;
+function copySel(){
+  var its=selItems(); if(!its.length) return;
+  var set=its.slice();   /* includi gli elementi che poggiano sulle pedane selezionate (copia completa) */
+  its.forEach(function(it){ if(TYPES[it.type] && TYPES[it.type].riser){
+    itemsOnRiser(it).forEach(function(o){ if(set.indexOf(o)===-1) set.push(o); }); } });
+  clipboard = set.map(function(it){ return JSON.parse(JSON.stringify(it)); });
+  clipPastes=0;
+}
+function pasteClip(){
+  if(!clipboard.length) return;
+  clipPastes++; var off=40*clipPastes;
+  var hasRiser=clipboard.some(function(it){ return TYPES[it.type] && TYPES[it.type].riser; });
+  var gmap={}, copies=clipboard.map(function(it){ var c=JSON.parse(JSON.stringify(it)); c.id=uid(); c.x+=off; c.y+=off; bumpItemLabels(c);
+    if(c.grp){ if(!gmap[c.grp]) gmap[c.grp]="g"+uid(); c.grp=gmap[c.grp]; } return c; });
+  if(hasRiser){ var bg="g"+uid(); copies.forEach(function(c){ c.grp=bg; }); }   /* pedana+elementi = blocco */
+  copies.forEach(function(c){ state.items.push(c); });
+  selSet={}; copies.forEach(function(c){ selSet[c.id]=true; }); sel=copies.length?copies[copies.length-1].id:null;
+  render(); save(); ensureVisible();
+}
 /* distribuisce n copie del "template" sulla pedana, a file (righe), con equidistanza regolabile (0..100).
    Il template diventa il 1° elemento (ancora); le altre copie sono taggate distOf=riser.id per poter rigenerare. */
 function applyDistribute(riser, template, n, eq){
@@ -3197,6 +3218,9 @@ document.addEventListener("keydown", function(e){
     if((e.key==="Backspace"||e.key==="Delete") && !/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)){ e.preventDefault(); delSelBlock(); return; }
   }
   if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+  if((e.metaKey||e.ctrlKey) && (e.key==="c"||e.key==="C")){ e.preventDefault(); copySel(); return; }   /* Cmd/Ctrl+C copia */
+  if((e.metaKey||e.ctrlKey) && (e.key==="v"||e.key==="V")){ e.preventDefault(); pasteClip(); return; }  /* Cmd/Ctrl+V incolla */
+  if((e.metaKey||e.ctrlKey) && (e.key==="x"||e.key==="X")){ e.preventDefault(); if(getSel()){ copySel(); deleteSel(); } return; }   /* Cmd/Ctrl+X taglia */
   var it=getSel(), step = e.shiftKey?25:5;
   if(e.key==="Escape"){ clearSelection(); render(); }
   if(!it) return;
