@@ -230,6 +230,23 @@
   #props .clhead:first-child{margin-top:2px}
   #props .clhead h3{margin:0}
   #props .clhead .btn{padding:4px 9px;font-size:11px}
+  /* sezioni collassabili input/output */
+  .clsec-head{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;-webkit-user-select:none;
+    border:1px solid #e5e7eb;border-radius:8px;padding:7px 10px;margin:8px 0 0;
+    font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#374151;background:#f8fafc}
+  .clsec-head:hover{background:#eceef1}
+  .clsec-head.open{background:#1f2937;border-color:#1f2937;color:#fff}
+  .clsec-head .cl-caret{font-size:10px;color:#9ca3af;transition:transform .15s ease;display:inline-block;width:10px;flex:0 0 10px}
+  .clsec-head.open .cl-caret{transform:rotate(90deg);color:#cbd5e1}
+  .clsec-head .cl-lbl{flex:1}
+  .clsec-head .cl-count{font-size:10px;font-weight:700;color:#aab0b8;background:#fff;
+    border-radius:999px;padding:1px 8px;min-width:20px;text-align:center}
+  .clsec-head.open .cl-count{background:#374151;color:#cbd5e1}
+  .clsec-head .btn{padding:3px 8px;font-size:11px;margin-left:2px}
+  .clsec-head.open .btn{background:#374151;border-color:#4b5563;color:#e5e7eb}
+  .clsec-head.open .btn:hover{background:#4b5563}
+  .clsec-body{display:none;padding:8px 0 4px}
+  .clsec-body.open{display:block}
   .clrow{display:grid;grid-template-columns:22px 1fr 86px 72px 36px 18px;gap:4px;align-items:center;margin-bottom:6px}
   .clrow .n{font-size:11px;color:#9ca3af;text-align:center;border-radius:4px}
   .clrow .n.grip{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -543,12 +560,24 @@
     <div id="accessoriCount" style="margin-top:8px;font-size:12px;color:#6b7280;line-height:1.8"></div>
   </div>
   <div class="sec" id="chanlist" style="border-top:1px solid #e5e7eb;padding-top:6px;margin-top:8px">
-    <div class="clhead"><h3>Input patch</h3><button class="btn" id="inAuto" title="Genera i canali dai mic/DI presenti sul palco">Auto</button></div>
-    <div id="inRows"></div>
-    <div class="clactions"><button class="btn" id="inAdd">+ canale</button><button class="btn" id="inClear">Svuota</button></div>
-    <div class="clhead"><h3>Monitor / Output</h3><button class="btn" id="outAuto" title="Genera i mix dai monitor presenti sul palco">Auto</button></div>
-    <div id="outRows"></div>
-    <div class="clactions"><button class="btn" id="outAdd">+ mix</button><button class="btn" id="outClear">Svuota</button></div>
+    <div class="clsec-head" id="inHead" title="Espandi/chiudi Input patch">
+      <span class="cl-caret">▶</span><span class="cl-lbl">Input patch</span>
+      <span class="cl-count" id="inCount">0</span>
+      <button class="btn" id="inAuto" title="Genera i canali dai mic/DI presenti sul palco">Auto</button>
+    </div>
+    <div class="clsec-body" id="inBody">
+      <div id="inRows"></div>
+      <div class="clactions"><button class="btn" id="inAdd">+ canale</button><button class="btn" id="inClear">Svuota</button></div>
+    </div>
+    <div class="clsec-head" id="outHead" title="Espandi/chiudi Monitor / Output">
+      <span class="cl-caret">▶</span><span class="cl-lbl">Monitor / Output</span>
+      <span class="cl-count" id="outCount">0</span>
+      <button class="btn" id="outAuto" title="Genera i mix dai monitor presenti sul palco">Auto</button>
+    </div>
+    <div class="clsec-body" id="outBody">
+      <div id="outRows"></div>
+      <div class="clactions"><button class="btn" id="outAdd">+ mix</button><button class="btn" id="outClear">Svuota</button></div>
+    </div>
     <button class="btn primary" id="bChanDone" style="width:100%;margin-top:12px">Fatto</button>
   </div>
   <datalist id="inSrcList"></datalist>
@@ -4335,6 +4364,10 @@ function renderChannels(){
   var inR=document.getElementById("inRows"), outR=document.getElementById("outRows");
   if(!inR) return;
   updateChanDatalists();
+  /* aggiorna badge conteggio negli header a scomparsa */
+  var inC=document.getElementById("inCount"), outC=document.getElementById("outCount");
+  if(inC) inC.textContent=state.inputs.length||"–";
+  if(outC) outC.textContent=state.outputs.length||"–";
   inR.innerHTML=""; outR.innerHTML="";
   if(!state.inputs.length){ inR.innerHTML='<div class="clempty">Nessun canale. Usa "+ canale" o "Auto" dal palco.</div>'; }
   else state.inputs.forEach(function(r,i){ inR.appendChild(chanRow("in",r,i)); });
@@ -4396,12 +4429,29 @@ function autoOutputs(){
   });
   state.outputs=rows; save(); renderChannels();
 }
-document.getElementById("inAdd").addEventListener("click", function(){ state.inputs.push(normalizeChannelRow({})); save(); renderChannels(); });
-document.getElementById("outAdd").addEventListener("click", function(){ state.outputs.push(normalizeChannelRow({})); save(); renderChannels(); });
+document.getElementById("inAdd").addEventListener("click", function(){ state.inputs.push(normalizeChannelRow({})); save(); renderChannels(); ensureClOpen("in"); });
+document.getElementById("outAdd").addEventListener("click", function(){ state.outputs.push(normalizeChannelRow({})); save(); renderChannels(); ensureClOpen("out"); });
 document.getElementById("inClear").addEventListener("click", function(){ if(state.inputs.length && confirm("Svuotare la input list?")){ state.inputs=[]; save(); renderChannels(); } });
 document.getElementById("outClear").addEventListener("click", function(){ if(state.outputs.length && confirm("Svuotare la output list?")){ state.outputs=[]; save(); renderChannels(); } });
-document.getElementById("inAuto").addEventListener("click", autoInputs);
-document.getElementById("outAuto").addEventListener("click", autoOutputs);
+document.getElementById("inAuto").addEventListener("click", function(e){ e.stopPropagation(); autoInputs(); ensureClOpen("in"); });
+document.getElementById("outAuto").addEventListener("click", function(e){ e.stopPropagation(); autoOutputs(); ensureClOpen("out"); });
+/* toggle a scomparsa Input patch / Monitor-Output */
+function clToggle(kind){
+  var head=document.getElementById(kind+"Head"), body=document.getElementById(kind+"Body");
+  var open=head.classList.toggle("open"); body.classList.toggle("open", open);
+}
+function ensureClOpen(kind){
+  var head=document.getElementById(kind+"Head"), body=document.getElementById(kind+"Body");
+  head.classList.add("open"); body.classList.add("open");
+}
+document.getElementById("inHead").addEventListener("click", function(e){
+  if(e.target.closest(".btn")) return;   /* click sui pulsanti interni non fa toggle */
+  clToggle("in");
+});
+document.getElementById("outHead").addEventListener("click", function(e){
+  if(e.target.closest(".btn")) return;
+  clToggle("out");
+});
 
 /* ============ FILE: nuovo / json / png ============ */
 document.getElementById("bNew").addEventListener("click", function(){
