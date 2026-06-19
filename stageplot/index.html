@@ -409,6 +409,7 @@
   <button class="btn" id="bTheme" title="Tema chiaro / scuro" style="padding:7px 11px">🌙</button>
   <button class="btn" id="bUndo" title="Annulla (⌘Z)" style="padding:7px 11px">↶</button>
   <button class="btn" id="bRedo" title="Ripeti (⇧⌘Z)" style="padding:7px 11px">↷</button>
+  <button class="btn" id="bFit" title="Adatta lo zoom al palco">⤢ Adatta</button>
   <button class="btn" id="bVenue" title="Importa planimetria di sfondo">🗺 Planimetria</button>
   <button class="btn" id="bPdf" hidden>Salva PDF</button>
   <button class="btn primary" id="bAi" hidden title="Descrivi il palco a ChatGPT e ricevi il link già pronto" style="display:none;align-items:center;gap:6px">🤖 Crea con AI</button>
@@ -3332,6 +3333,7 @@ document.getElementById("bAddSemi").addEventListener("click", addSemicircle);
 document.getElementById("bDelBlock").addEventListener("click", delSelBlock);
 document.getElementById("bUndo").addEventListener("click", undo);
 document.getElementById("bRedo").addEventListener("click", redo);
+document.getElementById("bFit").addEventListener("click", fit);
 document.getElementById("bVenue").addEventListener("click", toggleVenueEdit);
 /* tema chiaro/scuro persistente */
 function applyTheme(dark){
