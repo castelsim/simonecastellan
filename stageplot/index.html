@@ -2416,10 +2416,12 @@ function duplicateSel(){
   its.forEach(function(it){ if(TYPES[it.type] && TYPES[it.type].riser){
     itemsOnRiser(it).forEach(function(o){ if(set.indexOf(o)===-1) set.push(o); }); } });
   var hasRiser=set.some(function(it){ return TYPES[it.type] && TYPES[it.type].riser; });
-  var gmap={};   /* le copie di un blocco formano un NUOVO blocco (non si fondono con l'originale) */
-  var copies=set.map(function(it){ var c=JSON.parse(JSON.stringify(it)); c.id=uid(); c.x+=40; c.y+=40; bumpItemLabels(c);
+  var gmap={}, idmap={};   /* le copie di un blocco formano un NUOVO blocco (non si fondono con l'originale) */
+  var copies=set.map(function(it){ var c=JSON.parse(JSON.stringify(it)); idmap[it.id]=c.id=uid(); c.x+=40; c.y+=40; bumpItemLabels(c);
     if(c.grp){ if(!gmap[c.grp]) gmap[c.grp]="g"+uid(); c.grp=gmap[c.grp]; }
     state.items.push(c); return c; });
+  /* rimappa distOf al nuovo id della pedana copiata (evita che la copia punti alla pedana originale) */
+  copies.forEach(function(c){ if(c.distOf && idmap[c.distOf]) c.distOf=idmap[c.distOf]; });
   /* pedana + elementi duplicati = un BLOCCO unico: si muovono insieme e il trascinamento NON aggancia gli originali */
   if(hasRiser){ var bg="g"+uid(); copies.forEach(function(c){ c.grp=bg; }); }
   selSet={}; copies.forEach(function(c){ selSet[c.id]=true; }); sel=copies.length?copies[copies.length-1].id:null;
@@ -2439,8 +2441,11 @@ function pasteClip(){
   if(!clipboard.length) return;
   clipPastes++; var off=40*clipPastes;
   var hasRiser=clipboard.some(function(it){ return TYPES[it.type] && TYPES[it.type].riser; });
-  var gmap={}, copies=clipboard.map(function(it){ var c=JSON.parse(JSON.stringify(it)); c.id=uid(); c.x+=off; c.y+=off; bumpItemLabels(c);
+  var gmap={}, idmap={};
+  var copies=clipboard.map(function(it){ var c=JSON.parse(JSON.stringify(it)); idmap[it.id]=c.id=uid(); c.x+=off; c.y+=off; bumpItemLabels(c);
     if(c.grp){ if(!gmap[c.grp]) gmap[c.grp]="g"+uid(); c.grp=gmap[c.grp]; } return c; });
+  /* rimappa distOf al nuovo id della pedana incollata */
+  copies.forEach(function(c){ if(c.distOf && idmap[c.distOf]) c.distOf=idmap[c.distOf]; });
   if(hasRiser){ var bg="g"+uid(); copies.forEach(function(c){ c.grp=bg; }); }   /* pedana+elementi = blocco */
   copies.forEach(function(c){ state.items.push(c); });
   selSet={}; copies.forEach(function(c){ selSet[c.id]=true; }); sel=copies.length?copies[copies.length-1].id:null;
@@ -2872,7 +2877,9 @@ svg.addEventListener("pointerdown", function(e){
         if(it.grp){                            /* pedana in un blocco (es. duplicata): porta i membri del blocco, non gli elementi geometrici (così non aggancia gli originali sotto) */
           state.items.forEach(function(o){ if(o.grp===it.grp && moving.indexOf(o)===-1) moving.push(o); });
         } else {                               /* pedana libera: porta gli elementi che ci poggiano sopra (geometrico) */
-          itemsOnRiser(it).forEach(function(o){ if(moving.indexOf(o)===-1) moving.push(o); });
+          itemsOnRiser(it).forEach(function(o){ if(moving.indexOf(o)!==-1) return;
+            if(o.grp && o.distOf!==it.id) return;   /* appartiene a un blocco diverso (es. copia incollata) → non agganciare */
+            moving.push(o); });
         }
       }
     });
