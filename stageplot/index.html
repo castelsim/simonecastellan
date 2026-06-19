@@ -1004,12 +1004,13 @@ function conductor(){
   return s;
 }
 function podioPlatform(){ return bar(0,0,100,100,'ic fFloor',3)+bar(0,0,84,84,'ic thin',2)+
-  bar(0,-38,52,13,'ic fBlack',2)+circ(0,-27,2.5,'ic fill'); }   /* + leggio del direttore (come l'icona podio in Pedane) */
+  bar(0,-38,52,13,'ic fBlack',2)+circ(0,-27,2.5,'ic fill'); }   /* podio con leggìo incorporato (icona catalogo) */
+function podioBase(){ return bar(0,0,100,100,'ic fFloor',3)+bar(0,0,84,84,'ic thin',2); }   /* sola piattaforma (usata dal direttore: leggìo separato) */
 function dirSize(it){
   var w=84, d=72;
   if(it&&it.podio){ w=100; d=100; }
-  if(it&&it.leggio&&!(it&&it.podio)) d=Math.max(d,96);   /* leggio standalone estende verso l'orchestra (-y) */
-  if(it&&it.sgab) d=Math.max(d, (it&&it.podio)?122:82);  /* sgabello estende verso il pubblico (+y) */
+  if(it&&it.leggio) d=Math.max(d, (it&&it.podio)?116:92);   /* leggìo estende verso l'orchestra (-y) */
+  if(it&&it.sgab)   d=Math.max(d, (it&&it.podio)?120:82);   /* sgabello estende verso il pubblico (+y) */
   return [w,d];
 }
 /* divide la postazione chitarra nei suoi elementi (chitarra, sedia, leggio, ampli) come item indipendenti */
@@ -1550,9 +1551,9 @@ var TYPES = {
   direttore:{nome:"Direttore", dim:"braccia aperte", cat:"Persone", w:84,d:72, dir:true, defLabel:"M°",
              draw:function(it){ it=it||{};
                var s='';
-               if(it.sgab) s+=circ(0,20,17,'ic soft')+circ(0,20,5,'dotS');   /* sgabello dietro il direttore */
-               s+=(it.podio?podioPlatform():'')+conductor();
-               if(it.leggio&&!it.podio) s+='<g transform="translate(0,-44)">'+leggioGlyph(0)+'</g>';  /* leggio standalone (podio lo include già) */
+               if(it.sgab) s+=circ(0,22,17,'ic soft')+circ(0,22,5,'dotS');           /* sgabello: indipendente da podio */
+               s+=(it.podio?podioBase():'')+conductor();                               /* podio = sola piattaforma */
+               if(it.leggio) s+='<g transform="translate(0,'+(it.podio?-56:-44)+')">'+leggioGlyph(0)+'</g>';  /* leggìo: indipendente da podio */
                return s; }},
   /* --- monitoraggio --- */
   wedge:    {nome:"Wedge monitor", dim:"58×50", cat:"Monitoraggio", w:60,d:52, defLabel:"MIX 1",
