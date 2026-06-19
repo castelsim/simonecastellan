@@ -519,8 +519,8 @@
       <div class="hint" style="font-size:11.5px;color:#374151;margin-bottom:6px"><b id="grpDistTitle">Distribuisci sulla pedana</b></div>
       <label style="display:flex;justify-content:space-between;align-items:baseline">Numero <span id="grpDistNVal" style="color:#374151;font-weight:600">8</span></label>
       <input type="number" id="grpDistN" min="1" max="120" value="8" style="width:100%">
-      <label style="display:flex;justify-content:space-between;align-items:baseline;margin-top:6px">Equidistanza <span id="grpDistEqVal" style="color:#374151;font-weight:600">70%</span></label>
-      <input type="range" id="grpDistEq" min="0" max="100" step="5" value="70" style="width:100%;padding:0">
+      <label style="display:flex;justify-content:space-between;align-items:baseline;margin-top:6px">Equidistanza <span id="grpDistEqVal" style="color:#374151;font-weight:600">100%</span></label>
+      <input type="range" id="grpDistEq" min="0" max="100" step="5" value="100" style="width:100%;padding:0">
     </div>
     <div class="row">
       <button class="btn" id="grpRotL">⟲ 15</button>
@@ -2432,8 +2432,9 @@ function applyDistribute(riser, template, n, eq){
   var perRow=Math.min(n, maxPerRow);                       /* preferisci una sola fila; vai a capo solo se non entra */
   var rows=Math.min(maxRows, Math.ceil(n/perRow));
   perRow=Math.ceil(n/rows);                                /* bilancia le righe */
-  var spX=Math.max(ew, (W/perRow)*(0.4+0.6*eq/100));       /* equidistanza orizzontale */
-  var spY=rows>1 ? Math.max(ed, (D/rows)*(0.5+0.5*eq/100)) : 0;
+  /* spaziatura SENZA limite minimo: 100% = riempie la pedana in proporzione al numero; 0% = molto stretto → sovrapposti (poi regola l'utente) */
+  var spX=(W/perRow)*(0.06+0.94*eq/100);
+  var spY=rows>1 ? (D/rows)*(0.18+0.82*eq/100) : 0;
   var gid=template.grp || ("g"+uid()), made=0;
   var auto=autoNumbered(type), base=auto?instrBase(type):"";
   for(var r=0; r<rows && made<n; r++){
