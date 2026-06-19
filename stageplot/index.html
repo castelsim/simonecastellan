@@ -520,7 +520,7 @@
       <label style="display:flex;justify-content:space-between;align-items:baseline">Numero <span id="grpDistNVal" style="color:#374151;font-weight:600">8</span></label>
       <input type="number" id="grpDistN" min="1" max="120" value="8" style="width:100%">
       <label style="display:flex;justify-content:space-between;align-items:baseline;margin-top:6px">Equidistanza <span id="grpDistEqVal" style="color:#374151;font-weight:600">100%</span></label>
-      <input type="range" id="grpDistEq" min="0" max="100" step="5" value="100" style="width:100%;padding:0">
+      <input type="range" id="grpDistEq" min="0" max="100" step="1" value="100" style="width:100%;padding:0">
     </div>
     <div class="row">
       <button class="btn" id="grpRotL">⟲ 15</button>
@@ -2444,10 +2444,11 @@ function applyDistribute(riser, template, n, eq){
   var spY=rows>1 ? (D/rows)*(0.18+0.82*eq/100) : 0;
   var gid=template.grp || ("g"+uid()), made=0;
   var auto=autoNumbered(type), base=auto?instrBase(type):"";
+  function fine(v){ return Math.round(v*10)/10; }   /* equidistanza LIBERA dallo snap griglia: posizioni continue (0,1 cm) */
   for(var r=0; r<rows && made<n; r++){
-    var inRow=Math.min(perRow, n-r*perRow), x0=riser.x - (inRow-1)*spX/2, y=Math.round(riser.y - (rows-1)*spY/2 + r*spY);
+    var inRow=Math.min(perRow, n-r*perRow), x0=riser.x - (inRow-1)*spX/2, y=fine(riser.y - (rows-1)*spY/2 + r*spY);
     for(var c=0; c<inRow; c++){
-      var x=Math.round(x0 + c*spX), it;
+      var x=fine(x0 + c*spX), it;
       if(made===0){ it=template; it.x=x; it.y=y; it.rot=0; }   /* il template ancora la 1ª posizione, etichetta invariata */
       else {
         it={ id:uid(), type:type, rot:0, w:t.w, d:t.d, label:defaultLabel(type) };
