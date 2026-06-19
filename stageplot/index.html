@@ -1543,11 +1543,11 @@ var TYPES = {
              draw:function(){ return '<path class="ic fWoodL" d="M -30,22 L 30,22 L 21,-22 L -21,-22 Z"/>'+
                '<path class="ic thin" fill="none" d="M -24,16 L 24,16 L 17,-16 L -17,-16 Z"/>'+
                circ(0,-8,2.5,'ic fill')+lin(0,-8,0,0,'ic thin'); }},
-  cantante: {nome:"Cantante", dim:"voce", cat:"Voci", w:70,d:90, voce:true, defLabel:"Voce",
+  cantante: {nome:"Cantante", dim:"voce", cat:"Persone", w:70,d:90, voce:true, defLabel:"Voce",
              draw:function(it){ return singer(it); }},
-  corista:  {nome:"Corista", dim:"voce coro", cat:"Voci", w:70,d:88, voce:true, defLabel:"",
+  corista:  {nome:"Corista", dim:"voce coro", cat:"Persone", w:70,d:88, voce:true, defLabel:"",
              draw:function(it){ it=it||{}; return singer({mano:false, nomic:true, leggio:it.leggio!==false, donna:it.donna, sedia:it.sedia===true}); }},
-  direttore:{nome:"Direttore", dim:"braccia aperte", cat:"Voci", w:84,d:72, dir:true, defLabel:"M°",
+  direttore:{nome:"Direttore", dim:"braccia aperte", cat:"Persone", w:84,d:72, dir:true, defLabel:"M°",
              draw:function(it){ it=it||{};
                var s='';
                if(it.sgab) s+=circ(0,20,17,'ic soft')+circ(0,20,5,'dotS');   /* sgabello dietro il direttore */
@@ -1636,7 +1636,7 @@ var TYPES = {
              draw:function(){ return bar(0,-10,34,20,'ic fBlack',3)+bar(25,-10,16,12,'ic fGrey',2)+
                lin(0,2,-22,28,'ic thin')+lin(0,2,22,28,'ic thin')+lin(0,2,0,32,'ic thin')+circ(0,2,3,'ic fill'); }}
 };
-var CAT_ORDER = ["Pedane e strutture","Ottoni","Legni","Ritmica","Archi","Voci","Microfoni","Monitoraggio","Tecnica","Video"];
+var CAT_ORDER = ["Pedane e strutture","Ottoni","Legni","Ritmica","Archi","Persone","Microfoni","Monitoraggio","Tecnica","Video"];
 /* distanza interna di default (e minima) per le postazioni doppie: la più stretta disponibile.
    Gli strumenti larghi (contrabbasso, violoncello) hanno un minimo maggiore per non sovrapporsi. */
 var DEFAULT_SEP = 65;
@@ -2693,7 +2693,7 @@ function miniSvg(k, over){
       entries.push({nome:"Violino I", dim:"postazione", icon:"vlnpost", action:function(){ addViolin(1); }});
       entries.push({nome:"Violino II", dim:"postazione", icon:"vlnpost", action:function(){ addViolin(2); }});
     }
-    if(c==="Voci"){
+    if(c==="Persone"){
       var dirPov={podio:true, w:100, d:100};
       body.appendChild(makeBtn("direttore","Direttore su podio", dirPov, "con podio")); n++;
       entries.push({k:"direttore", nome:"Direttore su podio", over:dirPov, dim:"con podio"});
@@ -2761,7 +2761,7 @@ function findFreeSpot(x,y,w,d){
 function autoNumbered(type){ var t=TYPES[type]; if(!t) return false;
   if(type==="corista") return false;   /* i coristi nascono senza etichetta */
   if(t.gtr || POSTAZ[type] || VOCE[type] || t.dir) return true;
-  return ["Legni","Ottoni","Archi","Ritmica","Voci"].indexOf(t.cat)>=0;
+  return ["Legni","Ottoni","Archi","Ritmica","Persone"].indexOf(t.cat)>=0;
 }
 /* nomi abbreviati per la numerazione (es. nelle postazioni a 2) */
 var INSTR_ABBR = {
