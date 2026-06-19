@@ -1597,7 +1597,7 @@ var TYPES = {
                var s='';
                s+=(it.podio?podioBase():'')+conductor();
                /* leggìo davanti (verso orchestra) — con podio esce fuori dalla piattaforma */
-               if(it.leggio) s+='<g transform="translate(0,'+(it.podio?-54:-50)+')">'+leggioGlyph(0)+'</g>';
+               if(it.leggio) s+='<g transform="translate(0,'+(it.podio?-70:-66)+')">'+leggioGlyph(0)+'</g>';
                /* sgabello dietro (verso pubblico, +y) — dentro il box 120×120 */
                if(it.sgab){ var sy=it.podio?44:42; s+=circ(0,sy,17,'ic soft')+circ(0,sy,5,'dotS'); }
                return s; }},
