@@ -247,6 +247,22 @@
   .clsec-head.open .btn:hover{background:#4b5563}
   .clsec-body{display:none;padding:8px 0 4px}
   .clsec-body.open{display:block}
+  /* pannello planimetria */
+  #venuePanel{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:11px 12px;margin-bottom:10px}
+  #venuePanel h3{margin:0 0 8px;color:#15803d}
+  #venuePanel label{font-size:12px;color:#374151;display:block;margin:8px 0 2px}
+  #venuePanel input[type=range]{width:100%;padding:0;margin:2px 0}
+  #venuePanel input[type=number]{width:72px;border:1px solid #d1fae5;border-radius:7px;padding:4px 6px;font-size:13px;background:#fff}
+  .venue-row{display:flex;align-items:center;gap:6px;margin:5px 0}
+  .venue-row .btn{flex:1;font-size:12px;padding:5px 8px}
+  #venueReload{background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:7px 9px;font-size:12px;margin-bottom:8px}
+  #venueReload b{display:block;font-size:11px;color:#92400e;margin-bottom:4px;word-break:break-all}
+  body.venue-calib #svg{cursor:crosshair}
+  .venue-calib-dot{fill:#ef4444;stroke:#fff;stroke-width:2}
+  .venue-calib-line{stroke:#ef4444;stroke-width:2;stroke-dasharray:8 4;fill:none}
+  body.dark #venuePanel{background:#0f2d1a;border-color:#166534}
+  body.dark #venuePanel h3{color:#4ade80}
+  body.dark #venuePanel label{color:#d1fae5}
   .clrow{display:grid;grid-template-columns:22px 1fr 86px 72px 36px 18px;gap:4px;align-items:center;margin-bottom:6px}
   .clrow .n{font-size:11px;color:#9ca3af;text-align:center;border-radius:4px}
   .clrow .n.grip{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -394,6 +410,7 @@
   <button class="btn" id="bUndo" title="Annulla (⌘Z)" style="padding:7px 11px">↶</button>
   <button class="btn" id="bRedo" title="Ripeti (⇧⌘Z)" style="padding:7px 11px">↷</button>
   <button class="btn" id="bFit" title="Adatta lo zoom al palco">⤢ Adatta</button>
+  <button class="btn" id="bVenue" title="Importa planimetria di sfondo">🗺 Planimetria</button>
   <button class="btn" id="bPdf" hidden>Salva PDF</button>
   <button class="btn primary" id="bAi" hidden title="Descrivi il palco a ChatGPT e ricevi il link già pronto" style="display:none;align-items:center;gap:6px">🤖 Crea con AI</button>
   <button class="btn primary" id="bShare" title="Salva/esporta il progetto in JSON o scarica il PDF">💾 Salva / Esporta</button>
@@ -416,6 +433,7 @@
       <button data-act="palco">▦ Palco</button>
       <button data-act="evento">Evento</button>
       <button data-act="chan">Channel list</button>
+      <button data-act="venue">Planimetria</button>
       <button data-act="share">💾 Salva / Esporta</button>
       <button data-act="theme">Tema chiaro/scuro</button>
       <button data-act="new" class="danger">Nuovo</button>
@@ -558,6 +576,42 @@
   <div class="sec" id="noSel" style="font-size:12.5px;color:#9ca3af">
     <button class="btn" id="bResume" hidden>↩ Riprendi ultima sessione</button>
     <div id="accessoriCount" style="margin-top:8px;font-size:12px;color:#6b7280;line-height:1.8"></div>
+  </div>
+  <!-- pannello planimetria -->
+  <div id="venuePanel" hidden>
+    <h3>Planimetria</h3>
+    <div id="venueReload" hidden>
+      <b id="venueReloadName"></b>
+      <button class="btn" id="venueBtnReload" style="width:100%;margin-top:4px">Ricarica immagine…</button>
+    </div>
+    <input type="file" id="venueFile" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+    <div class="venue-row">
+      <button class="btn" id="venueBtnImport" style="flex:2">📥 Importa immagine</button>
+      <button class="btn" id="venueBtnVis" style="flex:1">👁 Nascondi</button>
+    </div>
+    <label>Opacità <span id="venueOpacityVal">40%</span></label>
+    <input type="range" id="venueOpacity" min="5" max="100" step="5" value="40">
+    <label>Rotazione <span id="venueRotVal">0°</span></label>
+    <div style="display:flex;gap:6px;align-items:center">
+      <input type="range" id="venueRot" min="-180" max="180" step="1" value="0" style="flex:1;padding:0;margin:0">
+      <input type="number" id="venueRotNum" min="-180" max="180" step="1" value="0" style="width:54px;border:1px solid #d1fae5;border-radius:7px;padding:4px 6px;font-size:13px">
+    </div>
+    <div class="venue-row" style="margin-top:10px">
+      <button class="btn" id="venueBtnCalib">📐 Calibra scala</button>
+      <button class="btn" id="venueBtnLock">🔒 Blocca</button>
+    </div>
+    <div id="venueCalibHint" hidden style="font-size:11.5px;color:#15803d;background:#dcfce7;border-radius:7px;padding:6px 8px;margin-top:6px">
+      Clicca il <b>1° punto</b> sulla planimetria
+    </div>
+    <div id="venueCalibInput" hidden style="margin-top:8px">
+      <label style="margin:0 0 4px">Distanza reale tra i 2 punti (m):</label>
+      <div style="display:flex;gap:6px;align-items:center">
+        <input type="number" id="venueCalibDist" min="0.1" step="0.1" value="10" style="flex:1;border:1px solid #d1fae5;border-radius:7px;padding:5px 7px;font-size:13px">
+        <button class="btn primary" id="venueCalibApply" style="flex:1">Applica</button>
+        <button class="btn" id="venueCalibCancel">✕</button>
+      </div>
+    </div>
+    <button class="btn danger" id="venueBtnDel" style="width:100%;margin-top:10px;font-size:12px">Rimuovi planimetria</button>
   </div>
   <div class="sec" id="chanlist" style="border-top:1px solid #e5e7eb;padding-top:6px;margin-top:8px">
     <div class="clsec-head" id="inHead" title="Espandi/chiudi Input patch">
@@ -1821,7 +1875,14 @@ var userZoomed = false;   /* true = l'utente ha zoomato dentro (niente auto-adat
 var svg = document.getElementById("svg");
 
 function uid(){ return "i"+(nextId++); }
-function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} recordHistory(); }
+function save(){
+  try{
+    /* serializza state senza venue._dataUrl (file immagine: richiesto al ricaricamento) */
+    var toSave=JSON.parse(JSON.stringify(state, function(k,v){ return k==='_dataUrl'||k==='_imgW'||k==='_imgH'?undefined:v; }));
+    localStorage.setItem(LS_KEY, JSON.stringify(toSave));
+  }catch(e){}
+  recordHistory();
+}
 /* ===== Undo / Redo ===== */
 var undoStack=[], redoStack=[], lastSnap=null;
 function recordHistory(){
@@ -1886,6 +1947,7 @@ function normalizeState(s){
   s.stage.w=bb.w; s.stage.d=bb.d;
   s.inputs=(s.inputs||[]).map(normalizeChannelRow);
   s.outputs=(s.outputs||[]).map(normalizeChannelRow);
+  if(s.venue){ s.venue=normalizeVenue(s.venue); }   /* retrocompat: venue opzionale */
   return s;
 }
 function load(){
@@ -2125,7 +2187,8 @@ function sortedItems(){
 function sceneMarkup(){
   recalcStageBBox();
   var W=state.stage.w, D=state.stage.d;
-  var s = stageFloorMarkup();
+  var s = (state.venue&&state.venue.enabled!==false ? venueMarkup() : '');   /* layer 0: planimetria */
+  s += stageFloorMarkup();
   s += stageDimsMarkup();
   s += '<text class="zone-lbl" x="'+(W/2)+'" y="-42" text-anchor="middle">FONDO PALCO</text>';
   s += '<text class="zone-lbl" x="'+(W/2)+'" y="'+(D+38)+'" text-anchor="middle">PUBBLICO</text>';
@@ -2138,6 +2201,7 @@ function render(){
   svg.innerHTML = sceneMarkup();
   renderProps();
   renderAccessoriCount();
+  renderVenuePanel();
   var ppm = svg.clientWidth / vb.w * 100;
   document.getElementById("scaleInfo").textContent =
     "palco "+(state.stage.w/100)+"×"+(state.stage.d/100)+" m"+stageHeightNote()+" · zoom "+ppm.toFixed(0)+" px/m";
@@ -2835,6 +2899,7 @@ function closeMobileDrawers(){
       if(a==="palco"){ toggleStageEdit(); return; }
       if(a==="evento"){ toggleEvento(); return; }
       if(a==="chan"){ toggleChan(); return; }
+      if(a==="venue"){ toggleVenueEdit(); return; }
       if(a==="share") proxy("bShare"); else if(a==="pdf") proxy("bPdf"); else if(a==="theme") proxy("bTheme");
       else if(a==="new") proxy("bNew");
     });
@@ -2873,6 +2938,25 @@ svg.addEventListener("pointerdown", function(e){
   }
   lastDown={t:Date.now(), x:e.clientX, y:e.clientY, id:dcId};
   var sp = svgPoint(e);
+  /* modalità calibrazione planimetria: raccoglie due punti */
+  if(venueCalibMode>0 && venueCalibMode<=2){
+    venueCalibPts.push({x:sp.x,y:sp.y});
+    if(venueCalibMode===1){
+      venueCalibMode=2;
+      document.getElementById("venueCalibHint").innerHTML="Clicca il <b>2° punto</b> sulla planimetria";
+    } else {
+      venueCalibMode=3;
+      document.getElementById("venueCalibHint").hidden=true;
+      document.getElementById("venueCalibInput").hidden=false;
+    }
+    render(); svg.setPointerCapture(e.pointerId); return;
+  }
+  /* drag planimetria (solo se venueEdit attivo, sbloccata, non calib) */
+  if(venueEdit && state.venue && !state.venue.locked && state.venue._dataUrl && venueCalibMode===0){
+    var venEl=e.target.closest ? e.target.closest("[data-venue]") : null;
+    if(venEl){ drag={mode:"venue", sp0:{x:sp.x,y:sp.y}, x0:state.venue.x, y0:state.venue.y, moved:false};
+      svg.setPointerCapture(e.pointerId); return; }
+  }
   /* Option/Alt + trascina = disegna un nuovo blocco del palco (non sopra un elemento) */
   if(e.altKey && !dcG && !(e.target.closest && e.target.closest(".rot-handle"))){
     e.preventDefault();
@@ -2971,6 +3055,13 @@ svg.addEventListener("pointermove", function(e){
   }
   if(!drag) return;
   var sp;
+  if(drag.mode==="venue"){
+    sp=svgPoint(e); var vdx=sp.x-drag.sp0.x, vdy=sp.y-drag.sp0.y; drag.moved=true;
+    state.venue.x=Math.round(drag.x0+vdx); state.venue.y=Math.round(drag.y0+vdy);
+    var vi=svg.querySelector("[data-venue]");
+    if(vi) vi.setAttribute("transform","translate("+state.venue.x+","+state.venue.y+") rotate("+(state.venue.rot||0)+")");
+    return;
+  }
   if(drag.mode==="item"){
     sp=svgPoint(e); var ddx=sp.x-drag.sp0.x, ddy=sp.y-drag.sp0.y; drag.moved=true;
     var freeMove = e.metaKey || e.ctrlKey;   /* Cmd (Mac) / Ctrl (Win) tenuto premuto = movimento libero, fuori dallo snap */
@@ -3033,6 +3124,7 @@ svg.addEventListener("pointermove", function(e){
 svg.addEventListener("pointerup", function(e){
   delete pointers[e.pointerId];
   if(pinch){ if(Object.keys(pointers).length<2) pinch=null; svg.classList.remove("dragging"); drag=null; return; }
+  if(drag && drag.mode==="venue"){ if(drag.moved){ save(); render(); } drag=null; return; }
   if(drag && drag.mode==="block"){ if(drag.moved){ recalcStageBBox(); save(); } renderStagePanel(); render(); svg.classList.remove("dragging"); drag=null; ensureVisible(); return; }
   if(drag && drag.mode==="blkresize"){ if(drag.moved){ recalcStageBBox(); save(); } renderStagePanel(); render(); drag=null; ensureVisible(); return; }
   if(drag && drag.mode==="newblk"){     /* fine Alt+trascina: crea il nuovo blocco se abbastanza grande */
@@ -3181,6 +3273,7 @@ function exitHubModes(except){
   if(except!=="palco" && stageEdit){ stageEdit=false; selBlock=null; renderStagePanel(); }
   if(except!=="evento" && eventoEdit){ eventoEdit=false; renderEventoPanel(); }
   if(except!=="chan" && chanEdit){ chanEdit=false; renderChanPanel(); }
+  if(except!=="venue" && venueEdit){ venueEdit=false; venueCalibCancel(); renderVenuePanel(); }
 }
 function toggleStageEdit(){ stageEdit=!stageEdit; selBlock=stageEdit?0:null; if(stageEdit){ exitHubModes("palco"); clearSelection(); } renderStagePanel(); render(); }
 function renderEventoPanel(){ document.body.classList.toggle("evento-edit", eventoEdit); document.getElementById("eventoSec").hidden=!eventoEdit; }
@@ -3249,6 +3342,7 @@ document.getElementById("bAddSemi").addEventListener("click", addSemicircle);
 document.getElementById("bDelBlock").addEventListener("click", delSelBlock);
 document.getElementById("bUndo").addEventListener("click", undo);
 document.getElementById("bRedo").addEventListener("click", redo);
+document.getElementById("bVenue").addEventListener("click", toggleVenueEdit);
 /* tema chiaro/scuro persistente */
 function applyTheme(dark){
   document.body.classList.toggle("dark", dark);
@@ -4455,6 +4549,142 @@ document.getElementById("outHead").addEventListener("click", function(e){
   if(e.target.closest(".btn")) return;
   clToggle("out");
 });
+
+/* ============ PLANIMETRIA / VENUE ============ */
+var venueEdit=false, venueCalibMode=0, venueCalibPts=[];
+/* default vuoto; non serializzare _dataUrl nel JSON */
+function venueDefault(){ return {enabled:true,locked:false,name:"",x:0,y:0,w:5000,h:3500,rot:0,opacity:40,calibration:null}; }
+function normalizeVenue(v){ if(!v) return null; return Object.assign(venueDefault(), v); }
+
+function venueMarkup(){
+  var v=state.venue; if(!v||!v._dataUrl) return '';
+  var op=((v.opacity||40)/100).toFixed(2);
+  var hw=v.w/2, hh=v.h/2;
+  var pe=v.locked?'none':'auto';
+  var s='<image href="'+v._dataUrl+'" x="'+(-hw)+'" y="'+(-hh)+'" width="'+v.w+'" height="'+v.h+'"';
+  s+=' opacity="'+op+'" pointer-events="'+pe+'"';
+  s+=' transform="translate('+v.x+','+v.y+') rotate('+((v.rot||0))+')"';
+  if(!v.locked) s+=' class="venue-img" data-venue="1"';
+  s+='/>';
+  /* punti calibrazione */
+  if(venueCalibMode>0 && venueCalibPts.length>0){
+    venueCalibPts.forEach(function(p){ s+='<circle class="venue-calib-dot" cx="'+p.x+'" cy="'+p.y+'" r="6"/>'; });
+    if(venueCalibPts.length===2){
+      s+='<line class="venue-calib-line" x1="'+venueCalibPts[0].x+'" y1="'+venueCalibPts[0].y+'" x2="'+venueCalibPts[1].x+'" y2="'+venueCalibPts[1].y+'"/>';
+    }
+  }
+  return s;
+}
+
+function renderVenuePanel(){
+  var vp=document.getElementById("venuePanel"); if(!vp) return;
+  var v=state.venue;
+  vp.hidden=!venueEdit;
+  if(!venueEdit) return;
+  var hasImg=!!(v&&v._dataUrl);
+  document.getElementById("venueReload").hidden = !(v&&v.name&&!v._dataUrl);
+  if(v&&v.name&&!v._dataUrl) document.getElementById("venueReloadName").textContent=v.name;
+  document.getElementById("venueOpacity").value = v?v.opacity:40;
+  document.getElementById("venueOpacityVal").textContent = (v?v.opacity:40)+"%";
+  document.getElementById("venueRot").value = v?v.rot:0;
+  document.getElementById("venueRotNum").value = v?v.rot:0;
+  document.getElementById("venueRotVal").textContent = (v?v.rot:0)+"°";
+  document.getElementById("venueBtnLock").textContent = (v&&v.locked)?"🔓 Sblocca":"🔒 Blocca";
+  document.getElementById("venueBtnVis").textContent = (v&&v.enabled===false)?"👁 Mostra":"👁 Nascondi";
+  document.getElementById("venueBtnVis").style.display = hasImg?"":"none";
+  document.getElementById("venueBtnLock").style.display = hasImg?"":"none";
+  document.getElementById("venueOpacity").parentElement.style.display = hasImg?"":"none";
+  var rotRow=document.getElementById("venueRot").parentElement.parentElement;
+  rotRow.style.display = hasImg?"":"none";
+  document.getElementById("venueBtnCalib").style.display = hasImg?"":"none";
+  document.getElementById("venueBtnDel").style.display = v?"":"none";
+}
+function toggleVenueEdit(){ venueEdit=!venueEdit; if(venueEdit){ exitHubModes("venue"); clearSelection(); } renderVenuePanel(); render(); }
+
+function venueLoadFile(file){
+  if(!file) return;
+  var rd=new FileReader();
+  rd.onload=function(){
+    if(!state.venue) state.venue=venueDefault();
+    state.venue.name=file.name;
+    state.venue._dataUrl=String(rd.result);
+    /* dimensioni immagine → w/h iniziale in cm (1px=1cm, utente calibra dopo) */
+    var img=new Image();
+    img.onload=function(){
+      state.venue._imgW=img.naturalWidth; state.venue._imgH=img.naturalHeight;
+      if(!state.venue.calibration){ state.venue.w=img.naturalWidth; state.venue.h=img.naturalHeight; }
+      save(); renderVenuePanel(); render();
+    };
+    img.src=String(rd.result);
+  };
+  rd.readAsDataURL(file);
+}
+
+function venueSetRot(v){
+  if(!state.venue) return;
+  state.venue.rot=((+v%360)+360)%360; if(state.venue.rot>180) state.venue.rot-=360;
+  document.getElementById("venueRot").value=state.venue.rot;
+  document.getElementById("venueRotNum").value=state.venue.rot;
+  document.getElementById("venueRotVal").textContent=state.venue.rot+"°";
+  save(); render();
+}
+
+function venueCalibStart(){
+  venueCalibMode=1; venueCalibPts=[]; document.body.classList.add("venue-calib");
+  document.getElementById("venueCalibHint").hidden=false;
+  document.getElementById("venueCalibHint").innerHTML="Clicca il <b>1° punto</b> sulla planimetria";
+  document.getElementById("venueCalibInput").hidden=true;
+  render();
+}
+function venueCalibCancel(){
+  venueCalibMode=0; venueCalibPts=[]; document.body.classList.remove("venue-calib");
+  document.getElementById("venueCalibHint").hidden=true;
+  document.getElementById("venueCalibInput").hidden=true;
+  render();
+}
+function venueCalibApply(){
+  if(venueCalibPts.length<2||!state.venue) return;
+  var dm=+document.getElementById("venueCalibDist").value||1;
+  var realCm=dm*100;
+  var p1=venueCalibPts[0], p2=venueCalibPts[1];
+  var d=Math.sqrt((p2.x-p1.x)*(p2.x-p1.x)+(p2.y-p1.y)*(p2.y-p1.y));
+  if(d<1) return;
+  var scale=realCm/d;   /* scala: 1 unità display = scale cm reali */
+  state.venue.w=state.venue.w*scale;
+  state.venue.h=state.venue.h*scale;
+  state.venue.calibration={p1:p1,p2:p2,realCm:realCm};
+  venueCalibCancel(); save(); renderVenuePanel(); render();
+}
+
+/* listener pannello venue */
+document.getElementById("venueBtnImport").addEventListener("click", function(){ document.getElementById("venueFile").click(); });
+document.getElementById("venueFile").addEventListener("change", function(e){ venueLoadFile(e.target.files&&e.target.files[0]); e.target.value=""; });
+document.getElementById("venueBtnReload").addEventListener("click", function(){ document.getElementById("venueFile").click(); });
+document.getElementById("venueOpacity").addEventListener("input", function(){
+  if(!state.venue) return; state.venue.opacity=+this.value;
+  document.getElementById("venueOpacityVal").textContent=this.value+"%"; save(); render();
+});
+document.getElementById("venueRot").addEventListener("input", function(){ venueSetRot(this.value); });
+document.getElementById("venueRotNum").addEventListener("change", function(){ venueSetRot(this.value); });
+document.getElementById("venueBtnVis").addEventListener("click", function(){
+  if(!state.venue) return; state.venue.enabled=(state.venue.enabled===false)?true:false; save(); renderVenuePanel(); render();
+});
+document.getElementById("venueBtnLock").addEventListener("click", function(){
+  if(!state.venue) return; state.venue.locked=!state.venue.locked; save(); renderVenuePanel(); render();
+});
+document.getElementById("venueBtnCalib").addEventListener("click", venueCalibStart);
+document.getElementById("venueCalibApply").addEventListener("click", venueCalibApply);
+document.getElementById("venueCalibCancel").addEventListener("click", venueCalibCancel);
+document.getElementById("venueBtnDel").addEventListener("click", function(){
+  if(!confirm("Rimuovere la planimetria?")) return;
+  state.venue=null; venueCalibCancel(); save(); renderVenuePanel(); render();
+});
+
+/* mobile hub "Planimetria" */
+(function(){
+  var mob=document.querySelector("[data-act='venue']");
+  if(mob) mob.addEventListener("click", toggleVenueEdit);
+})();
 
 /* ============ FILE: nuovo / json / png ============ */
 document.getElementById("bNew").addEventListener("click", function(){
