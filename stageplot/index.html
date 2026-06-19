@@ -260,7 +260,6 @@
   body.venue-calib #svg{cursor:crosshair}
   .venue-calib-dot{fill:#ef4444;stroke:#fff;stroke-width:2}
   .venue-calib-line{stroke:#ef4444;stroke-width:2;stroke-dasharray:8 4;fill:none}
-  body.dark #zoomControl span,body.dark #zoomOutLabel{color:#4b5563}
   body.dark #venuePanel{background:#0f2d1a;border-color:#166534}
   body.dark #venuePanel h3{color:#4ade80}
   body.dark #venuePanel label{color:#d1fae5}
@@ -297,7 +296,6 @@
   /* azioni nel pannello-hub quando NON c'è selezione: aggiungi + menu */
   #mActions{display:none}
   #mBar{display:none}                 /* barra ↶↷⤢: solo mobile (desktop ha l'header) */
-  #zoomControl{display:block}        /* visibile solo desktop */
   #bChanDone{display:none}            /* "Fatto" channel list: solo mobile in modalità chan */
   .mact-add{display:block;width:100%;border:none;background:#1f2937;color:#fff;border-radius:12px;padding:13px;font-size:15px;font-weight:700;margin-bottom:10px;cursor:pointer}
   .mact-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
@@ -307,7 +305,6 @@
     header,footer{display:none}
     body{display:block;height:100%}
     #mTop{display:block}
-    #zoomControl{display:none}
     /* bande: barra alta (titolo + ↶↷⤢ + palco) | palco | pannello-hub fisso in basso */
     main{position:fixed;top:86px;left:0;right:0;bottom:46vh;background:#fafafa}
     /* PANNELLO-HUB fisso: niente selezione = aggiungi+menu+channel list; elemento = sue opzioni */
@@ -412,7 +409,6 @@
   <button class="btn" id="bTheme" title="Tema chiaro / scuro" style="padding:7px 11px">🌙</button>
   <button class="btn" id="bUndo" title="Annulla (⌘Z)" style="padding:7px 11px">↶</button>
   <button class="btn" id="bRedo" title="Ripeti (⇧⌘Z)" style="padding:7px 11px">↷</button>
-  <button class="btn" id="bFit" title="Adatta lo zoom al palco">⤢ Adatta</button>
   <button class="btn" id="bVenue" title="Importa planimetria di sfondo">🗺 Planimetria</button>
   <button class="btn" id="bPdf" hidden>Salva PDF</button>
   <button class="btn primary" id="bAi" hidden title="Descrivi il palco a ChatGPT e ricevi il link già pronto" style="display:none;align-items:center;gap:6px">🤖 Crea con AI</button>
@@ -428,7 +424,6 @@
   <div id="mBar">
     <button class="mtbtn" id="mUndo" aria-label="Annulla">↶</button>
     <button class="mtbtn" id="mRedo" aria-label="Ripeti">↷</button>
-    <button class="mtbtn" id="mFit" aria-label="Adatta zoom">⤢</button>
   </div>
   <div id="mActions">
     <button class="mact-add" data-act="add">＋ Aggiungi elemento</button>
@@ -575,15 +570,6 @@
       <button class="btn danger" id="grpDel">Elimina</button>
     </div>
     <div class="hint" style="font-size:11px;color:#9ca3af;margin-top:8px">Shift-click per aggiungere/togliere. <b>Unisci in blocco</b>: si muovono e selezionano insieme. Trascina per spostare il gruppo.</div>
-  </div>
-  <!-- controllo zoom-out massimo + lock vista (desktop) -->
-  <div id="zoomControl" style="margin-bottom:10px">
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-      <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#9ca3af;flex:1">Vista</span>
-      <button class="btn" id="bViewLock" style="padding:3px 9px;font-size:12px" title="Blocca la vista corrente">🔓</button>
-    </div>
-    <input type="range" id="zoomOutSlider" min="100" max="500" step="25" value="100" style="width:100%;margin:0 0 2px">
-    <div style="font-size:11px;color:#9ca3af;text-align:center" id="zoomOutLabel">auto</div>
   </div>
   <div class="sec" id="noSel" style="font-size:12.5px;color:#9ca3af">
     <button class="btn" id="bResume" hidden>↩ Riprendi ultima sessione</button>
@@ -1887,7 +1873,6 @@ function itemsOnRiser(r){
   });
 }
 var vb = {x:-100,y:-150,w:1500,h:1100};
-var userZoomed = false;   /* true = l'utente ha zoomato dentro (niente auto-adatta); false = panoramica (tutto visibile) */
 var svg = document.getElementById("svg");
 
 function uid(){ return "i"+(nextId++); }
@@ -2905,7 +2890,6 @@ function closeMobileDrawers(){
   /* barra hub: ↶ ↷ ⤢ (sempre visibile in basso) */
   document.getElementById("mUndo").addEventListener("click", undo);
   document.getElementById("mRedo").addEventListener("click", redo);
-  document.getElementById("mFit").addEventListener("click", fit);
   /* azioni nel pannello-hub (nessuna selezione): Aggiungi elemento + voci di menu */
   function proxy(id){ var b=document.getElementById(id); if(b) b.click(); }
   Array.prototype.forEach.call(document.querySelectorAll("#mActions button"), function(b){
@@ -3060,12 +3044,11 @@ svg.addEventListener("pointermove", function(e){
     var pa=pointers[ids[0]], pb=pointers[ids[1]];
     var d=Math.hypot(pb.x-pa.x, pb.y-pa.y); if(d<=0) return;
     var f=pinch.d0/d, rect=svg.getBoundingClientRect();
-    var nw=Math.max(300, Math.min(fitVbW()*zoomOutMult, pinch.startW*f)), nh=nw*pinch.ratio;
+    var nw=Math.max(300, pinch.startW*f), nh=nw*pinch.ratio;
     var mx=(pa.x+pb.x)/2, my=(pa.y+pb.y)/2;
     vb.w=nw; vb.h=nh;
     vb.x=pinch.mid0.x - (mx-rect.left)/rect.width*nw;
     vb.y=pinch.mid0.y - (my-rect.top)/rect.height*nh;
-    userZoomed = nw < fitVbW()-1;
     svg.setAttribute("viewBox", vb.x+" "+vb.y+" "+vb.w+" "+vb.h);
     return;
   }
@@ -3177,23 +3160,18 @@ svg.addEventListener("pointercancel", function(e){   /* touch interrotto: ripuli
   delete pointers[e.pointerId];
   if(Object.keys(pointers).length<2) pinch=null;
 });
-var zoomOutMult=1, viewLocked=false;
 svg.addEventListener("wheel", function(e){
   e.preventDefault();
-  if(viewLocked) return;
-  var sp=svgPoint(e), autoW=fitVbW(), maxW=autoW*zoomOutMult;
+  var sp=svgPoint(e);
   /* passo proporzionale all'entità dello scroll: fluido sul trackpad, max ~6%/evento → zoom controllato */
-  var unit = e.deltaMode===1 ? 16 : (e.deltaMode===2 ? 100 : 1);   /* righe/pagine → pixel */
-  var d = e.deltaY*unit, mag = Math.min(Math.abs(d), 120)/120;     /* 0..1, satura sugli scatti bruschi */
+  var unit = e.deltaMode===1 ? 16 : (e.deltaMode===2 ? 100 : 1);
+  var d = e.deltaY*unit, mag = Math.min(Math.abs(d), 120)/120;
   var f = Math.exp((d>0?1:-1) * 0.06 * mag);
   var nw=vb.w*f;
-  if(nw>maxW) nw=maxW;
   if(nw<300) nw=300;
-  if(Math.abs(nw-vb.w)<0.5){ if(e.deltaY>0 && zoomOutMult===1) ensureVisible(); return; }
+  if(Math.abs(nw-vb.w)<0.5) return;
   f=nw/vb.w;
   vb.x = sp.x-(sp.x-vb.x)*f; vb.y = sp.y-(sp.y-vb.y)*f; vb.w*=f; vb.h*=f;
-  if(nw>=maxW && zoomOutMult===1){ fit(); return; }   /* a 1× → centra tutto */
-  userZoomed=true;
   svg.setAttribute("viewBox", vb.x+" "+vb.y+" "+vb.w+" "+vb.h);
 }, {passive:false});
 /* drag-and-drop dal catalogo: rilascia l'elemento dove vuoi sul palco (desktop) */
@@ -3246,35 +3224,11 @@ function fitVbW(){
 function fit(){
   var b=contentBounds(), mob=isMobile(), m=fitMargin();
   var W=(b.x1-b.x0)+2*m, D=(b.y1-b.y0)+2*m, ar=svg.clientWidth/svg.clientHeight;
-  if(W/D>ar){ var h=W/ar; vb={x:b.x0-m, y: b.y0-m, w:W, h:h}; }   /* ancora in alto: lo spazio extra va sotto (lato pubblico), non sopra */
+  if(W/D>ar){ var h=W/ar; vb={x:b.x0-m, y: b.y0-m, w:W, h:h}; }
   else { vb={x:b.x0-m-(D*ar-W)/2, y:b.y0-m, w:D*ar, h:D}; }
-  userZoomed=false; render();
+  render();
 }
-/* in panoramica: se un elemento esce dalla visuale → riadatta (si vede sempre tutto). Se l'utente ha zoomato dentro, non disturba. */
-function ensureVisible(){
-  if(userZoomed || viewLocked) return;
-  var b=contentBounds(), eps=1;
-  if(b.x0<vb.x-eps || b.y0<vb.y-eps || b.x1>vb.x+vb.w+eps || b.y1>vb.y+vb.h+eps) fit();
-}
-document.getElementById("bFit").addEventListener("click", function(){ viewLocked=false; updateViewLockUI(); fit(); });
-/* ===== Controllo zoom-out max + lock vista ===== */
-function updateViewLockUI(){
-  var btn=document.getElementById("bViewLock"); if(!btn) return;
-  btn.textContent = viewLocked ? "🔒" : "🔓";
-  btn.title = viewLocked ? "Vista bloccata — clicca per sbloccare" : "Blocca la vista corrente";
-  btn.style.background = viewLocked ? "#1d4ed8" : "";
-  btn.style.color = viewLocked ? "#fff" : "";
-}
-document.getElementById("zoomOutSlider").addEventListener("input", function(){
-  zoomOutMult = this.value/100;
-  var lbl=document.getElementById("zoomOutLabel");
-  lbl.textContent = zoomOutMult===1 ? "auto" : "×"+zoomOutMult.toFixed(2).replace(/(\.\d*?)0+$/,"$1").replace(/\.$/,"");
-});
-document.getElementById("bViewLock").addEventListener("click", function(){
-  viewLocked=!viewLocked;
-  if(viewLocked) userZoomed=true;
-  updateViewLockUI();
-});
+function ensureVisible(){}
 /* ===== Modifica palco (forma a blocchi) ===== */
 function renderStagePanel(){
   var panel=document.getElementById("stageEditPanel");
