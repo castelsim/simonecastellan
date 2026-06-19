@@ -2411,10 +2411,17 @@ function bumpItemLabels(c){
 }
 function duplicateSel(){
   var its=selItems(); if(!its.length) return;
+  /* includi gli elementi che poggiano sulle pedane selezionate → la copia è completa e non "ruba" gli originali */
+  var set=its.slice();
+  its.forEach(function(it){ if(TYPES[it.type] && TYPES[it.type].riser){
+    itemsOnRiser(it).forEach(function(o){ if(set.indexOf(o)===-1) set.push(o); }); } });
+  var hasRiser=set.some(function(it){ return TYPES[it.type] && TYPES[it.type].riser; });
   var gmap={};   /* le copie di un blocco formano un NUOVO blocco (non si fondono con l'originale) */
-  var copies=its.map(function(it){ var c=JSON.parse(JSON.stringify(it)); c.id=uid(); c.x+=40; c.y+=40; bumpItemLabels(c);
+  var copies=set.map(function(it){ var c=JSON.parse(JSON.stringify(it)); c.id=uid(); c.x+=40; c.y+=40; bumpItemLabels(c);
     if(c.grp){ if(!gmap[c.grp]) gmap[c.grp]="g"+uid(); c.grp=gmap[c.grp]; }
     state.items.push(c); return c; });
+  /* pedana + elementi duplicati = un BLOCCO unico: si muovono insieme e il trascinamento NON aggancia gli originali */
+  if(hasRiser){ var bg="g"+uid(); copies.forEach(function(c){ c.grp=bg; }); }
   selSet={}; copies.forEach(function(c){ selSet[c.id]=true; }); sel=copies.length?copies[copies.length-1].id:null;
   render(); save();
 }
@@ -2838,9 +2845,14 @@ svg.addEventListener("pointerdown", function(e){
     if(!selSet[id]) selectClick(id);      /* click su elemento non selezionato → selezione (gruppo se fa parte di un blocco) */
     if(e.altKey){ e.preventDefault(); duplicateSel(); }   /* alt = duplica la selezione e trascina le copie */
     var moving=selItems().slice();
-    moving.slice().forEach(function(it){      /* le pedane trascinano gli elementi che ci poggiano sopra */
-      if(TYPES[it.type] && TYPES[it.type].riser)
-        itemsOnRiser(it).forEach(function(o){ if(moving.indexOf(o)===-1) moving.push(o); });
+    moving.slice().forEach(function(it){      /* le pedane trascinano gli elementi sopra */
+      if(TYPES[it.type] && TYPES[it.type].riser){
+        if(it.grp){                            /* pedana in un blocco (es. duplicata): porta i membri del blocco, non gli elementi geometrici (così non aggancia gli originali sotto) */
+          state.items.forEach(function(o){ if(o.grp===it.grp && moving.indexOf(o)===-1) moving.push(o); });
+        } else {                               /* pedana libera: porta gli elementi che ci poggiano sopra (geometrico) */
+          itemsOnRiser(it).forEach(function(o){ if(moving.indexOf(o)===-1) moving.push(o); });
+        }
+      }
     });
     drag = {mode:"item", sp0:{x:sp.x,y:sp.y},
             items:moving.map(function(i){ return {id:i.id, x0:i.x, y0:i.y}; }), moved:false};
