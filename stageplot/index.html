@@ -589,12 +589,16 @@
       <button class="btn" id="venueBtnImport" style="flex:2">📥 Importa immagine</button>
       <button class="btn" id="venueBtnVis" style="flex:1">👁 Nascondi</button>
     </div>
-    <label>Opacità <span id="venueOpacityVal">40%</span></label>
-    <input type="range" id="venueOpacity" min="5" max="100" step="5" value="40">
-    <label>Rotazione <span id="venueRotVal">0°</span></label>
-    <div style="display:flex;gap:6px;align-items:center">
-      <input type="range" id="venueRot" min="-180" max="180" step="1" value="0" style="flex:1;padding:0;margin:0">
-      <input type="number" id="venueRotNum" min="-180" max="180" step="1" value="0" style="width:54px;border:1px solid #d1fae5;border-radius:7px;padding:4px 6px;font-size:13px">
+    <div id="venueOpacityRow">
+      <label>Opacità <span id="venueOpacityVal">40%</span></label>
+      <input type="range" id="venueOpacity" min="5" max="100" step="5" value="40">
+    </div>
+    <div id="venueRotRow">
+      <label>Rotazione <span id="venueRotVal">0°</span></label>
+      <div style="display:flex;gap:6px;align-items:center">
+        <input type="range" id="venueRot" min="-180" max="180" step="1" value="0" style="flex:1;padding:0;margin:0">
+        <input type="number" id="venueRotNum" min="-180" max="180" step="1" value="0" style="width:54px;border:1px solid #d1fae5;border-radius:7px;padding:4px 6px;font-size:13px">
+      </div>
     </div>
     <div class="venue-row" style="margin-top:10px">
       <button class="btn" id="venueBtnCalib">📐 Calibra scala</button>
@@ -4593,9 +4597,8 @@ function renderVenuePanel(){
   document.getElementById("venueBtnVis").textContent = (v&&v.enabled===false)?"👁 Mostra":"👁 Nascondi";
   document.getElementById("venueBtnVis").style.display = hasImg?"":"none";
   document.getElementById("venueBtnLock").style.display = hasImg?"":"none";
-  document.getElementById("venueOpacity").parentElement.style.display = hasImg?"":"none";
-  var rotRow=document.getElementById("venueRot").parentElement.parentElement;
-  rotRow.style.display = hasImg?"":"none";
+  document.getElementById("venueOpacityRow").style.display = hasImg?"":"none";
+  document.getElementById("venueRotRow").style.display = hasImg?"":"none";
   document.getElementById("venueBtnCalib").style.display = hasImg?"":"none";
   document.getElementById("venueBtnDel").style.display = v?"":"none";
 }
