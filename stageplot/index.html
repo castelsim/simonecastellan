@@ -42,6 +42,7 @@
   .hdr-stage select{border:1px solid #e5e7eb;border-radius:7px;padding:4px 6px;font-size:13px;background:#fff}
   .hdr-stage input:focus,.hdr-stage select:focus{outline:none;border-color:#9aa3ad}
   header input[type=text]{flex:1;max-width:340px;border:1px solid #e5e7eb;border-radius:8px;padding:7px 10px;font-size:14px}
+  .btn-icon{padding:7px 11px;font-size:16px;min-width:36px}
   .btn{background:#f1f3f4;border:none;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600;
     color:#1a1a1a;cursor:pointer;white-space:nowrap}
   .btn:hover{background:#e6e8ea}
@@ -417,12 +418,12 @@
   <button class="btn" id="bUndo" title="Annulla (⌘Z)" style="padding:7px 11px">↶</button>
   <button class="btn" id="bRedo" title="Ripeti (⇧⌘Z)" style="padding:7px 11px">↷</button>
   <button class="btn" id="bFit" title="Adatta lo zoom al palco">⤢ Adatta</button>
-  <button class="btn" id="bVenue" title="Importa planimetria di sfondo">🗺 Planimetria</button>
-  <button class="btn" id="bFrame" title="Cornice di stampa: scegli l'area esportata nel PDF">▭ Area stampa</button>
+  <button class="btn btn-icon" id="bVenue" title="Planimetria — importa immagine di sfondo">🗺</button>
+  <button class="btn btn-icon" id="bFrame" title="Area stampa — definisce cosa esporta il PDF">▭</button>
   <button class="btn" id="bPdf" hidden>Salva PDF</button>
   <button class="btn primary" id="bAi" hidden title="Descrivi il palco a ChatGPT e ricevi il link già pronto" style="display:none;align-items:center;gap:6px">🤖 Crea con AI</button>
-  <button class="btn primary" id="bShare" title="Salva/esporta il progetto in JSON o scarica il PDF">💾 Salva / Esporta</button>
-  <button class="btn danger" id="bNew">Nuovo</button>
+  <button class="btn primary" id="bShare" title="Salva/esporta il progetto in JSON o scarica il PDF">💾 Salva</button>
+  <button class="btn danger" id="bNew" hidden>Nuovo</button>
 </header>
 
 <aside id="catalog"></aside>
