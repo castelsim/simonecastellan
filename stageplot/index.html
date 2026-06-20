@@ -1858,11 +1858,11 @@ var TYPES = {
   tavolo:   {nome:"Tavolo", dim:"120×60", cat:"Pedane e strutture", w:120,d:60, resizable:true, z:1,
              draw:function(it){ return rectSvg(it.w,it.d,'ic fWoodL',5)+
                '<rect class="ic thin" fill="none" x="'+(-it.w/2+7)+'" y="'+(-it.d/2+7)+'" width="'+(it.w-14)+'" height="'+(it.d-14)+'" rx="3"/>'; }},
-  sedia:    {nome:"Sedia", dim:"46×46", cat:"Pedane e strutture", w:50,d:55, z:1.5,
+  sedia:    {nome:"Sedia", dim:"46×46", cat:"Pedane e strutture", catalog:false, w:50,d:55, z:1.5,
              draw:function(){ return bar(0,3,46,46,'ic fBlack',9)+bar(0,-22,46,9,'ic fill',4); }},
   sedialeggio:{nome:"Sedia + leggio", dim:"postazione", cat:"Pedane e strutture", w:75,d:105,
              draw:function(){ return bar(0,-22,46,46,'ic fBlack',9)+bar(0,-48,46,9,'ic fill',4)+leggioGlyph(38); }},
-  leggio:   {nome:"Leggio", dim:"48×35", cat:"Pedane e strutture", w:50,d:35,
+  leggio:   {nome:"Leggio", dim:"48×35", cat:"Pedane e strutture", catalog:false, w:50,d:35,
              draw:function(){ return leggioGlyph(2); }},
   podio:    {nome:"Podio direttore", dim:"100×100", cat:"Pedane e strutture", w:100,d:100,
              draw:function(){ return bar(0,0,100,100,'ic fFloor',3)+bar(0,0,84,84,'ic thin',2)+
@@ -1918,7 +1918,7 @@ var TYPES = {
   /* --- ritmica: batteria e percussioni --- */
   batteria: {nome:"Batteria", dim:"componibile", cat:"Ritmica", sub:"Batteria e percussioni", w:240,d:200,
              draw:function(it){ return drawBatteria(it); }},
-  edrums:   {nome:"E-drums", dim:"140×120", cat:"Ritmica", sub:"Batteria e percussioni", w:140,d:120,
+  edrums:   {nome:"E-drums", dim:"140×120", cat:"Ritmica", sub:"Batteria e percussioni", catalog:false, w:140,d:120,
              draw:function(){
                /* sgabello in fondo (-y) come la batteria acustica; pad mesh + pad piatti su rack */
                function pad(x,y,r){ return circ(x,y,r,'ic fGrey')+circ(x,y,r-3.5,'ic thin fBlack'); }
@@ -2005,7 +2005,7 @@ var TYPES = {
              draw:function(){ return bar(0,0,66,41,'ic fMon',3)+bar(0,2,52,28,'ic thin fGrey',2)+kn(-15,-13,5,7.5); }},
   keysamp:  {nome:"Ampli keys", dim:"55×36", cat:"Ritmica", sub:"Ampli e backline", w:57,d:38,
              draw:function(){ return bar(0,0,55,36,'ic fMon',3)+bar(0,3,40,22,'ic thin fGrey',2)+kn(-12,-11,4,8); }},
-  leslie:   {nome:"Leslie", dim:"74×52", cat:"Ritmica", sub:"Ampli e backline", w:76,d:54,
+  leslie:   {nome:"Leslie", dim:"74×52", cat:"Ritmica", sub:"Ampli e backline", catalog:false, w:76,d:54,
              draw:function(){ return bar(0,0,74,52,'ic fWoodL',4)+circ(0,3,17,'ic thin fWood')+
                lin(-30,-18,-13,-18,'ic thin')+lin(13,-18,30,-18,'ic thin'); }},
   /* --- ritmica: tastiere --- */
@@ -2046,7 +2046,7 @@ var TYPES = {
              draw:function(it){ return guitarDraw(it,"bass"); }},
   pedaliera:{nome:"Pedaliera", dim:"50×30", cat:"Ritmica", sub:"Chitarre", w:52,d:32, defLabel:"Pedalboard",
              draw:function(){ return pedalGlyph(); }},
-  djset:    {nome:"DJ set su tavolo", dim:"180×60", cat:"Tecnica", w:182,d:64, defLabel:"DJ",
+  djset:    {nome:"DJ set su tavolo", dim:"180×60", cat:"Tecnica", catalog:false, w:182,d:64, defLabel:"DJ",
              draw:function(){ return bar(0,0,180,60,'ic fBlack',4)+
                bar(-58,0,36,32,'ic fGrey',3)+circ(-58,2,11,'ic thin fSilver')+
                bar(58,0,36,32,'ic fGrey',3)+circ(58,2,11,'ic thin fSilver')+
@@ -2096,7 +2096,7 @@ var TYPES = {
                '<path class="ic thin" fill="none" d="M 11,-11 A 16 16 0 0 1 15,-6"/><path class="ic thin" fill="none" d="M 14,-15 A 21 21 0 0 1 19,-9"/>'; }},
   headset:  {nome:"Headset", dim:"", cat:"Microfoni", w:32,d:32, defLabel:"HS",
              draw:function(){ return '<path class="ic" fill="none" d="M -10,5 A 11 11 0 1 1 10,5"/>'+lin(10,5,13,9,'ic thin')+circ(13,9,3.5,'ic fill'); }},
-  podiosp:  {nome:"Podio speaker", dim:"60×45", cat:"Pedane e strutture", w:62,d:48,
+  podiosp:  {nome:"Podio speaker", dim:"60×45", cat:"Pedane e strutture", catalog:false, w:62,d:48,
              draw:function(){ return '<path class="ic fWoodL" d="M -30,22 L 30,22 L 21,-22 L -21,-22 Z"/>'+
                '<path class="ic thin" fill="none" d="M -24,16 L 24,16 L 17,-16 L -17,-16 Z"/>'+
                circ(0,-8,2.5,'ic fill')+lin(0,-8,0,0,'ic thin'); }},
@@ -2125,7 +2125,7 @@ var TYPES = {
                /* colonna 2 vie: woofer grande + tromba in alto */
                return bar(0,0,58,68,'ic mon fMon',5)+bar(0,2,48,58,'sil',3)+
                  speakerCone(0,16,16)+hornTweeter(0,-16,26,12); }},
-  drumfill: {nome:"Drum fill", dim:"62×62", cat:"Monitoraggio", w:64,d:64, defLabel:"DRUM FILL",
+  drumfill: {nome:"Drum fill", dim:"62×62", cat:"Monitoraggio", catalog:false, w:64,d:64, defLabel:"DRUM FILL",
              draw:function(){
                /* coppia di wedge accostati (tipico drum fill) */
                return bar(0,0,62,62,'ic mon fMon',5)+bar(0,0,52,52,'sil',3)+
@@ -2133,7 +2133,7 @@ var TYPES = {
   iem:      {nome:"IEM beltpack", dim:"simbolo", cat:"Monitoraggio", w:24,d:18, defLabel:"IEM",
              draw:function(){ return bar(0,1,18,14,'ic mon fMon',2)+bar(0,-1,11,7,'sil',1)+
                lin(8,-6,13,-13,'ic mon')+circ(13,-13,2,'mon fill'); }},
-  iemant:   {nome:"Rack TX in-ear", dim:"rack+antenne", cat:"Monitoraggio", w:60,d:46, defLabel:"TX IEM",
+  iemant:   {nome:"Rack TX in-ear", dim:"rack+antenne", cat:"Monitoraggio", catalog:false, w:60,d:46, defLabel:"TX IEM",
              draw:function(){ return bar(0,4,48,28,'ic mon fMon',4)+
                lin(-18,-10,-28,-22,'ic mon')+circ(-28,-22,2.5,'mon fill')+
                lin(18,-10,28,-22,'ic mon')+circ(28,-22,2.5,'mon fill')+
@@ -2155,11 +2155,11 @@ var TYPES = {
              draw:function(){ var s=bar(0,0,54,40,'ic tec fGrey',3);
                for(var r=0;r<2;r++)for(var c=0;c<4;c++){ s+=circ(-15+c*10,-5+r*11,2,'tec fill'); }
                return s; }},
-  splitter: {nome:"Splitter audio", dim:"rack 3U", cat:"Tecnica", w:70,d:46, defLabel:"SPLIT",
+  splitter: {nome:"Splitter audio", dim:"rack 3U", cat:"Tecnica", catalog:false, w:70,d:46, defLabel:"SPLIT",
              draw:function(){ var s=bar(0,0,66,40,'ic tec fGrey',3);
                for(var r=0;r<3;r++)for(var c=0;c<6;c++){ s+=circ(-24+c*9,-10+r*10,1.8,'tec fill'); }
                return s; }},
-  multicore:{nome:"Multicore / sub-snake", dim:"box+cavo", cat:"Tecnica", w:70,d:50, defLabel:"SUB",
+  multicore:{nome:"Multicore / sub-snake", dim:"box+cavo", cat:"Tecnica", catalog:false, w:70,d:50, defLabel:"SUB",
              draw:function(){ return bar(-12,0,40,30,'ic tec fGrey',3)+
                '<path class="ic thin" fill="none" d="M 8,0 C 26,-22 42,-10 32,10 C 22,30 46,28 50,8"/>'; }},
   corrente: {nome:"Corrente 220V", dim:"simbolo", cat:"Tecnica", w:30,d:30, defLabel:"220V",
