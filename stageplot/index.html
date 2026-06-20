@@ -263,6 +263,19 @@
   body.dark #venuePanel{background:#0f2d1a;border-color:#166534}
   body.dark #venuePanel h3{color:#4ade80}
   body.dark #venuePanel label{color:#d1fae5}
+  /* cornice di stampa */
+  #framePanel{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:11px 12px;margin-bottom:10px}
+  #framePanel h3{margin:0 0 8px;color:#1d4ed8}
+  #framePanel label{font-size:12px;color:#374151;display:block;margin:7px 0 2px}
+  #framePanel input[type=number]{width:100%;border:1px solid #bfdbfe;border-radius:7px;padding:5px 7px;font-size:13px;background:#fff}
+  .frame-row{display:flex;gap:8px}
+  .frame-row>div{flex:1}
+  .frame-rect{fill:rgba(37,99,235,.06);stroke:#2563eb;stroke-width:2;stroke-dasharray:10 7;cursor:move}
+  .frame-h{fill:#fff;stroke:#2563eb;stroke-width:2}
+  .frame-lbl{fill:#1d4ed8;font-weight:700;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}
+  body.dark #framePanel{background:#0c1e3a;border-color:#1e3a8a}
+  body.dark #framePanel h3{color:#60a5fa}
+  body.dark #framePanel label{color:#cdd9ee}
   .clrow{display:grid;grid-template-columns:22px 1fr 86px 72px 36px 18px;gap:4px;align-items:center;margin-bottom:6px}
   .clrow .n{font-size:11px;color:#9ca3af;text-align:center;border-radius:4px}
   .clrow .n.grip{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -411,6 +424,7 @@
   <button class="btn" id="bRedo" title="Ripeti (⇧⌘Z)" style="padding:7px 11px">↷</button>
   <button class="btn" id="bFit" title="Adatta lo zoom al palco">⤢ Adatta</button>
   <button class="btn" id="bVenue" title="Importa planimetria di sfondo">🗺 Planimetria</button>
+  <button class="btn" id="bFrame" title="Cornice di stampa: scegli l'area esportata nel PDF">▭ Area stampa</button>
   <button class="btn" id="bPdf" hidden>Salva PDF</button>
   <button class="btn primary" id="bAi" hidden title="Descrivi il palco a ChatGPT e ricevi il link già pronto" style="display:none;align-items:center;gap:6px">🤖 Crea con AI</button>
   <button class="btn primary" id="bShare" title="Salva/esporta il progetto in JSON o scarica il PDF">💾 Salva / Esporta</button>
@@ -433,6 +447,7 @@
       <button data-act="evento">Evento</button>
       <button data-act="chan">Channel list</button>
       <button data-act="venue">Planimetria</button>
+      <button data-act="frame">Area stampa</button>
       <button data-act="share">💾 Salva / Esporta</button>
       <button data-act="theme">Tema chiaro/scuro</button>
       <button data-act="new" class="danger">Nuovo</button>
@@ -615,6 +630,24 @@
       </div>
     </div>
     <button class="btn danger" id="venueBtnDel" style="width:100%;margin-top:10px;font-size:12px">Rimuovi planimetria</button>
+  </div>
+  <!-- pannello cornice di stampa -->
+  <div id="framePanel" hidden>
+    <h3>Area di stampa</h3>
+    <p class="hint" style="font-size:11.5px;color:#6b7280;margin:0 0 8px">Definisce cosa esporta il PDF. Trascina/ridimensiona il rettangolo sul palco, o usa i valori (in metri).</p>
+    <div class="frame-row">
+      <div><label>Larghezza (m)</label><input type="number" id="frameW" min="0.5" step="0.1"></div>
+      <div><label>Profondità (m)</label><input type="number" id="frameH" min="0.5" step="0.1"></div>
+    </div>
+    <div class="frame-row">
+      <div><label>X (m)</label><input type="number" id="frameX" step="0.1"></div>
+      <div><label>Y (m)</label><input type="number" id="frameY" step="0.1"></div>
+    </div>
+    <div class="frame-row" style="margin-top:10px">
+      <button class="btn" id="frameStage" style="flex:1;font-size:12px">= Palco</button>
+      <button class="btn" id="frameAll" style="flex:1;font-size:12px">Tutto + planimetria</button>
+    </div>
+    <button class="btn danger" id="frameClear" style="width:100%;margin-top:8px;font-size:12px">Reimposta (usa il palco)</button>
   </div>
   <div class="sec" id="chanlist" style="border-top:1px solid #e5e7eb;padding-top:6px;margin-top:8px">
     <div class="clsec-head" id="inHead" title="Espandi/chiudi Input patch">
@@ -887,6 +920,8 @@
           <option value="50">1:50</option>
           <option value="100">1:100</option>
           <option value="200">1:200</option>
+          <option value="250">1:250</option>
+          <option value="500">1:500</option>
         </select>
         <label>Intestazione (facoltativa)</label>
         <input type="text" id="pdfHeader" placeholder="Es. Tecnico: Simone Castellan · +39 …" maxlength="120">
@@ -2387,6 +2422,7 @@ function normalizeState(s){
   s.inputs=(s.inputs||[]).map(normalizeChannelRow);
   s.outputs=(s.outputs||[]).map(normalizeChannelRow);
   if(s.venue){ s.venue=normalizeVenue(s.venue); }   /* retrocompat: venue opzionale */
+  if(s.printFrame){ var f=s.printFrame; s.printFrame={x:Math.round(f.x||0), y:Math.round(f.y||0), w:Math.max(50,Math.round(f.w||100)), h:Math.max(50,Math.round(f.h||100))}; }
   return s;
 }
 function load(){
@@ -2648,6 +2684,7 @@ function sceneMarkup(){
   s += '<text class="zone-lbl" x="'+(W/2)+'" y="'+(D+38)+'" text-anchor="middle">PUBBLICO</text>';
   sortedItems().forEach(function(it){ s += itemMarkup(it); });
   s += stageBlocksOverlay();
+  s += frameMarkup();   /* overlay cornice di stampa (solo in modalità area-stampa) */
   return s;
 }
 function render(){
@@ -2656,6 +2693,7 @@ function render(){
   renderProps();
   renderAccessoriCount();
   renderVenuePanel();
+  renderFramePanel();
   var ppm = svg.clientWidth / vb.w * 100;
   document.getElementById("scaleInfo").textContent =
     "palco "+(state.stage.w/100)+"×"+(state.stage.d/100)+" m"+stageHeightNote()+" · zoom "+ppm.toFixed(0)+" px/m";
@@ -3353,6 +3391,7 @@ function closeMobileDrawers(){
       if(a==="evento"){ toggleEvento(); return; }
       if(a==="chan"){ toggleChan(); return; }
       if(a==="venue"){ toggleVenueEdit(); return; }
+      if(a==="frame"){ toggleFrameEdit(); return; }
       if(a==="share") proxy("bShare"); else if(a==="pdf") proxy("bPdf"); else if(a==="theme") proxy("bTheme");
       else if(a==="new") proxy("bNew");
     });
@@ -3408,6 +3447,15 @@ svg.addEventListener("pointerdown", function(e){
   if(venueEdit && state.venue && !state.venue.locked && state.venue._dataUrl && venueCalibMode===0){
     var venEl=e.target.closest ? e.target.closest("[data-venue]") : null;
     if(venEl){ drag={mode:"venue", sp0:{x:sp.x,y:sp.y}, x0:state.venue.x, y0:state.venue.y, moved:false};
+      svg.setPointerCapture(e.pointerId); return; }
+  }
+  /* cornice di stampa: ridimensiona dalle maniglie o sposta dal corpo */
+  if(frameEdit && state.printFrame){
+    var feH=e.target.closest ? e.target.closest("[data-frame-edge]") : null;
+    if(feH){ drag={mode:"frameresize", edge:feH.getAttribute("data-frame-edge"), sp0:{x:sp.x,y:sp.y}, f0:Object.assign({},state.printFrame), moved:false};
+      svg.setPointerCapture(e.pointerId); return; }
+    var feB=e.target.closest ? e.target.closest("[data-frame-body]") : null;
+    if(feB){ drag={mode:"frame", sp0:{x:sp.x,y:sp.y}, f0:Object.assign({},state.printFrame), moved:false};
       svg.setPointerCapture(e.pointerId); return; }
   }
   /* Option/Alt + trascina = disegna un nuovo blocco del palco (non sopra un elemento) */
@@ -3514,6 +3562,13 @@ svg.addEventListener("pointermove", function(e){
     if(vi) vi.setAttribute("transform","translate("+state.venue.x+","+state.venue.y+") rotate("+(state.venue.rot||0)+")");
     return;
   }
+  if(drag.mode==="frame"){
+    sp=svgPoint(e); state.printFrame.x=Math.round(drag.f0.x+(sp.x-drag.sp0.x)); state.printFrame.y=Math.round(drag.f0.y+(sp.y-drag.sp0.y)); drag.moved=true;
+    render(); return;
+  }
+  if(drag.mode==="frameresize"){
+    sp=svgPoint(e); resizeFrame(drag, sp); drag.moved=true; render(); return;
+  }
   if(drag.mode==="item"){
     sp=svgPoint(e); var ddx=sp.x-drag.sp0.x, ddy=sp.y-drag.sp0.y; drag.moved=true;
     var freeMove = e.metaKey || e.ctrlKey;   /* Cmd (Mac) / Ctrl (Win) tenuto premuto = movimento libero, fuori dallo snap */
@@ -3577,6 +3632,7 @@ svg.addEventListener("pointerup", function(e){
   delete pointers[e.pointerId];
   if(pinch){ if(Object.keys(pointers).length<2) pinch=null; svg.classList.remove("dragging"); drag=null; return; }
   if(drag && drag.mode==="venue"){ if(drag.moved){ save(); render(); } drag=null; return; }
+  if(drag && (drag.mode==="frame"||drag.mode==="frameresize")){ if(drag.moved){ save(); } renderFramePanel(); render(); drag=null; return; }
   if(drag && drag.mode==="block"){ if(drag.moved){ recalcStageBBox(); save(); } renderStagePanel(); render(); svg.classList.remove("dragging"); drag=null; ensureVisible(); return; }
   if(drag && drag.mode==="blkresize"){ if(drag.moved){ recalcStageBBox(); save(); } renderStagePanel(); render(); drag=null; ensureVisible(); return; }
   if(drag && drag.mode==="newblk"){     /* fine Alt+trascina: crea il nuovo blocco se abbastanza grande */
@@ -3717,6 +3773,7 @@ function exitHubModes(except){
   if(except!=="evento" && eventoEdit){ eventoEdit=false; renderEventoPanel(); }
   if(except!=="chan" && chanEdit){ chanEdit=false; renderChanPanel(); }
   if(except!=="venue" && venueEdit){ venueEdit=false; venueCalibCancel(); renderVenuePanel(); }
+  if(except!=="frame" && frameEdit){ frameEdit=false; renderFramePanel(); }
 }
 function toggleStageEdit(){ stageEdit=!stageEdit; selBlock=stageEdit?0:null; if(stageEdit){ exitHubModes("palco"); clearSelection(); } renderStagePanel(); render(); }
 function renderEventoPanel(){ document.body.classList.toggle("evento-edit", eventoEdit); document.getElementById("eventoSec").hidden=!eventoEdit; }
@@ -5044,6 +5101,69 @@ function renderVenuePanel(){
 }
 function toggleVenueEdit(){ venueEdit=!venueEdit; if(venueEdit){ exitHubModes("venue"); clearSelection(); } renderVenuePanel(); render(); }
 
+/* ===== Cornice di stampa (area esportata nel PDF) ===== */
+var frameEdit=false;
+function frameStageRect(){ recalcStageBBox(); return {x:0,y:0,w:state.stage.w,h:state.stage.d}; }
+/* area che racchiude palco + elementi + planimetria (per "Tutto + planimetria") */
+function frameContentRect(){
+  var b=contentBounds(), x0=b.x0,y0=b.y0,x1=b.x1,y1=b.y1, v=state.venue;
+  if(v && v.enabled!==false && v._dataUrl){
+    var hw=v.w/2, hh=v.h/2, a=(v.rot||0)*Math.PI/180, c=Math.cos(a), s=Math.sin(a);
+    [[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]].forEach(function(p){
+      var px=v.x+p[0]*c-p[1]*s, py=v.y+p[0]*s+p[1]*c;
+      x0=Math.min(x0,px); y0=Math.min(y0,py); x1=Math.max(x1,px); y1=Math.max(y1,py);
+    });
+  }
+  var m=40;
+  return {x:Math.round(x0-m), y:Math.round(y0-m), w:Math.round(x1-x0+2*m), h:Math.round(y1-y0+2*m)};
+}
+function ensurePrintFrame(){ if(!state.printFrame) state.printFrame=frameStageRect(); }
+function toggleFrameEdit(){ frameEdit=!frameEdit; if(frameEdit){ exitHubModes("frame"); clearSelection(); ensurePrintFrame(); } renderFramePanel(); render(); }
+function fmtMnum(cm){ return (cm/100).toFixed(2).replace(/\.?0+$/,""); }
+function renderFramePanel(){
+  var p=document.getElementById("framePanel"); if(!p) return;
+  p.hidden=!frameEdit; if(!frameEdit) return;
+  var f=state.printFrame||frameStageRect();
+  document.getElementById("frameW").value=fmtMnum(f.w);
+  document.getElementById("frameH").value=fmtMnum(f.h);
+  document.getElementById("frameX").value=fmtMnum(f.x);
+  document.getElementById("frameY").value=fmtMnum(f.y);
+}
+function frameMarkup(){
+  if(!frameEdit || !state.printFrame) return '';
+  var f=state.printFrame, H=14;
+  var s='<g data-frame="1">';
+  s+='<rect class="frame-rect" data-frame-body="1" x="'+f.x+'" y="'+f.y+'" width="'+f.w+'" height="'+f.h+'"/>';
+  s+='<text class="frame-lbl" x="'+(f.x+f.w/2)+'" y="'+(f.y-12)+'" text-anchor="middle" font-size="22">AREA STAMPA · '+(f.w/100)+'×'+(f.h/100)+' m</text>';
+  var pts=[["nw",f.x,f.y],["n",f.x+f.w/2,f.y],["ne",f.x+f.w,f.y],["e",f.x+f.w,f.y+f.h/2],["se",f.x+f.w,f.y+f.h],["s",f.x+f.w/2,f.y+f.h],["sw",f.x,f.y+f.h],["w",f.x,f.y+f.h/2]];
+  pts.forEach(function(p){ s+='<rect class="frame-h" data-frame-edge="'+p[0]+'" x="'+(p[1]-H)+'" y="'+(p[2]-H)+'" width="'+(2*H)+'" height="'+(2*H)+'" rx="3"/>'; });
+  s+='</g>';
+  return s;
+}
+function resizeFrame(drag, sp){
+  var f0=drag.f0, ed=drag.edge, dx=sp.x-drag.sp0.x, dy=sp.y-drag.sp0.y, MIN=50;
+  var x=f0.x, y=f0.y, w=f0.w, h=f0.h;
+  if(ed.indexOf("w")>=0){ var nx=f0.x+dx, nw=f0.w-dx; if(nw<MIN){ nx=f0.x+f0.w-MIN; nw=MIN; } x=Math.round(nx); w=Math.round(nw); }
+  if(ed.indexOf("e")>=0){ w=Math.round(Math.max(MIN, f0.w+dx)); }
+  if(ed.indexOf("n")>=0){ var ny=f0.y+dy, nh=f0.h-dy; if(nh<MIN){ ny=f0.y+f0.h-MIN; nh=MIN; } y=Math.round(ny); h=Math.round(nh); }
+  if(ed.indexOf("s")>=0){ h=Math.round(Math.max(MIN, f0.h+dy)); }
+  state.printFrame={x:x,y:y,w:w,h:h};
+}
+document.getElementById("bFrame").addEventListener("click", toggleFrameEdit);
+["frameW","frameH","frameX","frameY"].forEach(function(id){
+  document.getElementById(id).addEventListener("change", function(){
+    ensurePrintFrame();
+    var w=Math.max(0.5, +document.getElementById("frameW").value||0.5);
+    var h=Math.max(0.5, +document.getElementById("frameH").value||0.5);
+    var x=+document.getElementById("frameX").value||0, y=+document.getElementById("frameY").value||0;
+    state.printFrame={x:Math.round(x*100), y:Math.round(y*100), w:Math.round(w*100), h:Math.round(h*100)};
+    save(); render();
+  });
+});
+document.getElementById("frameStage").addEventListener("click", function(){ state.printFrame=frameStageRect(); save(); render(); });
+document.getElementById("frameAll").addEventListener("click", function(){ state.printFrame=frameContentRect(); save(); render(); });
+document.getElementById("frameClear").addEventListener("click", function(){ state.printFrame=null; save(); render(); });
+
 function venueLoadFile(file){
   if(!file) return;
   var rd=new FileReader();
@@ -5570,7 +5690,13 @@ function renderPng(scale){
 /* ============ EXPORT PDF IN SCALA (jsPDF, A4/A3 orizzontale) ============ */
 /* mm di carta per cm reali a scala 1:N → cm*10/N. Foglio orizzontale in mm. */
 var PAPER={ a4:{w:297,h:210}, a3:{w:420,h:297}, a2:{w:594,h:420} };
-var SCALES=[50,100,200];
+var SCALES=[50,100,200,250,500];   /* aggiunte 1:250 e 1:500 per aree grandi (planimetrie/piazze) */
+/* area di stampa in cm reali: la cornice personalizzata se impostata, altrimenti l'ingombro del palco */
+function printArea(){
+  if(state.printFrame){ var f=state.printFrame; return {x:f.x, y:f.y, w:f.w, h:f.h, custom:true}; }
+  recalcStageBBox();
+  return {x:0, y:0, w:state.stage.w, h:state.stage.d, custom:false};
+}
 function pdfLayout(paperKey, orient){
   var p=PAPER[paperKey], pw=p.w, ph=p.h;
   if(orient==="portrait"){ pw=p.h; ph=p.w; }
@@ -5580,8 +5706,8 @@ function pdfLayout(paperKey, orient){
     drawW:pw-2*M-20, drawH:ph-M-cartH-botLbl-(M+topLbl) };  /* area disegno utile */
 }
 function scaleFits(N, paperKey, orient){
-  var L=pdfLayout(paperKey, orient);
-  return state.stage.w*10/N<=L.drawW && state.stage.d*10/N<=L.drawH;
+  var L=pdfLayout(paperKey, orient), A=printArea();
+  return A.w*10/N<=L.drawW && A.h*10/N<=L.drawH;
 }
 function autoScale(paperKey, orient){
   for(var i=0;i<SCALES.length;i++){ if(scaleFits(SCALES[i],paperKey,orient)) return SCALES[i]; }
@@ -5590,17 +5716,23 @@ function autoScale(paperKey, orient){
 function resolveScale(paperKey, scaleSel, orient){
   return scaleSel==="auto" ? autoScale(paperKey, orient) : parseInt(scaleSel,10);
 }
-/* SVG del solo palco (rettangolo + griglia + elementi), viewBox in cm, niente etichette/quote */
+/* SVG dell'area di stampa (planimetria + palco + griglia + elementi), viewBox in cm, niente etichette/quote */
 function stageSceneSvg(){
   recalcStageBBox();
-  var W=state.stage.w, D=state.stage.d, keep=sel, keepSet=selSet; sel=null; selSet={};
+  var A=printArea(), keep=sel, keepSet=selSet; sel=null; selSet={};
   var sorted=sortedItems();
   var items=''; sorted.forEach(function(it){ items+=itemMarkup(it); });
   sel=keep; selSet=keepSet;
   var css=document.querySelector("style").textContent.replace(/\/\*[\s\S]*?\*\//g,"");   /* via i commenti: un '<' in un commento romperebbe l'SVG */
-  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+D+'">'+
+  var hasVenue = state.venue && state.venue.enabled!==false && state.venue._dataUrl;
+  var venue = hasVenue
+    ? '<clipPath id="paClip"><rect x="'+A.x+'" y="'+A.y+'" width="'+A.w+'" height="'+A.h+'"/></clipPath>'+
+      '<g clip-path="url(#paClip)">'+venueMarkup()+'</g>'   /* planimetria di sfondo, ritagliata all'area di stampa */
+    : '';
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+A.x+' '+A.y+' '+A.w+' '+A.h+'">'+
     '<style>'+css+'</style>'+DEFS+
-    '<rect x="0" y="0" width="'+W+'" height="'+D+'" fill="#ffffff"/>'+
+    '<rect x="'+A.x+'" y="'+A.y+'" width="'+A.w+'" height="'+A.h+'" fill="#ffffff"/>'+
+    venue+
     stageFloorMarkup()+items+'</svg>';
 }
 function svgToDataUrl(svgStr, pxW, pxH, type){
@@ -5722,22 +5854,25 @@ function pdfScaleBar(doc, x, y, N){
 }
 /* anteprima del foglio (SVG, mm) — rispecchia il layout del PDF: planimetria + quote + cartiglio */
 function pdfPreviewSvg(paperKey, N, orient, header){
-  var L=pdfLayout(paperKey, orient);
+  var L=pdfLayout(paperKey, orient), A=printArea();
   var fits = N && scaleFits(N, paperKey, orient);
-  var Ng = N || 200;
-  var stMmW=state.stage.w*10/Ng, stMmH=state.stage.d*10/Ng;
+  var Ng = N || 500;
+  var stMmW=A.w*10/Ng, stMmH=A.h*10/Ng;
   var ix=L.drawX+(L.drawW-stMmW)/2, iy=L.drawY+(L.drawH-stMmH)/2;
   var scene = stageSceneSvg().replace(/^<svg /, '<svg x="'+ix+'" y="'+iy+'" width="'+stMmW+'" height="'+stMmH+'" preserveAspectRatio="none" ');
   var cy=L.ph-L.cartH;
   var sub=[]; if(state.luogo) sub.push(state.luogo);
-  sub.push(new Date().toLocaleDateString("it-IT")); sub.push("palco "+(state.stage.w/100)+"×"+(state.stage.d/100)+" m");
+  sub.push(new Date().toLocaleDateString("it-IT")); sub.push((A.custom?"area ":"palco ")+(A.w/100)+"×"+(A.h/100)+" m");
+  var stroke = A.custom ? '#9ca3af' : (fits?(isSingleRect()?'#1f2937':'none'):'#dc2626');
+  var labels = A.custom ? '' :
+    '<text x="'+(ix+stMmW/2)+'" y="'+(iy-1.6)+'" font-size="3" fill="#9a9a9a" text-anchor="middle">FONDO PALCO</text>'+
+    '<text x="'+(ix+stMmW/2)+'" y="'+(iy+stMmH+4)+'" font-size="3" fill="#9a9a9a" text-anchor="middle">PUBBLICO</text>';
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+L.pw+' '+L.ph+'" '+
       'style="display:block;width:100%;height:auto;background:#fff;box-shadow:0 2px 14px rgba(0,0,0,.18)">'+
     '<rect x="0" y="0" width="'+L.pw+'" height="'+L.ph+'" fill="#fff"/>'+
     scene+
-    '<rect x="'+ix+'" y="'+iy+'" width="'+stMmW+'" height="'+stMmH+'" fill="'+(fits?'none':'rgba(220,38,38,.06)')+'" stroke="'+(fits?(isSingleRect()?'#1f2937':'none'):'#dc2626')+'" stroke-width="0.5"/>'+
-    '<text x="'+(ix+stMmW/2)+'" y="'+(iy-1.6)+'" font-size="3" fill="#9a9a9a" text-anchor="middle">FONDO PALCO</text>'+
-    '<text x="'+(ix+stMmW/2)+'" y="'+(iy+stMmH+4)+'" font-size="3" fill="#9a9a9a" text-anchor="middle">PUBBLICO</text>'+
+    '<rect x="'+ix+'" y="'+iy+'" width="'+stMmW+'" height="'+stMmH+'" fill="'+(fits?'none':'rgba(220,38,38,.06)')+'" stroke="'+stroke+'" stroke-width="0.5"/>'+
+    labels+
     '<line x1="'+L.M+'" y1="'+cy+'" x2="'+(L.pw-L.M)+'" y2="'+cy+'" stroke="#1f2937" stroke-width="0.4"/>'+
     '<text x="'+L.M+'" y="'+(cy+7)+'" font-size="6" font-weight="700" fill="#111827">'+esc(state.titolo||"Stage plot")+'</text>'+
     '<text x="'+L.M+'" y="'+(cy+12.5)+'" font-size="3.6" fill="#4b5563">'+esc(sub.join("  ·  "))+'</text>'+
@@ -5747,8 +5882,8 @@ function pdfPreviewSvg(paperKey, N, orient, header){
 }
 /* costruisce il jsPDF doc (Promise) — separato da save per poterlo testare */
 function buildPdfDoc(paperKey, N, orient, header){
-  var L=pdfLayout(paperKey, orient);
-  var stMmW=state.stage.w*10/N, stMmH=state.stage.d*10/N;
+  var L=pdfLayout(paperKey, orient), A=printArea();
+  var stMmW=A.w*10/N, stMmH=A.h*10/N;
   var ix=L.drawX+(L.drawW-stMmW)/2, iy=L.drawY+(L.drawH-stMmH)/2;
   return loadJsPDF().then(function(){
     var jsPDF=window.jspdf.jsPDF;
@@ -5760,14 +5895,18 @@ function buildPdfDoc(paperKey, N, orient, header){
         return svgToDataUrl(stageSceneSvg(), pxW, pxH, "image/png").then(function(dataUrl){ doc.addImage(dataUrl, "PNG", ix, iy, stMmW, stMmH); });
       })
       .then(function(){
-    if(isSingleRect()){ doc.setDrawColor(31,41,55); doc.setLineWidth(0.5); doc.rect(ix, iy, stMmW, stMmH); }   /* forma composita/curva: il contorno è già nell'immagine */
-    doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(150,150,150);
-    doc.text("FONDO PALCO", ix+stMmW/2, iy-3, {align:"center"});
-    doc.text("PUBBLICO", ix+stMmW/2, iy+stMmH+5, {align:"center"});
-    /* quote */
-    doc.setTextColor(107,114,128); doc.setFontSize(8.5);
-    doc.text((state.stage.w/100)+" m", ix+stMmW/2, iy-8, {align:"center"});
-    doc.text((state.stage.d/100)+" m", ix-5, iy+stMmH/2, {align:"center", angle:90});
+    if(A.custom){
+      doc.setDrawColor(120,120,120); doc.setLineWidth(0.3); doc.rect(ix, iy, stMmW, stMmH);   /* bordo dell'area di stampa */
+    } else {
+      if(isSingleRect()){ doc.setDrawColor(31,41,55); doc.setLineWidth(0.5); doc.rect(ix, iy, stMmW, stMmH); }   /* forma composita/curva: il contorno è già nell'immagine */
+      doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(150,150,150);
+      doc.text("FONDO PALCO", ix+stMmW/2, iy-3, {align:"center"});
+      doc.text("PUBBLICO", ix+stMmW/2, iy+stMmH+5, {align:"center"});
+      /* quote */
+      doc.setTextColor(107,114,128); doc.setFontSize(8.5);
+      doc.text((state.stage.w/100)+" m", ix+stMmW/2, iy-8, {align:"center"});
+      doc.text((state.stage.d/100)+" m", ix-5, iy+stMmH/2, {align:"center", angle:90});
+    }
     pdfScaleBar(doc, ix, iy+stMmH+10, N);
     pdfCartiglio(doc, L, N, header);
     /* --- PAG 2: channel list --- */
@@ -5803,9 +5942,10 @@ function exportPdf(paperKey, scaleSel, orient, header){
   var info=document.getElementById("pdfInfo");
   var N=resolveScale(paperKey, scaleSel, orient);
   var oTxt=(orient==="portrait"?"verticale":"orizzontale");
-  if(!N){ info.className="mstatus err"; info.textContent="Il palco non entra nemmeno a 1:200 su "+paperKey.toUpperCase()+" "+oTxt+". Prova un foglio più grande, l'altro orientamento o riduci il palco."; return; }
+  var aTxt=printArea().custom?"L'area di stampa":"Il palco";
+  if(!N){ info.className="mstatus err"; info.textContent=aTxt+" non entra nemmeno a 1:500 su "+paperKey.toUpperCase()+" "+oTxt+". Prova un foglio più grande, l'altro orientamento o riduci l'area."; return; }
   if(!scaleFits(N, paperKey, orient)){
-    info.className="mstatus err"; info.textContent="A 1:"+N+" il palco sfora il foglio "+paperKey.toUpperCase()+" "+oTxt+". Scegli Automatica o un foglio più grande."; return;
+    info.className="mstatus err"; info.textContent="A 1:"+N+" "+(printArea().custom?"l'area":"il palco")+" sfora il foglio "+paperKey.toUpperCase()+" "+oTxt+". Scegli Automatica o un foglio più grande."; return;
   }
   if(!state.items.length){ info.className="mstatus err"; info.textContent="Il palco è vuoto."; return; }
   var name=fileName()+".pdf";
