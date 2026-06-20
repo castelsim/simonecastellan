@@ -3262,9 +3262,6 @@ function miniSvg(k, over){
           addToGroup(g[0], makeBtn(k, TYPES[k].nome)); entries.push({k:k,nome:TYPES[k].nome});
         });
       });
-      /* — standalone: Metro e Testo libero — */
-      body.appendChild(makeBtn("metro", TYPES.metro.nome)); n++; entries.push({k:"metro",nome:TYPES.metro.nome});
-      body.appendChild(makeBtn("testo", TYPES.testo.nome)); n++; entries.push({k:"testo",nome:TYPES.testo.nome});
     }
     if(c==="Archi"){   /* organico archi rimosso per ora; restano Violino I / II con nome progressivo */
       body.appendChild(makeActionBtn("Violino I", "postazione · nome progressivo", "vlnpost", function(){ addViolin(1); })); n++;
@@ -3309,6 +3306,13 @@ function miniSvg(k, over){
     wrap.appendChild(head); wrap.appendChild(body);
   });
   // tutte le categorie chiuse di default (nessuna .open)
+
+  /* — Metro e Testo libero: fuori dalle categorie, sotto Video — */
+  var extraSep=document.createElement("div"); extraSep.style.cssText="height:1px;background:#e5e7eb;margin:10px 6px 8px";
+  el.insertBefore(extraSep, results);
+  ["metro","testo"].forEach(function(k){
+    var b=makeBtn(k, TYPES[k].nome); el.insertBefore(b, results); entries.push({k:k,nome:TYPES[k].nome});
+  });
 
   search.addEventListener("input", function(){
     var q=this.value.trim().toLowerCase();
