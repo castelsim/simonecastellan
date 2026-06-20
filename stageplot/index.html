@@ -1845,7 +1845,7 @@ var TYPES = {
                '<text class="lbl sub" y="28">BACKDROP</text>'; }},
   quinta:   {nome:"Quinta / laterale", dim:"120×20", cat:"Pedane e strutture", w:120,d:20, resizable:true, z:1,
              draw:function(it){ return bar(0,0,it.w,it.d,'ic fBlack',2)+lin(-it.w/2+12,0,it.w/2-12,0,'sil'); }},
-  truss:    {nome:"Truss a terra", dim:"200×30", cat:"Pedane e strutture", w:200,d:30, resizable:true, z:1, catalog:false,
+  truss:    {nome:"Truss a terra", dim:"200×30", cat:"Pedane e strutture", w:200,d:30, resizable:true, z:1,
              draw:function(it){ var s=bar(0,0,it.w,it.d,'ic dash',2);
                for(var x=-it.w/2+18;x<it.w/2;x+=36){ s+=lin(x,-it.d/2,x+18,it.d/2,'ic thin'); s+=lin(x,it.d/2,x+18,-it.d/2,'ic thin'); }
                return s; }},
@@ -2193,9 +2193,40 @@ var TYPES = {
                '<path class="ic dash" d="M 23,-7 L 62,-22 M 23,7 L 62,22"/>'; }},
   camera:   {nome:"Camera su treppiede", dim:"70×70", cat:"Video", w:72,d:72, defLabel:"CAM",
              draw:function(){ return bar(0,-10,34,20,'ic fBlack',3)+bar(25,-10,16,12,'ic fGrey',2)+
-               lin(0,2,-22,28,'ic thin')+lin(0,2,22,28,'ic thin')+lin(0,2,0,32,'ic thin')+circ(0,2,3,'ic fill'); }}
+               lin(0,2,-22,28,'ic thin')+lin(0,2,22,28,'ic thin')+lin(0,2,0,32,'ic thin')+circ(0,2,3,'ic fill'); }},
+  /* ===== Luci ===== */
+  consolaluci:{nome:"Console luci", dim:"100×60", cat:"Luci", w:100,d:60,
+    draw:function(it){ return bar(0,0,it.w,it.d,'ic fGrey',3)+bar(0,-8,it.w-14,it.d-24,'ic thin',1)+
+      lin(-it.w/2+20,it.d/2-10,it.w/2-20,it.d/2-10,'ic thin')+
+      lin(-it.w/2+20,it.d/2-16,it.w/2-20,it.d/2-16,'ic thin'); }},
+  dimmerluci: {nome:"Dimmer rack", dim:"60×50", cat:"Luci", w:60,d:50,
+    draw:function(it){ return bar(0,0,it.w,it.d,'ic fGrey',3)+
+      lin(-it.w/2+8,it.d/2-10,it.w/2-8,it.d/2-10,'ic thin')+
+      lin(-it.w/2+8,it.d/2-20,it.w/2-8,it.d/2-20,'ic thin')+
+      lin(-it.w/2+8,it.d/2-30,it.w/2-8,it.d/2-30,'ic thin'); }},
+  testamobile:{nome:"Testa mobile", dim:"40×40", cat:"Luci", w:40,d:40,
+    draw:function(){ return circ(0,0,20,'ic thin')+circ(0,0,13,'ic fGrey')+circ(0,0,5,'ic fBlack')+
+      lin(-20,0,-13,0,'ic thin')+lin(13,0,20,0,'ic thin'); }},
+  parluci:    {nome:"PAR / Wash", dim:"22×22", cat:"Luci", w:22,d:22,
+    draw:function(){ return circ(0,0,11,'ic thin')+circ(0,0,7,'ic fGrey')+circ(0,0,3,'ic fBlack'); }},
+  sagomatore: {nome:"Sagomatore", dim:"35×45", cat:"Luci", w:35,d:45,
+    draw:function(it){ return bar(0,5,it.w,it.d-12,'ic fGrey',3)+circ(0,-it.d/2+8,9,'ic thin')+circ(0,-it.d/2+8,5,'ic fBlack'); }},
+  strobo:     {nome:"Stroboscopio", dim:"30×15", cat:"Luci", w:30,d:15,
+    draw:function(it){ return bar(0,0,it.w,it.d,'ic fGrey',2)+
+      lin(-8,it.d/2-4,-8,-it.d/2+4,'ic thin')+lin(0,it.d/2-4,0,-it.d/2+4,'ic thin')+lin(8,it.d/2-4,8,-it.d/2+4,'ic thin'); }},
+  followspot: {nome:"Follow spot", dim:"80×40", cat:"Luci", w:80,d:40,
+    draw:function(it){ return bar(-8,0,it.w-18,it.d,'ic fGrey',3)+bar(it.w/2-12,0,8,22,'ic thin',2)+
+      circ(-it.w/2+10,0,10,'ic thin')+circ(-it.w/2+10,0,4,'ic fBlack'); }},
+  fumomachine:{nome:"Macchina del fumo", dim:"50×35", cat:"Luci", w:50,d:35,
+    draw:function(it){ return bar(6,0,it.w-12,it.d,'ic fGrey',3)+bar(-it.w/2+7,0,10,it.d-10,'ic thin',2); }},
+  hazer:      {nome:"Hazer", dim:"40×30", cat:"Luci", w:40,d:30,
+    draw:function(it){ return bar(0,0,it.w,it.d,'ic fGrey',3)+circ(0,-2,8,'ic thin')+lin(-4,6,4,6,'ic thin'); }},
+  americana:  {nome:"Americana", dim:"200×30", cat:"Luci", w:200,d:30, resizable:true, z:1,
+    draw:function(it){ var s=bar(0,0,it.w,it.d,'ic dash',2);
+      for(var x=-it.w/2+18;x<it.w/2;x+=36){ s+=lin(x,-it.d/2,x+18,it.d/2,'ic thin'); s+=lin(x,it.d/2,x+18,-it.d/2,'ic thin'); }
+      return s; }}
 };
-var CAT_ORDER = ["Pedane e strutture","Ottoni","Legni","Ritmica","Archi","Persone","Microfoni","Monitoraggio","Tecnica","Video"];
+var CAT_ORDER = ["Pedane e strutture","Ottoni","Legni","Ritmica","Archi","Persone","Microfoni","Monitoraggio","Tecnica","Luci","Video"];
 /* distanza interna di default (e minima) per le postazioni doppie: la più stretta disponibile.
    Gli strumenti larghi (contrabbasso, violoncello) hanno un minimo maggiore per non sovrapporsi. */
 var DEFAULT_SEP = 65;
