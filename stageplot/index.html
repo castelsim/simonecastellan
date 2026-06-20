@@ -400,20 +400,14 @@
     <span class="mlab">PALCO</span>
     <label>L<input type="number" id="mW" min="1" max="60" step="0.5"><span>m</span></label>
     <label>P<input type="number" id="mD" min="1" max="40" step="0.5"><span>m</span></label>
-    <label>Snap
-      <select id="mSnap"><option value="0">libero</option><option value="25" selected>25 cm</option><option value="50">50 cm</option><option value="100">1 m</option></select>
-    </label>
   </div>
 </div>
 <header>
   <span class="brand">STAGE PLOT</span>
-  <div class="hdr-stage" title="Dimensioni del palco rettangolare e snap alla griglia">
+  <div class="hdr-stage" title="Dimensioni del palco rettangolare (Cmd/Ctrl = snap 25 cm)">
     <span class="lab">PALCO</span>
     <label>Largh.<input type="number" id="stW" min="1" max="60" step="0.5"><i>m</i></label>
     <label>Prof.<input type="number" id="stD" min="1" max="40" step="0.5"><i>m</i></label>
-    <label>Snap
-      <select id="snap"><option value="0">libero</option><option value="25" selected>25 cm</option><option value="50">50 cm</option><option value="100">1 m</option></select>
-    </label>
   </div>
   <input type="text" id="titolo" class="hdr-evt" placeholder="Titolo" title="Titolo dell'evento (diventa l'oggetto della mail in condivisione)" style="width:150px">
   <input type="text" id="luogo" class="hdr-evt" placeholder="Luogo" title="Luogo dell'evento" style="width:130px">
@@ -1861,6 +1855,16 @@ var TYPES = {
              draw:function(){ var s=circ(0,0,22,'ic fGrey')+circ(0,0,4.5,'dotS');
                [0,120,240].forEach(function(a){ s+='<ellipse class="ic thin fSilver" cx="0" cy="-12" rx="5.5" ry="11" transform="rotate('+a+')"/>'; });
                return s; }},
+  metro:    {nome:"Metro", dim:"linea misura", cat:"Pedane e strutture", w:200,d:28, resizable:true, z:4, innerLabel:true,
+             draw:function(it){
+               var w=Math.max(10,it.w||200), fs=(it.lblSize==null?14:it.lblSize), txt=it.label||fmtM(w);
+               var tw=Math.max(44, String(txt).length*fs*.55+14), y=-fs*.7;
+               return lin(-w/2,0,w/2,0,'ic')+
+                 lin(-w/2,-9,-w/2,9,'ic')+lin(w/2,-9,w/2,9,'ic')+
+                 circ(-w/2,0,4,'ic fill')+circ(w/2,0,4,'ic fill')+
+                 '<rect x="'+(-tw/2)+'" y="'+(y-fs*.85)+'" width="'+tw+'" height="'+(fs+8)+'" rx="5" fill="#fff" stroke="#cbd5e1" stroke-width="1"/>'+
+                 '<text class="lbl" y="'+y+'" style="font-size:'+fs+'px">'+esc(txt)+'</text>';
+             }},
   testo:    {nome:"Testo libero", cat:"Pedane e strutture", w:10,d:10, z:3, defLabel:"Testo…",
              draw:function(){ return ''; }},
   /* --- ottoni (icone realistiche libreria + seduta chiara) --- */
@@ -2285,7 +2289,7 @@ var COMP = {
 var DEFAULT_LABELS = {
   pedana:"PED", scala:"Scala", rampa:"Rampa", parapetto:"Parap.", fondale:"Backdrop", quinta:"Quinta", truss:"Truss", transenna:"Transenna",
   tappeto:"Tappeto", tavolo:"Tavolo", sedia:"Sedia", sedialeggio:"Sedia+leggio", leggio:"Leggio", podio:"Podio", pedanacoro:"Coro riser",
-  sgabello:"Sgab.", ventilatore:"Fan", testo:"Testo",
+  sgabello:"Sgab.", ventilatore:"Fan", metro:"", testo:"Testo",
   corno:"Corno", tromba:"Tba", trombone:"Tbn", tuba:"Tuba",
   flauto:"Fl", oboe:"Ob", clarinetto:"Cl", fagotto:"Fg", saxalto:"Sax A", saxtenore:"Sax T", saxbaritono:"Sax Bar",
   batteria:"Drums", edrums:"E-drums", drumshield:"Shield", rullante:"Snare", percussioni:"Perc.", cajon:"Cajon", timbales:"Timbales",
@@ -3134,8 +3138,6 @@ function updateHeaderStage(){
   var b0=stageBlocks()[0];
   ["stW","mW"].forEach(function(id){ var e=document.getElementById(id); if(e && document.activeElement!==e) e.value=b0.w/100; });
   ["stD","mD"].forEach(function(id){ var e=document.getElementById(id); if(e && document.activeElement!==e) e.value=b0.d/100; });
-  var snap=document.getElementById("snap"), ms=document.getElementById("mSnap");
-  if(snap && ms && document.activeElement!==ms) ms.value=snap.value;
 }
 /* Titolo/Luogo: campi nell'header (desktop) + pannello Evento (mobile), sincronizzati con lo stato */
 function setEventInputs(){
@@ -3146,11 +3148,10 @@ function setEventInputs(){
 ["luogo","luogoEv"].forEach(function(id){ var e=document.getElementById(id); if(e) e.addEventListener("input", function(){ state.luogo=this.value; setEventInputs(); save(); }); });
 document.getElementById("mW").addEventListener("change", function(){ applyStageWidth(this.value); });
 document.getElementById("mD").addEventListener("change", function(){ applyStageDepth(this.value); });
-document.getElementById("mSnap").addEventListener("change", function(){ document.getElementById("snap").value=this.value; });
-document.getElementById("snap").addEventListener("change", function(){ updateHeaderStage(); });
 document.getElementById("mMenuBtn").addEventListener("click", function(){ closeMobileDrawers(); try{ document.getElementById("props").scrollTo({top:0,behavior:"smooth"}); }catch(e){} });
-function snapVal(){ return +document.getElementById("snap").value; }
-function snap(v){ var s=snapVal(); return s? Math.round(v/s)*s : Math.round(v); }
+function snapVal(){ return 25; }
+function snap(v){ var s=snapVal(); return Math.round(v/s)*s; }
+function placeCoord(v,e){ return (e && (e.metaKey||e.ctrlKey)) ? snap(v) : Math.round(v); }
 
 /* ============ CATALOGO (UI con anteprime) ============ */
 function miniSvg(k, over){
@@ -3239,7 +3240,7 @@ function miniSvg(k, over){
       [["Accessi e sicurezza", ["scala","rampa","parapetto","transenna"]],
        ["Scenografia",         ["fondale","quinta","tappeto"]],
        ["Arredo e leggii",     ["tavolo","sedia","sedialeggio","leggio","podio","podiosp","sgabello"]],
-       ["Varie",               ["ventilatore","testo"]]
+       ["Varie",               ["ventilatore","metro","testo"]]
       ].forEach(function(g){
         g[1].filter(function(k){ return TYPES[k] && TYPES[k].catalog!==false; }).forEach(function(k){
           addToGroup(g[0], makeBtn(k, TYPES[k].nome)); entries.push({k:k,nome:TYPES[k].nome});
@@ -3312,7 +3313,7 @@ function findFreeSpot(x,y,w,d){
   if(!itemsCollide(x,y,w,d,15)) return {x:x,y:y};
   var step=Math.max(45, Math.round((w+d)/4));
   for(var r=1;r<48;r++){ for(var a=0;a<8;a++){ var ang=a*Math.PI/4;
-    var nx=snap(x+Math.cos(ang)*step*r), ny=snap(y+Math.sin(ang)*step*r);
+    var nx=Math.round(x+Math.cos(ang)*step*r), ny=Math.round(y+Math.sin(ang)*step*r);
     if(!itemsCollide(nx,ny,w,d,15)) return {x:nx,y:ny}; } }
   return {x:x,y:y};
 }
@@ -3339,7 +3340,7 @@ function instrSeats(type){ var base=instrBase(type), n=0;
 function nextInstrLabel(type){ return instrBase(type)+" "+(instrSeats(type)+1); }
 function addItem(type, over){
   var t=TYPES[type];
-  var it={ id:uid(), type:type, x:snap(vb.x+vb.w/2+addCascade), y:snap(vb.y+vb.h/2+addCascade),
+  var it={ id:uid(), type:type, x:Math.round(vb.x+vb.w/2+addCascade), y:Math.round(vb.y+vb.h/2+addCascade),
            rot:0, w:t.w, d:t.d, label:defaultLabel(type) };
   if(t.riser) it.h=t.h||40;
   if(KEYS_BENCH[type]) it.panca=true;   /* tastiere/piano: sgabello di default */
@@ -3399,6 +3400,7 @@ function closeMobileDrawers(){
 })();
 function defaultLabel(type){
   var t=TYPES[type]; if(!t) return "";
+  if(type==="metro") return "";
   if(t.riser || type==="corista") return "";   /* pedane e coristi nascono senza nome */
   return DEFAULT_LABELS[type] || t.defLabel || t.nome || "";
 }
@@ -3571,11 +3573,11 @@ svg.addEventListener("pointermove", function(e){
   }
   if(drag.mode==="item"){
     sp=svgPoint(e); var ddx=sp.x-drag.sp0.x, ddy=sp.y-drag.sp0.y; drag.moved=true;
-    var freeMove = e.metaKey || e.ctrlKey;   /* Cmd (Mac) / Ctrl (Win) tenuto premuto = movimento libero, fuori dallo snap */
+    var gridMove = e.metaKey || e.ctrlKey;   /* Cmd (Mac) / Ctrl (Win) tenuto premuto = aggancio alla griglia */
     drag.items.forEach(function(d){
       var it=state.items.find(function(i){ return i.id===d.id; }); if(!it) return;
-      it.x = freeMove ? Math.round(d.x0+ddx) : snap(d.x0+ddx);
-      it.y = freeMove ? Math.round(d.y0+ddy) : snap(d.y0+ddy);
+      it.x = gridMove ? snap(d.x0+ddx) : Math.round(d.x0+ddx);
+      it.y = gridMove ? snap(d.y0+ddy) : Math.round(d.y0+ddy);
       var g=svg.querySelector('[data-id="'+it.id+'"]');
       if(g) g.setAttribute("transform","translate("+it.x+" "+it.y+")");
     });
@@ -3590,30 +3592,30 @@ svg.addEventListener("pointermove", function(e){
       var gdx=sp.x-drag.sp0.x, gdy=sp.y-drag.sp0.y;
       var cn=Math.cos(-drag.rot), sn=Math.sin(-drag.rot);
       var ldx=gdx*cn - gdy*sn, ldy=gdx*sn + gdy*cn;     /* delta nel frame locale dell'elemento */
-      var free=e.metaKey||e.ctrlKey, MIN=20, ed=drag.edge, nw=drag.w0, nd=drag.d0, sgx=0, sgy=0;
+      var grid=e.metaKey||e.ctrlKey, MIN=20, ed=drag.edge, nw=drag.w0, nd=drag.d0, sgx=0, sgy=0;
       if(ed.indexOf("r")>=0){ nw=Math.max(MIN, drag.w0+ldx); sgx=1; }
       if(ed.indexOf("l")>=0){ nw=Math.max(MIN, drag.w0-ldx); sgx=-1; }
       if(ed.indexOf("b")>=0){ nd=Math.max(MIN, drag.d0+ldy); sgy=1; }
       if(ed.indexOf("t")>=0){ nd=Math.max(MIN, drag.d0-ldy); sgy=-1; }
-      if(!free){ nw=snap(nw); nd=snap(nd); }
+      if(grid){ nw=snap(nw); nd=snap(nd); }
       rzit.w=nw; rzit.d=nd;
       var shx=sgx*(nw-drag.w0)/2, shy=sgy*(nd-drag.d0)/2;   /* shift calcolato sui valori (eventualmente) snappati → lato opposto davvero fermo */
       var cc=Math.cos(drag.rot), ss=Math.sin(drag.rot);   /* riporta lo shift locale in coordinate globali (lato opposto fermo) */
       rzit.x = drag.x0 + (shx*cc - shy*ss);
       rzit.y = drag.y0 + (shx*ss + shy*cc);
-      if(!free){ rzit.x=snap(rzit.x); rzit.y=snap(rzit.y); }
+      if(grid){ rzit.x=snap(rzit.x); rzit.y=snap(rzit.y); }
       drag.moved=true; render();
     }
   } else if(drag.mode==="block"){
     sp=svgPoint(e); var bdx=sp.x-drag.sp0.x, bdy=sp.y-drag.sp0.y; drag.moved=true;
-    var r=stageBlocks()[drag.bi]; if(r){ r.x=Math.max(0,snap(drag.x0+bdx)); r.y=Math.max(0,snap(drag.y0+bdy)); recalcStageBBox(); render(); }
+    var r=stageBlocks()[drag.bi]; if(r){ r.x=Math.max(0,placeCoord(drag.x0+bdx,e)); r.y=Math.max(0,placeCoord(drag.y0+bdy,e)); recalcStageBBox(); render(); }
   } else if(drag.mode==="blkresize"){
     sp=svgPoint(e); var r=stageBlocks()[drag.bi]; drag.moved=true;
     if(r){ var MIN=100;
-      if(drag.edge==="r"){ r.w=Math.max(MIN, snap(sp.x-r.x)); }
-      else if(drag.edge==="b"){ r.d=Math.max(MIN, snap(sp.y-r.y)); }
-      else if(drag.edge==="l"){ var nx=Math.max(0, Math.min(snap(sp.x), drag.x0+drag.w0-MIN)); r.w=drag.x0+drag.w0-nx; r.x=nx; }
-      else if(drag.edge==="t"){ var ny=Math.max(0, Math.min(snap(sp.y), drag.y0+drag.d0-MIN)); r.d=drag.y0+drag.d0-ny; r.y=ny; }
+      if(drag.edge==="r"){ r.w=Math.max(MIN, placeCoord(sp.x-r.x,e)); }
+      else if(drag.edge==="b"){ r.d=Math.max(MIN, placeCoord(sp.y-r.y,e)); }
+      else if(drag.edge==="l"){ var nx=Math.max(0, Math.min(placeCoord(sp.x,e), drag.x0+drag.w0-MIN)); r.w=drag.x0+drag.w0-nx; r.x=nx; }
+      else if(drag.edge==="t"){ var ny=Math.max(0, Math.min(placeCoord(sp.y,e), drag.y0+drag.d0-MIN)); r.d=drag.y0+drag.d0-ny; r.y=ny; }
       recalcStageBBox(); renderStagePanel(); render();
     }
   } else if(drag.mode==="marquee" || drag.mode==="newblk"){
@@ -3639,7 +3641,7 @@ svg.addEventListener("pointerup", function(e){
     if(drag.el && drag.el.parentNode) drag.el.parentNode.removeChild(drag.el);
     var nr=drag.rect;
     if(nr && nr.w>=40 && nr.h>=40){
-      var base=state.stage.blocks[0], nb={x:snap(nr.x), y:snap(nr.y), w:Math.max(100,snap(nr.w)), d:Math.max(100,snap(nr.h))};
+      var base=state.stage.blocks[0], nb={x:placeCoord(nr.x,e), y:placeCoord(nr.y,e), w:Math.max(100,placeCoord(nr.w,e)), d:Math.max(100,placeCoord(nr.h,e))};
       if(base && base.h) nb.h=base.h;
       state.stage.blocks.push(nb); selBlock=state.stage.blocks.length-1;
       recalcStageBBox(); save(); renderStagePanel(); render(); ensureVisible();
@@ -3699,7 +3701,7 @@ svg.addEventListener("drop", function(e){
   if(!data || !data.sp || !data.k || !TYPES[data.k]) return;   /* ignora drop estranei */
   e.preventDefault(); svg.classList.remove("drop-target");
   var p=svgPoint(e), over=data.over?JSON.parse(JSON.stringify(data.over)):{};
-  over.x=snap(p.x); over.y=snap(p.y);
+  over.x=placeCoord(p.x,e); over.y=placeCoord(p.y,e);
   addItem(data.k, over);
 });
 /* il doppio-click è gestito manualmente nel pointerdown (vedi lastDown): il dblclick nativo
@@ -3782,13 +3784,13 @@ function renderChanPanel(){ document.body.classList.toggle("chan-edit", chanEdit
 function toggleChan(){ chanEdit=!chanEdit; if(chanEdit){ exitHubModes("chan"); clearSelection(); } renderChanPanel(); render(); }
 function addStageBlock(){
   var bb=stageBlocks(); recalcStageBBox();
-  var base=bb[0], r={x:snap(state.stage.w), y:0, w:300, d:base?base.d:300};   /* a destra dell'ingombro */
+  var base=bb[0], r={x:Math.round(state.stage.w), y:0, w:300, d:base?base.d:300};   /* a destra dell'ingombro */
   state.stage.blocks.push(r); selBlock=state.stage.blocks.length-1;
   recalcStageBBox(); renderStagePanel(); render(); save();
 }
 function addSemicircle(){
   recalcStageBBox(); var W=state.stage.w, D=state.stage.d, w=400, d=200;
-  var r={shape:"semi", flat:"top", x:snap(Math.max(0,(W-w)/2)), y:D, w:w, d:d};   /* semicerchio al centro fronte (verso il pubblico) */
+  var r={shape:"semi", flat:"top", x:Math.round(Math.max(0,(W-w)/2)), y:D, w:w, d:d};   /* semicerchio al centro fronte (verso il pubblico) */
   state.stage.blocks.push(r); selBlock=state.stage.blocks.length-1;
   recalcStageBBox(); renderStagePanel(); render(); save();
 }
@@ -3796,8 +3798,8 @@ function addSemicircle(){
 function addCatalogBlock(w,d,shape){
   recalcStageBBox();
   var r = shape==="semi"
-    ? {shape:"semi", flat:"top", x:snap(Math.max(0,(state.stage.w-w)/2)), y:state.stage.d, w:w, d:d}
-    : {x:snap(state.stage.w), y:0, w:w, d:d};   /* a destra dell'ingombro, da trascinare */
+    ? {shape:"semi", flat:"top", x:Math.round(Math.max(0,(state.stage.w-w)/2)), y:state.stage.d, w:w, d:d}
+    : {x:Math.round(state.stage.w), y:0, w:w, d:d};   /* a destra dell'ingombro, da trascinare */
   state.stage.blocks.push(r); selBlock=state.stage.blocks.length-1;
   if(!stageEdit){ stageEdit=true; exitHubModes("palco"); clearSelection(); }
   recalcStageBBox(); renderStagePanel(); render(); save();
@@ -5273,7 +5275,7 @@ var H3D={ pedana:0,scala:40,rampa:40,parapetto:110,fondale:400,quinta:400,truss:
   dimono:5,distereo:5,stagebox:25,splitter:25,multicore:15,quadro:120,foh:95,monmix:95,laptop:25,audiointerface:9,
   schermo:300,proiettore:30,camera:160 };
 /* elementi documentati in patch/2D ma NON da renderizzare (simboli) */
-var HIDDEN3D={ testo:1, corrente:1, ciabatta:1, iem:1, headset:1, wireless:1 };
+var HIDDEN3D={ testo:1, metro:1, corrente:1, ciabatta:1, iem:1, headset:1, wireless:1 };
 /* descrizioni EN per il motore 3D (fallback = nome italiano) */
 var DESC3D={ pedana:"black stage riser/platform", podio:"square conductor podium with black trim",
   pedanacoro:"choir riser with 3 steps", tappeto:"large muted-red orchestral rug", sedia:"black padded orchestra chair",
