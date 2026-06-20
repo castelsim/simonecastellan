@@ -3259,6 +3259,30 @@ function renderSnapGuides(guides){
   });
 }
 
+function blockMagneticSnap(bi, propX, propY){
+  /* propX/propY: posizione top-left proposta (già ≥0) della pedana bi */
+  var blocks=stageBlocks(), r=blocks[bi];
+  if(!r||blocks.length<2) return {sdx:0,sdy:0,guides:[]};
+  var T=SNAP_T, W=state.stage.w, D=state.stage.d;
+  var pL=propX, pR=propX+r.w, pT=propY, pB=propY+r.d;
+  var pCx=pL+r.w/2, pCy=pT+r.d/2;
+  var xSnap=null,xDist=T+1,ySnap=null,yDist=T+1;
+  blocks.forEach(function(b,i){
+    if(i===bi) return;
+    var bL=b.x,bR=b.x+b.w,bT=b.y,bB=b.y+b.d,bCx=b.x+b.w/2,bCy=b.y+b.d/2;
+    [[pL,bR],[pR,bL],[pL,bL],[pR,bR],[pCx,bCx]].forEach(function(p){
+      var d=Math.abs(p[0]-p[1]); if(d<xDist){xDist=d;xSnap={delta:p[1]-p[0],val:p[1]};}
+    });
+    [[pT,bB],[pB,bT],[pT,bT],[pB,bB],[pCy,bCy]].forEach(function(p){
+      var d=Math.abs(p[0]-p[1]); if(d<yDist){yDist=d;ySnap={delta:p[1]-p[0],val:p[1]};}
+    });
+  });
+  var sdx=xSnap?xSnap.delta:0,sdy=ySnap?ySnap.delta:0,guides=[],pad=40;
+  if(xSnap) guides.push({x1:xSnap.val,y1:-pad,x2:xSnap.val,y2:D+pad,cls:'snap-guide'});
+  if(ySnap) guides.push({x1:-pad,y1:ySnap.val,x2:W+pad,y2:ySnap.val,cls:'snap-guide'});
+  return {sdx:sdx,sdy:sdy,guides:guides};
+}
+
 /* ============ CATALOGO (UI con anteprime) ============ */
 function miniSvg(k, over){
   var t=TYPES[k];
@@ -3724,15 +3748,52 @@ svg.addEventListener("pointermove", function(e){
     }
   } else if(drag.mode==="block"){
     sp=svgPoint(e); var bdx=sp.x-drag.sp0.x, bdy=sp.y-drag.sp0.y; drag.moved=true;
-    var r=stageBlocks()[drag.bi]; if(r){ r.x=Math.max(0,placeCoord(drag.x0+bdx,e)); r.y=Math.max(0,placeCoord(drag.y0+bdy,e)); recalcStageBBox(); render(); }
+    var r=stageBlocks()[drag.bi]; if(r){
+      var bgrid=e.metaKey||e.ctrlKey;
+      var bpx=Math.max(0,bgrid?snap(drag.x0+bdx):Math.round(drag.x0+bdx));
+      var bpy=Math.max(0,bgrid?snap(drag.y0+bdy):Math.round(drag.y0+bdy));
+      var bmag=bgrid?{sdx:0,sdy:0,guides:[]}:blockMagneticSnap(drag.bi,bpx,bpy);
+      r.x=Math.max(0,bpx+bmag.sdx); r.y=Math.max(0,bpy+bmag.sdy);
+      recalcStageBBox(); render(); renderSnapGuides(bmag.guides);
+    }
   } else if(drag.mode==="blkresize"){
     sp=svgPoint(e); var r=stageBlocks()[drag.bi]; drag.moved=true;
-    if(r){ var MIN=100;
+    if(r){ var MIN=100, brgrid=e.metaKey||e.ctrlKey;
       if(drag.edge==="r"){ r.w=Math.max(MIN, placeCoord(sp.x-r.x,e)); }
       else if(drag.edge==="b"){ r.d=Math.max(MIN, placeCoord(sp.y-r.y,e)); }
       else if(drag.edge==="l"){ var nx=Math.max(0, Math.min(placeCoord(sp.x,e), drag.x0+drag.w0-MIN)); r.w=drag.x0+drag.w0-nx; r.x=nx; }
       else if(drag.edge==="t"){ var ny=Math.max(0, Math.min(placeCoord(sp.y,e), drag.y0+drag.d0-MIN)); r.d=drag.y0+drag.d0-ny; r.y=ny; }
-      recalcStageBBox(); renderStagePanel(); render();
+      /* snap magnetico tra pedane durante resize */
+      var brrsg=[];
+      if(!brgrid && stageBlocks().length>1){
+        var brblk=stageBlocks(), brT=SNAP_T, brW=state.stage.w, brD=state.stage.d;
+        var brBestDist=brT+1, brBestDelta=0, brBestGuide=null;
+        brblk.forEach(function(b,i){ if(i===drag.bi) return;
+          var bL=b.x,bR=b.x+b.w,bT2=b.y,bB=b.y+b.d;
+          var edgeVal, targets;
+          if(drag.edge==="r"){ edgeVal=r.x+r.w; targets=[bL,bR]; }
+          else if(drag.edge==="l"){ edgeVal=r.x; targets=[bR,bL]; }
+          else if(drag.edge==="b"){ edgeVal=r.y+r.d; targets=[bT2,bB]; }
+          else if(drag.edge==="t"){ edgeVal=r.y; targets=[bB,bT2]; }
+          else return;
+          targets.forEach(function(t){
+            var d=Math.abs(edgeVal-t);
+            if(d<brBestDist){ brBestDist=d; brBestDelta=t-edgeVal;
+              brBestGuide=(drag.edge==="r"||drag.edge==="l")
+                ?{x1:t,y1:-40,x2:t,y2:brD+40,cls:'snap-guide'}
+                :{x1:-40,y1:t,x2:brW+40,y2:t,cls:'snap-guide'};
+            }
+          });
+        });
+        if(brBestDist<=brT){
+          if(drag.edge==="r"){ r.w=Math.max(MIN,r.w+brBestDelta); }
+          else if(drag.edge==="l"){ r.w=Math.max(MIN,r.w-brBestDelta); r.x=Math.max(0,r.x+brBestDelta); }
+          else if(drag.edge==="b"){ r.d=Math.max(MIN,r.d+brBestDelta); }
+          else if(drag.edge==="t"){ r.d=Math.max(MIN,r.d-brBestDelta); r.y=Math.max(0,r.y+brBestDelta); }
+          if(brBestGuide) brrsg=[brBestGuide];
+        }
+      }
+      recalcStageBBox(); renderStagePanel(); render(); renderSnapGuides(brrsg);
     }
   } else if(drag.mode==="marquee" || drag.mode==="newblk"){
     sp=svgPoint(e);
