@@ -97,6 +97,9 @@
   svg{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
   svg.dragging{cursor:grabbing}
   #props{grid-area:props;border-left:1px solid #e5e7eb;padding:12px;overflow-y:auto}
+  #propsTopBar{position:relative;display:flex;justify-content:flex-end;margin:-12px -12px 10px;padding:6px 10px;border-bottom:1px solid #e5e7eb}
+  #propsMenu{top:36px;right:8px;left:auto;min-width:190px;z-index:200}
+  body.dark #propsTopBar{border-color:#2b3445}
   #props h3{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;margin:0 0 8px}
   #props .sec{margin-bottom:18px}
   #props label{display:block;font-size:12px;color:#6b7280;margin:8px 0 3px}
@@ -348,6 +351,10 @@
   body.dark .hdr-stage{background:#1b2230;border-color:#2b3445}
   body.dark .hdr-stage .lab,body.dark .hdr-stage label,body.dark .hdr-stage label i{color:#94a3b8}
   body.dark .hdr-stage input,body.dark .hdr-stage select,body.dark header input[type=text]{background:#0f141b;border-color:#2b3445;color:#e5e7eb}
+  body.dark .menu-pop{background:#1b2230;border-color:#2b3445}
+  body.dark .menu-pop button{background:#1b2230;color:#e5e7eb;border-color:#2b3445}
+  body.dark .menu-pop button:hover{background:#222b38}
+  body.dark .menu-pop .sep{background:#2b3445}
   body.dark .btn{background:#222b38;color:#e5e7eb}
   body.dark .btn:hover{background:#2c3848}
   body.dark .btn.primary{background:#2563eb;color:#fff}
@@ -418,11 +425,11 @@
   <button class="btn" id="bUndo" title="Annulla (⌘Z)" style="padding:7px 11px">↶</button>
   <button class="btn" id="bRedo" title="Ripeti (⇧⌘Z)" style="padding:7px 11px">↷</button>
   <button class="btn" id="bFit" title="Adatta lo zoom al palco">⤢ Adatta</button>
-  <button class="btn btn-icon" id="bVenue" title="Planimetria — importa immagine di sfondo">🗺</button>
-  <button class="btn btn-icon" id="bFrame" title="Area stampa — definisce cosa esporta il PDF">▭</button>
+  <button class="btn btn-icon" id="bVenue" title="Planimetria — importa immagine di sfondo" hidden>🗺</button>
+  <button class="btn btn-icon" id="bFrame" title="Area stampa — definisce cosa esporta il PDF" hidden>▭</button>
   <button class="btn" id="bPdf" hidden>Salva PDF</button>
   <button class="btn primary" id="bAi" hidden title="Descrivi il palco a ChatGPT e ricevi il link già pronto" style="display:none;align-items:center;gap:6px">🤖 Crea con AI</button>
-  <button class="btn primary" id="bShare" title="Salva/esporta il progetto in JSON o scarica il PDF">💾 Salva</button>
+  <button class="btn primary" id="bShare" title="Salva/esporta il progetto in JSON o scarica il PDF" hidden>💾 Salva</button>
   <button class="btn danger" id="bNew" hidden>Nuovo</button>
 </header>
 
@@ -431,6 +438,15 @@
 <main><svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg></main>
 
 <aside id="props">
+  <div id="propsTopBar">
+    <button class="btn btn-icon" id="bPropsMenu" title="Azioni">⋯</button>
+    <div class="menu-pop" id="propsMenu" hidden>
+      <button id="pmVenue">🗺 Planimetria</button>
+      <button id="pmFrame">▭ Area stampa</button>
+      <div class="sep"></div>
+      <button id="pmSave">💾 Salva / Esporta</button>
+    </div>
+  </div>
   <div id="mBar">
     <button class="mtbtn" id="mUndo" aria-label="Annulla">↶</button>
     <button class="mtbtn" id="mRedo" aria-label="Ripeti">↷</button>
@@ -6156,6 +6172,14 @@ else { window.addEventListener("resize", render); fit();
   if(savedSession && !sharedLoaded) document.getElementById("bResume").hidden=false;   /* offri il ripristino solo all'avvio normale */
 }
 resetHistory();   /* la sessione iniziale è la base: undo non torna prima del caricamento */
+(function(){
+  var btn=document.getElementById("bPropsMenu"), pop=document.getElementById("propsMenu");
+  btn.addEventListener("click",function(e){ e.stopPropagation(); pop.hidden=!pop.hidden; });
+  document.addEventListener("click",function(){ pop.hidden=true; });
+  document.getElementById("pmVenue").addEventListener("click",function(){ document.getElementById("bVenue").click(); });
+  document.getElementById("pmFrame").addEventListener("click",function(){ document.getElementById("bFrame").click(); });
+  document.getElementById("pmSave").addEventListener("click",function(){ document.getElementById("bShare").click(); });
+})();
 </script>
 </body>
 </html>
