@@ -108,6 +108,8 @@
   body.dark #propsMenu button{color:#e5e7eb}
   body.dark #propsMenu button:hover{background:#222b38}
   body.dark .pm-sep{background:#2b3445}
+  .snap-guide{stroke:#3b82f6;stroke-width:1.2px;stroke-dasharray:8 5;opacity:.75;pointer-events:none}
+  .snap-guide.center{stroke:#f59e0b}
   #props h3{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;margin:0 0 8px}
   #props .sec{margin-bottom:18px}
   #props label{display:block;font-size:12px;color:#6b7280;margin:8px 0 3px}
@@ -3208,6 +3210,55 @@ function snapVal(){ return 25; }
 function snap(v){ var s=snapVal(); return Math.round(v/s)*s; }
 function placeCoord(v,e){ return (e && (e.metaKey||e.ctrlKey)) ? snap(v) : Math.round(v); }
 
+/* ===== Snap magnetico a lati e centri del palco ===== */
+var SNAP_T = 15;  /* soglia cm entro cui lo snap si attiva */
+function magneticSnap(dragItems, ddx, ddy){
+  /* dragItems: array di {id, x0, y0} da drag.items
+     ddx/ddy:  delta grezzo dal punto di inizio drag
+     Ritorna {sdx, sdy, guides:[{x1,y1,x2,y2,cls}]}  */
+  if(!dragItems.length) return {sdx:0,sdy:0,guides:[]};
+  var W=state.stage.w, D=state.stage.d, T=SNAP_T;
+
+  /* bounding box di tutti gli items trascinati nelle posizioni proposte */
+  var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  dragItems.forEach(function(d){
+    var it=state.items.find(function(i){return i.id===d.id;}); if(!it) return;
+    var px=d.x0+ddx, py=d.y0+ddy;
+    minX=Math.min(minX,px-it.w/2); maxX=Math.max(maxX,px+it.w/2);
+    minY=Math.min(minY,py-it.d/2); maxY=Math.max(maxY,py+it.d/2);
+  });
+  var cx=(minX+maxX)/2, cy=(minY+maxY)/2;
+
+  /* candidati X: [valore proposto, target, classe guide] */
+  var xSnap=null, xDist=T+1;
+  [[minX,0,''],[maxX,W,''],[cx,W/2,'center']].forEach(function(c){
+    var d=Math.abs(c[0]-c[1]); if(d<xDist){xDist=d; xSnap={delta:c[1]-c[0],val:c[1],cls:c[2]};}
+  });
+  var ySnap=null, yDist=T+1;
+  [[minY,0,''],[maxY,D,''],[cy,D/2,'center']].forEach(function(c){
+    var d=Math.abs(c[0]-c[1]); if(d<yDist){yDist=d; ySnap={delta:c[1]-c[0],val:c[1],cls:c[2]};}
+  });
+
+  var sdx=xSnap?xSnap.delta:0, sdy=ySnap?ySnap.delta:0, guides=[];
+  var pad=Math.round(Math.max(W,D)*0.06);
+  if(xSnap) guides.push({x1:xSnap.val,y1:-pad,x2:xSnap.val,y2:D+pad,cls:'snap-guide'+' '+xSnap.cls});
+  if(ySnap) guides.push({x1:-pad,y1:ySnap.val,x2:W+pad,y2:ySnap.val,cls:'snap-guide'+' '+ySnap.cls});
+  return {sdx:sdx,sdy:sdy,guides:guides};
+}
+function renderSnapGuides(guides){
+  var NS='http://www.w3.org/2000/svg';
+  var g=document.getElementById('snapGuides');
+  if(!g){g=document.createElementNS(NS,'g');g.id='snapGuides';svg.appendChild(g);}
+  while(g.firstChild) g.removeChild(g.firstChild);
+  guides.forEach(function(ln){
+    var el=document.createElementNS(NS,'line');
+    el.setAttribute('x1',ln.x1);el.setAttribute('y1',ln.y1);
+    el.setAttribute('x2',ln.x2);el.setAttribute('y2',ln.y2);
+    el.setAttribute('class',ln.cls.trim());
+    g.appendChild(el);
+  });
+}
+
 /* ============ CATALOGO (UI con anteprime) ============ */
 function miniSvg(k, over){
   var t=TYPES[k];
@@ -3628,10 +3679,12 @@ svg.addEventListener("pointermove", function(e){
   if(drag.mode==="item"){
     sp=svgPoint(e); var ddx=sp.x-drag.sp0.x, ddy=sp.y-drag.sp0.y; drag.moved=true;
     var gridMove = e.metaKey || e.ctrlKey;   /* Cmd (Mac) / Ctrl (Win) tenuto premuto = aggancio alla griglia */
+    var magnet = gridMove ? {sdx:0,sdy:0,guides:[]} : magneticSnap(drag.items,ddx,ddy);
+    renderSnapGuides(magnet.guides);
     drag.items.forEach(function(d){
       var it=state.items.find(function(i){ return i.id===d.id; }); if(!it) return;
-      it.x = gridMove ? snap(d.x0+ddx) : Math.round(d.x0+ddx);
-      it.y = gridMove ? snap(d.y0+ddy) : Math.round(d.y0+ddy);
+      it.x = gridMove ? snap(d.x0+ddx) : Math.round(d.x0+ddx+magnet.sdx);
+      it.y = gridMove ? snap(d.y0+ddy) : Math.round(d.y0+ddy+magnet.sdy);
       var g=svg.querySelector('[data-id="'+it.id+'"]');
       if(g) g.setAttribute("transform","translate("+it.x+" "+it.y+")");
     });
@@ -3704,7 +3757,7 @@ svg.addEventListener("pointerup", function(e){
   }
   if(drag && drag.mode==="rotate"){ if(drag.moved){ save(); ensureVisible(); } render(); drag=null; return; }
   if(drag && drag.mode==="itemresize"){ if(drag.moved){ save(); ensureVisible(); } render(); drag=null; return; }
-  if(drag && drag.mode==="item" && drag.moved){ render(); save(); ensureVisible(); }
+  if(drag && drag.mode==="item" && drag.moved){ renderSnapGuides([]); render(); save(); ensureVisible(); }
   else if(drag && drag.mode==="marquee"){
     var r=drag.rect;
     if(r && (r.w>8||r.h>8)){
