@@ -641,7 +641,8 @@
       <button class="btn" id="frameStage" style="flex:1;font-size:12px">= Palco</button>
       <button class="btn" id="frameAll" style="flex:1;font-size:12px">Tutto + planimetria</button>
     </div>
-    <button class="btn danger" id="frameClear" style="width:100%;margin-top:8px;font-size:12px">Reimposta (usa il palco)</button>
+    <button class="btn" id="frameCenter" style="width:100%;margin-top:6px;font-size:12px">⊕ Centra palco nell'area</button>
+    <button class="btn danger" id="frameClear" style="width:100%;margin-top:6px;font-size:12px">Reimposta (usa il palco)</button>
   </div>
   <div class="sec" id="chanlist" style="border-top:1px solid #e5e7eb;padding-top:6px;margin-top:8px">
     <div class="clsec-head" id="inHead" title="Espandi/chiudi Input patch">
@@ -2396,7 +2397,7 @@ function importProject(json){
   if(!s || typeof s!=="object") throw new Error("Formato non valido");
   undoStack.push(JSON.stringify(state)); if(undoStack.length>120) undoStack.shift(); redoStack.length=0;   /* importazione annullabile con Ctrl+Z */
   state=normalizeState(s);
-  state.items=(state.items||[]).filter(function(it){ return it && TYPES[it.type]; });   /* scarta elementi di tipo sconosciuto */
+  state.items=sanitizeItems(state.items||[]);
   ensureItemIds();
   lastSnap=JSON.stringify(state); sel=null; selSet={};
   setEventInputs();
@@ -3237,10 +3238,11 @@ function miniSvg(k, over){
       });
       if(TYPES.pedanacoro){ addToGroup("Pedane e gradoni", makeBtn("pedanacoro", TYPES.pedanacoro.nome)); entries.push({k:"pedanacoro",nome:TYPES.pedanacoro.nome}); }
       /* — restanti gruppi — */
+      addToGroup("Misura", makeBtn("metro", TYPES.metro.nome)); entries.push({k:"metro",nome:TYPES.metro.nome});
       [["Accessi e sicurezza", ["scala","rampa","parapetto","transenna"]],
        ["Scenografia",         ["fondale","quinta","tappeto"]],
        ["Arredo e leggii",     ["tavolo","sedia","sedialeggio","leggio","podio","podiosp","sgabello"]],
-       ["Varie",               ["ventilatore","metro","testo"]]
+       ["Varie",               ["ventilatore","testo"]]
       ].forEach(function(g){
         g[1].filter(function(k){ return TYPES[k] && TYPES[k].catalog!==false; }).forEach(function(k){
           addToGroup(g[0], makeBtn(k, TYPES[k].nome)); entries.push({k:k,nome:TYPES[k].nome});
@@ -5165,6 +5167,12 @@ document.getElementById("bFrame").addEventListener("click", toggleFrameEdit);
 document.getElementById("frameStage").addEventListener("click", function(){ state.printFrame=frameStageRect(); save(); render(); });
 document.getElementById("frameAll").addEventListener("click", function(){ state.printFrame=frameContentRect(); save(); render(); });
 document.getElementById("frameClear").addEventListener("click", function(){ state.printFrame=null; save(); render(); });
+document.getElementById("frameCenter").addEventListener("click", function(){
+  ensurePrintFrame(); recalcStageBBox();
+  state.printFrame.x = Math.round(state.stage.w/2 - state.printFrame.w/2);
+  state.printFrame.y = Math.round(state.stage.d/2 - state.printFrame.h/2);
+  save(); render();
+});
 
 function venueLoadFile(file){
   if(!file) return;
