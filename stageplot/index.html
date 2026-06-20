@@ -97,9 +97,17 @@
   svg{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
   svg.dragging{cursor:grabbing}
   #props{grid-area:props;border-left:1px solid #e5e7eb;padding:12px;overflow-y:auto}
-  #propsTopBar{position:relative;display:flex;justify-content:flex-end;margin:-12px -12px 10px;padding:6px 10px;border-bottom:1px solid #e5e7eb}
-  #propsMenu{top:36px;right:8px;left:auto;min-width:190px;z-index:200}
-  body.dark #propsTopBar{border-color:#2b3445}
+  #propsMenu{position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e5e7eb;border-radius:10px;
+    box-shadow:0 8px 24px rgba(0,0,0,.14);padding:6px;z-index:200;width:190px;min-width:unset}
+  #propsMenu[hidden]{display:none}
+  #propsMenu button{display:block;width:100%;text-align:left;background:transparent;border:none;border-radius:7px;
+    padding:9px 12px;font-size:13px;font-weight:600;color:#1f2937;cursor:pointer;white-space:nowrap}
+  #propsMenu button:hover{background:#f1f3f4}
+  .pm-sep{height:1px;background:#e5e7eb;margin:4px 6px}
+  body.dark #propsMenu{background:#1b2230;border-color:#2b3445}
+  body.dark #propsMenu button{color:#e5e7eb}
+  body.dark #propsMenu button:hover{background:#222b38}
+  body.dark .pm-sep{background:#2b3445}
   #props h3{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;margin:0 0 8px}
   #props .sec{margin-bottom:18px}
   #props label{display:block;font-size:12px;color:#6b7280;margin:8px 0 3px}
@@ -351,10 +359,6 @@
   body.dark .hdr-stage{background:#1b2230;border-color:#2b3445}
   body.dark .hdr-stage .lab,body.dark .hdr-stage label,body.dark .hdr-stage label i{color:#94a3b8}
   body.dark .hdr-stage input,body.dark .hdr-stage select,body.dark header input[type=text]{background:#0f141b;border-color:#2b3445;color:#e5e7eb}
-  body.dark .menu-pop{background:#1b2230;border-color:#2b3445}
-  body.dark .menu-pop button{background:#1b2230;color:#e5e7eb;border-color:#2b3445}
-  body.dark .menu-pop button:hover{background:#222b38}
-  body.dark .menu-pop .sep{background:#2b3445}
   body.dark .btn{background:#222b38;color:#e5e7eb}
   body.dark .btn:hover{background:#2c3848}
   body.dark .btn.primary{background:#2563eb;color:#fff}
@@ -438,15 +442,6 @@
 <main><svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg></main>
 
 <aside id="props">
-  <div id="propsTopBar">
-    <button class="btn btn-icon" id="bPropsMenu" title="Azioni">⋯</button>
-    <div class="menu-pop" id="propsMenu" hidden>
-      <button id="pmVenue">🗺 Planimetria</button>
-      <button id="pmFrame">▭ Area stampa</button>
-      <div class="sep"></div>
-      <button id="pmSave">💾 Salva / Esporta</button>
-    </div>
-  </div>
   <div id="mBar">
     <button class="mtbtn" id="mUndo" aria-label="Annulla">↶</button>
     <button class="mtbtn" id="mRedo" aria-label="Ripeti">↷</button>
@@ -599,7 +594,18 @@
     <div class="hint" style="font-size:11px;color:#9ca3af;margin-top:8px">Shift-click per aggiungere/togliere. <b>Unisci in blocco</b>: si muovono e selezionano insieme. Trascina per spostare il gruppo.</div>
   </div>
   <div class="sec" id="noSel" style="font-size:12.5px;color:#9ca3af">
-    <button class="btn" id="bResume" hidden>↩ Riprendi ultima sessione</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn" id="bResume" hidden>↩ Riprendi ultima sessione</button>
+      <div style="position:relative;margin-left:auto">
+        <button class="btn btn-icon" id="bPropsMenu" title="Azioni">⋯</button>
+        <div id="propsMenu" hidden>
+          <button id="pmVenue">🗺 Planimetria</button>
+          <button id="pmFrame">▭ Area stampa</button>
+          <div class="pm-sep"></div>
+          <button id="pmSave">💾 Salva / Esporta</button>
+        </div>
+      </div>
+    </div>
     <div id="accessoriCount" style="margin-top:8px;font-size:12px;color:#6b7280;line-height:1.8"></div>
   </div>
   <!-- pannello planimetria -->
