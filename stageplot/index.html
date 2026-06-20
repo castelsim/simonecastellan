@@ -3711,7 +3711,16 @@ svg.addEventListener("pointermove", function(e){
       rzit.x = drag.x0 + (shx*cc - shy*ss);
       rzit.y = drag.y0 + (shx*ss + shy*cc);
       if(grid){ rzit.x=snap(rzit.x); rzit.y=snap(rzit.y); }
-      drag.moved=true; render();
+      /* snap magnetico a bordo palco durante resize (solo rot=0, no griglia) */
+      var rsg=[];
+      if(!grid && drag.rot===0){
+        var rW=state.stage.w,rD=state.stage.d,rT=SNAP_T;
+        if(ed.indexOf("r")>=0){var rre=rzit.x+nw/2,rdt=rW-rre;if(Math.abs(rdt)<rT){nw+=rdt;rzit.x+=rdt/2;rzit.w=nw;rsg.push({x1:rW,y1:-40,x2:rW,y2:rD+40,cls:'snap-guide'});}}
+        if(ed.indexOf("l")>=0){var rle=rzit.x-nw/2,rdt=-rle;if(Math.abs(rdt)<rT){nw+=rdt;rzit.x-=rdt/2;rzit.w=nw;rsg.push({x1:0,y1:-40,x2:0,y2:rD+40,cls:'snap-guide'});}}
+        if(ed.indexOf("b")>=0){var rbe=rzit.y+nd/2,rdt=rD-rbe;if(Math.abs(rdt)<rT){nd+=rdt;rzit.y+=rdt/2;rzit.d=nd;rsg.push({x1:-40,y1:rD,x2:rW+40,y2:rD,cls:'snap-guide'});}}
+        if(ed.indexOf("t")>=0){var rte=rzit.y-nd/2,rdt=-rte;if(Math.abs(rdt)<rT){nd+=rdt;rzit.y-=rdt/2;rzit.d=nd;rsg.push({x1:-40,y1:0,x2:rW+40,y2:0,cls:'snap-guide'});}}
+      }
+      drag.moved=true; render(); renderSnapGuides(rsg);   /* guide DOPO render() perché itemresize chiama render() ogni frame */
     }
   } else if(drag.mode==="block"){
     sp=svgPoint(e); var bdx=sp.x-drag.sp0.x, bdy=sp.y-drag.sp0.y; drag.moved=true;
