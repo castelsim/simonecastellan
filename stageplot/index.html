@@ -3245,32 +3245,26 @@ function miniSvg(k, over){
       g.head.innerHTML='<span class="caret">▸</span><span>'+esc(sub)+'</span><span class="count">'+g.count+'</span>';
       g.body.appendChild(btn); n++; }
     if(c==="Pedane e strutture"){
-      /* — Blocchi palco — (compongono il pavimento del palco; moduli standard) */
-      [["2×1 m",200,100],["1×1 m",100,100],["2×2 m",200,200]].forEach(function(p){
-        var nome="Blocco palco "+p[0];
-        addToGroup("Blocchi palco", makeActionBtn(nome, "modulo palco", "pedana", function(){ addCatalogBlock(p[1],p[2]); }));
-        entries.push({nome:nome, dim:"modulo palco", icon:"pedana", action:function(){ addCatalogBlock(p[1],p[2]); }});
-      });
-      addToGroup("Blocchi palco", makeActionBtn("Blocco semicerchio", "fronte curvo", "pedana", function(){ addCatalogBlock(400,200,"semi"); }));
-      entries.push({nome:"Blocco semicerchio", dim:"fronte curvo", icon:"pedana", action:function(){ addCatalogBlock(400,200,"semi"); }});
-      /* — Pedane e gradoni — (rialzi che vanno SOPRA il palco) */
+      /* — Pedane e gradoni — */
       [["2×1 m",200,100],["1×1 m",100,100],["2×0,5 m",200,50]].forEach(function(p){
         var nome="Pedana "+p[0], over={w:p[1],d:p[2]};
         addToGroup("Pedane e gradoni", makeBtn("pedana",nome,over,p[0]));
         entries.push({k:"pedana",nome:nome,over:over,dim:p[0]});
       });
       if(TYPES.pedanacoro){ addToGroup("Pedane e gradoni", makeBtn("pedanacoro", TYPES.pedanacoro.nome)); entries.push({k:"pedanacoro",nome:TYPES.pedanacoro.nome}); }
-      /* — restanti gruppi — */
-      addToGroup("Misura", makeBtn("metro", TYPES.metro.nome)); entries.push({k:"metro",nome:TYPES.metro.nome});
+      /* — gruppi strutture — */
       [["Accessi e sicurezza", ["scala","rampa","parapetto","transenna"]],
        ["Scenografia",         ["fondale","quinta","tappeto"]],
        ["Arredo e leggii",     ["tavolo","sedia","sedialeggio","leggio","podio","podiosp","sgabello"]],
-       ["Varie",               ["ventilatore","testo"]]
+       ["Varie",               ["ventilatore"]]
       ].forEach(function(g){
         g[1].filter(function(k){ return TYPES[k] && TYPES[k].catalog!==false; }).forEach(function(k){
           addToGroup(g[0], makeBtn(k, TYPES[k].nome)); entries.push({k:k,nome:TYPES[k].nome});
         });
       });
+      /* — standalone: Metro e Testo libero — */
+      body.appendChild(makeBtn("metro", TYPES.metro.nome)); n++; entries.push({k:"metro",nome:TYPES.metro.nome});
+      body.appendChild(makeBtn("testo", TYPES.testo.nome)); n++; entries.push({k:"testo",nome:TYPES.testo.nome});
     }
     if(c==="Archi"){   /* organico archi rimosso per ora; restano Violino I / II con nome progressivo */
       body.appendChild(makeActionBtn("Violino I", "postazione · nome progressivo", "vlnpost", function(){ addViolin(1); })); n++;
