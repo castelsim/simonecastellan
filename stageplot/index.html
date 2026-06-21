@@ -3362,7 +3362,7 @@ function miniSvg(k, over){
       g.body.appendChild(btn); n++; }
     if(c==="Pedane e strutture"){
       /* — Pedane e gradoni — */
-      [["2×1 m",200,100],["1×1 m",100,100],["2×0,5 m",200,50]].forEach(function(p){
+      [["2×1 m",200,100]].forEach(function(p){
         var nome="Pedana "+p[0], over={w:p[1],d:p[2]};
         addToGroup("Pedane e gradoni", makeBtn("pedana",nome,over,p[0]));
         entries.push({k:"pedana",nome:nome,over:over,dim:p[0]});
