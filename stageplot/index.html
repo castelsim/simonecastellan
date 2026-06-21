@@ -3219,6 +3219,10 @@ function magneticSnap(dragItems, ddx, ddy){
   if(!dragItems.length) return {sdx:0,sdy:0,guides:[]};
   var W=state.stage.w, D=state.stage.d, T=SNAP_T;
 
+  /* set di id trascinati (esclusi dai target) */
+  var dragIds={};
+  dragItems.forEach(function(d){ dragIds[d.id]=true; });
+
   /* bounding box di tutti gli items trascinati nelle posizioni proposte */
   var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
   dragItems.forEach(function(d){
@@ -3229,20 +3233,26 @@ function magneticSnap(dragItems, ddx, ddy){
   });
   var cx=(minX+maxX)/2, cy=(minY+maxY)/2;
 
-  /* candidati X: [valore proposto, target, classe guide] */
-  var xSnap=null, xDist=T+1;
-  [[minX,0,''],[maxX,W,''],[cx,W/2,'center']].forEach(function(c){
-    var d=Math.abs(c[0]-c[1]); if(d<xDist){xDist=d; xSnap={delta:c[1]-c[0],val:c[1],cls:c[2]};}
-  });
-  var ySnap=null, yDist=T+1;
-  [[minY,0,''],[maxY,D,''],[cy,D/2,'center']].forEach(function(c){
-    var d=Math.abs(c[0]-c[1]); if(d<yDist){yDist=d; ySnap={delta:c[1]-c[0],val:c[1],cls:c[2]};}
+  /* candidati: bordi e centro del palco */
+  var xCands=[[minX,0,''],[maxX,W,''],[cx,W/2,'center']];
+  var yCands=[[minY,0,''],[maxY,D,''],[cy,D/2,'center']];
+
+  /* candidati: bordi e centro di ogni altro item fermo */
+  state.items.forEach(function(it){
+    if(dragIds[it.id]) return;
+    var iL=it.x-it.w/2, iR=it.x+it.w/2, iT=it.y-it.d/2, iB=it.y+it.d/2;
+    xCands.push([minX,iR,''],[maxX,iL,''],[minX,iL,''],[maxX,iR,''],[cx,it.x,'']);
+    yCands.push([minY,iB,''],[maxY,iT,''],[minY,iT,''],[maxY,iB,''],[cy,it.y,'']);
   });
 
-  var sdx=xSnap?xSnap.delta:0, sdy=ySnap?ySnap.delta:0, guides=[];
+  var xSnap=null,xDist=T+1,ySnap=null,yDist=T+1;
+  xCands.forEach(function(c){ var d=Math.abs(c[0]-c[1]); if(d<xDist){xDist=d;xSnap={delta:c[1]-c[0],val:c[1],cls:c[2]};} });
+  yCands.forEach(function(c){ var d=Math.abs(c[0]-c[1]); if(d<yDist){yDist=d;ySnap={delta:c[1]-c[0],val:c[1],cls:c[2]};} });
+
+  var sdx=xSnap?xSnap.delta:0,sdy=ySnap?ySnap.delta:0,guides=[];
   var pad=Math.round(Math.max(W,D)*0.06);
-  if(xSnap) guides.push({x1:xSnap.val,y1:-pad,x2:xSnap.val,y2:D+pad,cls:'snap-guide'+' '+xSnap.cls});
-  if(ySnap) guides.push({x1:-pad,y1:ySnap.val,x2:W+pad,y2:ySnap.val,cls:'snap-guide'+' '+ySnap.cls});
+  if(xSnap) guides.push({x1:xSnap.val,y1:-pad,x2:xSnap.val,y2:D+pad,cls:'snap-guide '+xSnap.cls});
+  if(ySnap) guides.push({x1:-pad,y1:ySnap.val,x2:W+pad,y2:ySnap.val,cls:'snap-guide '+ySnap.cls});
   return {sdx:sdx,sdy:sdy,guides:guides};
 }
 function renderSnapGuides(guides){
