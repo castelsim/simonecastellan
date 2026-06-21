@@ -4063,7 +4063,7 @@ document.addEventListener("keydown", function(e){
     if(e.key==="Enter"){ e.preventDefault(); if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); toggleStageEdit(); return; }
     if((e.key==="Backspace"||e.key==="Delete") && !/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)){ e.preventDefault(); delSelBlock(); return; }
   }
-  if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+  if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)){ if(e.key==="Escape"){ e.target.blur(); clearSelection(); render(); } return; }
   if((e.metaKey||e.ctrlKey) && (e.key==="c"||e.key==="C")){ e.preventDefault(); copySel(); return; }   /* Cmd/Ctrl+C copia */
   if((e.metaKey||e.ctrlKey) && (e.key==="v"||e.key==="V")){ e.preventDefault(); pasteClip(); return; }  /* Cmd/Ctrl+V incolla */
   if((e.metaKey||e.ctrlKey) && (e.key==="x"||e.key==="X")){ e.preventDefault(); if(getSel()){ copySel(); deleteSel(); } return; }   /* Cmd/Ctrl+X taglia */
