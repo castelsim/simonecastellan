@@ -3372,7 +3372,7 @@ function miniSvg(k, over){
       [["Accessi e sicurezza", ["scala","rampa","parapetto","transenna"]],
        ["Scenografia",         ["fondale","quinta","tappeto"]],
        ["Arredo e leggii",     ["tavolo","sedia","sedialeggio","leggio","podio","podiosp","sgabello"]],
-       ["Varie",               ["ventilatore"]]
+       ["Accessori",           ["ventilatore"]]
       ].forEach(function(g){
         g[1].filter(function(k){ return TYPES[k] && TYPES[k].catalog!==false; }).forEach(function(k){
           addToGroup(g[0], makeBtn(k, TYPES[k].nome)); entries.push({k:k,nome:TYPES[k].nome});
