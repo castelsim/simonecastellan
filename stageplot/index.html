@@ -6034,7 +6034,16 @@ function flattenGradients(rootEl){
     });
   }
 }
-/* disegna la planimetria come VETTORE puro nel PDF (qualità infinita). Style isolato in shadow DOM per non toccare la pagina. */
+/* Stima la complessità dell'SVG (numero di path + comandi) — usata per decidere se usare svg2pdf o raster. */
+function svgComplexity(svgEl){
+  var ps=svgEl.querySelectorAll("path,polygon,polyline");
+  var total=0;
+  for(var i=0;i<ps.length;i++){ var d=ps[i].getAttribute("d")||""; total+=d.length; }
+  return {paths:ps.length, dLen:total};
+}
+/* disegna la planimetria come VETTORE puro nel PDF (qualità infinita). Style isolato in shadow DOM per non toccare la pagina.
+   Se l'SVG è troppo complesso (icone persone ad alta fedeltà, archi numerosi) rigetta subito così buildPdfDoc
+   cade nel catch raster — evita che svg2pdf blocchi il main thread fino a far crashare Chrome. */
 function drawStageVector(doc, ix, iy, wMm, hMm){
   return loadSvg2Pdf().then(function(){
     var host=document.createElement("div");
@@ -6043,6 +6052,9 @@ function drawStageVector(doc, ix, iy, wMm, hMm){
     var root=host.attachShadow ? host.attachShadow({mode:"open"}) : host;
     root.innerHTML=stageSceneSvg();
     var svgEl=root.querySelector("svg");
+    var cx=svgComplexity(svgEl);
+    /* soglie: >400 path O >80 000 caratteri nei d="" → l'icona persone da sola supera entrambi */
+    if(cx.paths>400 || cx.dLen>80000){ host.remove(); return Promise.reject(new Error("svg-complex:"+cx.paths+"/"+cx.dLen)); }
     flattenTextStyles(svgEl);
     flattenGradients(svgEl);
     var fn=svg2pdfFn();
@@ -6122,10 +6134,15 @@ function buildPdfDoc(paperKey, N, orient, header){
   return loadJsPDF().then(function(){
     var jsPDF=window.jspdf.jsPDF;
     var doc=new jsPDF({orientation:L.orient, unit:"mm", format:paperKey, compress:true});
-    /* --- PAG 1: planimetria in scala — VETTORE puro; se fallisce, raster ad alta risoluzione --- */
+    /* --- PAG 1: planimetria in scala — vettore se semplice, raster 350 DPI se complesso (icone persone, molti archi) --- */
     return drawStageVector(doc, ix, iy, stMmW, stMmH)
-      .catch(function(){
-        var pxW=Math.round(stMmW/25.4*320), pxH=Math.round(stMmH/25.4*320);   /* fallback: 320 DPI PNG lossless */
+      .catch(function(e){
+        /* svg2pdf salterebbe per complessità o errore → raster ad alta risoluzione */
+        var dpi = (e && e.message && e.message.indexOf("svg-complex:")===0) ? 350 : 320;
+        var pxW=Math.round(stMmW/25.4*dpi), pxH=Math.round(stMmH/25.4*dpi);
+        /* cap canvas a 4000×4000 per evitare OOM su palchi molto grandi */
+        var scale=Math.min(1, 4000/Math.max(pxW,pxH,1));
+        pxW=Math.round(pxW*scale); pxH=Math.round(pxH*scale);
         return svgToDataUrl(stageSceneSvg(), pxW, pxH, "image/png").then(function(dataUrl){ doc.addImage(dataUrl, "PNG", ix, iy, stMmW, stMmH); });
       })
       .then(function(){
