@@ -425,7 +425,6 @@
   <button class="btn" id="bRedo" title="Ripeti (⇧⌘Z)" style="padding:7px 11px">↷</button>
   <button class="btn" id="bFit" title="Adatta lo zoom al palco">⤢ Adatta</button>
   <button class="btn btn-icon" id="bSnap" title="Snap magnetico ON (bordi palco) — ⌘/Ctrl = movimento libero">🧲</button>
-  <button class="btn btn-icon" id="bHdrVenue" title="Planimetria">🗺</button>
   <div style="display:flex;gap:4px">
     <button class="btn" id="bHdrSave" title="Salva progetto (.json)">💾 Save as</button>
     <button class="btn" id="bHdrPdf" title="Esporta planimetria in PDF">📄 PDF</button>
@@ -5787,7 +5786,6 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   document.getElementById("bHdrSave").addEventListener("click", function(){ document.getElementById("saveJson").click(); });
   document.getElementById("bHdrPdf").addEventListener("click", function(){ if(!frameEdit){ frameEdit=true; exitHubModes("frame"); clearSelection(); ensurePrintFrame(); renderFramePanel(); render(); } });
   document.getElementById("bHdrImport").addEventListener("click", function(){ document.getElementById("importJson").click(); });
-  document.getElementById("bHdrVenue").addEventListener("click", function(){ document.getElementById("bVenue").click(); });
   document.getElementById("shareTabLink").addEventListener("click", function(){ openShare(); });
   document.getElementById("shareTabPdf").addEventListener("click", function(){ modal.hidden=true; document.getElementById("bPdf").click(); });
   document.getElementById("shareGoPdf").addEventListener("click", function(){ modal.hidden=true; document.getElementById("bPdf").click(); });
