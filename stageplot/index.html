@@ -192,6 +192,7 @@
   .fBrass{fill:url(#gBrass)} .fSilver{fill:url(#gSilver)} .fBlack{fill:url(#gBlack)}
   .fHead{fill:url(#gHead)}   .fCym{fill:url(#gCym)}       .fCopper{fill:url(#gCopper)}
   .fFloor{fill:url(#gFloor)} .fRed{fill:url(#gRed)}       .fGrey{fill:#494d54}
+  .nofloor .fFloor{fill:none;stroke:none}
   .fMon{fill:#33363b}
   /* sagome cantanti: pelle, capelli, vestiti */
   .fSkin{fill:#e7b48f} .fShirt{fill:#3f5c83} .fShirtF{fill:#e0789f}
@@ -2605,6 +2606,7 @@ function stageBlocks(){ var b=state.stage.blocks; return (b&&b.length)?b:[{x:0,y
 function isSingleRect(){ var b=stageBlocks(); return b.length===1 && b[0].shape!=="semi"; }
 function stageHeightNote(){ var h=stageBlocks()[0].h||0; return h?" · h "+h+" cm":""; }
 function recalcStageBBox(){ var b=stageBlocks(), W=0, D=0; b.forEach(function(r){ W=Math.max(W,r.x+r.w); D=Math.max(D,r.y+r.d); }); state.stage.w=W; state.stage.d=D; }
+function isOutsideStage(it){ var px=it.x, py=it.y, b=stageBlocks(); return !b.some(function(r){ return px>=r.x&&px<=r.x+r.w&&py>=r.y&&py<=r.y+r.d; }); }
 /* path di un semicerchio (mezza ellisse) iscritto nel bbox del blocco; flat = lato dritto (di solito attaccato al palco) */
 function semiPath(r){
   var x=r.x, y=r.y, w=r.w, d=r.d, flat=r.flat||"top";
@@ -2725,7 +2727,8 @@ function itemMarkup(it){
   var t = TYPES[it.type]; if(!t) return '';
   var hw = Math.max(it.w,70)/2 + 8, hd = Math.max(it.d,30)/2 + 8;   /* area di click generosa */
   var bw = it.w/2 + 6, bh = it.d/2 + 6;                             /* riquadro selezione aderente all'ingombro reale */
-  var s = '<g class="item'+(selSet[it.id]?' selected':'')+'" data-id="'+it.id+'" transform="translate('+it.x+' '+it.y+')">';
+  var isOut = isOutsideStage(it);
+  var s = '<g class="item'+(isOut?' nofloor':'')+(selSet[it.id]?' selected':'')+'" data-id="'+it.id+'" transform="translate('+it.x+' '+it.y+')">';
   s += '<g transform="rotate('+(it.rot||0)+')">';
   s += '<rect class="hit" x="'+(-hw)+'" y="'+(-hd)+'" width="'+(2*hw)+'" height="'+(2*hd)+'"/>';
   s += '<rect class="selbox" x="'+(-bw)+'" y="'+(-bh)+'" width="'+(2*bw)+'" height="'+(2*bh)+'" rx="6"/>';
