@@ -6185,7 +6185,7 @@ function pdfPreviewSvg(paperKey, N, orient, header){
   var cy=L.ph-L.cartH;
   var sub=[]; if(state.luogo) sub.push(state.luogo);
   sub.push(new Date().toLocaleDateString("it-IT")); sub.push((A.custom?"area ":"palco ")+(A.w/100)+"×"+(A.h/100)+" m");
-  var stroke = A.custom ? '#9ca3af' : (fits ? 'none' : '#dc2626');
+  var stroke = A.custom ? '#9ca3af' : (fits?(isSingleRect()?'#1f2937':'none'):'#dc2626');
   var labels = A.custom ? '' :
     '<text x="'+(ix+stMmW/2)+'" y="'+(iy-1.6)+'" font-size="3" fill="#9a9a9a" text-anchor="middle">FONDO PALCO</text>'+
     '<text x="'+(ix+stMmW/2)+'" y="'+(iy+stMmH+4)+'" font-size="3" fill="#9a9a9a" text-anchor="middle">PUBBLICO</text>';
@@ -6221,7 +6221,10 @@ function buildPdfDoc(paperKey, N, orient, header){
         return svgToDataUrl(stageSceneSvg(), pxW, pxH, "image/png").then(function(dataUrl){ doc.addImage(dataUrl, "PNG", ix, iy, stMmW, stMmH); });
       })
       .then(function(){
-    if(!A.custom){
+    if(A.custom){
+      doc.setDrawColor(120,120,120); doc.setLineWidth(0.3); doc.rect(ix, iy, stMmW, stMmH);   /* bordo dell'area di stampa */
+    } else {
+      if(isSingleRect()){ doc.setDrawColor(31,41,55); doc.setLineWidth(0.5); doc.rect(ix, iy, stMmW, stMmH); }   /* forma composita/curva: il contorno è già nell'immagine */
       doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(150,150,150);
       doc.text("FONDO PALCO", ix+stMmW/2, iy-3, {align:"center"});
       doc.text("PUBBLICO", ix+stMmW/2, iy+stMmH+5, {align:"center"});
