@@ -192,7 +192,7 @@
   .fBrass{fill:url(#gBrass)} .fSilver{fill:url(#gSilver)} .fBlack{fill:url(#gBlack)}
   .fHead{fill:url(#gHead)}   .fCym{fill:url(#gCym)}       .fCopper{fill:url(#gCopper)}
   .fFloor{fill:url(#gFloor)} .fRed{fill:url(#gRed)}       .fGrey{fill:#494d54}
-  .nofloor .fFloor{fill:none;stroke:none}
+  .nofloor .lbl{fill:#fff;stroke:none}
   .fMon{fill:#33363b}
   /* sagome cantanti: pelle, capelli, vestiti */
   .fSkin{fill:#e7b48f} .fShirt{fill:#3f5c83} .fShirtF{fill:#e0789f}
@@ -6029,7 +6029,8 @@ function stageSceneSvg(){
   var sorted=sortedItems();
   var items=''; sorted.forEach(function(it){ items+=itemMarkup(it); });
   sel=keep; selSet=keepSet;
-  var css=document.querySelector("style").textContent.replace(/\/\*[\s\S]*?\*\//g,"");   /* via i commenti: un '<' in un commento romperebbe l'SVG */
+  var css=document.querySelector("style").textContent.replace(/\/\*[\s\S]*?\*\//g,"") +   /* via i commenti: un '<' in un commento romperebbe l'SVG */
+    '.nofloor .fFloor{fill:none;stroke:none}.nofloor .lbl{fill:#1f2937;stroke:none}';   /* PDF: niente sfondo fuori palco, etichette nere leggibili */
   var hasVenue = state.venue && state.venue.enabled!==false && state.venue._dataUrl;
   var venue = hasVenue
     ? '<clipPath id="paClip"><rect x="'+A.x+'" y="'+A.y+'" width="'+A.w+'" height="'+A.h+'"/></clipPath>'+
@@ -6106,6 +6107,12 @@ function flattenGradients(rootEl){
     });
   }
 }
+function flattenNofloor(rootEl){
+  /* svg2pdf ignora il CSS: forza inline fill/stroke=none sugli sfondi degli elementi fuori palco */
+  rootEl.querySelectorAll('.nofloor .fFloor').forEach(function(el){
+    el.setAttribute('fill','none'); el.setAttribute('stroke','none');
+  });
+}
 /* Stima la complessità dell'SVG (numero di path + comandi) — usata per decidere se usare svg2pdf o raster. */
 function svgComplexity(svgEl){
   var ps=svgEl.querySelectorAll("path,polygon,polyline");
@@ -6133,6 +6140,7 @@ function drawStageVector(doc, ix, iy, wMm, hMm){
     if(cx.paths>1000 || cx.dLen>400000){ host.remove(); return Promise.reject(new Error("svg-complex:"+cx.paths+"/"+cx.dLen)); }
     flattenTextStyles(svgEl);
     flattenGradients(svgEl);
+    flattenNofloor(svgEl);
     var fn=svg2pdfFn();
     var ret = (typeof doc.svg==="function") ? doc.svg(svgEl,{x:ix,y:iy,width:wMm,height:hMm})
                                             : fn(svgEl, doc, {x:ix,y:iy,width:wMm,height:hMm});
