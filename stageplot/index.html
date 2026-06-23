@@ -491,6 +491,48 @@
       <button class="btn danger" id="bDelBlock" style="width:100%;margin-top:7px;font-size:12px">Elimina blocco</button>
     </div>
     <button class="btn primary" id="bStageDone" style="width:100%;margin-top:11px">Fatto</button>
+    <div style="border-top:1px solid #cfe0fb;margin-top:14px;padding-top:12px">
+      <!-- pannello planimetria (embedded nel pannello palco) -->
+      <div id="venuePanel">
+        <h3 style="margin:0 0 8px;color:#15803d">Planimetria</h3>
+        <div id="venueReload" hidden>
+          <b id="venueReloadName"></b>
+          <button class="btn" id="venueBtnReload" style="width:100%;margin-top:4px">Ricarica immagine…</button>
+        </div>
+        <input type="file" id="venueFile" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+        <div class="venue-row">
+          <button class="btn" id="venueBtnImport" style="flex:2">📥 Importa immagine</button>
+          <button class="btn" id="venueBtnVis" style="flex:1">👁 Nascondi</button>
+        </div>
+        <div id="venueOpacityRow">
+          <label>Opacità <span id="venueOpacityVal">40%</span></label>
+          <input type="range" id="venueOpacity" min="5" max="100" step="5" value="40">
+        </div>
+        <div id="venueRotRow">
+          <label>Rotazione <span id="venueRotVal">0°</span></label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="range" id="venueRot" min="-180" max="180" step="1" value="0" style="flex:1;padding:0;margin:0">
+            <input type="number" id="venueRotNum" min="-180" max="180" step="1" value="0" style="width:54px;border:1px solid #d1fae5;border-radius:7px;padding:4px 6px;font-size:13px">
+          </div>
+        </div>
+        <div class="venue-row" style="margin-top:10px">
+          <button class="btn" id="venueBtnCalib">📐 Calibra scala</button>
+          <button class="btn" id="venueBtnLock">🔒 Blocca</button>
+        </div>
+        <div id="venueCalibHint" hidden style="font-size:11.5px;color:#15803d;background:#dcfce7;border-radius:7px;padding:6px 8px;margin-top:6px">
+          Clicca il <b>1° punto</b> sulla planimetria
+        </div>
+        <div id="venueCalibInput" hidden style="margin-top:8px">
+          <label style="margin:0 0 4px">Distanza reale tra i 2 punti (m):</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="number" id="venueCalibDist" min="0.1" step="0.1" value="10" style="flex:1;border:1px solid #d1fae5;border-radius:7px;padding:5px 7px;font-size:13px">
+            <button class="btn primary" id="venueCalibApply" style="flex:1">Applica</button>
+            <button class="btn" id="venueCalibCancel">✕</button>
+          </div>
+        </div>
+        <button class="btn danger" id="venueBtnDel" style="width:100%;margin-top:10px;font-size:12px">Rimuovi planimetria</button>
+      </div>
+    </div>
   </div>
   <div class="sec" id="eventoSec" hidden style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:10px 11px;margin-bottom:14px">
     <h3 style="margin-bottom:6px">Evento</h3>
@@ -612,46 +654,6 @@
       <button class="btn" id="bResume" hidden>↩ Riprendi ultima sessione</button>
     </div>
     <div id="accessoriCount" style="margin-top:8px;font-size:12px;color:#6b7280;line-height:1.8"></div>
-  </div>
-  <!-- pannello planimetria -->
-  <div id="venuePanel" hidden>
-    <h3>Planimetria</h3>
-    <div id="venueReload" hidden>
-      <b id="venueReloadName"></b>
-      <button class="btn" id="venueBtnReload" style="width:100%;margin-top:4px">Ricarica immagine…</button>
-    </div>
-    <input type="file" id="venueFile" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
-    <div class="venue-row">
-      <button class="btn" id="venueBtnImport" style="flex:2">📥 Importa immagine</button>
-      <button class="btn" id="venueBtnVis" style="flex:1">👁 Nascondi</button>
-    </div>
-    <div id="venueOpacityRow">
-      <label>Opacità <span id="venueOpacityVal">40%</span></label>
-      <input type="range" id="venueOpacity" min="5" max="100" step="5" value="40">
-    </div>
-    <div id="venueRotRow">
-      <label>Rotazione <span id="venueRotVal">0°</span></label>
-      <div style="display:flex;gap:6px;align-items:center">
-        <input type="range" id="venueRot" min="-180" max="180" step="1" value="0" style="flex:1;padding:0;margin:0">
-        <input type="number" id="venueRotNum" min="-180" max="180" step="1" value="0" style="width:54px;border:1px solid #d1fae5;border-radius:7px;padding:4px 6px;font-size:13px">
-      </div>
-    </div>
-    <div class="venue-row" style="margin-top:10px">
-      <button class="btn" id="venueBtnCalib">📐 Calibra scala</button>
-      <button class="btn" id="venueBtnLock">🔒 Blocca</button>
-    </div>
-    <div id="venueCalibHint" hidden style="font-size:11.5px;color:#15803d;background:#dcfce7;border-radius:7px;padding:6px 8px;margin-top:6px">
-      Clicca il <b>1° punto</b> sulla planimetria
-    </div>
-    <div id="venueCalibInput" hidden style="margin-top:8px">
-      <label style="margin:0 0 4px">Distanza reale tra i 2 punti (m):</label>
-      <div style="display:flex;gap:6px;align-items:center">
-        <input type="number" id="venueCalibDist" min="0.1" step="0.1" value="10" style="flex:1;border:1px solid #d1fae5;border-radius:7px;padding:5px 7px;font-size:13px">
-        <button class="btn primary" id="venueCalibApply" style="flex:1">Applica</button>
-        <button class="btn" id="venueCalibCancel">✕</button>
-      </div>
-    </div>
-    <button class="btn danger" id="venueBtnDel" style="width:100%;margin-top:10px;font-size:12px">Rimuovi planimetria</button>
   </div>
   <!-- pannello cornice di stampa -->
   <div id="framePanel" hidden>
@@ -3694,8 +3696,8 @@ svg.addEventListener("pointerdown", function(e){
     }
     render(); svg.setPointerCapture(e.pointerId); return;
   }
-  /* drag planimetria (solo se venueEdit attivo, sbloccata, non calib) */
-  if(venueEdit && state.venue && !state.venue.locked && state.venue._dataUrl && venueCalibMode===0){
+  /* drag planimetria (solo in modalità palco, sbloccata, non calib) */
+  if(stageEdit && state.venue && !state.venue.locked && state.venue._dataUrl && venueCalibMode===0){
     var venEl=e.target.closest ? e.target.closest("[data-venue]") : null;
     if(venEl){ drag={mode:"venue", sp0:{x:sp.x,y:sp.y}, x0:state.venue.x, y0:state.venue.y, moved:false};
       svg.setPointerCapture(e.pointerId); return; }
@@ -4067,12 +4069,12 @@ function renderStagePanel(){
   var fw=document.getElementById("blkFlatWrap"), isSemi=(r.shape==="semi");
   fw.style.display=isSemi?"":"none";
   if(isSemi) document.getElementById("blkFlat").value=r.flat||"top";
+  renderVenuePanel();
 }
 function exitHubModes(except){
   if(except!=="palco" && stageEdit){ stageEdit=false; selBlock=null; renderStagePanel(); }
   if(except!=="evento" && eventoEdit){ eventoEdit=false; renderEventoPanel(); }
   if(except!=="chan" && chanEdit){ chanEdit=false; renderChanPanel(); }
-  if(except!=="venue" && venueEdit){ venueEdit=false; venueCalibCancel(); renderVenuePanel(); }
   if(except!=="frame" && frameEdit){ frameEdit=false; renderFramePanel(); }
 }
 function toggleStageEdit(){ stageEdit=!stageEdit; selBlock=stageEdit?0:null; if(stageEdit){ exitHubModes("palco"); clearSelection(); } renderStagePanel(); render(); }
@@ -5352,7 +5354,7 @@ document.getElementById("outHead").addEventListener("click", function(e){
 });
 
 /* ============ PLANIMETRIA / VENUE ============ */
-var venueEdit=false, venueCalibMode=0, venueCalibPts=[];
+var venueCalibMode=0, venueCalibPts=[];
 /* default vuoto; non serializzare _dataUrl nel JSON */
 function venueDefault(){ return {enabled:true,locked:false,name:"",x:0,y:0,w:5000,h:3500,rot:0,opacity:40,calibration:null}; }
 function normalizeVenue(v){ if(!v) return null; return Object.assign(venueDefault(), v); }
@@ -5380,8 +5382,6 @@ function venueMarkup(){
 function renderVenuePanel(){
   var vp=document.getElementById("venuePanel"); if(!vp) return;
   var v=state.venue;
-  vp.hidden=!venueEdit;
-  if(!venueEdit) return;
   var hasImg=!!(v&&v._dataUrl);
   document.getElementById("venueReload").hidden = !(v&&v.name&&!v._dataUrl);
   if(v&&v.name&&!v._dataUrl) document.getElementById("venueReloadName").textContent=v.name;
@@ -5399,7 +5399,7 @@ function renderVenuePanel(){
   document.getElementById("venueBtnCalib").style.display = hasImg?"":"none";
   document.getElementById("venueBtnDel").style.display = v?"":"none";
 }
-function toggleVenueEdit(){ venueEdit=!venueEdit; if(venueEdit){ exitHubModes("venue"); clearSelection(); } renderVenuePanel(); render(); }
+function toggleVenueEdit(){ if(!stageEdit){ stageEdit=true; selBlock=stageEdit?0:null; exitHubModes("palco"); clearSelection(); renderStagePanel(); render(); } }
 
 /* ===== Cornice di stampa (area esportata nel PDF) ===== */
 var frameEdit=false;
