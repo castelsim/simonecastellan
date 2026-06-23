@@ -691,6 +691,7 @@
     </div>
     <button class="btn" id="frameCenter" style="width:100%;margin-top:6px;font-size:12px">⊕ Centra palco nell'area</button>
     <button class="btn danger" id="frameClear" style="width:100%;margin-top:6px;font-size:12px">Reimposta (usa il palco)</button>
+    <button class="btn primary" id="frameSavePdf" style="width:100%;margin-top:14px">📄 Salva PDF in scala →</button>
   </div>
   <div class="sec" id="chanlist" style="border-top:1px solid #e5e7eb;padding-top:6px;margin-top:8px">
     <div class="clsec-head" id="inHead" title="Espandi/chiudi Input patch">
@@ -5488,6 +5489,7 @@ document.getElementById("frameCenter").addEventListener("click", function(){
   state.printFrame.y = Math.round(state.stage.d/2 - state.printFrame.h/2);
   save(); render();
 });
+document.getElementById("frameSavePdf").addEventListener("click", function(){ openPdfExportModal(); });
 
 function venueLoadFile(file){
   if(!file) return;
@@ -5804,7 +5806,7 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   document.getElementById("shareClose").addEventListener("click", function(){ modal.hidden=true; });
   /* — pulsanti header: Salva / PDF / Importa / Altro — */
   document.getElementById("bHdrSave").addEventListener("click", function(){ document.getElementById("saveJson").click(); });
-  document.getElementById("bHdrPdf").addEventListener("click", function(){ document.getElementById("bPdf").click(); });
+  document.getElementById("bHdrPdf").addEventListener("click", function(){ if(!frameEdit){ frameEdit=true; exitHubModes("frame"); clearSelection(); ensurePrintFrame(); renderFramePanel(); render(); } });
   document.getElementById("bHdrImport").addEventListener("click", function(){ document.getElementById("importJson").click(); });
   document.getElementById("bHdrVenue").addEventListener("click", function(){ document.getElementById("bVenue").click(); });
   document.getElementById("bHdrNew").addEventListener("click", function(){ document.getElementById("bNew").click(); });
