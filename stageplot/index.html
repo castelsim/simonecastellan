@@ -5994,8 +5994,9 @@ var SCALES=[50,100,200,250,500];   /* aggiunte 1:250 e 1:500 per aree grandi (pl
 /* area di stampa in cm reali: la cornice personalizzata se impostata, altrimenti l'ingombro del palco */
 function printArea(){
   if(state.printFrame){ var f=state.printFrame; return {x:f.x, y:f.y, w:f.w, h:f.h, custom:true}; }
-  recalcStageBBox();
-  return {x:0, y:0, w:state.stage.w, h:state.stage.d, custom:false};
+  /* auto: bounding box di tutto il contenuto (palco + elementi fuori dal palco, etichette incluse) */
+  var b=contentBounds();
+  return {x:b.x0, y:b.y0, w:b.x1-b.x0, h:b.y1-b.y0, custom:false};
 }
 function pdfLayout(paperKey, orient){
   var p=PAPER[paperKey], pw=p.w, ph=p.h;
