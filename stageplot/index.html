@@ -6224,7 +6224,8 @@ function buildPdfDoc(paperKey, N, orient, header){
     if(A.custom){
       doc.setDrawColor(120,120,120); doc.setLineWidth(0.3); doc.rect(ix, iy, stMmW, stMmH);   /* bordo dell'area di stampa */
     } else {
-      if(isSingleRect()){ doc.setDrawColor(31,41,55); doc.setLineWidth(0.5); doc.rect(ix, iy, stMmW, stMmH); }   /* forma composita/curva: il contorno è già nell'immagine */
+      var noOutside=A.x>=-1&&A.y>=-1&&A.w<=state.stage.w+1&&A.h<=state.stage.d+1;
+      if(isSingleRect()&&noOutside){ doc.setDrawColor(31,41,55); doc.setLineWidth(0.5); doc.rect(ix, iy, stMmW, stMmH); }
       doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(150,150,150);
       doc.text("FONDO PALCO", ix+stMmW/2, iy-3, {align:"center"});
       doc.text("PUBBLICO", ix+stMmW/2, iy+stMmH+5, {align:"center"});
