@@ -225,6 +225,9 @@
   .mcard select{width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;font-size:14px;background:#fff}
   .mcard .mstatus{font-size:12.5px}
   .mcard .mstatus.ok{color:#15803d}  .mcard .mstatus.err{color:#b91c1c}
+  .pa-card{border:2px solid #e5e7eb;border-radius:10px;padding:14px 12px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;user-select:none}
+  .pa-card.sel{border-color:#2563eb;background:#eff6ff}
+  .pa-card:hover:not(.sel){border-color:#93c5fd;background:#f0f9ff}
   /* menu formazioni (Organico) */
   header{position:relative}
   .menu-pop{position:absolute;top:46px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;
@@ -939,6 +942,42 @@
     </div>
     <div style="display:flex;margin-top:14px">
       <button class="btn" id="shareClose" style="margin-left:auto">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="printAreaModal" hidden>
+  <div class="mcard" style="width:480px;max-width:94vw">
+    <h2>Area di stampa</h2>
+    <p class="hint">Scegli cosa includere nel PDF.</p>
+    <div style="display:flex;gap:12px;margin-bottom:14px">
+      <div class="pa-card sel" id="paCardStage" style="flex:1">
+        <div style="font-size:26px;margin-bottom:6px">▭</div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:3px">Solo palco</div>
+        <div style="font-size:12px;color:#6b7280">Esporta esattamente il perimetro del palco</div>
+      </div>
+      <div class="pa-card" id="paCardCustom" style="flex:1">
+        <div style="font-size:26px;margin-bottom:6px">⊞</div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:3px">Area personalizzata</div>
+        <div style="font-size:12px;color:#6b7280">Definisci larghezza e profondità libere</div>
+      </div>
+    </div>
+    <div id="paCustomSection" hidden>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+        <div><label>Larghezza (m)</label><input type="number" id="paW2" min="0.5" step="0.1"></div>
+        <div><label>Profondità (m)</label><input type="number" id="paH2" min="0.5" step="0.1"></div>
+        <div><label>X origine (m)</label><input type="number" id="paX2" step="0.1"></div>
+        <div><label>Y origine (m)</label><input type="number" id="paY2" step="0.1"></div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn" id="paPreStage" style="flex:1;font-size:12px">= Palco</button>
+        <button class="btn" id="paPreAll" style="flex:1;font-size:12px">Tutto il contenuto</button>
+        <button class="btn" id="paPreCenter" style="flex:1;font-size:12px">⊕ Centra</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn" id="paCancel">Annulla</button>
+      <button class="btn primary" id="paContinue">Continua →</button>
     </div>
   </div>
 </div>
@@ -6346,13 +6385,63 @@ function pdfChannelPage(doc, L, paperKey){
     }
     try{ document.getElementById("pdfPreview").innerHTML = state.items.length ? pdfPreviewSvg(paper.value, N, orient.value, header.value) : '<div style="font-size:12.5px;color:#9ca3af">Palco vuoto</div>'; }catch(e){}
   }
-  document.getElementById("bPdf").addEventListener("click", function(){ modal.hidden=false; refresh(); });
+  window.openPdfExportModal=function(){ modal.hidden=false; refresh(); };
+  document.getElementById("bPdf").addEventListener("click", function(){ (window.openPrintAreaStep||window.openPdfExportModal)(); });
   document.getElementById("pdfCancel").addEventListener("click", function(){ modal.hidden=true; });
   modal.addEventListener("click", function(e){ if(e.target===modal) modal.hidden=true; });
   document.addEventListener("keydown", function(e){ if(!modal.hidden && e.key==="Escape") modal.hidden=true; });
   paper.addEventListener("change", refresh); scl.addEventListener("change", refresh);
   orient.addEventListener("change", refresh); header.addEventListener("input", refresh);
   document.getElementById("pdfGo").addEventListener("click", function(){ exportPdf(paper.value, scl.value, orient.value, header.value); });
+})();
+/* ============ AREA DI STAMPA — step 1 del flusso PDF ============ */
+(function(){
+  var am=document.getElementById("printAreaModal");
+  var cardStage=document.getElementById("paCardStage"), cardCustom=document.getElementById("paCardCustom");
+  var custSec=document.getElementById("paCustomSection");
+  var paW=document.getElementById("paW2"), paH=document.getElementById("paH2");
+  var paX=document.getElementById("paX2"), paY=document.getElementById("paY2");
+
+  function selectCard(choice){
+    if(choice==="stage"){
+      cardStage.classList.add("sel"); cardCustom.classList.remove("sel"); custSec.hidden=true;
+    } else {
+      cardCustom.classList.add("sel"); cardStage.classList.remove("sel"); custSec.hidden=false;
+      ensurePrintFrame(); fillInputs();
+    }
+  }
+  function fillInputs(){
+    var f=state.printFrame||frameStageRect();
+    paW.value=fmtMnum(f.w); paH.value=fmtMnum(f.h);
+    paX.value=fmtMnum(f.x); paY.value=fmtMnum(f.y);
+  }
+  function applyInputs(){
+    var w=Math.max(0.5,+paW.value||0.5), h=Math.max(0.5,+paH.value||0.5);
+    var x=+paX.value||0, y=+paY.value||0;
+    state.printFrame={x:Math.round(x*100),y:Math.round(y*100),w:Math.round(w*100),h:Math.round(h*100)};
+  }
+  cardStage.addEventListener("click", function(){ selectCard("stage"); });
+  cardCustom.addEventListener("click", function(){ selectCard("custom"); });
+  document.getElementById("paPreStage").addEventListener("click", function(){ state.printFrame=frameStageRect(); save(); fillInputs(); });
+  document.getElementById("paPreAll").addEventListener("click", function(){ state.printFrame=frameContentRect(); save(); fillInputs(); });
+  document.getElementById("paPreCenter").addEventListener("click", function(){
+    ensurePrintFrame(); recalcStageBBox();
+    state.printFrame.x=Math.round(state.stage.w/2-state.printFrame.w/2);
+    state.printFrame.y=Math.round(state.stage.d/2-state.printFrame.h/2);
+    save(); fillInputs();
+  });
+  [paW,paH,paX,paY].forEach(function(inp){ inp.addEventListener("change", function(){ if(!custSec.hidden){ applyInputs(); save(); } }); });
+  document.getElementById("paCancel").addEventListener("click", function(){ am.hidden=true; });
+  am.addEventListener("click", function(e){ if(e.target===am) am.hidden=true; });
+  document.addEventListener("keydown", function(e){ if(!am.hidden && e.key==="Escape") am.hidden=true; });
+  document.getElementById("paContinue").addEventListener("click", function(){
+    if(cardStage.classList.contains("sel")){ state.printFrame=null; } else { applyInputs(); }
+    save(); am.hidden=true; window.openPdfExportModal();
+  });
+  window.openPrintAreaStep=function(){
+    selectCard(state.printFrame?"custom":"stage");
+    am.hidden=false;
+  };
 })();
 /* ============ DEMO (?demo=1) ============ */
 function demo(){
