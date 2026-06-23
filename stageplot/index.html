@@ -432,7 +432,7 @@
   <button class="btn" id="bUndo" title="Annulla (⌘Z)" style="padding:7px 11px">↶</button>
   <button class="btn" id="bRedo" title="Ripeti (⇧⌘Z)" style="padding:7px 11px">↷</button>
   <button class="btn" id="bFit" title="Adatta lo zoom al palco">⤢ Adatta</button>
-  <button class="btn btn-icon" id="bSnap" title="Snap magnetico OFF (griglia 25cm attiva) — clicca per snap ai bordi del palco" style="opacity:0.35">🧲</button>
+  <button class="btn btn-icon" id="bSnap" title="Snap magnetico ON (bordi palco) — ⌘/Ctrl = movimento libero">🧲</button>
   <button class="btn btn-icon" id="bFrame" title="Area stampa — definisce cosa esporta il PDF">▭</button>
   <button class="btn" id="bHdrSave" title="Salva progetto (.json)">💾 Salva</button>
   <button class="btn" id="bHdrPdf" title="Esporta planimetria in PDF">📄 PDF</button>
@@ -3293,7 +3293,7 @@ function placeCoord(v,e){ return (e && (e.metaKey||e.ctrlKey)) ? snap(v) : Math.
 
 /* ===== Snap magnetico a lati e centri del palco ===== */
 var SNAP_T = 15;  /* soglia cm entro cui lo snap si attiva */
-var snapEnabled = false;   /* toggle snap magnetico (🧲 in header); false = griglia 25cm, true = snap magnetico bordi palco */
+var snapEnabled = true;    /* toggle snap magnetico (🧲 in header); false = griglia 25cm, true = snap magnetico bordi palco */
 function magneticSnap(dragItems, ddx, ddy){
   /* dragItems: array di {id, x0, y0} da drag.items
      ddx/ddy:  delta grezzo dal punto di inizio drag
@@ -3325,7 +3325,7 @@ function magneticSnap(dragItems, ddx, ddy){
      [maxX,0] / [minX,W]: snap bordo destro/sinistro al lato opposto del palco → snap fuori dal palco.
      [minY,D]: bordo superiore al fronte del palco (elemento posizionato davanti). */
   var xCands=[[minX,0,''],[maxX,W,''],[maxX,0,''],[minX,W,''],[cx,W/2,'center']];
-  var yCands=[[minY,0,''],[maxY,D,''],[minY,D,''],[cy,D/2,'center']];
+  var yCands=[[minY,0,''],[maxY,D,''],[minY,D,''],[maxY,0,''],[cy,D/2,'center']];
 
   var xSnap=null,xDist=T+1,ySnap=null,yDist=T+1;
   xCands.forEach(function(c){ var d=Math.abs(c[0]-c[1]); if(d<xDist){xDist=d;xSnap={delta:c[1]-c[0],val:c[1],cls:c[2]};} });
@@ -6185,7 +6185,7 @@ function pdfPreviewSvg(paperKey, N, orient, header){
   var cy=L.ph-L.cartH;
   var sub=[]; if(state.luogo) sub.push(state.luogo);
   sub.push(new Date().toLocaleDateString("it-IT")); sub.push((A.custom?"area ":"palco ")+(A.w/100)+"×"+(A.h/100)+" m");
-  var stroke = A.custom ? '#9ca3af' : (fits?(isSingleRect()?'#1f2937':'none'):'#dc2626');
+  var stroke = A.custom ? '#9ca3af' : (fits ? 'none' : '#dc2626');
   var labels = A.custom ? '' :
     '<text x="'+(ix+stMmW/2)+'" y="'+(iy-1.6)+'" font-size="3" fill="#9a9a9a" text-anchor="middle">FONDO PALCO</text>'+
     '<text x="'+(ix+stMmW/2)+'" y="'+(iy+stMmH+4)+'" font-size="3" fill="#9a9a9a" text-anchor="middle">PUBBLICO</text>';
@@ -6221,10 +6221,7 @@ function buildPdfDoc(paperKey, N, orient, header){
         return svgToDataUrl(stageSceneSvg(), pxW, pxH, "image/png").then(function(dataUrl){ doc.addImage(dataUrl, "PNG", ix, iy, stMmW, stMmH); });
       })
       .then(function(){
-    if(A.custom){
-      doc.setDrawColor(120,120,120); doc.setLineWidth(0.3); doc.rect(ix, iy, stMmW, stMmH);   /* bordo dell'area di stampa */
-    } else {
-      if(isSingleRect()){ doc.setDrawColor(31,41,55); doc.setLineWidth(0.5); doc.rect(ix, iy, stMmW, stMmH); }   /* forma composita/curva: il contorno è già nell'immagine */
+    if(!A.custom){
       doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(150,150,150);
       doc.text("FONDO PALCO", ix+stMmW/2, iy-3, {align:"center"});
       doc.text("PUBBLICO", ix+stMmW/2, iy+stMmH+5, {align:"center"});
