@@ -429,7 +429,6 @@
   <button class="btn" id="bHdrPdf" title="Esporta planimetria in PDF">📄 PDF</button>
   <button class="btn" id="bHdrImport" title="Importa progetto (.json)">📂 Importa</button>
   <button class="btn btn-icon" id="bHdrVenue" title="Planimetria">🗺</button>
-  <button class="btn btn-icon" id="bHdrNew" title="Nuovo progetto" style="color:#dc2626">⊘</button>
   <!-- proxy nascosti: usati da mActions mobile e backward compat -->
   <button class="btn btn-icon" id="bVenue" title="Planimetria" hidden>🗺</button>
   <button class="btn" id="bPdf" hidden>Salva PDF</button>
@@ -5787,7 +5786,6 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   document.getElementById("bHdrPdf").addEventListener("click", function(){ if(!frameEdit){ frameEdit=true; exitHubModes("frame"); clearSelection(); ensurePrintFrame(); renderFramePanel(); render(); } });
   document.getElementById("bHdrImport").addEventListener("click", function(){ document.getElementById("importJson").click(); });
   document.getElementById("bHdrVenue").addEventListener("click", function(){ document.getElementById("bVenue").click(); });
-  document.getElementById("bHdrNew").addEventListener("click", function(){ document.getElementById("bNew").click(); });
   document.getElementById("shareTabLink").addEventListener("click", function(){ openShare(); });
   document.getElementById("shareTabPdf").addEventListener("click", function(){ modal.hidden=true; document.getElementById("bPdf").click(); });
   document.getElementById("shareGoPdf").addEventListener("click", function(){ modal.hidden=true; document.getElementById("bPdf").click(); });
