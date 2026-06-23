@@ -5997,9 +5997,9 @@ var SCALES=[50,100,200,250,500];   /* aggiunte 1:250 e 1:500 per aree grandi (pl
 /* area di stampa in cm reali: la cornice personalizzata se impostata, altrimenti l'ingombro del palco */
 function printArea(){
   if(state.printFrame){ var f=state.printFrame; return {x:f.x, y:f.y, w:f.w, h:f.h, custom:true}; }
-  /* auto: bounding box di tutto il contenuto (palco + elementi fuori dal palco, etichette incluse) */
-  var b=contentBounds();
-  return {x:b.x0, y:b.y0, w:b.x1-b.x0, h:b.y1-b.y0, custom:false};
+  /* auto: solo il palco — elementi fuori dal palco clippati dalla viewport SVG */
+  recalcStageBBox();
+  return {x:0, y:0, w:state.stage.w, h:state.stage.d, custom:false};
 }
 function pdfLayout(paperKey, orient){
   var p=PAPER[paperKey], pw=p.w, ph=p.h;
@@ -6029,8 +6029,7 @@ function stageSceneSvg(){
   var sorted=sortedItems();
   var items=''; sorted.forEach(function(it){ items+=itemMarkup(it); });
   sel=keep; selSet=keepSet;
-  var css=document.querySelector("style").textContent.replace(/\/\*[\s\S]*?\*\//g,"") +   /* via i commenti: un '<' in un commento romperebbe l'SVG */
-    '.nofloor .fFloor{fill:none;stroke:none}.nofloor .lbl{fill:#1f2937;stroke:none}';   /* PDF: niente sfondo fuori palco, etichette nere leggibili */
+  var css=document.querySelector("style").textContent.replace(/\/\*[\s\S]*?\*\//g,"");   /* via i commenti: un '<' in un commento romperebbe l'SVG */
   var hasVenue = state.venue && state.venue.enabled!==false && state.venue._dataUrl;
   var venue = hasVenue
     ? '<clipPath id="paClip"><rect x="'+A.x+'" y="'+A.y+'" width="'+A.w+'" height="'+A.h+'"/></clipPath>'+
@@ -6140,7 +6139,6 @@ function drawStageVector(doc, ix, iy, wMm, hMm){
     if(cx.paths>1000 || cx.dLen>400000){ host.remove(); return Promise.reject(new Error("svg-complex:"+cx.paths+"/"+cx.dLen)); }
     flattenTextStyles(svgEl);
     flattenGradients(svgEl);
-    flattenNofloor(svgEl);
     var fn=svg2pdfFn();
     var ret = (typeof doc.svg==="function") ? doc.svg(svgEl,{x:ix,y:iy,width:wMm,height:hMm})
                                             : fn(svgEl, doc, {x:ix,y:iy,width:wMm,height:hMm});
@@ -6232,8 +6230,7 @@ function buildPdfDoc(paperKey, N, orient, header){
     if(A.custom){
       doc.setDrawColor(120,120,120); doc.setLineWidth(0.3); doc.rect(ix, iy, stMmW, stMmH);   /* bordo dell'area di stampa */
     } else {
-      var noOutside=A.x>=-1&&A.y>=-1&&A.w<=state.stage.w+1&&A.h<=state.stage.d+1;
-      if(isSingleRect()&&noOutside){ doc.setDrawColor(31,41,55); doc.setLineWidth(0.5); doc.rect(ix, iy, stMmW, stMmH); }
+      if(isSingleRect()){ doc.setDrawColor(31,41,55); doc.setLineWidth(0.5); doc.rect(ix, iy, stMmW, stMmH); }
       doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(150,150,150);
       doc.text("FONDO PALCO", ix+stMmW/2, iy-3, {align:"center"});
       doc.text("PUBBLICO", ix+stMmW/2, iy+stMmH+5, {align:"center"});
