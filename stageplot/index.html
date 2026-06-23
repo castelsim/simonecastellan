@@ -431,7 +431,7 @@
   <button class="btn" id="bUndo" title="Annulla (⌘Z)" style="padding:7px 11px">↶</button>
   <button class="btn" id="bRedo" title="Ripeti (⇧⌘Z)" style="padding:7px 11px">↷</button>
   <button class="btn" id="bFit" title="Adatta lo zoom al palco">⤢ Adatta</button>
-  <button class="btn btn-icon" id="bSnap" title="Snap magnetico ON — ⌘/Ctrl durante trascinamento = movimento libero">🧲</button>
+  <button class="btn btn-icon" id="bSnap" title="Snap magnetico OFF (griglia 25cm attiva) — clicca per snap ai bordi del palco" style="opacity:0.35">🧲</button>
   <button class="btn btn-icon" id="bFrame" title="Area stampa — definisce cosa esporta il PDF">▭</button>
   <button class="btn" id="bHdrSave" title="Salva progetto (.json)">💾 Salva</button>
   <button class="btn" id="bHdrPdf" title="Esporta planimetria in PDF">📄 PDF</button>
@@ -726,7 +726,7 @@
 
 <footer>
   <span><b>R</b> ruota · <b>⇧R</b> ruota indietro · <b>frecce</b> sposta · <b>⌫</b> elimina · <b>D</b> duplica · <b>Esc</b> deseleziona</span>
-  <span>rotella = zoom · trascina lo sfondo = sposta vista · <b>⌘/Ctrl</b> trascina = fuori snap</span>
+  <span>rotella = zoom · trascina lo sfondo = sposta vista · trascina = griglia 25cm · <b>⌘/Ctrl</b> trascina = libero · <b>🧲</b> = snap bordi palco</span>
   <span id="scaleInfo"></span>
 </footer>
 
@@ -3052,7 +3052,7 @@ document.getElementById("pTastLeg2").addEventListener("change", function(){ mutS
   btn.addEventListener("click", function(){
     snapEnabled=!snapEnabled;
     btn.style.opacity=snapEnabled?"":"0.35";
-    btn.title="Snap magnetico "+(snapEnabled?"ON":"OFF")+" — ⌘/Ctrl durante trascinamento = movimento libero";
+    btn.title=snapEnabled?"Snap magnetico ON (bordi palco) — ⌘/Ctrl = movimento libero":"Snap magnetico OFF (griglia 25cm attiva) — clicca per snap ai bordi del palco";
   });
 })();
 document.getElementById("pGtrSplit").addEventListener("click", explodeGuitar);
@@ -3290,7 +3290,7 @@ function placeCoord(v,e){ return (e && (e.metaKey||e.ctrlKey)) ? snap(v) : Math.
 
 /* ===== Snap magnetico a lati e centri del palco ===== */
 var SNAP_T = 15;  /* soglia cm entro cui lo snap si attiva */
-var snapEnabled = true;   /* toggle globale snap magnetico (pulsante 🧲 in header) */
+var snapEnabled = false;   /* toggle snap magnetico (🧲 in header); false = griglia 25cm, true = snap magnetico bordi palco */
 function magneticSnap(dragItems, ddx, ddy){
   /* dragItems: array di {id, x0, y0} da drag.items
      ddx/ddy:  delta grezzo dal punto di inizio drag
@@ -3810,8 +3810,9 @@ svg.addEventListener("pointermove", function(e){
     renderSnapGuides(magnet.guides);
     drag.items.forEach(function(d){
       var it=state.items.find(function(i){ return i.id===d.id; }); if(!it) return;
-      it.x = Math.round(d.x0+ddx + (freeMove ? 0 : magnet.sdx));
-      it.y = Math.round(d.y0+ddy + (freeMove ? 0 : magnet.sdy));
+      if(freeMove){ it.x=Math.round(d.x0+ddx); it.y=Math.round(d.y0+ddy); }
+      else if(snapEnabled){ it.x=Math.round(d.x0+ddx+magnet.sdx); it.y=Math.round(d.y0+ddy+magnet.sdy); }
+      else { it.x=snap(d.x0+ddx); it.y=snap(d.y0+ddy); }   /* default: griglia 25cm */
       var g=svg.querySelector('[data-id="'+it.id+'"]');
       if(g) g.setAttribute("transform","translate("+it.x+" "+it.y+")");
     });
