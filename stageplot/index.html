@@ -6128,14 +6128,11 @@ function drawStageVector(doc, ix, iy, wMm, hMm){
     host.style.cssText="position:fixed;left:-99999px;top:0;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none";
     document.body.appendChild(host);
     var root=host.attachShadow ? host.attachShadow({mode:"open"}) : host;
-    /* _pdfMode=true solo qui: singer/conductor → 3 path geometriche invece di 708,
-       riduce complessità per svg2pdf. Il percorso raster usa _pdfMode=false → icone reali. */
-    _pdfMode=true;
-    try { root.innerHTML=stageSceneSvg(); } finally { _pdfMode=false; }
+    /* Icone reali (_pdfMode=false): il complexity check esclude palchi complessi → raster 1200 DPI.
+       Palchi semplici (strumenti, no singer/conductor) → vettore puro svg2pdf. */
+    root.innerHTML=stageSceneSvg();
     var svgEl=root.querySelector("svg");
     var cx=svgComplexity(svgEl);
-    /* Con _pdfMode le icone persone sono ~3 path (da 708).
-       Soglie: >1000 path O >400 000 chr nei d="" copre le orchestre numerose. */
     if(cx.paths>1000 || cx.dLen>400000){ host.remove(); return Promise.reject(new Error("svg-complex:"+cx.paths+"/"+cx.dLen)); }
     flattenTextStyles(svgEl);
     flattenGradients(svgEl);
@@ -6220,17 +6217,14 @@ function buildPdfDoc(paperKey, N, orient, header){
     return drawStageVector(doc, ix, iy, stMmW, stMmH)
       .catch(function(e){
         /* svg2pdf fallito o SVG troppo complesso → raster ad alta risoluzione */
-        var pxW=Math.round(stMmW/25.4*600), pxH=Math.round(stMmH/25.4*600);   /* 600 DPI: nitido anche a 4× zoom nel PDF */
-        /* cap canvas a 5000 px sul lato lungo per evitare OOM su palchi molto estesi */
-        var scale=Math.min(1, 5000/Math.max(pxW,pxH,1));
+        var pxW=Math.round(stMmW/25.4*1200), pxH=Math.round(stMmH/25.4*1200);   /* 1200 DPI: icone nitide anche a 6× zoom nel PDF */
+        /* cap canvas a 8000 px sul lato lungo per evitare OOM su palchi molto estesi */
+        var scale=Math.min(1, 8000/Math.max(pxW,pxH,1));
         pxW=Math.round(pxW*scale); pxH=Math.round(pxH*scale);
         return svgToDataUrl(stageSceneSvg(), pxW, pxH, "image/png").then(function(dataUrl){ doc.addImage(dataUrl, "PNG", ix, iy, stMmW, stMmH); });
       })
       .then(function(){
-    if(A.custom){
-      doc.setDrawColor(120,120,120); doc.setLineWidth(0.3); doc.rect(ix, iy, stMmW, stMmH);   /* bordo dell'area di stampa */
-    } else {
-      if(isSingleRect()){ doc.setDrawColor(31,41,55); doc.setLineWidth(0.5); doc.rect(ix, iy, stMmW, stMmH); }
+    if(!A.custom){
       doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(150,150,150);
       doc.text("FONDO PALCO", ix+stMmW/2, iy-3, {align:"center"});
       doc.text("PUBBLICO", ix+stMmW/2, iy+stMmH+5, {align:"center"});
