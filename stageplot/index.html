@@ -436,7 +436,6 @@
   <button class="btn" id="bRedo" title="Ripeti (⇧⌘Z)" style="padding:7px 11px">↷</button>
   <button class="btn" id="bFit" title="Adatta lo zoom al palco">⤢ Adatta</button>
   <button class="btn btn-icon" id="bSnap" title="Snap magnetico ON (bordi palco) — ⌘/Ctrl = movimento libero">🧲</button>
-  <button class="btn btn-icon" id="bFrame" title="Area stampa — definisce cosa esporta il PDF">▭</button>
   <button class="btn" id="bHdrSave" title="Salva progetto (.json)">💾 Salva</button>
   <button class="btn" id="bHdrPdf" title="Esporta planimetria in PDF">📄 PDF</button>
   <button class="btn" id="bHdrImport" title="Importa progetto (.json)">📂 Importa</button>
@@ -4199,7 +4198,7 @@ document.addEventListener("keydown", function(e){
   if((e.metaKey||e.ctrlKey) && (e.key==="v"||e.key==="V")){ e.preventDefault(); pasteClip(); return; }  /* Cmd/Ctrl+V incolla */
   if((e.metaKey||e.ctrlKey) && (e.key==="x"||e.key==="X")){ e.preventDefault(); if(getSel()){ copySel(); deleteSel(); } return; }   /* Cmd/Ctrl+X taglia */
   var it=getSel(), step = e.shiftKey?25:5;
-  if(e.key==="Escape"){ clearSelection(); render(); }
+  if(e.key==="Escape"){ exitHubModes(); clearSelection(); render(); }
   if(!it) return;
   if(e.key==="Backspace"||e.key==="Delete"){ e.preventDefault(); deleteSel(); }
   else if(e.key==="r"){ rotateSel(15); }
@@ -5469,7 +5468,6 @@ function resizeFrame(drag, sp){
   if(ed.indexOf("s")>=0){ h=Math.round(Math.max(MIN, f0.h+dy)); }
   state.printFrame={x:x,y:y,w:w,h:h};
 }
-document.getElementById("bFrame").addEventListener("click", toggleFrameEdit);
 ["frameW","frameH","frameX","frameY"].forEach(function(id){
   document.getElementById(id).addEventListener("change", function(){
     ensurePrintFrame();
@@ -6556,7 +6554,7 @@ resetHistory();   /* la sessione iniziale è la base: undo non torna prima del c
   btn.addEventListener("click",function(e){ e.stopPropagation(); pop.hidden=!pop.hidden; });
   document.addEventListener("click",function(){ pop.hidden=true; });
   document.getElementById("pmVenue").addEventListener("click",function(){ document.getElementById("bVenue").click(); });
-  document.getElementById("pmFrame").addEventListener("click",function(){ document.getElementById("bFrame").click(); });
+  document.getElementById("pmFrame").addEventListener("click",function(){ toggleFrameEdit(); });
   document.getElementById("pmSave").addEventListener("click",function(){ document.getElementById("bShare").click(); });
 })();
 </script>
