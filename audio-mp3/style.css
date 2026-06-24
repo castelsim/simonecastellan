@@ -142,6 +142,12 @@ h1 {
 .metric-value.neutral { color: var(--muted-2); }
 
 .actions { display: flex; flex-direction: column; gap: 10px; }
+.send-hint {
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
 
 /* Errore */
 .error { padding: 8px 0; }

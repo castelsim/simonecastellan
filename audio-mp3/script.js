@@ -18,13 +18,18 @@ var progressEl = document.getElementById('progress');
 var progressBar= document.getElementById('progressBar');
 var resultBox  = document.getElementById('result');
 var fileNameEl = document.getElementById('fileName');
+var sendBtn    = document.getElementById('sendBtn');
+var sendHint   = document.getElementById('sendHint');
 var downloadBtn= document.getElementById('downloadBtn');
-var shareBtn   = document.getElementById('shareBtn');
 var errorBox   = document.getElementById('error');
 var resetBtn   = document.getElementById('resetBtn');
 
 var currentBlob = null;
 var currentName = 'audio.mp3';
+
+// Destinatario di default: Simone (WhatsApp gia' pubblico sul sito).
+var WA_NUMBER = '393404579244';
+var WA_TEXT   = 'Ciao Simone, ti mando un file audio.';
 
 // --- Utility ---
 function show(el)  { el.classList.remove('hidden'); }
@@ -182,9 +187,10 @@ function finish(blob, origSize) {
   currentBlob = blob;
   setProgress(1);
   fileNameEl.textContent = currentName;
+  hide(sendHint);
   hide(statusBox);
   show(resultBox);
-  setupShare();
+  setupSend();
 }
 
 // --- Flusso principale: prima la via veloce, poi ffmpeg ---
@@ -264,24 +270,35 @@ function doDownload() {
   setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
 }
 
-// --- Condivisione ---
-function setupShare() {
-  var canShareFiles = false;
+// --- Invio a Simone (default) ---
+// Obiettivo del tool: far arrivare il file a Simone, di norma via WhatsApp.
+// I link wa.me NON possono allegare un file, quindi:
+//  - se il dispositivo supporta la condivisione di file (tipico mobile),
+//    uso la Web Share API: l'utente passa il file e sceglie WhatsApp -> Simone;
+//  - altrimenti (desktop) scarico l'MP3 e apro la chat di Simone gia' pronta,
+//    con l'istruzione di allegare il file appena scaricato.
+function canShareFile() {
   try {
-    var testFile = new File([currentBlob], currentName, { type: 'audio/mpeg' });
-    canShareFiles = !!(navigator.canShare && navigator.canShare({ files: [testFile] }));
-  } catch (e) { canShareFiles = false; }
+    var f = new File([currentBlob], currentName, { type: 'audio/mpeg' });
+    return !!(navigator.canShare && navigator.canShare({ files: [f] }));
+  } catch (e) { return false; }
+}
 
-  if (canShareFiles) {
-    show(shareBtn);
-    shareBtn.onclick = function () {
+function setupSend() {
+  sendBtn.onclick = function () {
+    if (canShareFile()) {
       var f = new File([currentBlob], currentName, { type: 'audio/mpeg' });
-      navigator.share({ files: [f], title: currentName })
+      navigator.share({ files: [f], text: WA_TEXT, title: currentName })
         .catch(function () { /* annullato dall'utente: ignoro */ });
-    };
-  } else {
-    hide(shareBtn);
-  }
+    } else {
+      // Desktop: scarico e apro la chat di Simone, poi guido all'allegato.
+      doDownload();
+      window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(WA_TEXT),
+                  '_blank', 'noopener');
+      sendHint.textContent = 'File scaricato. Nella chat di Simone tocca 📎 e allega il file appena scaricato.';
+      show(sendHint);
+    }
+  };
 }
 
 // --- Eventi UI ---
