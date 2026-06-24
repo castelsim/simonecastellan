@@ -13,13 +13,12 @@ var MAX_BPM = 300;
 
 // Righe della tabella: etichetta, nome esteso, denominatore (rispetto al 4/4).
 var NOTES = [
-  { label: '1/1',  name: 'Intero',          denom: 1  },
-  { label: '1/2',  name: 'Mezza',           denom: 2  },
-  { label: '1/4',  name: 'Quarto',          denom: 4  },
-  { label: '1/8',  name: 'Ottavo',          denom: 8  },
-  { label: '1/16', name: 'Sedicesimo',      denom: 16 },
-  { label: '1/32', name: 'Trentaduesimo',   denom: 32 },
-  { label: '1/64', name: 'Pre-delay',       denom: 64 }
+  { label: '1/1',  denom: 1  },
+  { label: '1/2',  denom: 2  },
+  { label: '1/4',  denom: 4  },
+  { label: '1/8',  denom: 8  },
+  { label: '1/16', denom: 16 },
+  { label: '1/32', denom: 32 }
 ];
 
 // --- Riferimenti DOM ---
@@ -81,7 +80,7 @@ function buildRows() {
 
     var note = document.createElement('span');
     note.className = 'note';
-    note.innerHTML = n.label + '<small>' + n.name + '</small>';
+    note.textContent = n.label;
     row.appendChild(note);
 
     ['straight', 'dot', 'trip'].forEach(function (kind) {
