@@ -7,7 +7,7 @@
     <line x1="100"  y1="-22" x2="100"  y2="22"  opacity="0.32"/>
   </g>
   <text x="600" y="430" text-anchor="middle" font-family="-apple-system, Segoe UI, Roboto, Arial, sans-serif"
-        font-size="60" font-weight="500" fill="#1a1a1a">Calcolatore Delay</text>
+        font-size="60" font-weight="500" fill="#1a1a1a">BPM</text>
   <text x="600" y="498" text-anchor="middle" font-family="-apple-system, Segoe UI, Roboto, Arial, sans-serif"
         font-size="30" fill="#5f6368">Delay e riverbero dal BPM · dritte, puntate, terzine · anche in Hz</text>
 </svg>
