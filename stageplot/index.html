@@ -3481,9 +3481,9 @@ function miniSvg(k, over){
       entries.push({nome:"Violino II", dim:"postazione", icon:"vlnpost", action:function(){ addViolin(2); }});
     }
     if(c==="Persone"){
-      var dirPov={podio:true, w:100, d:100};
-      body.appendChild(makeBtn("direttore","Direttore su podio", dirPov, "con podio")); n++;
-      entries.push({k:"direttore", nome:"Direttore su podio", over:dirPov, dim:"con podio"});
+      var dirPov={leggio:true};
+      body.appendChild(makeBtn("direttore","Direttore", dirPov, "con leggio")); n++;
+      entries.push({k:"direttore", nome:"Direttore", over:dirPov, dim:"con leggio"});
       var corU={donna:false}, corD={donna:true};
       body.appendChild(makeBtn("corista","Uomo", corU, "voce coro")); n++;
       entries.push({k:"corista", nome:"Uomo", over:corU, dim:"voce coro"});
@@ -3494,7 +3494,7 @@ function miniSvg(k, over){
       if(c==="Pedane e strutture") return;   /* categoria gestita interamente sopra (sottosezioni) */
       if(k==="pedana") return;
       if(k==="vlnpost") return;   /* violini gestiti sopra (Violino I / II con nome progressivo) */
-      if(k==="direttore") return; /* solo "Direttore su podio" (il podio si toglie dalle opzioni) */
+      if(k==="direttore") return; /* gestito sopra */
       if(c==="Persone" && (k==="cantante"||k==="corista")) return; /* gestiti sopra come varianti uomo/donna */
       var sub=TYPES[k].sub||null;
       var target=body, group=null;
@@ -3586,7 +3586,7 @@ function addItem(type, over){
   if(KEYS_BENCH[type]) it.panca=true;   /* tastiere/piano: sgabello di default */
   if(POSTAZ[type]){ it.sedia=true; it.leggio=true; it.doppia=false; it.sep=minSepType(type); }
   if(DOUBLE_TYPES[type]){ it.sep=minSepType(type); it.w=sepToW(DOUBLE_TYPES[type], it.sep); it.d=DOUBLE_TYPES[type].dbl[1]; }
-  if(t.dir){ it.podio=false; }
+  if(t.dir){ it.podio=false; it.leggio=true; }
   if(autoNumbered(type)){   /* nome progressivo: Flauto 1, Flauto 2, … (doppie = 2 nomi) */
     var seats0=instrSeats(type), base0=instrBase(type);
     it.label=base0+" "+(seats0+1);
