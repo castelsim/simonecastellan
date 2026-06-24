@@ -208,6 +208,7 @@ unitBtns.forEach(function (btn) {
 // --- Toggle Avanzate (animato) ---
 advBtn.addEventListener('click', function () {
   var open = advPanel.classList.toggle('open');
+  tapBtn.classList.toggle('compact', open);
   advBtn.textContent = open ? 'Chiudi' : 'Avanzate';
 });
 
