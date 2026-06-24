@@ -18,9 +18,6 @@ var progressEl = document.getElementById('progress');
 var progressBar= document.getElementById('progressBar');
 var resultBox  = document.getElementById('result');
 var fileNameEl = document.getElementById('fileName');
-var sizeOrigEl = document.getElementById('sizeOrig');
-var sizeFinalEl= document.getElementById('sizeFinal');
-var reductionEl= document.getElementById('reduction');
 var downloadBtn= document.getElementById('downloadBtn');
 var shareBtn   = document.getElementById('shareBtn');
 var errorBox   = document.getElementById('error');
@@ -30,12 +27,6 @@ var currentBlob = null;
 var currentName = 'audio.mp3';
 
 // --- Utility ---
-function fmtBytes(b) {
-  if (b < 1024) return b + ' B';
-  if (b < 1024 * 1024) return (b / 1024).toFixed(0) + ' KB';
-  return (b / (1024 * 1024)).toFixed(2) + ' MB';
-}
-
 function show(el)  { el.classList.remove('hidden'); }
 function hide(el)  { el.classList.add('hidden'); }
 
@@ -190,12 +181,7 @@ function convertWithFfmpeg(file) {
 function finish(blob, origSize) {
   currentBlob = blob;
   setProgress(1);
-  fileNameEl.textContent  = currentName;
-  sizeOrigEl.textContent  = fmtBytes(origSize);
-  sizeFinalEl.textContent = fmtBytes(blob.size);
-  var reduction = origSize > 0 ? Math.round((1 - blob.size / origSize) * 100) : 0;
-  reductionEl.textContent = (reduction > 0 ? '−' + reduction : '+' + Math.abs(reduction)) + '%';
-  reductionEl.className = 'metric-value ' + (reduction > 0 ? '' : 'neutral');
+  fileNameEl.textContent = currentName;
   hide(statusBox);
   show(resultBox);
   setupShare();
