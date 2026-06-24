@@ -284,9 +284,20 @@ function canShareFile() {
   } catch (e) { return false; }
 }
 
+// Solo su mobile la condivisione di file raggiunge davvero WhatsApp (col file
+// allegato). Su desktop il foglio di sistema non ha WhatsApp, quindi lì
+// conviene aprire wa.me direttamente.
+function isMobile() {
+  if (navigator.userAgentData && typeof navigator.userAgentData.mobile === 'boolean') {
+    return navigator.userAgentData.mobile;
+  }
+  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+}
+
 function setupSend() {
   sendBtn.onclick = function () {
-    if (canShareFile()) {
+    if (isMobile() && canShareFile()) {
+      // MOBILE: passo il file a WhatsApp (gia' allegato), l'utente sceglie Simone.
       var f = new File([currentBlob], currentName, { type: 'audio/mpeg' });
       navigator.share({ files: [f], text: WA_TEXT, title: currentName })
         .catch(function () { /* annullato dall'utente: ignoro */ });
