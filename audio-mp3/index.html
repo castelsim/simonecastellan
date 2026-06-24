@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Converti Audio in MP3 — leggero e pronto da inviare</title>
+  <meta name="description" content="Carica un file audio (WAV, AIFF, MP3, M4A, AAC…) e ottieni in un attimo un MP3 leggero pronto per WhatsApp, email o messaggi. Tutto nel tuo browser: i file non vengono caricati online." />
+  <meta name="theme-color" content="#ffffff" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Converti Audio in MP3" />
+  <meta property="og:description" content="Carica un file audio e ottieni un MP3 leggero pronto da inviare. Funziona nel browser, niente upload." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Abilita l'isolamento cross-origin (SharedArrayBuffer) necessario a ffmpeg.wasm
+       anche su GitHub Pages. Si attiva da solo, l'utente non se ne accorge. -->
+  <script src="coi-serviceworker.min.js"></script>
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>Converti Audio in MP3</h1>
+      <p class="subtitle">Carica un file audio e ottieni un MP3 leggero pronto da inviare.</p>
+    </header>
+
+    <!-- Drop zone -->
+    <section id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Carica o trascina un file audio">
+      <p class="dz-title">Trascina qui il file audio</p>
+      <p class="dz-or">oppure</p>
+      <button type="button" id="pickBtn" class="btn btn-secondary">Carica file</button>
+      <input type="file" id="fileInput" accept="audio/*,video/*,.wav,.aiff,.aif,.aifc,.flac,.ogg,.oga,.opus,.m4a,.mp4,.aac,.mp3,.wma,.amr,.ac3,.alac,.caf,.mka,.weba,.3gp" hidden />
+    </section>
+
+    <!-- Stato / progresso -->
+    <section id="status" class="status hidden" aria-live="polite">
+      <p id="statusText" class="status-text">Conversione in corso…</p>
+      <div id="progress" class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+    </section>
+
+    <!-- Risultato -->
+    <section id="result" class="result hidden">
+      <div class="result-head">
+        <span id="fileName" class="result-name">audio.mp3</span>
+      </div>
+
+      <div class="metrics">
+        <div class="metric">
+          <span class="metric-label">Originale</span>
+          <span id="sizeOrig" class="metric-value">—</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">MP3 finale</span>
+          <span id="sizeFinal" class="metric-value">—</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Riduzione</span>
+          <span id="reduction" class="metric-value good">—</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="downloadBtn" class="btn btn-primary">Scarica MP3</button>
+        <button type="button" id="shareBtn" class="btn btn-secondary hidden">Condividi</button>
+      </div>
+      <button type="button" id="resetBtn" class="btn btn-ghost">Converti un altro file</button>
+    </section>
+
+    <!-- Errore -->
+    <section id="error" class="error hidden" aria-live="assertive">
+      <p class="error-title">Qualcosa è andato storto</p>
+      <p class="error-msg">Impossibile convertire questo file.</p>
+      <button type="button" class="btn btn-ghost" onclick="location.reload()">Riprova</button>
+    </section>
+
+    <p class="privacy">I file rimangono sul tuo dispositivo e non vengono caricati online.</p>
+  </main>
+
+  <footer class="site-footer">
+    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+  </footer>
+
+  <!-- Motore di fallback universale (caricato leggero ~22KB; il core pesante
+       viene scaricato solo se serve davvero, alla prima conversione "esotica"). -->
+  <script src="vendor/ffmpeg/ffmpeg.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

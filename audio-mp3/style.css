@@ -1,0 +1,177 @@
+/* Stile coerente con simonecastellan.com — minimale, monocromatico, luce. */
+:root {
+  --bg: #ffffff;
+  --text: #3c4043;
+  --ink: #1a1a1a;       /* testo forte */
+  --muted: #5f6368;
+  --muted-2: #80868b;
+  --faint: #9aa0a6;
+  --pill: #f1f3f4;
+  --pill-hover: #e6e8ea;
+  --line: #c2c6cc;
+  --line-soft: #dadce0;
+  --radius: 16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px 20px calc(64px + env(safe-area-inset-bottom));
+  text-align: center;
+}
+
+.card {
+  width: 100%;
+  max-width: 440px;
+}
+
+/* Intestazione */
+header { margin-bottom: 26px; }
+h1 {
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.2px;
+}
+.subtitle {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--muted);
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+/* Drop zone */
+.dropzone {
+  border: 1.5px dashed var(--line-soft);
+  border-radius: 22px;
+  padding: 34px 20px;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+  background: #fafbfc;
+}
+.dropzone:hover { background: var(--pill); }
+.dropzone.dragover { background: var(--pill); border-color: var(--muted-2); }
+.dz-title { font-size: 16px; font-weight: 500; color: var(--ink); }
+.dz-or { color: var(--faint); margin: 6px 0 16px; font-size: 13px; }
+
+/* Bottoni — pillole come sul sito */
+.btn {
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 22px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s ease, opacity .15s ease;
+}
+.btn-primary { background: var(--ink); color: #fff; width: 100%; }
+.btn-primary:hover { background: #000; }
+.btn-secondary { background: var(--pill); color: var(--ink); width: 100%; }
+.btn-secondary:hover { background: var(--pill-hover); }
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 13px;
+  margin-top: 14px;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  padding: 0 0 1px;
+}
+.btn-ghost:hover { color: var(--ink); }
+.dropzone .btn { width: auto; min-width: 150px; }
+
+/* Stato / progresso */
+.status { padding: 16px 0 4px; }
+.status-text { color: var(--muted); font-size: 15px; margin-bottom: 16px; }
+.progress {
+  width: 100%;
+  height: 6px;
+  background: var(--pill);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--ink);
+  border-radius: 999px;
+  transition: width .2s ease;
+}
+
+/* Risultato */
+.result-head {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 20px;
+  word-break: break-all;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.metric {
+  background: var(--pill);
+  border-radius: 14px;
+  padding: 14px 8px;
+}
+.metric-label {
+  display: block;
+  color: var(--muted-2);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+.metric-value { display: block; font-size: 17px; font-weight: 700; color: var(--ink); margin-top: 5px; }
+.metric-value.neutral { color: var(--muted-2); }
+
+.actions { display: flex; flex-direction: column; gap: 10px; }
+
+/* Errore */
+.error { padding: 8px 0; }
+.error-title { font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+.error-msg { color: var(--muted); font-size: 14px; line-height: 1.5; margin-bottom: 16px; }
+
+/* Privacy */
+.privacy {
+  margin-top: 26px;
+  font-size: 12px;
+  color: var(--faint);
+  letter-spacing: .1px;
+}
+
+/* Footer fisso, come il credit del sito */
+.site-footer {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: #6b7075;
+  letter-spacing: .2px;
+}
+.site-footer a { color: #6b7075; text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 1px; }
+.site-footer a:hover { color: var(--ink); }
+
+.hidden { display: none !important; }
+
+@media (max-width: 460px) {
+  h1 { font-size: 22px; }
+  .subtitle { font-size: 15px; }
+}
