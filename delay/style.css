@@ -121,7 +121,17 @@ h1 {
 .btn-secondary { background: var(--pill); color: var(--ink); }
 .btn-secondary:hover { background: var(--pill-hover); }
 
-.tap { min-width: 170px; }
+.tap {
+  width: 170px;
+  height: 170px;
+  font-size: 28px;
+  letter-spacing: 2px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 28px;
+}
 .tap.beat { background: var(--line-soft); }
 .tap-hint {
   font-size: 12px;
@@ -149,8 +159,20 @@ h1 {
 }
 .adv-btn:hover { color: var(--ink); }
 
-/* Sezione avanzata */
-.advanced { margin-top: 26px; width: 100%; }
+/* Sezione avanzata — slide-down animato */
+.advanced {
+  margin-top: 0;
+  width: 100%;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.4s ease;
+}
+.advanced.open {
+  max-height: 900px;
+  opacity: 1;
+  margin-top: 26px;
+}
 
 /* Tabella tempi */
 .grid { width: 100%; }

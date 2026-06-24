@@ -205,11 +205,10 @@ unitBtns.forEach(function (btn) {
   });
 });
 
-// --- Toggle Avanzate ---
+// --- Toggle Avanzate (animato) ---
 advBtn.addEventListener('click', function () {
-  var open = !advPanel.classList.contains('hidden');
-  advPanel.classList.toggle('hidden', open);
-  advBtn.textContent = open ? 'Avanzate' : 'Chiudi';
+  var open = advPanel.classList.toggle('open');
+  advBtn.textContent = open ? 'Chiudi' : 'Avanzate';
 });
 
 // --- Avvio ---
