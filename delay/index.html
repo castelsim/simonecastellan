@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Calcolatore Delay — tempi di delay e riverbero dal BPM</title>
+  <meta name="description" content="Inserisci il BPM e ottieni subito i tempi di delay e pre-delay in millisecondi: note dritte, puntate e terzine. Anche in Hz. Tutto nel browser, niente da installare." />
+  <meta name="theme-color" content="#ffffff" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Calcolatore Delay" />
+  <meta property="og:description" content="Dal BPM ai tempi di delay in millisecondi: dritte, puntate e terzine. Anche in Hz. Funziona nel browser." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>Calcolatore Delay</h1>
+      <p class="subtitle">Dal BPM ai tempi di delay, in un attimo.</p>
+    </header>
+
+    <!-- Controllo BPM -->
+    <section class="bpm" aria-label="Battiti per minuto">
+      <button type="button" id="minusBtn" class="step" aria-label="Diminuisci BPM">−</button>
+      <div class="bpm-field">
+        <input type="number" id="bpm" class="bpm-input" value="120" min="20" max="300" step="1"
+               inputmode="numeric" aria-label="BPM" />
+        <span class="bpm-unit">BPM</span>
+      </div>
+      <button type="button" id="plusBtn" class="step" aria-label="Aumenta BPM">+</button>
+    </section>
+
+    <button type="button" id="tapBtn" class="btn btn-secondary tap">Batti il tempo</button>
+    <p id="tapHint" class="tap-hint">Tocca a ritmo per ricavare il BPM.</p>
+
+    <!-- Tabella tempi -->
+    <section class="grid" aria-label="Tempi di delay">
+      <div class="grid-head">
+        <span class="col-note"></span>
+        <span>Dritto</span>
+        <span>Puntato</span>
+        <span>Terzina</span>
+      </div>
+      <div id="rows"></div>
+    </section>
+
+    <!-- Selettore unità -->
+    <div class="unit-toggle" role="group" aria-label="Unità di misura">
+      <button type="button" class="unit active" data-unit="ms">ms</button>
+      <button type="button" class="unit" data-unit="hz">Hz</button>
+    </div>
+
+    <p class="hint">Tocca un valore per copiarlo.</p>
+  </main>
+
+  <footer class="site-footer">
+    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
