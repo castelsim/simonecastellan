@@ -18,7 +18,8 @@ var NOTES = [
   { label: '1/4',  name: 'Quarto',          denom: 4  },
   { label: '1/8',  name: 'Ottavo',          denom: 8  },
   { label: '1/16', name: 'Sedicesimo',      denom: 16 },
-  { label: '1/32', name: 'Trentaduesimo',   denom: 32 }
+  { label: '1/32', name: 'Trentaduesimo',   denom: 32 },
+  { label: '1/64', name: 'Pre-delay',       denom: 64 }
 ];
 
 // --- Riferimenti DOM ---
