@@ -27,9 +27,8 @@ var resetBtn   = document.getElementById('resetBtn');
 var currentBlob = null;
 var currentName = 'audio.mp3';
 
-// Destinatario di default: Simone (WhatsApp gia' pubblico sul sito).
-var WA_NUMBER = '393404579244';
-var WA_TEXT   = 'Ciao Simone, ti mando un file audio.';
+// Email di Simone, usata come ripiego quando manca la condivisione di file.
+var MAIL_TO = 'castellansimone@gmail.com';
 
 // --- Utility ---
 function show(el)  { el.classList.remove('hidden'); }
@@ -284,29 +283,22 @@ function canShareFile() {
   } catch (e) { return false; }
 }
 
-// Solo su mobile la condivisione di file raggiunge davvero WhatsApp (col file
-// allegato). Su desktop il foglio di sistema non ha WhatsApp, quindi lì
-// conviene aprire wa.me direttamente.
-function isMobile() {
-  if (navigator.userAgentData && typeof navigator.userAgentData.mobile === 'boolean') {
-    return navigator.userAgentData.mobile;
-  }
-  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
-}
-
 function setupSend() {
   sendBtn.onclick = function () {
-    if (isMobile() && canShareFile()) {
-      // MOBILE: passo il file a WhatsApp (gia' allegato), l'utente sceglie Simone.
+    if (canShareFile()) {
+      // Menu di condivisione di sistema: scegliendo Mail (Mac/iPhone) o WhatsApp
+      // (mobile), il file e' GIA' allegato. Unico modo per allegare via browser.
       var f = new File([currentBlob], currentName, { type: 'audio/mpeg' });
-      navigator.share({ files: [f], text: WA_TEXT, title: currentName })
+      navigator.share({ files: [f], title: currentName, text: 'File audio convertito.' })
         .catch(function () { /* annullato dall'utente: ignoro */ });
     } else {
-      // Desktop: scarico e apro la chat di Simone, poi guido all'allegato.
+      // Ripiego (browser senza condivisione di file): scarico e apro una mail
+      // gia' indirizzata a Simone; l'allegato lo aggiunge l'utente a mano.
       doDownload();
-      window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(WA_TEXT),
-                  '_blank', 'noopener');
-      sendHint.textContent = 'File scaricato. Nella chat di Simone tocca 📎 e allega il file appena scaricato.';
+      var subject = encodeURIComponent('File audio: ' + currentName);
+      var body = encodeURIComponent('Ciao Simone, ti allego il file audio (' + currentName + ').');
+      window.location.href = 'mailto:' + MAIL_TO + '?subject=' + subject + '&body=' + body;
+      sendHint.textContent = 'File scaricato. Allega il file appena scaricato all’email che si è aperta.';
       show(sendHint);
     }
   };
