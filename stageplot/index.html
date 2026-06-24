@@ -3484,15 +3484,11 @@ function miniSvg(k, over){
       var dirPov={podio:true, w:100, d:100};
       body.appendChild(makeBtn("direttore","Direttore su podio", dirPov, "con podio")); n++;
       entries.push({k:"direttore", nome:"Direttore su podio", over:dirPov, dim:"con podio"});
-      var cantU={donna:false}, cantD={donna:true}, corU={donna:false}, corD={donna:true};
-      body.appendChild(makeBtn("cantante","Cantante Uomo", cantU, "voce")); n++;
-      entries.push({k:"cantante", nome:"Cantante Uomo", over:cantU, dim:"voce"});
-      body.appendChild(makeBtn("cantante","Cantante Donna", cantD, "voce")); n++;
-      entries.push({k:"cantante", nome:"Cantante Donna", over:cantD, dim:"voce"});
-      body.appendChild(makeBtn("corista","Corista Uomo", corU, "voce coro")); n++;
-      entries.push({k:"corista", nome:"Corista Uomo", over:corU, dim:"voce coro"});
-      body.appendChild(makeBtn("corista","Corista Donna", corD, "voce coro")); n++;
-      entries.push({k:"corista", nome:"Corista Donna", over:corD, dim:"voce coro"});
+      var corU={donna:false}, corD={donna:true};
+      body.appendChild(makeBtn("corista","Uomo", corU, "voce coro")); n++;
+      entries.push({k:"corista", nome:"Uomo", over:corU, dim:"voce coro"});
+      body.appendChild(makeBtn("corista","Donna", corD, "voce coro")); n++;
+      entries.push({k:"corista", nome:"Donna", over:corD, dim:"voce coro"});
     }
     cats[c].forEach(function(k){
       if(c==="Pedane e strutture") return;   /* categoria gestita interamente sopra (sottosezioni) */
