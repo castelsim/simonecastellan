@@ -23,14 +23,16 @@ var NOTES = [
 ];
 
 // --- Riferimenti DOM ---
-var bpmInput = document.getElementById('bpm');
-var minusBtn = document.getElementById('minusBtn');
-var plusBtn  = document.getElementById('plusBtn');
-var tapBtn   = document.getElementById('tapBtn');
-var tapHint  = document.getElementById('tapHint');
-var rowsEl   = document.getElementById('rows');
-var unitBtns = document.querySelectorAll('.unit');
-var toastEl  = document.getElementById('toast');
+var bpmInput  = document.getElementById('bpm');
+var minusBtn  = document.getElementById('minusBtn');
+var plusBtn   = document.getElementById('plusBtn');
+var tapBtn    = document.getElementById('tapBtn');
+var tapHint   = document.getElementById('tapHint');
+var advBtn    = document.getElementById('advBtn');
+var advPanel  = document.getElementById('advanced');
+var rowsEl    = document.getElementById('rows');
+var unitBtns  = document.querySelectorAll('.unit');
+var toastEl   = document.getElementById('toast');
 
 var unit = 'ms';   // 'ms' | 'hz'
 
@@ -201,6 +203,13 @@ unitBtns.forEach(function (btn) {
     unitBtns.forEach(function (b) { b.classList.toggle('active', b === btn); });
     render();
   });
+});
+
+// --- Toggle Avanzate ---
+advBtn.addEventListener('click', function () {
+  var open = !advPanel.classList.contains('hidden');
+  advPanel.classList.toggle('hidden', open);
+  advBtn.textContent = open ? 'Avanzate' : 'Chiudi';
 });
 
 // --- Avvio ---

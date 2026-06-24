@@ -23,7 +23,6 @@
   <main class="card">
     <header>
       <h1>BPM</h1>
-      <p class="subtitle">Tempi di delay e riverbero, dal BPM.</p>
     </header>
 
     <!-- Controllo BPM -->
@@ -40,24 +39,29 @@
     <button type="button" id="tapBtn" class="btn btn-secondary tap">Batti il tempo</button>
     <p id="tapHint" class="tap-hint">Tocca a ritmo per ricavare il BPM.</p>
 
-    <!-- Tabella tempi -->
-    <section class="grid" aria-label="Tempi di delay">
-      <div class="grid-head">
-        <span class="col-note"></span>
-        <span>Dritto</span>
-        <span>Puntato</span>
-        <span>Terzina</span>
+    <button type="button" id="advBtn" class="btn-ghost adv-btn">Avanzate</button>
+
+    <!-- Sezione avanzata (nascosta di default) -->
+    <div id="advanced" class="advanced hidden">
+      <!-- Tabella tempi -->
+      <section class="grid" aria-label="Tempi di delay">
+        <div class="grid-head">
+          <span class="col-note"></span>
+          <span>Dritto</span>
+          <span>Puntato</span>
+          <span>Terzina</span>
+        </div>
+        <div id="rows"></div>
+      </section>
+
+      <!-- Selettore unità -->
+      <div class="unit-toggle" role="group" aria-label="Unità di misura">
+        <button type="button" class="unit active" data-unit="ms">ms</button>
+        <button type="button" class="unit" data-unit="hz">Hz</button>
       </div>
-      <div id="rows"></div>
-    </section>
 
-    <!-- Selettore unità -->
-    <div class="unit-toggle" role="group" aria-label="Unità di misura">
-      <button type="button" class="unit active" data-unit="ms">ms</button>
-      <button type="button" class="unit" data-unit="hz">Hz</button>
+      <p class="hint">Tocca un valore per copiarlo.</p>
     </div>
-
-    <p class="hint">Tocca un valore per copiarlo. Stessi ms per delay, pre-delay e coda del riverbero.</p>
   </main>
 
   <footer class="site-footer">
