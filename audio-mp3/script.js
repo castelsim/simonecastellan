@@ -283,31 +283,22 @@ function canShareFile() {
   } catch (e) { return false; }
 }
 
-// Solo su mobile la condivisione di sistema include Mail/WhatsApp e allega il
-// file da sola. Su desktop (Chrome in primis) non e' affidabile: meglio aprire
-// la mail a Simone e far allegare il file scaricato.
-function isMobile() {
-  if (navigator.userAgentData && typeof navigator.userAgentData.mobile === 'boolean') {
-    return navigator.userAgentData.mobile;
-  }
-  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
-}
-
 function setupSend() {
   sendBtn.onclick = function () {
-    if (isMobile() && canShareFile()) {
-      // MOBILE: il file viene gia' allegato; l'utente sceglie Mail o WhatsApp.
+    if (canShareFile()) {
+      // Menu di condivisione di sistema: scegliendo Mail (Mac/iPhone) il file e'
+      // GIA' allegato. Unico modo per allegare un file via browser.
       var f = new File([currentBlob], currentName, { type: 'audio/mpeg' });
       navigator.share({ files: [f], title: currentName, text: 'File audio convertito.' })
         .catch(function () { /* annullato dall'utente: ignoro */ });
     } else {
-      // DESKTOP: scarico e apro la mail gia' indirizzata a Simone;
-      // l'allegato lo aggiunge l'utente trascinando il file scaricato.
+      // Ripiego (browser senza condivisione di file): scarico e apro una mail
+      // gia' indirizzata a Simone; l'allegato lo aggiunge l'utente a mano.
       doDownload();
       var subject = encodeURIComponent('File audio: ' + currentName);
       var body = encodeURIComponent('Ciao Simone, ti allego il file audio (' + currentName + ').');
       window.location.href = 'mailto:' + MAIL_TO + '?subject=' + subject + '&body=' + body;
-      sendHint.textContent = 'File scaricato. Trascina il file appena scaricato nell’email che si è aperta.';
+      sendHint.textContent = 'File scaricato. Allega il file appena scaricato all’email che si è aperta.';
       show(sendHint);
     }
   };
