@@ -6236,7 +6236,7 @@ function flattenTextStyles(rootEl){
     var halo=h.el.cloneNode(true);
     halo.setAttribute('fill','none');
     halo.setAttribute('stroke',h.stroke);
-    halo.setAttribute('stroke-width',(h.sw*0.4)+'px');
+    halo.setAttribute('stroke-width',(h.sw*0.15)+'px');
     halo.setAttribute('stroke-linejoin','round');
     halo.setAttribute('stroke-linecap','round');
     halo.querySelectorAll('tspan').forEach(function(ts){ ts.removeAttribute('stroke'); });
