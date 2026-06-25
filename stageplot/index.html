@@ -3206,8 +3206,10 @@ function bumpLabel(label, extra){
 /* incrementa entrambe le etichette di una postazione (label e, se presente, label2 della doppia) */
 function bumpItemLabels(c){
   var reserved={};
-  c.label=bumpLabel(c.label, reserved); if(c.label) reserved[c.label]=true;
-  if(c.label2){ c.label2=bumpLabel(c.label2, reserved); reserved[c.label2]=true; }
+  var num=/\d+\s*$/, auto=autoNumbered(c.type);
+  if(auto || num.test(c.label||"")){ c.label=bumpLabel(c.label, reserved); }
+  if(c.label) reserved[c.label]=true;
+  if(c.label2 && (auto || num.test(c.label2))){ c.label2=bumpLabel(c.label2, reserved); reserved[c.label2]=true; }
 }
 function duplicateSel(noOffset){
   var its=selItems(); if(!its.length) return;
