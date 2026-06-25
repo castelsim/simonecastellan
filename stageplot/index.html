@@ -950,7 +950,7 @@
 
 <div class="modal" id="shareModal" hidden>
   <div class="mcard" style="width:480px;max-width:94vw">
-    <h2>Salva / Esporta</h2>
+    <h2>Condividi</h2>
     <!-- elementi tenuti per backward compat JS -->
     <div id="shareTabs" hidden style="display:none">
       <button class="btn primary" id="shareTabLink">🔗 Link del progetto</button>
@@ -970,19 +970,12 @@
       </div>
       <div id="shareStatus" style="font-size:12px;color:#16a34a;min-height:14px;margin-top:4px"></div>
     </div>
-    <div>
-      <p class="hint" style="font-size:12.5px;color:#6b7280;margin-bottom:10px">Salva il progetto come file <b>.json</b> (backup/archivio) e ricaricalo quando vuoi.</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn primary" id="saveJson">💾 Salva .json</button>
-        <button class="btn" id="importJson">📂 Importa .json</button>
-      </div>
-      <input type="file" id="importFile" accept="application/json,.json" hidden>
-      <div class="mstatus" id="ioStatus" style="font-size:12px;color:#16a34a;margin-top:8px;min-height:14px"></div>
-    </div>
-    <div style="border-top:1px solid #eef0f3;margin-top:14px;padding-top:12px">
-      <p class="hint" style="font-size:12.5px;color:#6b7280;margin-bottom:10px">Salva la planimetria in <b>scala</b> + channel list in PDF.</p>
-      <button class="btn" id="shareGoPdf">📄 Salva PDF</button>
-    </div>
+    <!-- elementi nascosti usati dal pannello laterale -->
+    <button id="saveJson" hidden></button>
+    <button id="importJson" hidden></button>
+    <input type="file" id="importFile" accept="application/json,.json" hidden>
+    <div id="ioStatus" hidden></div>
+    <button id="shareGoPdf" hidden></button>
     <div style="display:flex;margin-top:14px">
       <button class="btn" id="shareClose" style="margin-left:auto">Chiudi</button>
     </div>
