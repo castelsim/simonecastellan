@@ -354,7 +354,7 @@
   body.dark header{background:#161b24;border-bottom-color:#283142}
   body.dark .hdr-stage{background:#1b2230;border-color:#2b3445}
   body.dark .hdr-stage .lab,body.dark .hdr-stage label,body.dark .hdr-stage label i{color:#94a3b8}
-  body.dark .hdr-stage input,body.dark .hdr-stage select,body.dark header input[type=text]{background:#0f141b;border-color:#2b3445;color:#e5e7eb}
+  body.dark .hdr-stage input,body.dark .hdr-stage select,body.dark header input[type=text],body.dark header select{background:#0f141b;border-color:#2b3445;color:#e5e7eb}
   body.dark .btn{background:#222b38;color:#e5e7eb}
   body.dark .btn:hover{background:#2c3848}
   body.dark .btn.primary{background:#2563eb;color:#fff}
@@ -420,7 +420,13 @@
   <button class="btn" id="bUndo" title="Annulla (⌘Z)" style="padding:7px 11px">↶</button>
   <button class="btn" id="bRedo" title="Ripeti (⇧⌘Z)" style="padding:7px 11px">↷</button>
   <button class="btn" id="bFit" title="Adatta lo zoom al palco">⤢ Adatta</button>
-  <button class="btn btn-icon" id="bSnap" title="Snap magnetico ON (bordi palco) — ⌘/Ctrl = movimento libero">🧲</button>
+  <select id="snapSel" title="Modalità snap posizione" style="font-size:13px;padding:3px 6px;border-radius:6px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer;height:32px">
+    <option value="0">Libero</option>
+    <option value="25" selected>25 cm</option>
+    <option value="50">50 cm</option>
+    <option value="100">1 metro</option>
+    <option value="obj">Oggetti</option>
+  </select>
   <div style="display:flex;gap:4px">
     <button class="btn" id="bHdrSave" title="Salva progetto (.json)">💾 Save as</button>
     <button class="btn" id="bHdrPdf" title="Esporta planimetria in PDF">📄 PDF</button>
@@ -719,7 +725,7 @@
 
 <footer>
   <span><b>R</b> ruota · <b>⇧R</b> ruota indietro · <b>frecce</b> sposta · <b>⌫</b> elimina · <b>D</b> duplica · <b>Esc</b> deseleziona</span>
-  <span>rotella = zoom · trascina lo sfondo = sposta vista · trascina = griglia 25cm · <b>⌘/Ctrl</b> trascina = libero · <b>🧲</b> = snap bordi palco</span>
+  <span>rotella = zoom · trascina lo sfondo = sposta vista · <b>snap</b>: seleziona modalità nell'header · <b>⌘/Ctrl</b> trascina = sempre libero</span>
   <span id="scaleInfo"></span>
 </footer>
 
@@ -3097,14 +3103,7 @@ document.getElementById("pTastLeg1").addEventListener("change", function(){
   document.getElementById("pTastLeg2").disabled = !document.getElementById("pTastLeg1").checked;
 });
 document.getElementById("pTastLeg2").addEventListener("change", function(){ mutSel(function(it){ it.leggio2=document.getElementById("pTastLeg2").checked; }); });
-(function(){
-  var btn=document.getElementById("bSnap");
-  btn.addEventListener("click", function(){
-    snapEnabled=!snapEnabled;
-    btn.style.opacity=snapEnabled?"":"0.35";
-    btn.title=snapEnabled?"Snap magnetico ON (bordi palco) — ⌘/Ctrl = movimento libero":"Snap magnetico OFF (griglia 25cm attiva) — clicca per snap ai bordi del palco";
-  });
-})();
+document.getElementById("snapSel").addEventListener("change", function(){ snapMode=this.value; });
 document.getElementById("pGtrSplit").addEventListener("click", explodeGuitar);
 /* Dividi una postazione doppia (×2 del generatore o doppia-da-flag) in 2 postazioni singole */
 var SINGLE_OF_KIND={vln1:"vlnpost", vln2:"vlnpost", vla:"violapost", vc:"violoncello", cb:"contrabbasso"};
@@ -3337,13 +3336,13 @@ function setEventInputs(){
 document.getElementById("mW").addEventListener("change", function(){ applyStageWidth(this.value); });
 document.getElementById("mD").addEventListener("change", function(){ applyStageDepth(this.value); });
 document.getElementById("mMenuBtn").addEventListener("click", function(){ closeMobileDrawers(); try{ document.getElementById("props").scrollTo({top:0,behavior:"smooth"}); }catch(e){} });
-function snapVal(){ return 25; }
-function snap(v){ var s=snapVal(); return Math.round(v/s)*s; }
-function placeCoord(v,e){ return (e && (e.metaKey||e.ctrlKey)) ? snap(v) : Math.round(v); }
+var snapMode = "25";   /* "0"=libero · "25"/"50"/"100"=griglia cm · "obj"=oggetti */
+function snapVal(){ var v=parseInt(snapMode,10); return (isNaN(v)||v<=0) ? 0 : v; }
+function snap(v){ var s=snapVal(); return s>0 ? Math.round(v/s)*s : Math.round(v); }
+function placeCoord(v,e){ return (e && (e.metaKey||e.ctrlKey)) ? Math.round(v) : snap(v); }
 
 /* ===== Snap magnetico a lati e centri del palco ===== */
 var SNAP_T = 15;  /* soglia cm entro cui lo snap si attiva */
-var snapEnabled = true;    /* toggle snap magnetico (🧲 in header); false = griglia 25cm, true = snap magnetico bordi palco */
 function magneticSnap(dragItems, ddx, ddy){
   /* dragItems: array di {id, x0, y0} da drag.items
      ddx/ddy:  delta grezzo dal punto di inizio drag
@@ -3382,6 +3381,43 @@ function magneticSnap(dragItems, ddx, ddy){
   yCands.forEach(function(c){ var d=Math.abs(c[0]-c[1]); if(d<yDist){yDist=d;ySnap={delta:c[1]-c[0],val:c[1],cls:c[2]};} });
 
   var sdx=xSnap?xSnap.delta:0,sdy=ySnap?ySnap.delta:0,guides=[];
+  var pad=Math.round(Math.max(W,D)*0.06);
+  if(xSnap) guides.push({x1:xSnap.val,y1:-pad,x2:xSnap.val,y2:D+pad,cls:'snap-guide '+xSnap.cls});
+  if(ySnap) guides.push({x1:-pad,y1:ySnap.val,x2:W+pad,y2:ySnap.val,cls:'snap-guide '+ySnap.cls});
+  return {sdx:sdx,sdy:sdy,guides:guides};
+}
+function objectSnap(dragItems, ddx, ddy){
+  if(!dragItems.length) return {sdx:0,sdy:0,guides:[]};
+  var W=state.stage.w, D=state.stage.d, T=SNAP_T;
+  var dragIds={};
+  dragItems.forEach(function(d){ dragIds[d.id]=true; });
+  /* AABB degli item trascinati nella posizione proposta */
+  var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  dragItems.forEach(function(d){
+    var it=state.items.find(function(i){return i.id===d.id;}); if(!it) return;
+    var px=d.x0+ddx, py=d.y0+ddy;
+    var rot=(it.rot||0)*Math.PI/180, c=Math.abs(Math.cos(rot)), s=Math.abs(Math.sin(rot));
+    var hw=it.w/2*c+it.d/2*s, hd=it.w/2*s+it.d/2*c;
+    minX=Math.min(minX,px-hw); maxX=Math.max(maxX,px+hw);
+    minY=Math.min(minY,py-hd); maxY=Math.max(maxY,py+hd);
+  });
+  var cx=(minX+maxX)/2, cy=(minY+maxY)/2;
+  /* candidati dai bordi degli altri item + bordi e centro palco */
+  var xT=[0,W/2,W], yT=[0,D/2,D];
+  state.items.forEach(function(it){
+    if(dragIds[it.id]) return;
+    var rot=(it.rot||0)*Math.PI/180, c=Math.abs(Math.cos(rot)), s=Math.abs(Math.sin(rot));
+    var hw=it.w/2*c+it.d/2*s, hd=it.w/2*s+it.d/2*c;
+    xT.push(it.x-hw, it.x, it.x+hw);
+    yT.push(it.y-hd, it.y, it.y+hd);
+  });
+  /* per ogni lato/centro del gruppo trascinato, cerca il candidato più vicino */
+  var xFaces=[[minX,''],[cx,'center'],[maxX,'']];
+  var yFaces=[[minY,''],[cy,'center'],[maxY,'']];
+  var xSnap=null,xDist=T+1, ySnap=null,yDist=T+1;
+  xFaces.forEach(function(f){ xT.forEach(function(t){ var d=Math.abs(f[0]-t); if(d<xDist){xDist=d;xSnap={delta:t-f[0],val:t,cls:f[1]};} }); });
+  yFaces.forEach(function(f){ yT.forEach(function(t){ var d=Math.abs(f[0]-t); if(d<yDist){yDist=d;ySnap={delta:t-f[0],val:t,cls:f[1]};} }); });
+  var sdx=xSnap?xSnap.delta:0, sdy=ySnap?ySnap.delta:0, guides=[];
   var pad=Math.round(Math.max(W,D)*0.06);
   if(xSnap) guides.push({x1:xSnap.val,y1:-pad,x2:xSnap.val,y2:D+pad,cls:'snap-guide '+xSnap.cls});
   if(ySnap) guides.push({x1:-pad,y1:ySnap.val,x2:W+pad,y2:ySnap.val,cls:'snap-guide '+ySnap.cls});
@@ -3861,13 +3897,21 @@ svg.addEventListener("pointermove", function(e){
   if(drag.mode==="item"){
     sp=svgPoint(e); var ddx=sp.x-drag.sp0.x, ddy=sp.y-drag.sp0.y; drag.moved=true;
     var freeMove = e.metaKey || e.ctrlKey;   /* Cmd (Mac) / Ctrl (Win) tenuto premuto = movimento libero (no snap) */
-    var magnet = (freeMove || !snapEnabled) ? {sdx:0,sdy:0,guides:[]} : magneticSnap(drag.items,ddx,ddy);
+    var sm=snapMode;
+    var magnet = freeMove ? {sdx:0,sdy:0,guides:[]}
+      : sm==="obj" ? objectSnap(drag.items,ddx,ddy)
+      : sm!=="0"   ? magneticSnap(drag.items,ddx,ddy)
+      : {sdx:0,sdy:0,guides:[]};
     renderSnapGuides(magnet.guides);
     drag.items.forEach(function(d){
       var it=state.items.find(function(i){ return i.id===d.id; }); if(!it) return;
-      if(freeMove){ it.x=Math.round(d.x0+ddx); it.y=Math.round(d.y0+ddy); }
-      else if(snapEnabled){ it.x=Math.round(d.x0+ddx+magnet.sdx); it.y=Math.round(d.y0+ddy+magnet.sdy); }
-      else { it.x=snap(d.x0+ddx); it.y=snap(d.y0+ddy); }   /* default: griglia 25cm */
+      if(freeMove||sm==="0"){ it.x=Math.round(d.x0+ddx); it.y=Math.round(d.y0+ddy); }
+      else if(sm==="obj"){ it.x=Math.round(d.x0+ddx+magnet.sdx); it.y=Math.round(d.y0+ddy+magnet.sdy); }
+      else {
+        /* griglia + magnetic bordo palco: il magnetic prevale quando si è vicini a un bordo */
+        it.x = magnet.sdx!==0 ? Math.round(d.x0+ddx+magnet.sdx) : snap(d.x0+ddx);
+        it.y = magnet.sdy!==0 ? Math.round(d.y0+ddy+magnet.sdy) : snap(d.y0+ddy);
+      }
       var g=svg.querySelector('[data-id="'+it.id+'"]');
       if(g) g.setAttribute("transform","translate("+it.x+" "+it.y+")");
     });
@@ -3882,7 +3926,7 @@ svg.addEventListener("pointermove", function(e){
       var gdx=sp.x-drag.sp0.x, gdy=sp.y-drag.sp0.y;
       var cn=Math.cos(-drag.rot), sn=Math.sin(-drag.rot);
       var ldx=gdx*cn - gdy*sn, ldy=gdx*sn + gdy*cn;     /* delta nel frame locale dell'elemento */
-      var grid=e.metaKey||e.ctrlKey, MIN=20, ed=drag.edge, nw=drag.w0, nd=drag.d0, sgx=0, sgy=0;
+      var grid=(e.metaKey||e.ctrlKey)||(snapMode!=="0"&&snapMode!=="obj"), MIN=20, ed=drag.edge, nw=drag.w0, nd=drag.d0, sgx=0, sgy=0;
       if(ed.indexOf("r")>=0){ nw=Math.max(MIN, drag.w0+ldx); sgx=1; }
       if(ed.indexOf("l")>=0){ nw=Math.max(MIN, drag.w0-ldx); sgx=-1; }
       if(ed.indexOf("b")>=0){ nd=Math.max(MIN, drag.d0+ldy); sgy=1; }
@@ -6101,17 +6145,21 @@ function svgToDataUrl(svgStr, pxW, pxH, type){
   /* iOS Safari rasterizza l'SVG SOLO se il root ha width/height espliciti (non basta il viewBox) */
   svgStr = svgStr.replace(/^<svg /, '<svg width="'+pxW+'" height="'+pxH+'" ');
   return new Promise(function(res,rej){
+    /* Blob URL invece di data URI: Chrome rifiuta SVG >~200KB come data URI in img.src */
+    var blob = new Blob([svgStr], {type:'image/svg+xml'});
+    var url = URL.createObjectURL(blob);
     var img=new Image();
     img.onload=function(){
+      URL.revokeObjectURL(url);
       try{
         var c=document.createElement("canvas"); c.width=pxW; c.height=pxH;
         var ctx=c.getContext("2d"); ctx.fillStyle="#fff"; ctx.fillRect(0,0,pxW,pxH);
         ctx.drawImage(img,0,0,pxW,pxH);
         res(type==="image/png" ? c.toDataURL("image/png") : c.toDataURL("image/jpeg", 0.95));
-      }catch(e){ rej(e); }
+      }catch(e){ URL.revokeObjectURL(url); rej(e); }
     };
-    img.onerror=function(){ rej(new Error("SVG→PNG fallito")); };
-    img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svgStr);
+    img.onerror=function(){ URL.revokeObjectURL(url); rej(new Error("SVG→PNG fallito")); };
+    img.src=url;
   });
 }
 /* jsPDF + svg2pdf sono incorporati nel file (blocchi LIB-*-BUNDLE) → export PDF sempre disponibile, anche offline */
@@ -6189,7 +6237,7 @@ function drawStageVector(doc, ix, iy, wMm, hMm){
     root.innerHTML=stageSceneSvg();
     var svgEl=root.querySelector("svg");
     var cx=svgComplexity(svgEl);
-    if(cx.paths>1000 || cx.dLen>400000){ host.remove(); return Promise.reject(new Error("svg-complex:"+cx.paths+"/"+cx.dLen)); }
+    if(cx.paths>3000 || cx.dLen>800000){ host.remove(); return Promise.reject(new Error("svg-complex:"+cx.paths+"/"+cx.dLen)); }
     flattenTextStyles(svgEl);
     flattenGradients(svgEl);
     var fn=svg2pdfFn();
