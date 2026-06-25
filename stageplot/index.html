@@ -2759,7 +2759,9 @@ function itemMarkup(it){
   if(!t.innerLabel && fsz0>0){
     var fsz = fsz0;                             /* dimensione etichetta regolabile (cm reali) */
     var fst = ' style="font-size:'+fsz+'px"';
-    var ly  = it.d/2 + fsz*0.55 + 5;            /* etichetta più vicina allo strumento (segue la dimensione) */
+    /* violini singoli con sedia: etichetta sopra allo schienale (ruota con l'elemento) */
+    var isVlnSingle = it.type==='vlnpost' && !it.doppia && it.sedia!==false;
+    var ly  = isVlnSingle ? -(it.d/2) - fsz*0.35 : it.d/2 + fsz*0.55 + 5;
     var isDbl = it.doppia===true || !!DOUBLE_TYPES[it.type];
     if(isDbl){                                  /* postazione a 2 → un nome per ciascuno strumento (riferito al singolo) */
       var dc=sepCfg(it), dhalf=(it.sep || (dc&&dc.sep) || DEFAULT_SEP)/2;
