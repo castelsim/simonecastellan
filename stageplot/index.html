@@ -428,7 +428,14 @@
     <option value="obj">Oggetti</option>
   </select>
   <div style="display:flex;gap:4px">
-    <button class="btn" id="bHdrPdf" title="Esporta planimetria in PDF">📄 Save as</button>
+    <div style="position:relative">
+      <button class="btn" id="bHdrPdf" title="Salva / esporta">📄 Save as ▾</button>
+      <div id="saveAsMenu" hidden style="position:absolute;top:calc(100% + 4px);right:0;background:#fff;border:1px solid #d1d5db;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:9999;min-width:160px;padding:6px 0">
+        <button class="btn" id="saveAsPdf"  style="display:block;width:100%;text-align:left;border:none;background:none;padding:8px 16px;font-size:13px;border-radius:0;cursor:pointer">📄 PDF</button>
+        <button class="btn" id="saveAsJson" style="display:block;width:100%;text-align:left;border:none;background:none;padding:8px 16px;font-size:13px;border-radius:0;cursor:pointer">💾 JSON</button>
+        <button class="btn" id="saveAsPng"  style="display:block;width:100%;text-align:left;border:none;background:none;padding:8px 16px;font-size:13px;border-radius:0;cursor:pointer">🖼️ PNG</button>
+      </div>
+    </div>
     <button class="btn" id="bHdrImport" title="Apri progetto (.json)">📂 Open recent</button>
   </div>
   <!-- stW/stD nascosti: rimossi dall'header ma usati dal JS per aggiornare le dimensioni del palco -->
@@ -5902,8 +5909,28 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   }
   document.getElementById("bShare").addEventListener("click", openShare);
   document.getElementById("shareClose").addEventListener("click", function(){ modal.hidden=true; });
-  /* — pulsanti header: Salva / PDF / Importa / Altro — */
-  document.getElementById("bHdrPdf").addEventListener("click", function(){ if(!frameEdit){ frameEdit=true; exitHubModes("frame"); clearSelection(); ensurePrintFrame(); renderFramePanel(); render(); } });
+  /* — pulsanti header: Save as dropdown / Importa — */
+  (function(){
+    var menu=document.getElementById("saveAsMenu");
+    document.getElementById("bHdrPdf").addEventListener("click", function(e){
+      e.stopPropagation();
+      menu.hidden=!menu.hidden;
+    });
+    document.getElementById("saveAsPdf").addEventListener("click", function(){
+      menu.hidden=true;
+      if(!frameEdit){ frameEdit=true; exitHubModes("frame"); clearSelection(); ensurePrintFrame(); renderFramePanel(); render(); }
+    });
+    document.getElementById("saveAsJson").addEventListener("click", function(){
+      menu.hidden=true;
+      document.getElementById("saveJson").click();
+    });
+    document.getElementById("saveAsPng").addEventListener("click", function(){
+      menu.hidden=true;
+      exportPng();
+    });
+    document.addEventListener("click", function(){ menu.hidden=true; });
+    document.addEventListener("keydown", function(e){ if(e.key==="Escape") menu.hidden=true; });
+  })();
   document.getElementById("bHdrImport").addEventListener("click", function(){ document.getElementById("importJson").click(); });
   document.getElementById("shareTabLink").addEventListener("click", function(){ openShare(); });
   document.getElementById("shareTabPdf").addEventListener("click", function(){ modal.hidden=true; document.getElementById("bPdf").click(); });
