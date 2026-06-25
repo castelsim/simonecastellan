@@ -6214,6 +6214,25 @@ function flattenGradients(rootEl){
     });
   }
 }
+function flattenCssToAttrs(rootEl){
+  /* inline tutti gli stili calcolati (fill, stroke, …) come attributi e rimuove class/style/style-blocks
+     in modo che svg2pdf e il percorso canvas abbiano i valori espliciti senza dipendere dal CSS */
+  var all=rootEl.querySelectorAll('*');
+  for(var i=0;i<all.length;i++){
+    var el=all[i], cs=getComputedStyle(el);
+    var fill=cs.fill; if(fill) el.setAttribute('fill',fill);
+    var stroke=cs.stroke; if(stroke) el.setAttribute('stroke',stroke);
+    var fa=cs.fillOpacity; if(fa!=null&&fa!=='') el.setAttribute('fill-opacity',fa);
+    var sa=cs.strokeOpacity; if(sa!=null&&sa!=='') el.setAttribute('stroke-opacity',sa);
+    var sw=cs.strokeWidth; if(sw) el.setAttribute('stroke-width',sw);
+    var slj=cs.strokeLinejoin; if(slj) el.setAttribute('stroke-linejoin',slj);
+    var slc=cs.strokeLinecap; if(slc) el.setAttribute('stroke-linecap',slc);
+    var sda=cs.strokeDasharray; if(sda&&sda!=='none') el.setAttribute('stroke-dasharray',sda);
+    var fr=cs.fillRule; if(fr) el.setAttribute('fill-rule',fr);
+    el.removeAttribute('class'); el.removeAttribute('style');
+  }
+  rootEl.querySelectorAll('style').forEach(function(s){ s.parentNode.removeChild(s); });
+}
 function flattenNofloor(rootEl){
   /* svg2pdf ignora il CSS: forza inline fill/stroke=none sugli sfondi degli elementi fuori palco */
   rootEl.querySelectorAll('.nofloor .fFloor').forEach(function(el){
@@ -6236,11 +6255,11 @@ function drawStageVector(doc, ix, iy, wMm, hMm){
     host.style.cssText="position:fixed;left:-99999px;top:0;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none";
     document.body.appendChild(host);
     var root=host.attachShadow ? host.attachShadow({mode:"open"}) : host;
-    /* _pdfMode=true: singer/conductor usano sagome geometriche (meno path) → PDF più veloce */
-    _pdfMode=true; root.innerHTML=stageSceneSvg(); _pdfMode=false;
+    root.innerHTML=stageSceneSvg();
     var svgEl=root.querySelector("svg");
     flattenTextStyles(svgEl);
     flattenGradients(svgEl);
+    flattenCssToAttrs(svgEl);
     var fn=svg2pdfFn();
     var ret = (typeof doc.svg==="function") ? doc.svg(svgEl,{x:ix,y:iy,width:wMm,height:hMm})
                                             : fn(svgEl, doc, {x:ix,y:iy,width:wMm,height:hMm});
@@ -6404,7 +6423,7 @@ function exportPng(){
   var PX=4000;
   var sc=PX/Math.max(A.w,A.h);
   var pxW=Math.round(A.w*sc), pxH=Math.round(A.h*sc);
-  _pdfMode=true; var svgStr=stageSceneSvg(); _pdfMode=false;
+  var svgStr=stageSceneSvg();
   svgStr=svgStr.replace(/^<svg /,'<svg width="'+pxW+'" height="'+pxH+'" ');
   var host=document.createElement("div");
   host.style.cssText="position:fixed;left:-99999px;top:0;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none";
@@ -6414,18 +6433,7 @@ function exportPng(){
   var svgEl=root.querySelector("svg");
   flattenTextStyles(svgEl);
   flattenGradients(svgEl);
-  /* inline tutti gli stili CSS come attributi, così il blob SVG è auto-contenuto */
-  var allEl=svgEl.querySelectorAll('*');
-  for(var i=0;i<allEl.length;i++){
-    var el=allEl[i], cs=getComputedStyle(el);
-    var fill=cs.fill; if(fill) el.setAttribute('fill',fill);
-    var stroke=cs.stroke; if(stroke) el.setAttribute('stroke',stroke);
-    var fa=cs.fillOpacity; if(fa!=null && fa!=='') el.setAttribute('fill-opacity',fa);
-    var sa=cs.strokeOpacity; if(sa!=null && sa!=='') el.setAttribute('stroke-opacity',sa);
-    var sw=cs.strokeWidth; if(sw) el.setAttribute('stroke-width',sw);
-    el.removeAttribute('class'); el.removeAttribute('style');
-  }
-  svgEl.querySelectorAll('style').forEach(function(s){ s.parentNode.removeChild(s); });
+  flattenCssToAttrs(svgEl);
   var flat=new XMLSerializer().serializeToString(svgEl);
   host.remove();
   var blob=new Blob([flat],{type:'image/svg+xml'});
