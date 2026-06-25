@@ -3134,7 +3134,8 @@ function splitPostaz(){
     x:Math.round(it.x+dx*c-dy*s), y:Math.round(it.y+dx*s+dy*c), rot:it.rot||0, w:T.w, d:T.d, label:"", grp:gid}); }
   var hadSedia=it.sedia!==false, hadLeggio=it.leggio!==false;
   it.sedia=false; it.leggio=false; it.doppia=false; it.grp=gid;   /* lo strumento resta in posizione, nudo */
-  if(hadSedia) place("sedia", 0, -22);
+  var isStool=STOOL_POSTAZ[it.type]!=null;
+  if(hadSedia) place(isStool ? "sgabello" : "sedia", 0, isStool ? -26 : -22);
   if(hadLeggio) place("leggio", 0, 38);
   made.forEach(function(m){ state.items.push(m); });
   selSet={}; selSet[it.id]=true; made.forEach(function(m){ selSet[m.id]=true; }); sel=it.id;
