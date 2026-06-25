@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Trova tonalità da audio</title>
+  <meta name="description" content="Carica un brano, ascolta e prova note, accordi e scale sopra l'audio per trovare a orecchio la tonalità. Tastiera virtuale, drone in Hold, scala maggiore e minore. Tutto nel browser, niente da installare." />
+  <meta name="theme-color" content="#ffffff" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Trova tonalità da audio" />
+  <meta property="og:description" content="Carica un brano e prova note, accordi e scale sopra l'audio per trovare a orecchio la tonalità. Funziona nel browser." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>Trova tonalità da audio</h1>
+      <p class="subtitle">Carica un brano e prova note, accordi e scale sopra l'audio finché non senti il centro tonale.</p>
+    </header>
+
+    <!-- 1. Carica audio -->
+    <section class="upload" aria-label="Carica audio">
+      <input type="file" id="fileInput" class="file-input"
+             accept="audio/*,.mp3,.wav,.aiff,.aif,.flac,.m4a,.ogg" />
+      <label for="fileInput" class="btn btn-secondary upload-btn" id="uploadBtn">Carica audio</label>
+      <p id="fileName" class="file-name"></p>
+    </section>
+
+    <!-- 2-3. Player + controlli -->
+    <section id="player" class="player hidden" aria-label="Riproduzione brano">
+      <div class="transport">
+        <button type="button" id="playBtn" class="step play" aria-label="Play / Pausa">▶</button>
+        <div class="progress-wrap">
+          <input type="range" id="seek" class="range" min="0" max="1000" value="0" step="1" aria-label="Avanzamento" />
+          <div class="times"><span id="cur">0:00</span><span id="dur">0:00</span></div>
+        </div>
+      </div>
+
+      <div class="player-row">
+        <div class="vol">
+          <span class="vol-ic" aria-hidden="true">🔊</span>
+          <input type="range" id="vol" class="range" min="0" max="100" value="100" step="1" aria-label="Volume" />
+        </div>
+      </div>
+
+      <div class="speed" role="group" aria-label="Velocità di riproduzione">
+        <span class="speed-label">Velocità</span>
+        <button type="button" class="rate" data-rate="0.5">0.5×</button>
+        <button type="button" class="rate" data-rate="0.75">0.75×</button>
+        <button type="button" class="rate active" data-rate="1">1×</button>
+        <button type="button" class="rate" data-rate="1.25">1.25×</button>
+      </div>
+    </section>
+
+    <!-- 4. Tastiera -->
+    <section class="kbd-wrap" aria-label="Tastiera">
+      <div id="keyboard" class="keyboard"></div>
+    </section>
+
+    <!-- 5. Modalità -->
+    <div class="seg modes" role="group" aria-label="Modalità di suono">
+      <button type="button" class="seg-btn active" data-mode="note">Nota</button>
+      <button type="button" class="seg-btn" data-mode="major">Accordo Magg.</button>
+      <button type="button" class="seg-btn" data-mode="minor">Accordo Min.</button>
+    </div>
+
+    <!-- 6. Hold + Stop -->
+    <div class="ctrl-row">
+      <button type="button" id="holdBtn" class="btn btn-secondary hold" aria-pressed="false">HOLD</button>
+      <button type="button" id="stopBtn" class="btn btn-secondary stop">Stop</button>
+    </div>
+
+    <!-- 7. Ottava -->
+    <div class="ctrl-row octave" role="group" aria-label="Ottava">
+      <button type="button" id="octDown" class="step" aria-label="Ottava giù">−</button>
+      <span id="octLabel" class="oct-label">Ottava 4</span>
+      <button type="button" id="octUp" class="step" aria-label="Ottava su">+</button>
+    </div>
+
+    <!-- 8. Scala -->
+    <button type="button" id="scaleBtn" class="btn btn-secondary scale">Suona scala</button>
+
+  </main>
+
+  <footer class="site-footer">
+    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+  </footer>
+
+  <audio id="audio" preload="metadata"></audio>
+
+  <script src="script.js"></script>
+</body>
+</html>
