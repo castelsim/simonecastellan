@@ -958,7 +958,9 @@
     </div>
     <div id="shareLinkBox">
       <p class="hint" style="font-size:12.5px;color:#6b7280;margin:0 0 6px">Link del progetto — condividilo o scansiona il QR.</p>
-      <img id="shareQrImg" width="150" height="150" alt="QR" src="">
+      <img id="shareQrImg" width="150" height="150" alt="QR" src="" onerror="this.style.display='none';document.getElementById('shareQrErr').style.display='block'">
+      <div id="shareQrErr" style="display:none;font-size:11px;color:#6b7280;text-align:center;padding:8px 0">QR non disponibile offline</div>
+      <div id="shareQrWarn" style="display:none;font-size:11px;color:#b45309;text-align:center;padding:4px 0">⚠️ Stage complesso — QR potrebbe essere difficile da scansionare</div>
       <div id="shareUrlRow">
         <input type="text" id="shareUrl" readonly onclick="this.select()" style="font-size:12px;padding:5px 8px;border:1px solid #d1d5db;border-radius:7px;background:#f9fafb">
         <button class="btn primary" id="shareNative" hidden>Condividi…</button>
@@ -5998,10 +6000,13 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   function shareText(){ var t=state.titolo||"", l=state.luogo||"";
     return (t||l) ? (t+(t&&l?" · ":"")+l) : "Stage plot"; }   /* oggetto mail = titolo · luogo */
   function openShare(){
-    var url=buildShareUrl(); urlEl.value=url; status(""); document.getElementById("ioStatus").textContent="";
+    var url=buildShareUrl(); urlEl.value=url; status("");
     document.getElementById("shareNative").hidden = !navigator.share;
     /* QR code */
     var qrImg=document.getElementById('shareQrImg');
+    qrImg.style.display='block';
+    document.getElementById('shareQrErr').style.display='none';
+    document.getElementById('shareQrWarn').style.display= url.length>1500 ? 'block' : 'none';
     qrImg.src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=6&data='+encodeURIComponent(url);
     modal.hidden=false; setTimeout(function(){ try{ urlEl.focus(); urlEl.select(); }catch(e){} },40);
   }
@@ -6036,7 +6041,9 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   }
   document.getElementById("shareCopy").addEventListener("click", copy);
   document.getElementById("shareEmail").addEventListener("click", function(){
-    window.location.href="mailto:?subject="+encodeURIComponent(shareText())+"&body="+encodeURIComponent(shareText()+"\n\n"+urlEl.value);
+    var a=document.createElement('a');
+    a.href="mailto:?subject="+encodeURIComponent(shareText())+"&body="+encodeURIComponent(shareText()+"\n\n"+urlEl.value);
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
   });
   document.getElementById("shareWa").addEventListener("click", function(){
     window.open("https://wa.me/?text="+encodeURIComponent(shareText()+" "+urlEl.value),"_blank","noopener");
