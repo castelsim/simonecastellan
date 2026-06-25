@@ -4221,7 +4221,7 @@ function exitHubModes(except){
   if(except!=="palco" && stageEdit){ stageEdit=false; selBlock=null; renderStagePanel(); }
   if(except!=="evento" && eventoEdit){ eventoEdit=false; renderEventoPanel(); }
   if(except!=="chan" && chanEdit){ chanEdit=false; renderChanPanel(); }
-  if(except!=="frame" && frameEdit){ frameEdit=false; renderFramePanel(); }
+  if(except!=="frame"&&except!=="save" && (frameEdit||saveAsOpen)){ frameEdit=false; saveAsOpen=false; renderFramePanel(); }
   if(except!=="vers" && versEdit){ versEdit=false; renderVersionPanel(); }
 }
 function toggleStageEdit(){ stageEdit=!stageEdit; selBlock=stageEdit?0:null; if(stageEdit){ exitHubModes("palco"); clearSelection(); } renderStagePanel(); render(); }
@@ -5563,6 +5563,7 @@ function toggleVenueEdit(){ if(!stageEdit){ stageEdit=true; selBlock=stageEdit?0
 
 /* ===== Cornice di stampa (area esportata nel PDF) ===== */
 var frameEdit=false;
+var saveAsOpen=false;
 var versEdit=false;
 function frameStageRect(){ recalcStageBBox(); return {x:0,y:0,w:state.stage.w,h:state.stage.d}; }
 /* area che racchiude palco + elementi + planimetria (per "Tutto + planimetria") */
@@ -5581,14 +5582,17 @@ function frameContentRect(){
 function ensurePrintFrame(){ if(!state.printFrame) state.printFrame=frameStageRect(); }
 function toggleFrameEdit(){ frameEdit=!frameEdit; if(frameEdit){ exitHubModes("frame"); clearSelection(); ensurePrintFrame(); } renderFramePanel(); render(); }
 function fmtMnum(cm){ return (cm/100).toFixed(2).replace(/\.?0+$/,""); }
+function activateFrameEdit(){ if(!frameEdit){ frameEdit=true; saveAsOpen=true; ensurePrintFrame(); renderFramePanel(); render(); } }
 function renderFramePanel(){
   var p=document.getElementById("framePanel"); if(!p) return;
-  p.hidden=!frameEdit; if(!frameEdit) return;
-  var f=state.printFrame||frameStageRect();
-  document.getElementById("frameW").value=fmtMnum(f.w);
-  document.getElementById("frameH").value=fmtMnum(f.h);
-  document.getElementById("frameX").value=fmtMnum(f.x);
-  document.getElementById("frameY").value=fmtMnum(f.y);
+  p.hidden=!(saveAsOpen||frameEdit); if(!(saveAsOpen||frameEdit)) return;
+  if(frameEdit){
+    var f=state.printFrame||frameStageRect();
+    document.getElementById("frameW").value=fmtMnum(f.w);
+    document.getElementById("frameH").value=fmtMnum(f.h);
+    document.getElementById("frameX").value=fmtMnum(f.x);
+    document.getElementById("frameY").value=fmtMnum(f.y);
+  }
 }
 /* ===== Versioni salvate ===== */
 var VER_KEY='stageplot_versions';
@@ -5667,7 +5671,7 @@ function resizeFrame(drag, sp){
 }
 ["frameW","frameH","frameX","frameY"].forEach(function(id){
   document.getElementById(id).addEventListener("change", function(){
-    ensurePrintFrame();
+    activateFrameEdit();
     var w=Math.max(0.5, +document.getElementById("frameW").value||0.5);
     var h=Math.max(0.5, +document.getElementById("frameH").value||0.5);
     var x=+document.getElementById("frameX").value||0, y=+document.getElementById("frameY").value||0;
@@ -5675,17 +5679,17 @@ function resizeFrame(drag, sp){
     save(); render();
   });
 });
-document.getElementById("frameStage").addEventListener("click", function(){ state.printFrame=frameStageRect(); save(); render(); });
-document.getElementById("frameAll").addEventListener("click", function(){ state.printFrame=frameContentRect(); save(); render(); });
-document.getElementById("frameClear").addEventListener("click", function(){ state.printFrame=null; save(); render(); });
+document.getElementById("frameStage").addEventListener("click", function(){ activateFrameEdit(); state.printFrame=frameStageRect(); save(); render(); });
+document.getElementById("frameAll").addEventListener("click", function(){ activateFrameEdit(); state.printFrame=frameContentRect(); save(); render(); });
+document.getElementById("frameClear").addEventListener("click", function(){ activateFrameEdit(); state.printFrame=null; save(); render(); });
 document.getElementById("frameCenter").addEventListener("click", function(){
-  ensurePrintFrame(); recalcStageBBox();
+  activateFrameEdit(); ensurePrintFrame(); recalcStageBBox();
   state.printFrame.x = Math.round(state.stage.w/2 - state.printFrame.w/2);
   state.printFrame.y = Math.round(state.stage.d/2 - state.printFrame.h/2);
   save(); render();
 });
-document.getElementById("frameSavePdf").addEventListener("click", function(){ openPdfExportModal(); });
-document.getElementById("frameSavePng").addEventListener("click", function(){ exportPng(); });
+document.getElementById("frameSavePdf").addEventListener("click", function(){ activateFrameEdit(); openPdfExportModal(); });
+document.getElementById("frameSavePng").addEventListener("click", function(){ activateFrameEdit(); exportPng(); });
 
 function venueLoadFile(file){
   if(!file) return;
@@ -6004,7 +6008,12 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   document.getElementById("bShare").addEventListener("click", openShare);
   document.getElementById("shareClose").addEventListener("click", function(){ modal.hidden=true; });
   /* — pulsanti header: Save as / Importa — */
-  document.getElementById("bHdrPdf").addEventListener("click", function(){ if(!frameEdit){ frameEdit=true; exitHubModes("frame"); clearSelection(); ensurePrintFrame(); renderFramePanel(); render(); } });
+  document.getElementById("bHdrPdf").addEventListener("click", function(){
+    var open=!(saveAsOpen||frameEdit);
+    saveAsOpen=open; if(!open) frameEdit=false;
+    if(open){ exitHubModes("save"); clearSelection(); }
+    renderFramePanel(); render();
+  });
   document.getElementById("frameSaveJson").addEventListener("click", function(){ document.getElementById("saveJson").click(); });
   document.getElementById("frameVers").addEventListener("click", toggleVersionEdit);
   document.getElementById("versSave").addEventListener("click", function(){
