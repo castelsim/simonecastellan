@@ -210,6 +210,31 @@ h1 {
 .oct { display: inline-flex; align-items: center; gap: 8px; }
 .oct-label { font-size: 12px; font-weight: 600; color: var(--ink); min-width: 46px; }
 
+/* Tonalità stimata */
+.result {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+  min-height: 20px;
+}
+.key-guess { font-size: 14px; color: var(--muted); }
+.key-guess b { color: var(--ink); font-weight: 600; }
+.key-guess .conf { color: var(--faint); font-size: 12px; margin-left: 4px; }
+.reset-link {
+  appearance: none;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--faint);
+  cursor: pointer;
+  border-bottom: 1px solid var(--line-soft);
+  padding: 0 0 1px;
+}
+.reset-link:hover { color: var(--muted); }
+
 /* Footer */
 .site-footer {
   position: fixed;

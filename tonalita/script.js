@@ -37,9 +37,17 @@ var CHORD_TONES = {
 
 var MIN_OCT = 2, MAX_OCT = 6;
 
+// Nomi note per il risultato.
+var NOTE_NAMES = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
+
+// Profili di Krumhansl-Schmuckler (tonica in posizione 0).
+var KS_MAJOR = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88];
+var KS_MINOR = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17];
+
 // --- Stato ---
 var chordView = null;   // null | 'major' | 'minor' — solo evidenziazione
 var octave = 3;
+var counts = [0,0,0,0,0,0,0,0,0,0,0,0];   // quante volte è stata suonata ogni nota
 
 // --- Web Audio ---
 var ctx = null, master = null;
@@ -160,7 +168,62 @@ function toggleHold(pc) {
   heldPc = pc;
   highlight(pc);
   updateChordHighlight();
+  registerVote(pc);
 }
+
+// --- Stima della tonalità dalle note suonate ---
+function registerVote(pc) {
+  counts[pc]++;
+  updateKeyGuess();
+}
+
+function pearson(x, p) {
+  var n = 12, sx = 0, sp = 0, sxp = 0, sxx = 0, spp = 0;
+  for (var i = 0; i < n; i++) {
+    sx += x[i]; sp += p[i];
+    sxp += x[i] * p[i]; sxx += x[i] * x[i]; spp += p[i] * p[i];
+  }
+  var den = Math.sqrt((n * sxx - sx * sx) * (n * spp - sp * sp));
+  return den === 0 ? 0 : (n * sxp - sx * sp) / den;
+}
+
+function estimateKey() {
+  var cands = [];
+  for (var t = 0; t < 12; t++) {
+    ['major', 'minor'].forEach(function (m) {
+      var base = (m === 'major') ? KS_MAJOR : KS_MINOR;
+      var prof = [];
+      for (var pc = 0; pc < 12; pc++) prof[pc] = base[(pc - t + 12) % 12];
+      cands.push({ t: t, mode: m, r: pearson(counts, prof) });
+    });
+  }
+  cands.sort(function (a, b) { return b.r - a.r; });
+  // confidenza: softmax sulle correlazioni
+  var temp = 0.18, maxr = cands[0].r, sum = 0;
+  cands.forEach(function (c) { sum += Math.exp((c.r - maxr) / temp); });
+  cands[0].conf = 1 / sum;
+  return cands;
+}
+
+var resultEl = document.getElementById('result');
+var keyGuessEl = document.getElementById('keyGuess');
+function updateKeyGuess() {
+  var total = 0, distinct = 0;
+  counts.forEach(function (c) { total += c; if (c > 0) distinct++; });
+  if (total < 4 || distinct < 2) { resultEl.classList.add('hidden'); return; }
+  var best = estimateKey()[0];
+  var name = NOTE_NAMES[best.t] + (best.mode === 'major' ? ' maggiore' : ' minore');
+  var pct = Math.round(best.conf * 100);
+  keyGuessEl.innerHTML = 'Tonalità probabile: <b>' + name + '</b><span class="conf">' + pct + '%</span>';
+  resultEl.classList.remove('hidden');
+}
+
+function resetGuess() {
+  counts = [0,0,0,0,0,0,0,0,0,0,0,0];
+  resultEl.classList.add('hidden');
+  keyGuessEl.innerHTML = '';
+}
+document.getElementById('resetGuess').addEventListener('click', resetGuess);
 
 // Riavvia la nota tenuta (dopo cambio ottava)
 function refreshHeld() {
@@ -220,6 +283,7 @@ fileIn.addEventListener('change', function () {
   au.load();
   fileName.textContent = f.name;
   player.classList.remove('hidden');
+  resetGuess();   // nuova canzone, nuova stima
 });
 
 playBtn.addEventListener('click', function () {
