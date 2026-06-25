@@ -6126,13 +6126,20 @@ function printArea(){
   recalcStageBBox();
   return {x:0, y:0, w:state.stage.w, h:state.stage.d, custom:false};
 }
-function pdfLayout(paperKey, orient){
+function pdfLayout(paperKey, orient, cartH){
+  cartH = cartH || 22;
   var p=PAPER[paperKey], pw=p.w, ph=p.h;
   if(orient==="portrait"){ pw=p.h; ph=p.w; }
-  var M=10, cartH=22, topLbl=7, botLbl=5;
+  var M=10, topLbl=7, botLbl=5;
   return { pw:pw, ph:ph, M:M, cartH:cartH, orient:orient||"landscape",
     drawX:M+10, drawY:M+topLbl,
-    drawW:pw-2*M-20, drawH:ph-M-cartH-botLbl-(M+topLbl) };  /* area disegno utile */
+    drawW:pw-2*M-20, drawH:ph-M-cartH-botLbl-(M+topLbl) };
+}
+/* stima l'altezza del cartiglio in base alle righe dell'intestazione (8pt ≈ 1.8mm/char) */
+function cartHForHeader(header, titleW){
+  if(!header || !String(header).trim()) return 22;
+  var charsPerLine=Math.max(20, Math.floor(titleW/1.8));
+  return 22+Math.max(0, Math.ceil(String(header).trim().length/charsPerLine)-1)*4;
 }
 function scaleFits(N, paperKey, orient){
   var L=pdfLayout(paperKey, orient), A=printArea();
@@ -6304,26 +6311,33 @@ function niceBarMeters(N){            /* barra di scala: ~25-40 mm sul foglio */
   return best;
 }
 function pdfCartiglio(doc, L, N, header){
-  var y=L.ph-L.cartH;
+  var y=L.ph-L.cartH, M=L.M, scW=90, titleW=L.pw-2*M-scW;
   doc.setDrawColor(31,41,55); doc.setLineWidth(0.4);
-  doc.line(L.M, y, L.pw-L.M, y);
+  doc.line(M, y, L.pw-M, y);
   doc.setTextColor(17,24,39);
+  /* titolo — una riga con ellipsis se supera la colonna sinistra */
   doc.setFont("helvetica","bold"); doc.setFontSize(13);
-  doc.text((state.titolo||"Stage plot"), L.M, y+8);
+  var tit=state.titolo||"Stage plot";
+  var titL=doc.splitTextToSize(tit, titleW);
+  doc.text(titL.length>1 ? titL[0].replace(/\s+\S*$/,"")+"…" : tit, M, y+8);
+  /* luogo · data · palco — stessa logica */
   doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(75,85,99);
   var sub=[]; if(state.luogo) sub.push(state.luogo);
   sub.push(new Date().toLocaleDateString("it-IT"));
   sub.push("palco "+(state.stage.w/100)+"×"+(state.stage.d/100)+" m");
-  doc.text(sub.join("  ·  "), L.M, y+14);
-  if(header && String(header).trim()){           /* intestazione personalizzata (tecnico, contatti, note) */
+  var subStr=sub.join("  ·  ");
+  var subL=doc.splitTextToSize(subStr, titleW);
+  doc.text(subL.length>1 ? subL[0].replace(/\s+\S*$/,"")+"…" : subStr, M, y+14);
+  /* intestazione opzionale — multi-riga, sfrutta l'altezza dinamica del cartiglio */
+  if(header && String(header).trim()){
     doc.setFontSize(8); doc.setTextColor(120,120,120);
-    doc.text(String(header).trim(), L.M, y+19, {maxWidth:L.pw-2*L.M-120});
+    doc.text(doc.splitTextToSize(String(header).trim(), titleW), M, y+19);
   }
-  /* scala grande a destra */
+  /* SCALA a destra — colonna riservata scW */
   doc.setFont("helvetica","bold"); doc.setFontSize(20); doc.setTextColor(17,24,39);
-  doc.text("SCALA 1:"+N, L.pw-L.M, y+10, {align:"right"});
+  doc.text("SCALA 1:"+N, L.pw-M, y+10, {align:"right"});
   doc.setFont("helvetica","normal"); doc.setFontSize(7.5); doc.setTextColor(180,83,9);
-  doc.text("Stampare a 100% / dimensioni reali — non adattare alla pagina", L.pw-L.M, y+16, {align:"right"});
+  doc.text("Stampare a 100% / dimensioni reali — non adattare alla pagina", L.pw-M, y+16, {align:"right"});
 }
 function pdfScaleBar(doc, x, y, N){
   var bm=niceBarMeters(N), len=bm*1000/N;     /* mm */
@@ -6335,7 +6349,9 @@ function pdfScaleBar(doc, x, y, N){
 }
 /* anteprima del foglio (SVG, mm) — rispecchia il layout del PDF: planimetria + quote + cartiglio */
 function pdfPreviewSvg(paperKey, N, orient, header){
-  var L=pdfLayout(paperKey, orient), A=printArea();
+  var scW=90, baseL=pdfLayout(paperKey, orient, 22);
+  var ch=cartHForHeader(header, baseL.pw-2*baseL.M-scW);
+  var L=pdfLayout(paperKey, orient, ch), A=printArea();
   var fits = N && scaleFits(N, paperKey, orient);
   var Ng = N || 500;
   var stMmW=A.w*10/Ng, stMmH=A.h*10/Ng;
@@ -6348,22 +6364,31 @@ function pdfPreviewSvg(paperKey, N, orient, header){
   var labels = A.custom ? '' :
     '<text x="'+(ix+stMmW/2)+'" y="'+(iy-1.6)+'" font-size="3" fill="#9a9a9a" text-anchor="middle">FONDO PALCO</text>'+
     '<text x="'+(ix+stMmW/2)+'" y="'+(iy+stMmH+4)+'" font-size="3" fill="#9a9a9a" text-anchor="middle">PUBBLICO</text>';
+  var titleColW=L.pw-2*L.M-scW;
+  /* clip per la colonna sinistra del cartiglio (titolo+sub+header non invadono SCALA) */
+  var cartClip='<defs><clipPath id="cartClip"><rect x="'+L.M+'" y="'+cy+'" width="'+titleColW+'" height="'+L.cartH+'"/></clipPath></defs>';
+  /* header: riga singola nella preview (il PDF usa splitTextToSize per multi-riga) */
+  var headerSvg=header&&String(header).trim()
+    ?'<text clip-path="url(#cartClip)" x="'+L.M+'" y="'+(cy+17)+'" font-size="3.1" fill="#787878">'+esc(String(header).trim())+'</text>':'';
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+L.pw+' '+L.ph+'" '+
       'style="display:block;width:100%;height:auto;background:#fff;box-shadow:0 2px 14px rgba(0,0,0,.18)">'+
+    cartClip+
     '<rect x="0" y="0" width="'+L.pw+'" height="'+L.ph+'" fill="#fff"/>'+
     scene+
     '<rect x="'+ix+'" y="'+iy+'" width="'+stMmW+'" height="'+stMmH+'" fill="'+(fits?'none':'rgba(220,38,38,.06)')+'" stroke="'+stroke+'" stroke-width="0.5"/>'+
     labels+
     '<line x1="'+L.M+'" y1="'+cy+'" x2="'+(L.pw-L.M)+'" y2="'+cy+'" stroke="#1f2937" stroke-width="0.4"/>'+
-    '<text x="'+L.M+'" y="'+(cy+7)+'" font-size="6" font-weight="700" fill="#111827">'+esc(state.titolo||"Stage plot")+'</text>'+
-    '<text x="'+L.M+'" y="'+(cy+12.5)+'" font-size="3.6" fill="#4b5563">'+esc(sub.join("  ·  "))+'</text>'+
-    (header&&String(header).trim()?'<text x="'+L.M+'" y="'+(cy+17)+'" font-size="3.1" fill="#787878">'+esc(String(header).trim())+'</text>':'')+
+    '<text clip-path="url(#cartClip)" x="'+L.M+'" y="'+(cy+7)+'" font-size="6" font-weight="700" fill="#111827">'+esc(state.titolo||"Stage plot")+'</text>'+
+    '<text clip-path="url(#cartClip)" x="'+L.M+'" y="'+(cy+12.5)+'" font-size="3.6" fill="#4b5563">'+esc(sub.join("  ·  "))+'</text>'+
+    headerSvg+
     '<text x="'+(L.pw-L.M)+'" y="'+(cy+9)+'" font-size="9" font-weight="700" fill="#111827" text-anchor="end">SCALA 1:'+Ng+'</text>'+
     '</svg>';
 }
 /* costruisce il jsPDF doc (Promise) — separato da save per poterlo testare */
 function buildPdfDoc(paperKey, N, orient, header){
-  var L=pdfLayout(paperKey, orient), A=printArea();
+  var baseL=pdfLayout(paperKey, orient, 22);
+  var cartH=cartHForHeader(header, baseL.pw-2*baseL.M-90);
+  var L=pdfLayout(paperKey, orient, cartH), A=printArea();
   var stMmW=A.w*10/N, stMmH=A.h*10/N;
   var ix=L.drawX+(L.drawW-stMmW)/2, iy=L.drawY+(L.drawH-stMmH)/2;
   return loadJsPDF().then(function(){
@@ -6485,10 +6510,14 @@ function exportPng(){
 }
 function pdfChannelPage(doc, L, paperKey){
   var M=L.M, x=M, y=M+8, pw=L.pw, colW=(pw-2*M);
+  var dateStr=(state.luogo? state.luogo+"  ·  ":"")+new Date().toLocaleDateString("it-IT");
+  var titleStr=(state.titolo||"Stage plot")+" — Channel list";
+  var dateW=Math.min(80, pw*0.35), titleW=pw-2*M-dateW-4;
   doc.setFont("helvetica","bold"); doc.setFontSize(13); doc.setTextColor(17,24,39);
-  doc.text((state.titolo||"Stage plot")+" — Channel list", x, y);
+  var titL=doc.splitTextToSize(titleStr, titleW);
+  doc.text(titL.length>1 ? titL[0].replace(/\s+\S*$/,"")+"…" : titleStr, x, y);
   doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(120,120,120);
-  doc.text((state.luogo? state.luogo+"  ·  ":"")+new Date().toLocaleDateString("it-IT"), pw-M, y, {align:"right"});
+  doc.text(dateStr, pw-M, y, {align:"right"});
   y+=8;
   var cols=[ {t:"CH",w:10}, {t:"SORGENTE / MIX",w:70}, {t:"MIC / TIPO",w:38}, {t:"STAND / PATCH",w:42}, {t:"48V",w:12}, {t:"NOTE",w:0} ];
   cols[cols.length-1].w = colW - cols.reduce(function(a,c){return a+c.w;},0);
