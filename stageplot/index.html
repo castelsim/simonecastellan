@@ -6232,18 +6232,15 @@ function drawStageVector(doc, ix, iy, wMm, hMm){
     host.style.cssText="position:fixed;left:-99999px;top:0;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none";
     document.body.appendChild(host);
     var root=host.attachShadow ? host.attachShadow({mode:"open"}) : host;
-    /* Icone reali (_pdfMode=false): il complexity check esclude palchi complessi → raster 1200 DPI.
-       Palchi semplici (strumenti, no singer/conductor) → vettore puro svg2pdf. */
-    root.innerHTML=stageSceneSvg();
+    /* _pdfMode=true: singer/conductor usano sagome geometriche (meno path) → PDF più veloce */
+    _pdfMode=true; root.innerHTML=stageSceneSvg(); _pdfMode=false;
     var svgEl=root.querySelector("svg");
-    var cx=svgComplexity(svgEl);
-    if(cx.paths>3000 || cx.dLen>800000){ host.remove(); return Promise.reject(new Error("svg-complex:"+cx.paths+"/"+cx.dLen)); }
     flattenTextStyles(svgEl);
     flattenGradients(svgEl);
     var fn=svg2pdfFn();
     var ret = (typeof doc.svg==="function") ? doc.svg(svgEl,{x:ix,y:iy,width:wMm,height:hMm})
                                             : fn(svgEl, doc, {x:ix,y:iy,width:wMm,height:hMm});
-    return Promise.resolve(ret).then(function(){ host.remove(); }, function(e){ host.remove(); throw e; });
+    return Promise.resolve(ret).then(function(){ host.remove(); }, function(e){ host.remove(); _pdfMode=false; throw e; });
   });
 }
 function niceBarMeters(N){            /* barra di scala: ~25-40 mm sul foglio */
@@ -6317,13 +6314,12 @@ function buildPdfDoc(paperKey, N, orient, header){
   return loadJsPDF().then(function(){
     var jsPDF=window.jspdf.jsPDF;
     var doc=new jsPDF({orientation:L.orient, unit:"mm", format:paperKey, compress:true});
-    /* --- PAG 1: planimetria in scala — vettore se semplice, raster 350 DPI se complesso (icone persone, molti archi) --- */
+    /* --- PAG 1: planimetria in scala — sempre vettore (svg2pdf) --- */
     return drawStageVector(doc, ix, iy, stMmW, stMmH)
       .catch(function(e){
-        /* svg2pdf fallito o SVG troppo complesso → raster ad alta risoluzione */
-        var pxW=Math.round(stMmW/25.4*1200), pxH=Math.round(stMmH/25.4*1200);   /* 1200 DPI: icone nitide anche a 6× zoom nel PDF */
-        /* cap canvas a 8000 px sul lato lungo per evitare OOM su palchi molto estesi */
-        var scale=Math.min(1, 8000/Math.max(pxW,pxH,1));
+        /* svg2pdf ha lanciato un'eccezione (non dovrebbe succedere) → raster come ultima spiaggia */
+        var pxW=Math.round(stMmW/25.4*300), pxH=Math.round(stMmH/25.4*300);
+        var scale=Math.min(1, 4000/Math.max(pxW,pxH,1));
         pxW=Math.round(pxW*scale); pxH=Math.round(pxH*scale);
         return svgToDataUrl(stageSceneSvg(), pxW, pxH, "image/png").then(function(dataUrl){ doc.addImage(dataUrl, "PNG", ix, iy, stMmW, stMmH); });
       })
