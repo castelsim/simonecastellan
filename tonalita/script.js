@@ -39,7 +39,7 @@ var MIN_OCT = 2, MAX_OCT = 6;
 
 // --- Stato ---
 var mode = 'note';
-var octave = 4;
+var octave = 3;
 
 // --- Web Audio ---
 var ctx = null, master = null;
@@ -232,4 +232,4 @@ volEl.addEventListener('input', function () { au.volume = volEl.value / 100; });
 
 // --- Avvio ---
 buildKeyboard();
-setOctave(4);
+setOctave(3);
