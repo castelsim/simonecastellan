@@ -6201,21 +6201,42 @@ function loadSvg2Pdf(){ return loadJsPDF().then(function(){ return new Promise(f
 /* svg2pdf non applica il CSS <style>: appiattisco gli stili del testo (font, colore, allineamento)
    in attributi inline leggendo lo stile calcolato. Niente stroke → niente contorno bianco sopra il testo. */
 function flattenTextStyles(rootEl){
+  /* svg2pdf ignora paint-order:stroke, quindi disegnerebbe il bordo bianco sopra il fill.
+     Soluzione: clona ogni <text> con alone chiaro come elemento halo (solo stroke, fill=none)
+     da inserire PRIMA dell'originale; l'originale diventa solo fill (stroke=none). */
+  var halos=[];
   var t=rootEl.querySelectorAll("text,tspan");
   for(var i=0;i<t.length;i++){ var el=t[i], cs=getComputedStyle(el);
     if(el.tagName.toLowerCase()==="text" && !el.hasAttribute("x")) el.setAttribute("x","0");   /* svg2pdf salta i <text> senza x */
     if(el.tagName.toLowerCase()==="text" && !el.hasAttribute("y")) el.setAttribute("y","0");
     var fs=parseFloat(cs.fontSize); if(fs) el.setAttribute("font-size", fs);
-    el.setAttribute("font-family", "helvetica");   /* svg2pdf conosce solo i font PDF standard: lo stack di sistema verrebbe scartato */
+    el.setAttribute("font-family", "helvetica");   /* svg2pdf conosce solo i font PDF standard */
     if(cs.fontWeight) el.setAttribute("font-weight", (parseInt(cs.fontWeight,10)>=600?"bold":"normal"));
     if(cs.fontStyle && cs.fontStyle!=="normal") el.setAttribute("font-style", cs.fontStyle);
     if(cs.textAnchor) el.setAttribute("text-anchor", cs.textAnchor);
     if(/^rgb/.test(cs.fill)) el.setAttribute("fill", cs.fill);
     if(cs.fillOpacity!=="" && +cs.fillOpacity<1) el.setAttribute("fill-opacity", cs.fillOpacity);
     var ls=parseFloat(cs.letterSpacing); if(ls) el.setAttribute("letter-spacing", ls);
-    el.setAttribute("stroke","none");          /* il contorno bianco (.lbl) coprirebbe il testo (svg2pdf ignora paint-order) */
-    el.removeAttribute("class");               /* via la classe: così il <style> non riapplica lo stroke bianco sopra gli attributi inline */
+    /* Raccoglie info halo per i <text> con tratto chiaro (alone bianco), PRIMA di azzerare stroke */
+    if(el.tagName.toLowerCase()==="text"){
+      var sk=cs.stroke, sw=parseFloat(cs.strokeWidth)||3;
+      var m=sk&&sk.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+      if(m&&+m[1]>200&&+m[2]>200&&+m[3]>200) halos.push({el:el,stroke:sk,sw:sw});
+    }
+    el.setAttribute("stroke","none");
+    el.removeAttribute("class");
   }
+  /* Inserisce i cloni halo (stroke-only) prima degli elementi fill */
+  halos.forEach(function(h){
+    var halo=h.el.cloneNode(true);
+    halo.setAttribute('fill','none');
+    halo.setAttribute('stroke',h.stroke);
+    halo.setAttribute('stroke-width',(h.sw*2)+'px');
+    halo.setAttribute('stroke-linejoin','round');
+    halo.setAttribute('stroke-linecap','round');
+    halo.querySelectorAll('tspan').forEach(function(ts){ ts.removeAttribute('stroke'); });
+    h.el.parentNode.insertBefore(halo,h.el);
+  });
 }
 /* svg2pdf emette i gradienti SVG come shading/pattern PDF, che alcuni viewer (Chrome/PDFium) rendono male
    (strumenti con colori sbagliati). Appiattisco ogni fill/stroke a gradiente in un colore pieno rappresentativo
