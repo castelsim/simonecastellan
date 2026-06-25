@@ -428,8 +428,7 @@
     <option value="obj">Oggetti</option>
   </select>
   <div style="display:flex;gap:4px">
-    <button class="btn" id="bHdrSave" title="Salva progetto (.json)">💾 Save as</button>
-    <button class="btn" id="bHdrPdf" title="Esporta planimetria in PDF">📄 PDF</button>
+    <button class="btn" id="bHdrPdf" title="Esporta planimetria in PDF">📄 Save as</button>
     <button class="btn" id="bHdrImport" title="Apri progetto (.json)">📂 Open recent</button>
   </div>
   <!-- stW/stD nascosti: rimossi dall'header ma usati dal JS per aggiornare le dimensioni del palco -->
@@ -3732,7 +3731,7 @@ function closeMobileDrawers(){
       if(a==="chan"){ toggleChan(); return; }
       if(a==="venue"){ toggleVenueEdit(); return; }
       if(a==="frame"){ toggleFrameEdit(); return; }
-      if(a==="save") document.getElementById("bHdrSave").click();
+      if(a==="save") document.getElementById("bHdrPdf").click();
       else if(a==="pdf") proxy("bPdf");
       else if(a==="import") document.getElementById("bHdrImport").click();
       else if(a==="share") proxy("bShare");
@@ -5904,7 +5903,6 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   document.getElementById("bShare").addEventListener("click", openShare);
   document.getElementById("shareClose").addEventListener("click", function(){ modal.hidden=true; });
   /* — pulsanti header: Salva / PDF / Importa / Altro — */
-  document.getElementById("bHdrSave").addEventListener("click", function(){ document.getElementById("saveJson").click(); });
   document.getElementById("bHdrPdf").addEventListener("click", function(){ if(!frameEdit){ frameEdit=true; exitHubModes("frame"); clearSelection(); ensurePrintFrame(); renderFramePanel(); render(); } });
   document.getElementById("bHdrImport").addEventListener("click", function(){ document.getElementById("importJson").click(); });
   document.getElementById("shareTabLink").addEventListener("click", function(){ openShare(); });
