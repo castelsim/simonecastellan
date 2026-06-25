@@ -96,6 +96,7 @@
   #defs-master{position:absolute;width:0;height:0;overflow:hidden;pointer-events:none}
   svg{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
   svg.dragging{cursor:grabbing}
+  body.space-pan svg,body.space-pan svg *{cursor:grab !important}
   #props{grid-area:props;border-left:1px solid #e5e7eb;padding:12px;overflow-y:auto}
   .snap-guide{stroke:#3b82f6;stroke-width:1.2px;stroke-dasharray:8 5;opacity:.75;pointer-events:none}
   .snap-guide.center{stroke:#f59e0b}
@@ -544,6 +545,13 @@
     <div id="pLabel2Wrap" style="display:none"><label>Etichetta 2 (secondo strumento)</label><input type="text" id="pLabel2"></div>
     <label style="display:flex;justify-content:space-between;align-items:baseline">Dimensione etichetta <span id="pLblSizeVal" style="color:#374151;font-weight:600">14</span></label>
     <input type="range" id="pLblSize" min="0" max="34" step="1" style="width:100%;padding:0">
+    <div id="pLblPosWrap" style="display:none;margin-top:6px">
+      <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px">Posizione etichetta</label>
+      <div style="display:flex;gap:4px">
+        <button class="btn" id="pLblPosTop" style="flex:1;font-size:12px;padding:5px 2px">↑ Sopra</button>
+        <button class="btn" id="pLblPosBot" style="flex:1;font-size:12px;padding:5px 2px">↓ Sotto</button>
+      </div>
+    </div>
     <div class="row" id="pDims">
       <span><label>L (cm)</label><input type="number" id="pW" min="10" step="5"></span>
       <span><label>P (cm)</label><input type="number" id="pD" min="10" step="5"></span>
@@ -2584,7 +2592,7 @@ function sanitizeItems(arr){
              w:+o.w||t.w, d:+o.d||t.d, label:(o.label!=null?o.label:defaultLabel(o.type)) };
     if(t.riser) it.h=(o.h!=null?+o.h:(t.h||40));
     if(COMP[o.type]) it.parts=o.parts?compClone(o.parts):compClone(COMP[o.type].defParts);
-    ["sedia","leggio","doppia","sep","ampli","pedaliera","donna","mano","nomic","z","vsec","label2","podio","sgab","grp","distOf","distType","dimSide","lblSize","panca","flat"].forEach(function(k){ if(o[k]!=null) it[k]=o[k]; });
+    ["sedia","leggio","doppia","sep","ampli","pedaliera","donna","mano","nomic","z","vsec","label2","podio","sgab","grp","distOf","distType","dimSide","lblSize","panca","flat","lblAbove"].forEach(function(k){ if(o[k]!=null) it[k]=o[k]; });
     recalcItemDims(it);   /* ingombri coerenti con i flag (doppia/sep, podio/leggio/sgab, gtr, parti, voce) */
     return it;
   }).filter(Boolean);
@@ -2759,9 +2767,9 @@ function itemMarkup(it){
   if(!t.innerLabel && fsz0>0){
     var fsz = fsz0;                             /* dimensione etichetta regolabile (cm reali) */
     var fst = ' style="font-size:'+fsz+'px"';
-    /* violini singoli con sedia: etichetta sopra allo schienale (ruota con l'elemento) */
-    var isVlnSingle = it.type==='vlnpost' && !it.doppia && it.sedia!==false;
-    var ly  = isVlnSingle ? -(it.d/2) - fsz*0.35 : it.d/2 + fsz*0.55 + 5;
+    /* postazioni con sedia: etichetta sopra allo schienale di default (ruota con l'elemento) */
+    var lblAbove = !!POSTAZ[it.type] && optSedia(it) && it.lblAbove !== false;
+    var ly  = lblAbove ? -52.5 - fsz*0.35 : it.d/2 + fsz*0.55 + 5;
     var isDbl = it.doppia===true || !!DOUBLE_TYPES[it.type];
     if(isDbl){                                  /* postazione a 2 → un nome per ciascuno strumento (riferito al singolo) */
       var dc=sepCfg(it), dhalf=(it.sep || (dc&&dc.sep) || DEFAULT_SEP)/2;
@@ -2873,6 +2881,13 @@ function renderProps(){
   var lblv=(it.lblSize==null?14:it.lblSize);
   document.getElementById("pLblSize").value = lblv;
   document.getElementById("pLblSizeVal").textContent = lblv;
+  var hasChair = !!POSTAZ[it.type] && optSedia(it);
+  document.getElementById("pLblPosWrap").style.display = hasChair ? "block" : "none";
+  if(hasChair){
+    var above = it.lblAbove !== false;
+    document.getElementById("pLblPosTop").className = "btn" + (above ? " primary" : "");
+    document.getElementById("pLblPosBot").className = "btn" + (above ? "" : " primary");
+  }
   document.getElementById("pLabel").placeholder = (POSTAZ[it.type] && (t.cat==="Legni" || t.cat==="Ottoni")) ? "es. Clarinetto / Sax" : "";
   var rNorm=((it.rot||0)%360+360)%360; if(rNorm>180) rNorm-=360;   /* normalizza a -180..180 per lo slider */
   document.getElementById("pRot").value = rNorm;
@@ -3000,6 +3015,8 @@ function mutSel(fn){ var it=getSel(); if(!it) return; fn(it); render(); save(); 
 document.getElementById("pLabel").addEventListener("input", function(){ mutSel(function(it){ it.label=document.getElementById("pLabel").value; }); });
 document.getElementById("pLabel2").addEventListener("input", function(){ mutSel(function(it){ it.label2=document.getElementById("pLabel2").value; }); });
 document.getElementById("pLblSize").addEventListener("input", function(){ var v=+document.getElementById("pLblSize").value; document.getElementById("pLblSizeVal").textContent=v; mutSel(function(it){ it.lblSize=v; }); });
+document.getElementById("pLblPosTop").addEventListener("click", function(){ mutSel(function(it){ it.lblAbove=true; }); renderProps(); });
+document.getElementById("pLblPosBot").addEventListener("click", function(){ mutSel(function(it){ it.lblAbove=false; }); renderProps(); });
 document.getElementById("pDimSide").addEventListener("change", function(){ var v=document.getElementById("pDimSide").value; mutSel(function(it){ it.dimSide=v; }); });
 document.getElementById("pPanca").addEventListener("change", function(){ var v=document.getElementById("pPanca").checked; mutSel(function(it){ it.panca=v; }); });
 document.getElementById("pW").addEventListener("change", function(){ mutSel(function(it){ it.w=Math.max(10,+document.getElementById("pW").value||it.w); }); });
@@ -3656,7 +3673,7 @@ function svgPoint(e){
   var p=svg.createSVGPoint(); p.x=e.clientX; p.y=e.clientY;
   return p.matrixTransform(svg.getScreenCTM().inverse());
 }
-var drag=null, pointers={}, pinch=null, lastDown=null;
+var drag=null, pointers={}, pinch=null, lastDown=null, spacebarPan=false;
 svg.addEventListener("pointerdown", function(e){
   pointers[e.pointerId]={x:e.clientX, y:e.clientY};
   if(Object.keys(pointers).length===2){            /* due dita = pinch zoom: annulla drag in corso */
@@ -3666,6 +3683,12 @@ svg.addEventListener("pointerdown", function(e){
     var mx=(pa.x+pb.x)/2, my=(pa.y+pb.y)/2;
     pinch={ d0:Math.hypot(pb.x-pa.x, pb.y-pa.y), mid0:svgPoint({clientX:mx, clientY:my}), startW:vb.w, ratio:vb.h/vb.w };
     svg.setPointerCapture(e.pointerId); return;
+  }
+  /* spacebar pan: trascina il canvas ovunque (priorità su tutto tranne il pinch) */
+  if(spacebarPan){
+    lastDown=null;
+    drag={mode:"pan", px:e.clientX, py:e.clientY, vx:vb.x, vy:vb.y};
+    svg.classList.add("dragging"); svg.setPointerCapture(e.pointerId); return;
   }
   /* doppio-click manuale: robusto al re-render dell'SVG (il dblclick nativo si perde perché render() ricrea il bersaglio) */
   var dcG = e.target.closest ? e.target.closest(".item") : null;
@@ -4166,6 +4189,12 @@ document.addEventListener("keydown", function(e){
   var ottM=document.getElementById("ottoniModal"); if(!ottM.hidden && e.key==="Escape"){ ottM.hidden=true; return; }
   if((e.metaKey||e.ctrlKey) && (e.key==="z"||e.key==="Z")){ e.preventDefault(); if(e.shiftKey) redo(); else undo(); return; }
   if((e.metaKey||e.ctrlKey) && (e.key==="y"||e.key==="Y")){ e.preventDefault(); redo(); return; }
+  /* spacebar → modalità pan temporanea (come Figma/Photoshop) */
+  if(e.key===" " && !/INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && !e.metaKey && !e.ctrlKey){
+    e.preventDefault();
+    if(!spacebarPan){ spacebarPan=true; document.body.classList.add("space-pan"); }
+    return;
+  }
   /* modalità Palco: Invio = conferma (Fatto), Backspace/Canc = elimina il blocco selezionato */
   if(stageEdit){
     if(e.key==="Enter"){ e.preventDefault(); if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); toggleStageEdit(); return; }
@@ -4191,6 +4220,10 @@ document.addEventListener("keydown", function(e){
     render(); save(); ensureVisible();
   }
 });
+document.addEventListener("keyup", function(e){
+  if(e.key===" "){ spacebarPan=false; document.body.classList.remove("space-pan"); }
+});
+window.addEventListener("blur", function(){ spacebarPan=false; document.body.classList.remove("space-pan"); });
 
 /* ============ GENERATORE ORGANICO ORCHESTRA ============ */
 /* Disposizione standard (direttore fronte-centro, archi ad arco, legni/ottoni in file, percussioni in fondo).
@@ -5204,7 +5237,7 @@ function chanRow(kind, row, i){
 /* ===== Conteggio accessori (sedie / leggii / sgabelli) ===== */
 var STOOL_POSTAZ = {contrabbasso:1, cbx2:2};   /* tipi POSTAZ che usano sgabello anziché sedia */
 function countAccessori(){
-  var sedie=0, leggii=0, sgabelli=0;
+  var sedie=0, leggii=0, sgabelli=0, hearbacks=0;
   state.items.forEach(function(it){
     var t=TYPES[it.type]; if(!t) return;
     var isDouble = it.doppia===true || !!DOUBLE_TYPES[it.type];
@@ -5227,17 +5260,20 @@ function countAccessori(){
     else if(isStool) sgabelli+=(STOOL_POSTAZ[it.type]||mult);
     else if(it.type==="batteria") sgabelli++;
     else if(it.type==="direttore" && it.sgab===true) sgabelli++;
+    // hearback
+    if(it.type==="hearback") hearbacks++;
   });
-  return {sedie:sedie, leggii:leggii, sgabelli:sgabelli};
+  return {sedie:sedie, leggii:leggii, sgabelli:sgabelli, hearbacks:hearbacks};
 }
 function renderAccessoriCount(){
   var el=document.getElementById("accessoriCount"); if(!el) return;
   if(!state.items.length){ el.innerHTML=""; return; }
   var c=countAccessori();
   var parts=[];
-  if(c.sedie)    parts.push("Sedie: <b>"+c.sedie+"</b>");
-  if(c.leggii)   parts.push("Leggii: <b>"+c.leggii+"</b>");
-  if(c.sgabelli) parts.push("Sgabelli: <b>"+c.sgabelli+"</b>");
+  if(c.sedie)     parts.push("Sedie: <b>"+c.sedie+"</b>");
+  if(c.leggii)    parts.push("Leggii: <b>"+c.leggii+"</b>");
+  if(c.sgabelli)  parts.push("Sgabelli: <b>"+c.sgabelli+"</b>");
+  if(c.hearbacks) parts.push("Hearback: <b>"+c.hearbacks+"</b>");
   el.innerHTML = parts.length ? parts.join(" &nbsp;·&nbsp; ") : "";
 }
 /* ===== Datalist src per Input patch / Output list ===== */
