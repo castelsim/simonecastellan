@@ -428,14 +428,7 @@
     <option value="obj">Oggetti</option>
   </select>
   <div style="display:flex;gap:4px">
-    <div style="position:relative">
-      <button class="btn" id="bHdrPdf" title="Salva / esporta">📄 Save as ▾</button>
-      <div id="saveAsMenu" hidden style="position:absolute;top:calc(100% + 4px);right:0;background:#fff;border:1px solid #d1d5db;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:9999;min-width:160px;padding:6px 0">
-        <button class="btn" id="saveAsPdf"  style="display:block;width:100%;text-align:left;border:none;background:none;padding:8px 16px;font-size:13px;border-radius:0;cursor:pointer">📄 PDF</button>
-        <button class="btn" id="saveAsJson" style="display:block;width:100%;text-align:left;border:none;background:none;padding:8px 16px;font-size:13px;border-radius:0;cursor:pointer">💾 JSON</button>
-        <button class="btn" id="saveAsPng"  style="display:block;width:100%;text-align:left;border:none;background:none;padding:8px 16px;font-size:13px;border-radius:0;cursor:pointer">🖼️ PNG</button>
-      </div>
-    </div>
+    <button class="btn" id="bHdrPdf" title="Salva / esporta">📄 Save as</button>
     <button class="btn" id="bHdrImport" title="Apri progetto (.json)">📂 Open recent</button>
   </div>
   <!-- stW/stD nascosti: rimossi dall'header ma usati dal JS per aggiornare le dimensioni del palco -->
@@ -699,6 +692,10 @@
     <button class="btn danger" id="frameClear" style="width:100%;margin-top:6px;font-size:12px">Reimposta (usa il palco)</button>
     <button class="btn primary" id="frameSavePdf" style="width:100%;margin-top:14px">📄 Salva PDF in scala →</button>
     <button class="btn" id="frameSavePng" style="width:100%;margin-top:6px;font-size:12px">📷 Scarica PNG 4000px</button>
+    <div style="border-top:1px solid #bfdbfe;margin-top:14px;padding-top:12px">
+      <p class="hint" style="font-size:11.5px;color:#6b7280;margin:0 0 8px">Salva il progetto come file <b>.json</b> per riaprirlo in seguito.</p>
+      <button class="btn" id="frameSaveJson" style="width:100%;font-size:12px">💾 Salva progetto .json</button>
+    </div>
   </div>
   <div class="sec" id="chanlist" style="border-top:1px solid #e5e7eb;padding-top:6px;margin-top:8px">
     <div class="clsec-head" id="inHead" title="Espandi/chiudi Input patch">
@@ -5909,28 +5906,9 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   }
   document.getElementById("bShare").addEventListener("click", openShare);
   document.getElementById("shareClose").addEventListener("click", function(){ modal.hidden=true; });
-  /* — pulsanti header: Save as dropdown / Importa — */
-  (function(){
-    var menu=document.getElementById("saveAsMenu");
-    document.getElementById("bHdrPdf").addEventListener("click", function(e){
-      e.stopPropagation();
-      menu.hidden=!menu.hidden;
-    });
-    document.getElementById("saveAsPdf").addEventListener("click", function(){
-      menu.hidden=true;
-      if(!frameEdit){ frameEdit=true; exitHubModes("frame"); clearSelection(); ensurePrintFrame(); renderFramePanel(); render(); }
-    });
-    document.getElementById("saveAsJson").addEventListener("click", function(){
-      menu.hidden=true;
-      document.getElementById("saveJson").click();
-    });
-    document.getElementById("saveAsPng").addEventListener("click", function(){
-      menu.hidden=true;
-      exportPng();
-    });
-    document.addEventListener("click", function(){ menu.hidden=true; });
-    document.addEventListener("keydown", function(e){ if(e.key==="Escape") menu.hidden=true; });
-  })();
+  /* — pulsanti header: Save as / Importa — */
+  document.getElementById("bHdrPdf").addEventListener("click", function(){ if(!frameEdit){ frameEdit=true; exitHubModes("frame"); clearSelection(); ensurePrintFrame(); renderFramePanel(); render(); } });
+  document.getElementById("frameSaveJson").addEventListener("click", function(){ document.getElementById("saveJson").click(); });
   document.getElementById("bHdrImport").addEventListener("click", function(){ document.getElementById("importJson").click(); });
   document.getElementById("shareTabLink").addEventListener("click", function(){ openShare(); });
   document.getElementById("shareTabPdf").addEventListener("click", function(){ modal.hidden=true; document.getElementById("bPdf").click(); });
