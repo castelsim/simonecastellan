@@ -692,6 +692,7 @@
     <button class="btn" id="frameCenter" style="width:100%;margin-top:6px;font-size:12px">⊕ Centra palco nell'area</button>
     <button class="btn danger" id="frameClear" style="width:100%;margin-top:6px;font-size:12px">Reimposta (usa il palco)</button>
     <button class="btn primary" id="frameSavePdf" style="width:100%;margin-top:14px">📄 Salva PDF in scala →</button>
+    <button class="btn" id="frameSavePng" style="width:100%;margin-top:6px;font-size:12px">📷 Scarica PNG 4000px</button>
   </div>
   <div class="sec" id="chanlist" style="border-top:1px solid #e5e7eb;padding-top:6px;margin-top:8px">
     <div class="clsec-head" id="inHead" title="Espandi/chiudi Input patch">
@@ -5564,6 +5565,7 @@ document.getElementById("frameCenter").addEventListener("click", function(){
   save(); render();
 });
 document.getElementById("frameSavePdf").addEventListener("click", function(){ openPdfExportModal(); });
+document.getElementById("frameSavePng").addEventListener("click", function(){ exportPng(); });
 
 function venueLoadFile(file){
   if(!file) return;
@@ -6396,6 +6398,50 @@ function exportPdf(paperKey, scaleSel, orient, header){
     if(e && e.name==="AbortError"){ info.className="mstatus"; info.textContent="Salvataggio annullato."; return; }
     info.className="mstatus err"; info.textContent="Errore: "+(e&&e.message||e);
   });
+}
+function exportPng(){
+  var A=printArea();
+  var PX=4000;
+  var sc=PX/Math.max(A.w,A.h);
+  var pxW=Math.round(A.w*sc), pxH=Math.round(A.h*sc);
+  _pdfMode=true; var svgStr=stageSceneSvg(); _pdfMode=false;
+  svgStr=svgStr.replace(/^<svg /,'<svg width="'+pxW+'" height="'+pxH+'" ');
+  var host=document.createElement("div");
+  host.style.cssText="position:fixed;left:-99999px;top:0;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none";
+  document.body.appendChild(host);
+  var root=host.attachShadow ? host.attachShadow({mode:"open"}) : host;
+  root.innerHTML=svgStr;
+  var svgEl=root.querySelector("svg");
+  flattenTextStyles(svgEl);
+  flattenGradients(svgEl);
+  /* inline tutti gli stili CSS come attributi, così il blob SVG è auto-contenuto */
+  var allEl=svgEl.querySelectorAll('*');
+  for(var i=0;i<allEl.length;i++){
+    var el=allEl[i], cs=getComputedStyle(el);
+    var fill=cs.fill; if(fill) el.setAttribute('fill',fill);
+    var stroke=cs.stroke; if(stroke) el.setAttribute('stroke',stroke);
+    var fa=cs.fillOpacity; if(fa!=null && fa!=='') el.setAttribute('fill-opacity',fa);
+    var sa=cs.strokeOpacity; if(sa!=null && sa!=='') el.setAttribute('stroke-opacity',sa);
+    var sw=cs.strokeWidth; if(sw) el.setAttribute('stroke-width',sw);
+    el.removeAttribute('class'); el.removeAttribute('style');
+  }
+  svgEl.querySelectorAll('style').forEach(function(s){ s.parentNode.removeChild(s); });
+  var flat=new XMLSerializer().serializeToString(svgEl);
+  host.remove();
+  var blob=new Blob([flat],{type:'image/svg+xml'});
+  var url=URL.createObjectURL(blob);
+  var img=new Image();
+  img.onload=function(){
+    URL.revokeObjectURL(url);
+    var c=document.createElement("canvas"); c.width=pxW; c.height=pxH;
+    var ctx=c.getContext("2d");
+    ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,pxW,pxH);
+    ctx.drawImage(img,0,0,pxW,pxH);
+    var a=document.createElement("a");
+    a.download=(state.nome||"stage-plot")+".png"; a.href=c.toDataURL("image/png"); a.click();
+  };
+  img.onerror=function(){ URL.revokeObjectURL(url); showToast("PNG export fallito","err"); };
+  img.src=url;
 }
 function pdfChannelPage(doc, L, paperKey){
   var M=L.M, x=M, y=M+8, pw=L.pw, colW=(pw-2*M);
