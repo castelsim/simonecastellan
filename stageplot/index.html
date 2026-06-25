@@ -6215,20 +6215,31 @@ function flattenGradients(rootEl){
   }
 }
 function flattenCssToAttrs(rootEl){
-  /* inline tutti gli stili calcolati (fill, stroke, …) come attributi e rimuove class/style/style-blocks
-     in modo che svg2pdf e il percorso canvas abbiano i valori espliciti senza dipendere dal CSS */
+  /* due passaggi: prima si leggono tutti gli stili calcolati (prima di toccare classi/stili dei parent),
+     poi si applicano come attributi e si rimuovono class/style/style-blocks */
   var all=rootEl.querySelectorAll('*');
+  var snapshot=[];
   for(var i=0;i<all.length;i++){
-    var el=all[i], cs=getComputedStyle(el);
-    var fill=cs.fill; if(fill) el.setAttribute('fill',fill);
-    var stroke=cs.stroke; if(stroke) el.setAttribute('stroke',stroke);
-    var fa=cs.fillOpacity; if(fa!=null&&fa!=='') el.setAttribute('fill-opacity',fa);
-    var sa=cs.strokeOpacity; if(sa!=null&&sa!=='') el.setAttribute('stroke-opacity',sa);
-    var sw=cs.strokeWidth; if(sw) el.setAttribute('stroke-width',sw);
-    var slj=cs.strokeLinejoin; if(slj) el.setAttribute('stroke-linejoin',slj);
-    var slc=cs.strokeLinecap; if(slc) el.setAttribute('stroke-linecap',slc);
-    var sda=cs.strokeDasharray; if(sda&&sda!=='none') el.setAttribute('stroke-dasharray',sda);
-    var fr=cs.fillRule; if(fr) el.setAttribute('fill-rule',fr);
+    var cs=getComputedStyle(all[i]);
+    snapshot.push({
+      fill:cs.fill, stroke:cs.stroke,
+      fillOpacity:cs.fillOpacity, strokeOpacity:cs.strokeOpacity,
+      strokeWidth:cs.strokeWidth, strokeLinejoin:cs.strokeLinejoin,
+      strokeLinecap:cs.strokeLinecap, strokeDasharray:cs.strokeDasharray,
+      fillRule:cs.fillRule
+    });
+  }
+  for(var i=0;i<all.length;i++){
+    var el=all[i], s=snapshot[i];
+    if(s.fill) el.setAttribute('fill',s.fill);
+    if(s.stroke) el.setAttribute('stroke',s.stroke);
+    if(s.fillOpacity!=null&&s.fillOpacity!=='') el.setAttribute('fill-opacity',s.fillOpacity);
+    if(s.strokeOpacity!=null&&s.strokeOpacity!=='') el.setAttribute('stroke-opacity',s.strokeOpacity);
+    if(s.strokeWidth) el.setAttribute('stroke-width',s.strokeWidth);
+    if(s.strokeLinejoin) el.setAttribute('stroke-linejoin',s.strokeLinejoin);
+    if(s.strokeLinecap) el.setAttribute('stroke-linecap',s.strokeLinecap);
+    if(s.strokeDasharray&&s.strokeDasharray!=='none') el.setAttribute('stroke-dasharray',s.strokeDasharray);
+    if(s.fillRule) el.setAttribute('fill-rule',s.fillRule);
     el.removeAttribute('class'); el.removeAttribute('style');
   }
   rootEl.querySelectorAll('style').forEach(function(s){ s.parentNode.removeChild(s); });
