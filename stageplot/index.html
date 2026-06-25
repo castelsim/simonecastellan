@@ -632,6 +632,13 @@
     <div id="grpLblWrap" style="display:none;margin-bottom:8px">
       <label style="display:flex;justify-content:space-between;align-items:baseline">Dimensione etichetta (tutti) <span id="grpLblSizeVal" style="color:#374151;font-weight:600">14</span></label>
       <input type="range" id="grpLblSize" min="0" max="34" step="1" value="14" style="width:100%;padding:0">
+      <div id="grpLblPosWrap" style="display:none;margin-top:6px">
+        <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px">Posizione etichetta</label>
+        <div style="display:flex;gap:4px">
+          <button class="btn" id="grpLblPosTop" style="flex:1;font-size:12px;padding:5px 2px">↑ Sopra</button>
+          <button class="btn" id="grpLblPosBot" style="flex:1;font-size:12px;padding:5px 2px">↓ Sotto</button>
+        </div>
+      </div>
     </div>
     <div id="grpDist" style="display:none;border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin-bottom:8px;background:#f8fafc">
       <div class="hint" style="font-size:11.5px;color:#374151;margin-bottom:6px"><b id="grpDistTitle">Distribuisci sulla pedana</b></div>
@@ -2856,6 +2863,14 @@ function renderProps(){
     /* --- dimensione etichetta per tutti (normalizza) --- */
     document.getElementById("grpLblWrap").style.display="block";
     var cs=(its[0].lblSize==null?14:its[0].lblSize); document.getElementById("grpLblSize").value=cs; document.getElementById("grpLblSizeVal").textContent=cs;
+    /* --- posizione etichetta (solo postazioni con sedia) --- */
+    var chairIts=its.filter(function(it){ return !!POSTAZ[it.type] && optSedia(it); });
+    document.getElementById("grpLblPosWrap").style.display = chairIts.length ? "block" : "none";
+    if(chairIts.length){
+      var firstAbove=chairIts[0].lblAbove !== false;
+      document.getElementById("grpLblPosTop").className="btn"+(firstAbove?" primary":"");
+      document.getElementById("grpLblPosBot").className="btn"+(firstAbove?"":" primary");
+    }
     /* --- distribuzione: pedana + elemento(i) dello stesso tipo --- */
     var risers=its.filter(function(it){ return TYPES[it.type]&&TYPES[it.type].riser; });
     var others=its.filter(function(it){ return !(TYPES[it.type]&&TYPES[it.type].riser); });
@@ -3161,6 +3176,8 @@ document.getElementById("grpUngroup").addEventListener("click", ungroupSel);
 document.getElementById("grpSedia").addEventListener("change", function(){ applyOptAll("sedia", document.getElementById("grpSedia").checked); });
 document.getElementById("grpLeggio").addEventListener("change", function(){ applyOptAll("leggio", document.getElementById("grpLeggio").checked); });
 document.getElementById("grpLblSize").addEventListener("input", function(){ var v=+document.getElementById("grpLblSize").value; document.getElementById("grpLblSizeVal").textContent=v; selItems().forEach(function(it){ it.lblSize=v; }); render(); save(); });
+document.getElementById("grpLblPosTop").addEventListener("click", function(){ selItems().forEach(function(it){ if(!!POSTAZ[it.type]&&optSedia(it)) it.lblAbove=true; }); render(); save(); renderProps(); });
+document.getElementById("grpLblPosBot").addEventListener("click", function(){ selItems().forEach(function(it){ if(!!POSTAZ[it.type]&&optSedia(it)) it.lblAbove=false; }); render(); save(); renderProps(); });
 function grpDistApply(){
   var its=selItems();
   var risers=its.filter(function(it){ return TYPES[it.type]&&TYPES[it.type].riser; });
