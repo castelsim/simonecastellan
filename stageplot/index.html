@@ -182,7 +182,7 @@
   .fBrass{fill:url(#gBrass)} .fSilver{fill:url(#gSilver)} .fBlack{fill:url(#gBlack)}
   .fHead{fill:url(#gHead)}   .fCym{fill:url(#gCym)}       .fCopper{fill:url(#gCopper)}
   .fFloor{fill:url(#gFloor)} .fRed{fill:url(#gRed)}       .fGrey{fill:#494d54}
-  .nofloor .lbl{fill:#fff;stroke:none}
+  .nofloor .lbl{fill:#111827}
   .fMon{fill:#33363b}
   /* sagome cantanti: pelle, capelli, vestiti */
   .fSkin{fill:#e7b48f} .fShirt{fill:#3f5c83} .fShirtF{fill:#e0789f}
@@ -6324,7 +6324,7 @@ function pdfCartiglio(doc, L, N, header){
   doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(75,85,99);
   var sub=[]; if(state.luogo) sub.push(state.luogo);
   sub.push(new Date().toLocaleDateString("it-IT"));
-  sub.push("palco "+(state.stage.w/100)+"×"+(state.stage.d/100)+" m");
+  var _Ac=printArea(); sub.push((_Ac.custom?"area ":"palco ")+(_Ac.w/100)+"×"+(_Ac.h/100)+" m");
   var subStr=sub.join("  ·  ");
   var subL=doc.splitTextToSize(subStr, titleW);
   doc.text(subL.length>1 ? subL[0].replace(/\s+\S*$/,"")+"…" : subStr, M, y+14);
@@ -6453,7 +6453,6 @@ function exportPdf(paperKey, scaleSel, orient, header){
   if(!scaleFits(N, paperKey, orient)){
     info.className="mstatus err"; info.textContent="A 1:"+N+" "+(printArea().custom?"l'area":"il palco")+" sfora il foglio "+paperKey.toUpperCase()+" "+oTxt+". Scegli Automatica o un foglio più grande."; return;
   }
-  if(!state.items.length){ info.className="mstatus err"; info.textContent="Il palco è vuoto."; return; }
   var name=fileName()+".pdf";
   /* chiedi SUBITO dove salvare (mentre c'è il gesto utente): su desktop con browser compatibili apre il selettore di sistema */
   var pick = (typeof window.showSaveFilePicker==="function" && !isMobile())
@@ -6553,15 +6552,15 @@ function pdfChannelPage(doc, L, paperKey){
     var info=document.getElementById("pdfInfo");
     var N=resolveScale(paper.value, scl.value, orient.value);
     var oTxt=orient.value==="portrait"?"verticale":"orizzontale";
-    if(!N){ info.className="mstatus err"; info.textContent="Non entra nemmeno a 1:200 su "+paper.value.toUpperCase()+" "+oTxt+" — prova un foglio più grande o l'altro orientamento."; }
+    if(!N){ info.className="mstatus err"; info.textContent="Non entra nemmeno a 1:500 su "+paper.value.toUpperCase()+" "+oTxt+" — prova un foglio più grande o l'altro orientamento."; }
     else {
       var fits=scaleFits(N, paper.value, orient.value);
-      var mmW=Math.round(state.stage.w*10/N), mmH=Math.round(state.stage.d*10/N);
+      var _A=printArea(), mmW=Math.round(_A.w*10/N), mmH=Math.round(_A.h*10/N);
       info.className="mstatus"+(fits?"":" err");
       info.innerHTML="Scala risultante <b>1:"+N+"</b> · disegno "+mmW+"×"+mmH+" mm su "+paper.value.toUpperCase()+" "+oTxt+
         (fits? "" : " — <b>sfora il foglio</b>");
     }
-    try{ document.getElementById("pdfPreview").innerHTML = state.items.length ? pdfPreviewSvg(paper.value, N, orient.value, header.value) : '<div style="font-size:12.5px;color:#9ca3af">Palco vuoto</div>'; }catch(e){}
+    try{ document.getElementById("pdfPreview").innerHTML = pdfPreviewSvg(paper.value, N, orient.value, header.value); }catch(e){}
   }
   window.openPdfExportModal=function(){ modal.hidden=false; refresh(); };
   document.getElementById("bPdf").addEventListener("click", function(){ (window.openPrintAreaStep||window.openPdfExportModal)(); });
