@@ -396,6 +396,31 @@
   body.dark .mact-add{background:#2563eb}
   body.dark #catalog,body.dark #props{background:#161b24}
   body.dark main{background:#0b0e13}
+  /* print */
+  #printContainer{display:none}
+  @media print{
+    body>*:not(#printContainer){display:none!important}
+    #printContainer{display:block!important;width:100%;height:100%}
+    #printContainer svg{width:100%;height:auto}
+  }
+  /* versioni panel */
+  #versBox{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:11px 12px;margin-bottom:12px}
+  #versBox h3{margin:0 0 8px;color:#166534}
+  #versBox input[type=text]{width:100%;border:1px solid #bbf7d0;border-radius:7px;padding:5px 7px;font-size:13px;background:#fff;box-sizing:border-box}
+  .ver-row{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid #dcfce7;font-size:12px}
+  .ver-row:last-child{border:none}
+  .ver-name{flex:1;font-weight:600;color:#166534;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ver-date{color:#6b7280;font-size:11px;flex-shrink:0}
+  body.dark #versBox{background:#052e16;border-color:#14532d}
+  body.dark #versBox h3{color:#4ade80}
+  body.dark #versBox input[type=text]{background:#111;border-color:#14532d;color:#e5e7eb}
+  body.dark .ver-name{color:#4ade80}
+  /* QR in share modal */
+  #shareQrImg{display:block;margin:8px auto;border-radius:4px;border:1px solid #e5e7eb}
+  #shareLinkBox{margin-top:14px;padding-top:14px;border-top:1px solid #eef0f3}
+  #shareUrlRow{display:flex;gap:6px;margin-top:6px}
+  #shareUrlRow input{flex:1;min-width:0}
+  #shareUrlButtons{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -673,6 +698,17 @@
     </div>
     <div id="accessoriCount" style="margin-top:8px;font-size:12px;color:#6b7280;line-height:1.8"></div>
   </div>
+  <!-- pannello versioni -->
+  <div id="versPanel" hidden>
+    <div id="versBox">
+      <h3>Versioni salvate</h3>
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <input type="text" id="versName" placeholder="Nome (es. prova suono)…">
+        <button class="btn primary" id="versSave" style="white-space:nowrap;font-size:12px;flex-shrink:0">Salva</button>
+      </div>
+      <div id="versList"></div>
+    </div>
+  </div>
   <!-- pannello cornice di stampa -->
   <div id="framePanel" hidden>
     <div id="frameBox">
@@ -696,6 +732,9 @@
     <button class="btn primary" id="frameSavePdf" style="width:100%;margin-top:0">📄 Salva PDF in scala →</button>
     <button class="btn" id="frameSavePng" style="width:100%;margin-top:6px;font-size:12px">📷 Scarica PNG 4000px</button>
     <button class="btn" id="frameSaveJson" style="width:100%;margin-top:6px;font-size:12px">💾 Salva progetto .json</button>
+    <button class="btn" id="frameSaveSvg"  style="width:100%;margin-top:6px;font-size:12px">📐 Scarica SVG</button>
+    <button class="btn" id="framePrint"    style="width:100%;margin-top:6px;font-size:12px">🖨️ Stampa</button>
+    <button class="btn" id="frameVers"     style="width:100%;margin-top:6px;font-size:12px">📚 Versioni salvate</button>
   </div>
   <div class="sec" id="chanlist" style="border-top:1px solid #e5e7eb;padding-top:6px;margin-top:8px">
     <div class="clsec-head" id="inHead" title="Espandi/chiudi Input patch">
@@ -913,18 +952,24 @@
 <div class="modal" id="shareModal" hidden>
   <div class="mcard" style="width:480px;max-width:94vw">
     <h2>Salva / Esporta</h2>
-    <!-- CONDIVISIONE LINK: messa da parte, da reimplementare più avanti. Elementi tenuti (hidden) perché la logica li usa. -->
+    <!-- elementi tenuti per backward compat JS -->
     <div id="shareTabs" hidden style="display:none">
       <button class="btn primary" id="shareTabLink">🔗 Link del progetto</button>
       <button class="btn" id="shareTabPdf">📄 PDF in scala</button>
     </div>
-    <div id="shareLinkBox" hidden style="display:none">
-      <input type="text" id="shareUrl" readonly onclick="this.select()">
-      <button class="btn primary" id="shareNative" hidden>Condividi…</button>
-      <button class="btn" id="shareCopy">Copia link</button>
-      <button class="btn" id="shareEmail">Email</button>
-      <button class="btn" id="shareWa">WhatsApp</button>
-      <div id="shareStatus"></div>
+    <div id="shareLinkBox">
+      <p class="hint" style="font-size:12.5px;color:#6b7280;margin:0 0 6px">Link del progetto — condividilo o scansiona il QR.</p>
+      <img id="shareQrImg" width="150" height="150" alt="QR" src="">
+      <div id="shareUrlRow">
+        <input type="text" id="shareUrl" readonly onclick="this.select()" style="font-size:12px;padding:5px 8px;border:1px solid #d1d5db;border-radius:7px;background:#f9fafb">
+        <button class="btn primary" id="shareNative" hidden>Condividi…</button>
+        <button class="btn" id="shareCopy">Copia</button>
+      </div>
+      <div id="shareUrlButtons">
+        <button class="btn" id="shareEmail">Email</button>
+        <button class="btn" id="shareWa">WhatsApp</button>
+      </div>
+      <div id="shareStatus" style="font-size:12px;color:#16a34a;min-height:14px;margin-top:4px"></div>
     </div>
     <div>
       <p class="hint" style="font-size:12.5px;color:#6b7280;margin-bottom:10px">Salva il progetto come file <b>.json</b> (backup/archivio) e ricaricalo quando vuoi.</p>
@@ -4185,6 +4230,7 @@ function exitHubModes(except){
   if(except!=="evento" && eventoEdit){ eventoEdit=false; renderEventoPanel(); }
   if(except!=="chan" && chanEdit){ chanEdit=false; renderChanPanel(); }
   if(except!=="frame" && frameEdit){ frameEdit=false; renderFramePanel(); }
+  if(except!=="vers" && versEdit){ versEdit=false; renderVersionPanel(); }
 }
 function toggleStageEdit(){ stageEdit=!stageEdit; selBlock=stageEdit?0:null; if(stageEdit){ exitHubModes("palco"); clearSelection(); } renderStagePanel(); render(); }
 function renderEventoPanel(){ document.body.classList.toggle("evento-edit", eventoEdit); document.getElementById("eventoSec").hidden=!eventoEdit; }
@@ -5525,6 +5571,7 @@ function toggleVenueEdit(){ if(!stageEdit){ stageEdit=true; selBlock=stageEdit?0
 
 /* ===== Cornice di stampa (area esportata nel PDF) ===== */
 var frameEdit=false;
+var versEdit=false;
 function frameStageRect(){ recalcStageBBox(); return {x:0,y:0,w:state.stage.w,h:state.stage.d}; }
 /* area che racchiude palco + elementi + planimetria (per "Tutto + planimetria") */
 function frameContentRect(){
@@ -5550,6 +5597,61 @@ function renderFramePanel(){
   document.getElementById("frameH").value=fmtMnum(f.h);
   document.getElementById("frameX").value=fmtMnum(f.x);
   document.getElementById("frameY").value=fmtMnum(f.y);
+}
+/* ===== Versioni salvate ===== */
+var VER_KEY='stageplot_versions';
+function loadVersions(){ try{ return JSON.parse(localStorage.getItem(VER_KEY)||'[]'); }catch(e){ return []; } }
+function saveVersion(name){
+  var vs=loadVersions();
+  vs.unshift({name:name||'Versione', date:Date.now(), data:stateToJSON()});
+  if(vs.length>30) vs=vs.slice(0,30);
+  try{ localStorage.setItem(VER_KEY, JSON.stringify(vs)); }catch(e){}
+  renderVersionPanel();
+}
+function deleteVersion(idx){
+  var vs=loadVersions(); vs.splice(idx,1);
+  try{ localStorage.setItem(VER_KEY, JSON.stringify(vs)); }catch(e){}
+  renderVersionPanel();
+}
+function restoreVersion(idx){
+  var vs=loadVersions(); if(!vs[idx]) return;
+  applyHistory(vs[idx].data);
+  render();
+}
+function renderVersionPanel(){
+  var p=document.getElementById('versPanel'); if(!p) return;
+  p.hidden=!versEdit; if(!versEdit) return;
+  var vs=loadVersions();
+  var d=document.getElementById('versList');
+  if(!vs.length){ d.innerHTML='<div style="color:#6b7280;font-size:12px;padding:6px 0">Nessuna versione salvata.</div>'; return; }
+  d.innerHTML=vs.map(function(v,i){
+    var dt=new Date(v.date);
+    var ds=dt.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'2-digit'})+' '+dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+    return '<div class="ver-row"><span class="ver-name">'+esc(v.name)+'</span><span class="ver-date">'+ds+'</span>'+
+      '<button class="btn" style="font-size:11px;padding:3px 7px" onclick="restoreVersion('+i+')">Ripristina</button>'+
+      '<button class="btn danger" style="font-size:11px;padding:3px 7px" onclick="deleteVersion('+i+')">✕</button></div>';
+  }).join('');
+}
+function toggleVersionEdit(){
+  versEdit=!versEdit;
+  if(versEdit){ exitHubModes('vers'); clearSelection(); }
+  renderVersionPanel(); render();
+}
+/* ===== SVG Export ===== */
+function exportSvg(){
+  var svg=stageSceneSvg();
+  var blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.download=fileName()+'.svg';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); },1000);
+}
+/* ===== Stampa ===== */
+function printStage(){
+  var pc=document.getElementById('printContainer');
+  pc.innerHTML=stageSceneSvg();
+  window.print();
+  setTimeout(function(){ pc.innerHTML=''; },500);
 }
 function frameMarkup(){
   if(!frameEdit || !state.printFrame) return '';
@@ -5902,6 +6004,9 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   function openShare(){
     var url=buildShareUrl(); urlEl.value=url; status(""); document.getElementById("ioStatus").textContent="";
     document.getElementById("shareNative").hidden = !navigator.share;
+    /* QR code */
+    var qrImg=document.getElementById('shareQrImg');
+    qrImg.src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&margin=6&data='+encodeURIComponent(url);
     modal.hidden=false; setTimeout(function(){ try{ urlEl.focus(); urlEl.select(); }catch(e){} },40);
   }
   document.getElementById("bShare").addEventListener("click", openShare);
@@ -5909,6 +6014,15 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   /* — pulsanti header: Save as / Importa — */
   document.getElementById("bHdrPdf").addEventListener("click", function(){ if(!frameEdit){ frameEdit=true; exitHubModes("frame"); clearSelection(); ensurePrintFrame(); renderFramePanel(); render(); } });
   document.getElementById("frameSaveJson").addEventListener("click", function(){ document.getElementById("saveJson").click(); });
+  document.getElementById("frameSaveSvg").addEventListener("click", exportSvg);
+  document.getElementById("framePrint").addEventListener("click", printStage);
+  document.getElementById("frameVers").addEventListener("click", toggleVersionEdit);
+  document.getElementById("versSave").addEventListener("click", function(){
+    var n=document.getElementById("versName").value.trim();
+    if(!n){ document.getElementById("versName").focus(); return; }
+    saveVersion(n);
+    document.getElementById("versName").value="";
+  });
   document.getElementById("bHdrImport").addEventListener("click", function(){ document.getElementById("importJson").click(); });
   document.getElementById("shareTabLink").addEventListener("click", function(){ openShare(); });
   document.getElementById("shareTabPdf").addEventListener("click", function(){ modal.hidden=true; document.getElementById("bPdf").click(); });
@@ -6767,5 +6881,6 @@ else { window.addEventListener("resize", render); fit();
 }
 resetHistory();   /* la sessione iniziale è la base: undo non torna prima del caricamento */
 </script>
+<div id="printContainer"></div>
 </body>
 </html>
