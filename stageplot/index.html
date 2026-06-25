@@ -1711,10 +1711,10 @@ var STRING_CFG = {
   violino:    {legY:46, stool:false, side:0},
   viola:      {legY:50, stool:false, side:0},
   violoncello:{legY:74, stool:false, side:0},
-  contrabbasso:{legY:34, stool:true, side:64}   /* basso a lato; sgabello+leggio al centro */
+  contrabbasso:{legY:110, stool:true, side:0, stoolX:-45, stoolY:-55}   /* sgabello sx/manico; leggio vicino alla base (+90) */
 };
 function strKeyOf(kind){ return {vln1:'violino',vln2:'violino',vla:'viola',vc:'violoncello',cb:'contrabbasso'}[kind||""]; }
-function stringSeat(cfg){ return cfg.stool ? (circ(0,-26,17,'ic soft')+circ(0,-26,5,'dotS')) : seatLight(0); }   /* sgabello (cerchio) o sedia chiara */
+function stringSeat(cfg){ var sx=cfg.stoolX||0,sy=cfg.stoolY||-26; return cfg.stool ? (circ(sx,sy,17,'ic soft')+circ(sx,sy,5,'dotS')) : seatLight(0); }   /* sgabello (cerchio) o sedia chiara */
 function stringInstr(key){ return libIcon(key); }   /* scala reale (nessun ridimensionamento) */
 /* postazione singola arco (scala reale) */
 function archiStation(it, key){
@@ -1727,8 +1727,10 @@ function archiStation(it, key){
 function doubleStringPostLib(kind, dx){
   dx=dx||33;
   var key=strKeyOf(kind)||'violino', cfg=STRING_CFG[key]||{legY:38,side:0}, conv=12;   /* sedie convergenti verso il centro */
-  var inst=stringInstr(key);   /* nei doppi NIENTE offset: le due sedie già separano gli strumenti */
-  function side(sx,ang){ return '<g transform="translate('+sx+',0) rotate('+ang+')">'+stringSeat(cfg)+inst+'</g>'; }
+  var inst=stringInstr(key);
+  /* nel doppio lo sgabello/sedia è sempre al centro locale (non usa stoolX del singolo) */
+  var dblSeat=cfg.stool?(circ(0,-26,17,'ic soft')+circ(0,-26,5,'dotS')):seatLight(0);
+  function side(sx,ang){ return '<g transform="translate('+sx+',0) rotate('+ang+')">'+dblSeat+inst+'</g>'; }
   return side(-dx,-conv)+side(dx,conv)+'<g transform="translate(0,'+cfg.legY+')">'+leggioGlyph(0)+'</g>';
 }
 /* posizioni [x, y-arco] da sinistra a destra per n timpani */
@@ -6234,7 +6236,7 @@ function flattenTextStyles(rootEl){
     var halo=h.el.cloneNode(true);
     halo.setAttribute('fill','none');
     halo.setAttribute('stroke',h.stroke);
-    halo.setAttribute('stroke-width',h.sw+'px');
+    halo.setAttribute('stroke-width',(h.sw*0.4)+'px');
     halo.setAttribute('stroke-linejoin','round');
     halo.setAttribute('stroke-linecap','round');
     halo.querySelectorAll('tspan').forEach(function(ts){ ts.removeAttribute('stroke'); });
