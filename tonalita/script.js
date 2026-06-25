@@ -293,6 +293,16 @@ var fileName = document.getElementById('fileName');
 var player   = document.getElementById('player');
 var playBtn  = document.getElementById('playBtn');
 var volEl    = document.getElementById('vol');
+var seek     = document.getElementById('seek');
+var curEl    = document.getElementById('cur');
+var durEl    = document.getElementById('dur');
+
+function fmtTime(s) {
+  if (!isFinite(s)) s = 0;
+  var m = Math.floor(s / 60);
+  var ss = Math.floor(s % 60);
+  return m + ':' + (ss < 10 ? '0' : '') + ss;
+}
 
 var objUrl = null;
 fileIn.addEventListener('change', function () {
@@ -313,6 +323,15 @@ playBtn.addEventListener('click', function () {
 au.addEventListener('play',  function () { playBtn.textContent = '❚❚'; });
 au.addEventListener('pause', function () { playBtn.textContent = '▶'; });
 au.addEventListener('ended', function () { playBtn.textContent = '▶'; });
+
+au.addEventListener('loadedmetadata', function () { durEl.textContent = fmtTime(au.duration); });
+au.addEventListener('timeupdate', function () {
+  curEl.textContent = fmtTime(au.currentTime);
+  if (au.duration) seek.value = Math.round((au.currentTime / au.duration) * 1000);
+});
+seek.addEventListener('input', function () {
+  if (au.duration) au.currentTime = (seek.value / 1000) * au.duration;
+});
 
 volEl.addEventListener('input', function () { au.volume = volEl.value / 100; });
 

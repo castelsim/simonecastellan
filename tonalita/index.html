@@ -31,11 +31,19 @@
       <span id="fileName" class="file-name"></span>
     </div>
 
-    <!-- Player: solo play/pausa + volume -->
+    <!-- Player: play/pausa + avanzamento + volume -->
     <div id="player" class="player hidden">
-      <button type="button" id="playBtn" class="step play" aria-label="Play / Pausa">▶</button>
-      <span class="vol-ic" aria-hidden="true">🔊</span>
-      <input type="range" id="vol" class="range" min="0" max="100" value="100" step="1" aria-label="Volume" />
+      <div class="transport">
+        <button type="button" id="playBtn" class="step play" aria-label="Play / Pausa">▶</button>
+        <div class="pbar">
+          <input type="range" id="seek" class="range" min="0" max="1000" value="0" step="1" aria-label="Avanzamento" />
+          <div class="times"><span id="cur">0:00</span><span id="dur">0:00</span></div>
+        </div>
+      </div>
+      <div class="vol">
+        <span class="vol-ic" aria-hidden="true">🔊</span>
+        <input type="range" id="vol" class="range" min="0" max="100" value="100" step="1" aria-label="Volume" />
+      </div>
     </div>
 
     <!-- Tastiera -->
