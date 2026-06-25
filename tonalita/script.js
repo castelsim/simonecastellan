@@ -29,16 +29,16 @@ var BLACK = [
   { pc: 10, name: 'La#',  pos: 6 }
 ];
 
-var CHORD = {
-  note:  [0],
-  major: [0, 4, 7],
-  minor: [0, 3, 7]
+// Note aggiunte (oltre alla tonica) per la sola visualizzazione dell'accordo.
+var CHORD_TONES = {
+  major: [4, 7],
+  minor: [3, 7]
 };
 
 var MIN_OCT = 2, MAX_OCT = 6;
 
 // --- Stato ---
-var mode = 'note';
+var chordView = null;   // null | 'major' | 'minor' — solo evidenziazione
 var octave = 3;
 
 // --- Web Audio ---
@@ -58,9 +58,8 @@ function audio() {
 function freqOf(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
 function baseMidi(pc, oct) { return 12 * (oct + 1) + pc; }   // Do4 = 60
 
-function freqsFor(pc, oct) {
-  var base = baseMidi(pc, oct);
-  return CHORD[mode].map(function (i) { return freqOf(base + i); });
+function freqFor(pc, oct) {
+  return freqOf(baseMidi(pc, oct));   // sempre una nota singola
 }
 
 function makeVoice(freqs) {
@@ -126,6 +125,19 @@ function buildKeyboard() {
 function highlight(pc) { if (keyEls[pc]) keyEls[pc].classList.add('on'); }
 function unhighlight(pc) { if (keyEls[pc]) keyEls[pc].classList.remove('on'); }
 
+// Evidenzia in tenue le note dell'accordo (oltre alla tonica suonata).
+function clearGhost() {
+  Object.keys(keyEls).forEach(function (pc) { keyEls[pc].classList.remove('ghost'); });
+}
+function updateChordHighlight() {
+  clearGhost();
+  if (!chordView || heldPc === null) return;
+  CHORD_TONES[chordView].forEach(function (iv) {
+    var pc = (heldPc + iv) % 12;
+    if (pc !== heldPc && keyEls[pc]) keyEls[pc].classList.add('ghost');
+  });
+}
+
 function bindKey(el, pc) {
   el.addEventListener('pointerdown', function (e) {
     e.preventDefault();
@@ -140,33 +152,39 @@ function toggleHold(pc) {
     heldVoice.stop();
     unhighlight(heldPc);
     heldVoice = null; heldPc = null;
+    updateChordHighlight();
     return;
   }
   if (heldVoice) { heldVoice.stop(); unhighlight(heldPc); }
-  heldVoice = makeVoice(freqsFor(pc, octave));
+  heldVoice = makeVoice([freqFor(pc, octave)]);
   heldPc = pc;
   highlight(pc);
+  updateChordHighlight();
 }
 
-// Riavvia la nota tenuta (dopo cambio modalità o ottava)
+// Riavvia la nota tenuta (dopo cambio ottava)
 function refreshHeld() {
   if (heldVoice && heldPc !== null) {
     heldVoice.stop();
-    heldVoice = makeVoice(freqsFor(heldPc, octave));
+    heldVoice = makeVoice([freqFor(heldPc, octave)]);
   }
 }
 
 function stopAll() {
   if (heldVoice) { heldVoice.stop(); unhighlight(heldPc); heldVoice = null; heldPc = null; }
+  updateChordHighlight();
 }
 
 // --- Controlli UI ---
 var modeBtns = document.querySelectorAll('.seg-btn');
 modeBtns.forEach(function (btn) {
   btn.addEventListener('click', function () {
-    mode = btn.dataset.mode;
-    modeBtns.forEach(function (b) { b.classList.toggle('active', b === btn); });
-    refreshHeld();
+    // toggle: ripremendo lo stesso si disattiva (nessun accordo mostrato)
+    chordView = (chordView === btn.dataset.chord) ? null : btn.dataset.chord;
+    modeBtns.forEach(function (b) {
+      b.classList.toggle('active', b.dataset.chord === chordView);
+    });
+    updateChordHighlight();
   });
 });
 

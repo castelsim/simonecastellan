@@ -171,8 +171,9 @@ h1 {
 .key.black:hover { background: #333; }
 .key.on.white { background: var(--ink); color: #fff; border-color: var(--ink); }
 .key.on.black { background: #555; color: #fff; }
-.key.play.white { background: var(--pill-hover); color: var(--ink); }
-.key.play.black { background: #444; color: #fff; }
+/* Note dell'accordo: evidenziazione tenue (solo visiva) */
+.key.ghost.white { background: #e3e7ef; color: var(--muted); border-color: #cfd5df; }
+.key.ghost.black { background: #6a7280; color: #fff; }
 
 /* Modalità (segmented) */
 .seg {

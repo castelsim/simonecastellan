@@ -11,8 +11,9 @@ non senti il centro tonale. Nessun riconoscimento automatico, nessuna AI, nessun
 - **Player** minimale: play/pausa, barra di avanzamento e volume. Audio sempre a velocità 1×.
 - **Tastiera** virtuale Web Audio (oscillatore sinusoidale puro), un'ottava Do→Si.
 - **Drone in hold (default)**: cliccando una nota questa resta a suonare; cliccando un'altra
-  si sostituisce, ricliccando la stessa si spegne.
-- **Modalità**: Nota · Maggiore (0-4-7) · Minore (0-3-7).
+  si sostituisce, ricliccando la stessa si spegne. Suona sempre **una nota singola**.
+- **Maggiore / Minore**: solo **visualizzazione** — evidenziano in tenue le note dell'accordo
+  (3ª e 5ª) rispetto alla nota suonata. Nessun accordo in audio.
 - **Stop**: ferma tutto immediatamente, nessun oscillatore appeso.
 - **Ottava −/+** (da 2 a 6): cambia l'altezza reale, la tastiera resta uguale.
 
