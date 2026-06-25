@@ -272,18 +272,19 @@
   body.dark #venuePanel h3{color:#4ade80}
   body.dark #venuePanel label{color:#d1fae5}
   /* cornice di stampa */
-  #framePanel{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:11px 12px;margin-bottom:10px}
-  #framePanel h3{margin:0 0 8px;color:#1d4ed8}
-  #framePanel label{font-size:12px;color:#374151;display:block;margin:7px 0 2px}
-  #framePanel input[type=number]{width:100%;border:1px solid #bfdbfe;border-radius:7px;padding:5px 7px;font-size:13px;background:#fff}
+  #framePanel{margin-bottom:10px}
+  #frameBox{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:11px 12px;margin-bottom:12px}
+  #frameBox h3{margin:0 0 8px;color:#1d4ed8}
+  #frameBox label{font-size:12px;color:#374151;display:block;margin:7px 0 2px}
+  #frameBox input[type=number]{width:100%;border:1px solid #bfdbfe;border-radius:7px;padding:5px 7px;font-size:13px;background:#fff}
   .frame-row{display:flex;gap:8px}
   .frame-row>div{flex:1}
   .frame-rect{fill:rgba(37,99,235,.06);stroke:#2563eb;stroke-width:2;stroke-dasharray:10 7;cursor:move}
   .frame-h{fill:#fff;stroke:#2563eb;stroke-width:2}
   .frame-lbl{fill:#1d4ed8;font-weight:700;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}
-  body.dark #framePanel{background:#0c1e3a;border-color:#1e3a8a}
-  body.dark #framePanel h3{color:#60a5fa}
-  body.dark #framePanel label{color:#cdd9ee}
+  body.dark #frameBox{background:#0c1e3a;border-color:#1e3a8a}
+  body.dark #frameBox h3{color:#60a5fa}
+  body.dark #frameBox label{color:#cdd9ee}
   .clrow{display:grid;grid-template-columns:22px 1fr 86px 72px 36px 18px;gap:4px;align-items:center;margin-bottom:6px}
   .clrow .n{font-size:11px;color:#9ca3af;text-align:center;border-radius:4px}
   .clrow .n.grip{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -674,28 +675,27 @@
   </div>
   <!-- pannello cornice di stampa -->
   <div id="framePanel" hidden>
-    <h3>Area di stampa</h3>
-    <p class="hint" style="font-size:11.5px;color:#6b7280;margin:0 0 8px">Definisce cosa esporta il PDF. Trascina/ridimensiona il rettangolo sul palco, o usa i valori (in metri).</p>
-    <div class="frame-row">
-      <div><label>Larghezza (m)</label><input type="number" id="frameW" min="0.5" step="0.1"></div>
-      <div><label>Profondità (m)</label><input type="number" id="frameH" min="0.5" step="0.1"></div>
+    <div id="frameBox">
+      <h3>Area di stampa</h3>
+      <p class="hint" style="font-size:11.5px;color:#6b7280;margin:0 0 8px">Definisce cosa esporta il PDF. Trascina/ridimensiona il rettangolo sul palco, o usa i valori (in metri).</p>
+      <div class="frame-row">
+        <div><label>Larghezza (m)</label><input type="number" id="frameW" min="0.5" step="0.1"></div>
+        <div><label>Profondità (m)</label><input type="number" id="frameH" min="0.5" step="0.1"></div>
+      </div>
+      <div class="frame-row">
+        <div><label>X (m)</label><input type="number" id="frameX" step="0.1"></div>
+        <div><label>Y (m)</label><input type="number" id="frameY" step="0.1"></div>
+      </div>
+      <div class="frame-row" style="margin-top:10px">
+        <button class="btn" id="frameStage" style="flex:1;font-size:12px">= Palco</button>
+        <button class="btn" id="frameAll" style="flex:1;font-size:12px">Tutto + planimetria</button>
+      </div>
+      <button class="btn" id="frameCenter" style="width:100%;margin-top:6px;font-size:12px">⊕ Centra palco nell'area</button>
+      <button class="btn danger" id="frameClear" style="width:100%;margin-top:6px;font-size:12px">Reimposta (usa il palco)</button>
     </div>
-    <div class="frame-row">
-      <div><label>X (m)</label><input type="number" id="frameX" step="0.1"></div>
-      <div><label>Y (m)</label><input type="number" id="frameY" step="0.1"></div>
-    </div>
-    <div class="frame-row" style="margin-top:10px">
-      <button class="btn" id="frameStage" style="flex:1;font-size:12px">= Palco</button>
-      <button class="btn" id="frameAll" style="flex:1;font-size:12px">Tutto + planimetria</button>
-    </div>
-    <button class="btn" id="frameCenter" style="width:100%;margin-top:6px;font-size:12px">⊕ Centra palco nell'area</button>
-    <button class="btn danger" id="frameClear" style="width:100%;margin-top:6px;font-size:12px">Reimposta (usa il palco)</button>
-    <button class="btn primary" id="frameSavePdf" style="width:100%;margin-top:14px">📄 Salva PDF in scala →</button>
+    <button class="btn primary" id="frameSavePdf" style="width:100%;margin-top:0">📄 Salva PDF in scala →</button>
     <button class="btn" id="frameSavePng" style="width:100%;margin-top:6px;font-size:12px">📷 Scarica PNG 4000px</button>
-    <div style="border-top:1px solid #bfdbfe;margin-top:14px;padding-top:12px">
-      <p class="hint" style="font-size:11.5px;color:#6b7280;margin:0 0 8px">Salva il progetto come file <b>.json</b> per riaprirlo in seguito.</p>
-      <button class="btn" id="frameSaveJson" style="width:100%;font-size:12px">💾 Salva progetto .json</button>
-    </div>
+    <button class="btn" id="frameSaveJson" style="width:100%;margin-top:6px;font-size:12px">💾 Salva progetto .json</button>
   </div>
   <div class="sec" id="chanlist" style="border-top:1px solid #e5e7eb;padding-top:6px;margin-top:8px">
     <div class="clsec-head" id="inHead" title="Espandi/chiudi Input patch">
