@@ -735,6 +735,7 @@
     <button class="btn" id="frameSaveSvg"  style="width:100%;margin-top:6px;font-size:12px">📐 Scarica SVG</button>
     <button class="btn" id="framePrint"    style="width:100%;margin-top:6px;font-size:12px">🖨️ Stampa</button>
     <button class="btn" id="frameVers"     style="width:100%;margin-top:6px;font-size:12px">📚 Versioni salvate</button>
+    <button class="btn" id="frameShare"    style="width:100%;margin-top:6px;font-size:12px">🔗 Condividi / QR</button>
   </div>
   <div class="sec" id="chanlist" style="border-top:1px solid #e5e7eb;padding-top:6px;margin-top:8px">
     <div class="clsec-head" id="inHead" title="Espandi/chiudi Input patch">
@@ -6023,6 +6024,7 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
     saveVersion(n);
     document.getElementById("versName").value="";
   });
+  document.getElementById("frameShare").addEventListener("click", function(){ openShare(); });
   document.getElementById("bHdrImport").addEventListener("click", function(){ document.getElementById("importJson").click(); });
   document.getElementById("shareTabLink").addEventListener("click", function(){ openShare(); });
   document.getElementById("shareTabPdf").addEventListener("click", function(){ modal.hidden=true; document.getElementById("bPdf").click(); });
