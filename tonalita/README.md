@@ -14,7 +14,6 @@ non senti il centro tonale. Nessun riconoscimento automatico, nessuna AI, nessun
   si sostituisce, ricliccando la stessa si spegne. Suona sempre **una nota singola**.
 - **Maggiore / Minore**: solo **visualizzazione** — evidenziano in tenue le note dell'accordo
   (3ª e 5ª) rispetto alla nota suonata. Nessun accordo in audio.
-- **Stop**: ferma tutto immediatamente, nessun oscillatore appeso.
 - **Ottava −/+** (da 2 a 6): cambia l'altezza reale, la tastiera resta uguale.
 
 ## Uso tipico

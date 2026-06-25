@@ -170,10 +170,6 @@ function refreshHeld() {
   }
 }
 
-function stopAll() {
-  if (heldVoice) { heldVoice.stop(); unhighlight(heldPc); heldVoice = null; heldPc = null; }
-  updateChordHighlight();
-}
 
 // --- Controlli UI ---
 var modeBtns = document.querySelectorAll('.seg-btn');
@@ -185,8 +181,6 @@ modeBtns.forEach(function (btn) {
     updateChordHighlight();
   });
 });
-
-document.getElementById('stopBtn').addEventListener('click', stopAll);
 
 var octLabel = document.getElementById('octLabel');
 function setOctave(v) {
