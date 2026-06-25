@@ -49,6 +49,15 @@
     <!-- Tastiera -->
     <div id="keyboard" class="keyboard"></div>
 
+    <!-- Ottava -->
+    <div class="ctrl-row">
+      <span class="oct" role="group" aria-label="Ottava">
+        <button type="button" id="octDown" class="step sm" aria-label="Ottava giù">−</button>
+        <span id="octLabel" class="oct-label">Ott. 4</span>
+        <button type="button" id="octUp" class="step sm" aria-label="Ottava su">+</button>
+      </span>
+    </div>
+
     <!-- Modalità -->
     <div class="seg modes" role="group" aria-label="Modalità">
       <button type="button" class="seg-btn active" data-mode="note">Nota</button>
@@ -56,14 +65,9 @@
       <button type="button" class="seg-btn" data-mode="minor">Minore</button>
     </div>
 
-    <!-- Stop / Ottava -->
+    <!-- Stop -->
     <div class="ctrl-row">
       <button type="button" id="stopBtn" class="btn btn-secondary">Stop</button>
-      <span class="oct" role="group" aria-label="Ottava">
-        <button type="button" id="octDown" class="step sm" aria-label="Ottava giù">−</button>
-        <span id="octLabel" class="oct-label">Ott. 4</span>
-        <button type="button" id="octUp" class="step sm" aria-label="Ottava su">+</button>
-      </span>
     </div>
   </main>
 
