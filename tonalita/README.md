@@ -1,4 +1,4 @@
-# Trova tonalità da audio
+# Tonalità
 
 Strumento web 100% client-side per trovare **a orecchio** la tonalità di un brano.
 Carichi un file audio, lo ascolti e provi note, accordi e scale sopra l'audio finché
@@ -8,15 +8,16 @@ non senti il centro tonale. Nessun riconoscimento automatico, nessuna AI, nessun
 
 ## Funzioni
 - **Carica audio** locale (mp3, wav, aiff, flac, m4a, ogg) — niente upload, resta sul dispositivo.
-- **Player**: play/pausa, barra di avanzamento, tempo/durata, volume, velocità 0.5×–1.25×
-  a intonazione costante (`preservesPitch`).
+- **Player** minimale: play/pausa e volume. Audio sempre a velocità 1×.
 - **Tastiera** virtuale Web Audio (oscillatore sinusoidale puro), un'ottava Do→Si.
-- **Modalità**: Nota · Accordo Maggiore (0-4-7) · Accordo Minore (0-3-7).
+- **Modalità**: Nota · Maggiore (0-4-7) · Minore (0-3-7).
 - **HOLD**: tiene la nota/accordo come drone; nuova nota sostituisce, stessa nota spegne.
 - **Stop**: ferma tutto immediatamente, nessun oscillatore appeso.
 - **Ottava −/+** (da 2 a 6): cambia l'altezza reale, la tastiera resta uguale.
 - **Suona scala**: dall'ultima nota selezionata, maggiore o minore naturale secondo la modalità,
-  con feedback visivo sui tasti.
+  in **loop** con feedback visivo sui tasti.
+- **Tap tempo**: batti il pulsante TAP a ritmo del brano; la scala segue quel tempo.
+  Nessun valore numerico mostrato, serve solo a sincronizzare la scala con l'ascolto.
 
 ## Uso tipico
 1. Carica il brano e fai play. 2. Attiva **Hold** e clicca una nota: senti il drone sopra il brano.

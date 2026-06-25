@@ -2,7 +2,7 @@
 :root {
   --bg: #ffffff;
   --text: #3c4043;
-  --ink: #1a1a1a;       /* testo forte */
+  --ink: #1a1a1a;
   --muted: #5f6368;
   --muted-2: #80868b;
   --faint: #9aa0a6;
@@ -10,7 +10,6 @@
   --pill-hover: #e6e8ea;
   --line: #c2c6cc;
   --line-soft: #dadce0;
-  --radius: 16px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,105 +22,77 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   min-height: 100vh;
-  padding: 40px 20px calc(72px + env(safe-area-inset-bottom));
+  padding: 20px 18px calc(48px + env(safe-area-inset-bottom));
   text-align: center;
 }
 
 .card {
   width: 100%;
-  max-width: 480px;
-  margin: auto 0;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
-/* Intestazione */
-header { margin-bottom: 28px; }
 h1 {
-  font-size: 26px;
+  font-size: 20px;
   font-weight: 500;
   color: var(--ink);
   letter-spacing: -0.2px;
-}
-.subtitle {
-  font-size: 15px;
-  font-weight: 400;
-  color: var(--muted);
-  margin-top: 12px;
-  line-height: 1.5;
+  margin-bottom: 2px;
 }
 
-/* Bottoni pillola, come sul sito */
+/* Bottoni pillola */
 .btn {
   appearance: none;
   border: none;
   border-radius: 999px;
-  padding: 12px 22px;
-  font-size: 15px;
+  padding: 9px 16px;
+  font-size: 13px;
   font-weight: 600;
   font-family: inherit;
   color: var(--ink);
   cursor: pointer;
-  transition: background .15s ease, opacity .15s ease;
+  transition: background .15s ease, color .15s ease;
 }
-.btn-secondary { background: var(--pill); color: var(--ink); }
+.btn-secondary { background: var(--pill); }
 .btn-secondary:hover { background: var(--pill-hover); }
 
-/* Tondi +/− e play, come i pulsanti step del sito */
+/* Tondi +/- e play */
 .step {
   appearance: none;
   border: none;
   background: var(--pill);
   color: var(--ink);
-  width: 46px;
-  height: 46px;
+  width: 38px;
+  height: 38px;
   border-radius: 999px;
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1;
   cursor: pointer;
   flex: 0 0 auto;
   transition: background .15s ease;
 }
+.step.sm { width: 30px; height: 30px; font-size: 15px; }
 .step:hover { background: var(--pill-hover); }
 .step:active { background: var(--line-soft); }
+.play { font-size: 12px; }
 
-/* 1. Carica audio */
-.upload { margin-bottom: 24px; }
+/* Carica audio */
+.upload { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
 .file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-.upload-btn { display: inline-block; }
-.file-name {
-  font-size: 12px;
-  color: var(--faint);
-  margin-top: 10px;
-  min-height: 1em;
-  word-break: break-all;
-}
+.file-name { font-size: 11px; color: var(--faint); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* 2-3. Player */
-.player {
-  width: 100%;
-  margin-bottom: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.transport { display: flex; align-items: center; gap: 14px; }
-.play { font-size: 15px; }
-.progress-wrap { flex: 1; }
-.times {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  color: var(--muted-2);
-  margin-top: 4px;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Slider minimali */
+/* Player compatto: play + volume */
+.player { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 320px; }
+.vol-ic { font-size: 12px; opacity: .55; }
 .range {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 100%;
+  appearance: none; -webkit-appearance: none;
+  flex: 1;
   height: 4px;
   border-radius: 999px;
   background: var(--line-soft);
@@ -130,63 +101,25 @@ h1 {
 }
 .range::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 14px; height: 14px;
+  width: 13px; height: 13px;
   border-radius: 50%;
   background: var(--ink);
   cursor: pointer;
 }
 .range::-moz-range-thumb {
-  width: 14px; height: 14px;
-  border: none;
-  border-radius: 50%;
+  width: 13px; height: 13px;
+  border: none; border-radius: 50%;
   background: var(--ink);
   cursor: pointer;
 }
 
-.player-row { display: flex; align-items: center; }
-.vol { display: flex; align-items: center; gap: 10px; width: 100%; }
-.vol-ic { font-size: 13px; opacity: .6; }
-
-/* Velocità */
-.speed {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: var(--pill);
-  border-radius: 999px;
-  padding: 4px;
-  align-self: center;
-}
-.speed-label {
-  font-size: 11px;
-  color: var(--muted-2);
-  text-transform: uppercase;
-  letter-spacing: .6px;
-  padding: 0 8px 0 10px;
-}
-.rate {
-  appearance: none;
-  border: none;
-  background: transparent;
-  color: var(--muted);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: background .15s ease, color .15s ease;
-}
-.rate.active { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
-
-/* 4. Tastiera */
-.kbd-wrap { margin-bottom: 22px; }
+/* Tastiera */
 .keyboard {
   position: relative;
   width: 100%;
-  height: 150px;
+  height: 96px;
   display: flex;
-  gap: 4px;
+  gap: 3px;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -199,17 +132,16 @@ h1 {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding-bottom: 10px;
-  font-size: 11px;
+  padding-bottom: 6px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: .2px;
   transition: background .08s ease, color .08s ease;
 }
 .key.white {
   flex: 1;
   background: #fff;
   border: 1px solid var(--line-soft);
-  border-radius: 0 0 8px 8px;
+  border-radius: 0 0 6px 6px;
   color: var(--muted-2);
   z-index: 1;
 }
@@ -217,32 +149,27 @@ h1 {
 .key.black {
   position: absolute;
   top: 0;
-  height: 62%;
+  height: 60%;
   width: 9%;
   background: var(--ink);
-  border-radius: 0 0 6px 6px;
+  border-radius: 0 0 5px 5px;
   color: #cfcfcf;
-  font-size: 9px;
+  font-size: 8px;
   z-index: 2;
 }
 .key.black:hover { background: #333; }
-
-/* Stato attivo: nota tenuta/premuta */
 .key.on.white { background: var(--ink); color: #fff; border-color: var(--ink); }
 .key.on.black { background: #555; color: #fff; }
-/* Stato scala in riproduzione */
 .key.play.white { background: var(--pill-hover); color: var(--ink); }
 .key.play.black { background: #444; color: #fff; }
 
-/* 5. Modalità (segmented) */
+/* Modalità (segmented) */
 .seg {
   display: inline-flex;
-  gap: 4px;
+  gap: 3px;
   background: var(--pill);
   border-radius: 999px;
-  padding: 4px;
-  margin-bottom: 16px;
-  max-width: 100%;
+  padding: 3px;
 }
 .seg-btn {
   appearance: none;
@@ -250,9 +177,9 @@ h1 {
   background: transparent;
   color: var(--muted);
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  padding: 8px 14px;
+  padding: 6px 14px;
   border-radius: 999px;
   cursor: pointer;
   white-space: nowrap;
@@ -260,41 +187,51 @@ h1 {
 }
 .seg-btn.active { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
 
-/* 6-8. Righe di controllo */
+/* Riga Hold / Stop / Ottava */
 .ctrl-row {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.hold { letter-spacing: .5px; transition: background .15s ease, color .15s ease; }
+.hold[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.oct { display: inline-flex; align-items: center; gap: 8px; }
+.oct-label { font-size: 12px; font-weight: 600; color: var(--ink); min-width: 46px; }
+
+/* Riga Scala + Tap */
+.scale-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 12px;
-  margin-bottom: 16px;
 }
-.hold {
-  letter-spacing: 1px;
-  min-width: 110px;
-  transition: background .15s ease, color .15s ease;
-}
-.hold[aria-pressed="true"] {
-  background: var(--ink);
-  color: #fff;
-}
-.stop { min-width: 90px; }
-
-.octave { gap: 16px; }
-.oct-label {
-  font-size: 15px;
-  font-weight: 600;
+#scaleBtn.playing { background: var(--ink); color: #fff; }
+.tap-btn {
+  appearance: none;
+  border: none;
+  width: 44px; height: 44px;
+  border-radius: 999px;
+  background: var(--pill);
   color: var(--ink);
-  min-width: 92px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: background .1s ease, transform .1s ease;
 }
+.tap-btn:hover { background: var(--pill-hover); }
+.tap-btn.beat { background: var(--ink); color: #fff; transform: scale(.94); }
+.tap-btn.set { box-shadow: inset 0 0 0 1.5px var(--line); }
 
-.scale { margin-top: 6px; min-width: 160px; }
-.scale.playing { background: var(--ink); color: #fff; }
-
-/* Footer fisso, come il credit del sito */
+/* Footer */
 .site-footer {
   position: fixed;
   left: 0; right: 0;
-  bottom: 16px;
+  bottom: 14px;
   text-align: center;
   font-size: 12px;
   color: #6b7075;
@@ -307,10 +244,8 @@ h1 {
 .hidden { display: none !important; }
 
 @media (max-width: 460px) {
-  body { padding-top: 28px; }
-  h1 { font-size: 22px; }
-  .subtitle { font-size: 14px; }
-  .keyboard { height: 132px; }
-  .seg-btn { padding: 8px 11px; font-size: 12px; }
-  .hold { min-width: 96px; }
+  h1 { font-size: 18px; }
+  .keyboard { height: 84px; }
+  .seg-btn { padding: 6px 11px; }
+  .btn { padding: 8px 13px; }
 }

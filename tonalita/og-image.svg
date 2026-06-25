@@ -2,7 +2,7 @@
   <rect width="1200" height="630" fill="#ffffff"/>
   <text x="600" y="288" text-anchor="middle"
         font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-        font-size="64" font-weight="500" fill="#1a1a1a" letter-spacing="-1">Trova tonalità da audio</text>
+        font-size="72" font-weight="500" fill="#1a1a1a" letter-spacing="-1">Tonalità</text>
   <text x="600" y="348" text-anchor="middle"
         font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
         font-size="28" font-weight="400" fill="#5f6368">Note, accordi e scale sopra il tuo brano — a orecchio</text>
