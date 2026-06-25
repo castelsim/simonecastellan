@@ -198,45 +198,16 @@ h1 {
 }
 .seg-btn.active { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
 
-/* Riga Hold / Stop / Ottava */
+/* Riga Stop / Ottava */
 .ctrl-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
-.hold { letter-spacing: .5px; transition: background .15s ease, color .15s ease; }
-.hold[aria-pressed="true"] { background: var(--ink); color: #fff; }
 .oct { display: inline-flex; align-items: center; gap: 8px; }
 .oct-label { font-size: 12px; font-weight: 600; color: var(--ink); min-width: 46px; }
-
-/* Riga Scala + Tap */
-.scale-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-#scaleBtn.playing { background: var(--ink); color: #fff; }
-.tap-btn {
-  appearance: none;
-  border: none;
-  width: 44px; height: 44px;
-  border-radius: 999px;
-  background: var(--pill);
-  color: var(--ink);
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .5px;
-  cursor: pointer;
-  flex: 0 0 auto;
-  transition: background .1s ease, transform .1s ease;
-}
-.tap-btn:hover { background: var(--pill-hover); }
-.tap-btn.beat { background: var(--ink); color: #fff; transform: scale(.94); }
-.tap-btn.set { box-shadow: inset 0 0 0 1.5px var(--line); }
 
 /* Footer */
 .site-footer {
