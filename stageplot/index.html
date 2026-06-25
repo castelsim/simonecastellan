@@ -732,8 +732,6 @@
     <button class="btn primary" id="frameSavePdf" style="width:100%;margin-top:0">📄 Salva PDF in scala →</button>
     <button class="btn" id="frameSavePng" style="width:100%;margin-top:6px;font-size:12px">📷 Scarica PNG 4000px</button>
     <button class="btn" id="frameSaveJson" style="width:100%;margin-top:6px;font-size:12px">💾 Salva progetto .json</button>
-    <button class="btn" id="frameSaveSvg"  style="width:100%;margin-top:6px;font-size:12px">📐 Scarica SVG</button>
-    <button class="btn" id="framePrint"    style="width:100%;margin-top:6px;font-size:12px">🖨️ Stampa</button>
     <button class="btn" id="frameVers"     style="width:100%;margin-top:6px;font-size:12px">📚 Versioni salvate</button>
     <button class="btn" id="frameShare"    style="width:100%;margin-top:6px;font-size:12px">🔗 Condividi / QR</button>
   </div>
@@ -6015,8 +6013,6 @@ function fileName(){ return (state.titolo||"stage-plot").toLowerCase().replace(/
   /* — pulsanti header: Save as / Importa — */
   document.getElementById("bHdrPdf").addEventListener("click", function(){ if(!frameEdit){ frameEdit=true; exitHubModes("frame"); clearSelection(); ensurePrintFrame(); renderFramePanel(); render(); } });
   document.getElementById("frameSaveJson").addEventListener("click", function(){ document.getElementById("saveJson").click(); });
-  document.getElementById("frameSaveSvg").addEventListener("click", exportSvg);
-  document.getElementById("framePrint").addEventListener("click", printStage);
   document.getElementById("frameVers").addEventListener("click", toggleVersionEdit);
   document.getElementById("versSave").addEventListener("click", function(){
     var n=document.getElementById("versName").value.trim();
