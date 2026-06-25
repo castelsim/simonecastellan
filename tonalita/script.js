@@ -179,11 +179,9 @@ function stopAll() {
 var modeBtns = document.querySelectorAll('.seg-btn');
 modeBtns.forEach(function (btn) {
   btn.addEventListener('click', function () {
-    // toggle: ripremendo lo stesso si disattiva (nessun accordo mostrato)
-    chordView = (chordView === btn.dataset.chord) ? null : btn.dataset.chord;
-    modeBtns.forEach(function (b) {
-      b.classList.toggle('active', b.dataset.chord === chordView);
-    });
+    var v = btn.dataset.chord;
+    chordView = (v === 'none') ? null : v;   // "Nota" = nessuna evidenziazione
+    modeBtns.forEach(function (b) { b.classList.toggle('active', b === btn); });
     updateChordHighlight();
   });
 });
