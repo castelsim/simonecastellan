@@ -14,9 +14,10 @@ non senti il centro tonale. Nessun riconoscimento automatico, nessuna AI, nessun
   si sostituisce, ricliccando la stessa si spegne. Suona sempre **una nota singola**.
 - **Maggiore / Minore**: solo **visualizzazione** — evidenziano in tenue le note dell'accordo
   (3ª e 5ª) rispetto alla nota suonata. Nessun accordo in audio.
-- **Tonalità probabile**: conta quante volte suoni ogni nota mentre cerchi a orecchio e,
-  con il profilo di Krumhansl-Schmuckler (24 candidati maggiori/minori), mostra sotto la
-  tonalità più probabile con una percentuale di confidenza. Stima statistica dai tuoi click,
+- **Tonalità probabile**: pesa ogni nota in base a **quanto a lungo la tieni** (più la tieni,
+  più conta — di solito è la fondamentale) e, con il profilo di Krumhansl-Schmuckler
+  (24 candidati maggiori/minori), mostra sotto la tonalità più probabile con una percentuale
+  di confidenza, aggiornata in tempo reale mentre suoni. Stima statistica dalle tue scelte,
   non dall'audio. "azzera" ripulisce il conteggio (resettato anche a ogni nuovo brano).
 - **Ottava −/+** (da 2 a 6): cambia l'altezza reale, la tastiera resta uguale.
 

@@ -47,7 +47,10 @@ var KS_MINOR = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34
 // --- Stato ---
 var chordView = null;   // null | 'major' | 'minor' — solo evidenziazione
 var octave = 3;
-var counts = [0,0,0,0,0,0,0,0,0,0,0,0];   // quante volte è stata suonata ogni nota
+var counts = [0,0,0,0,0,0,0,0,0,0,0,0];   // peso accumulato per ogni nota
+var heldStart = null;                      // istante (ms) in cui è iniziata la nota tenuta
+var SUSTAIN_W = 1.0;                        // peso per secondo di nota tenuta
+var BASE_W = 0.4;                           // piccolo peso d'avvio a ogni nota suonata
 
 // --- Web Audio ---
 var ctx = null, master = null;
@@ -157,25 +160,36 @@ function bindKey(el, pc) {
 // Click su una nota: la tiene; altra nota = sostituisce; stessa nota = spegne.
 function toggleHold(pc) {
   if (heldPc === pc) {
+    commitHeld();                // accredita la durata finora tenuta
     heldVoice.stop();
     unhighlight(heldPc);
-    heldVoice = null; heldPc = null;
+    heldVoice = null; heldPc = null; heldStart = null;
     updateChordHighlight();
+    updateKeyGuess();
     return;
   }
-  if (heldVoice) { heldVoice.stop(); unhighlight(heldPc); }
+  if (heldVoice) { commitHeld(); heldVoice.stop(); unhighlight(heldPc); }
   heldVoice = makeVoice([freqFor(pc, octave)]);
   heldPc = pc;
+  heldStart = performance.now();
+  counts[pc] += BASE_W;          // piccolo peso d'avvio
   highlight(pc);
   updateChordHighlight();
-  registerVote(pc);
+  updateKeyGuess();
 }
 
 // --- Stima della tonalità dalle note suonate ---
-function registerVote(pc) {
-  counts[pc]++;
-  updateKeyGuess();
+// Accredita alla nota tenuta il tempo trascorso da heldStart (più la tieni, più pesa).
+function commitHeld() {
+  if (heldPc === null || heldStart === null) return;
+  var now = performance.now();
+  counts[heldPc] += (now - heldStart) / 1000 * SUSTAIN_W;
+  heldStart = now;
 }
+// Mentre tieni una nota, accumula peso e aggiorna la stima in tempo reale.
+setInterval(function () {
+  if (heldPc !== null) { commitHeld(); updateKeyGuess(); }
+}, 300);
 
 function pearson(x, p) {
   var n = 12, sx = 0, sp = 0, sxp = 0, sxx = 0, spp = 0;
@@ -210,7 +224,7 @@ var keyGuessEl = document.getElementById('keyGuess');
 function updateKeyGuess() {
   var total = 0, distinct = 0;
   counts.forEach(function (c) { total += c; if (c > 0) distinct++; });
-  if (total < 4 || distinct < 2) { resultEl.classList.add('hidden'); return; }
+  if (total < 3 || distinct < 2) { resultEl.classList.add('hidden'); return; }
   var best = estimateKey()[0];
   var name = NOTE_NAMES[best.t] + (best.mode === 'major' ? ' maggiore' : ' minore');
   var pct = Math.round(best.conf * 100);
@@ -220,6 +234,8 @@ function updateKeyGuess() {
 
 function resetGuess() {
   counts = [0,0,0,0,0,0,0,0,0,0,0,0];
+  // se una nota è tenuta, riparte da ora ad accumulare peso
+  heldStart = (heldPc !== null) ? performance.now() : null;
   resultEl.classList.add('hidden');
   keyGuessEl.innerHTML = '';
 }
