@@ -2684,6 +2684,18 @@ function stageBlocks(){ var b=state.stage.blocks; return (b&&b.length)?b:[{x:0,y
 function isSingleRect(){ var b=stageBlocks(); return b.length===1 && b[0].shape!=="semi"; }
 function stageHeightNote(){ var h=stageBlocks()[0].h||0; return h?" · h "+h+" cm":""; }
 function recalcStageBBox(){ var b=stageBlocks(), W=0, D=0; b.forEach(function(r){ W=Math.max(W,r.x+r.w); D=Math.max(D,r.y+r.d); }); state.stage.w=W; state.stage.d=D; }
+function normalizeStageBBox(){
+  var b=stageBlocks(), minX=Infinity, minY=Infinity;
+  b.forEach(function(r){ minX=Math.min(minX,r.x); minY=Math.min(minY,r.y); });
+  var ox=minX<0?-minX:0, oy=minY<0?-minY:0;
+  if(ox||oy){
+    b.forEach(function(r){ r.x+=ox; r.y+=oy; });
+    state.items.forEach(function(it){ it.x+=ox; it.y+=oy; });
+  }
+  var W=0, D=0;
+  b.forEach(function(r){ W=Math.max(W,r.x+r.w); D=Math.max(D,r.y+r.d); });
+  state.stage.w=W; state.stage.d=D;
+}
 function isOutsideStage(it){ var px=it.x, py=it.y, b=stageBlocks(); return !b.some(function(r){ return px>=r.x&&px<=r.x+r.w&&py>=r.y&&py<=r.y+r.d; }); }
 /* path di un semicerchio (mezza ellisse) iscritto nel bbox del blocco; flat = lato dritto (di solito attaccato al palco) */
 function semiPath(r){
@@ -4020,10 +4032,10 @@ svg.addEventListener("pointermove", function(e){
     sp=svgPoint(e); var bdx=sp.x-drag.sp0.x, bdy=sp.y-drag.sp0.y; drag.moved=true;
     var r=stageBlocks()[drag.bi]; if(r){
       var bgrid=e.metaKey||e.ctrlKey;
-      var bpx=Math.max(0,bgrid?snap(drag.x0+bdx):Math.round(drag.x0+bdx));
-      var bpy=Math.max(0,bgrid?snap(drag.y0+bdy):Math.round(drag.y0+bdy));
+      var bpx=bgrid?snap(drag.x0+bdx):Math.round(drag.x0+bdx);
+      var bpy=bgrid?snap(drag.y0+bdy):Math.round(drag.y0+bdy);
       var bmag=bgrid?{sdx:0,sdy:0,guides:[]}:blockMagneticSnap(drag.bi,bpx,bpy);
-      r.x=Math.max(0,bpx+bmag.sdx); r.y=Math.max(0,bpy+bmag.sdy);
+      r.x=bpx+bmag.sdx; r.y=bpy+bmag.sdy;
       recalcStageBBox(); render(); renderSnapGuides(bmag.guides);
     }
   } else if(drag.mode==="blkresize"){
@@ -4031,8 +4043,8 @@ svg.addEventListener("pointermove", function(e){
     if(r){ var MIN=100, brgrid=e.metaKey||e.ctrlKey;
       if(drag.edge==="r"){ r.w=Math.max(MIN, placeCoord(sp.x-r.x,e)); }
       else if(drag.edge==="b"){ r.d=Math.max(MIN, placeCoord(sp.y-r.y,e)); }
-      else if(drag.edge==="l"){ var nx=Math.max(0, Math.min(placeCoord(sp.x,e), drag.x0+drag.w0-MIN)); r.w=drag.x0+drag.w0-nx; r.x=nx; }
-      else if(drag.edge==="t"){ var ny=Math.max(0, Math.min(placeCoord(sp.y,e), drag.y0+drag.d0-MIN)); r.d=drag.y0+drag.d0-ny; r.y=ny; }
+      else if(drag.edge==="l"){ var nx=Math.min(placeCoord(sp.x,e), drag.x0+drag.w0-MIN); r.w=drag.x0+drag.w0-nx; r.x=nx; }
+      else if(drag.edge==="t"){ var ny=Math.min(placeCoord(sp.y,e), drag.y0+drag.d0-MIN); r.d=drag.y0+drag.d0-ny; r.y=ny; }
       /* snap magnetico tra pedane durante resize */
       var brrsg=[];
       if(!brgrid && stageBlocks().length>1){
@@ -4057,9 +4069,9 @@ svg.addEventListener("pointermove", function(e){
         });
         if(brBestDist<=brT){
           if(drag.edge==="r"){ r.w=Math.max(MIN,r.w+brBestDelta); }
-          else if(drag.edge==="l"){ r.w=Math.max(MIN,r.w-brBestDelta); r.x=Math.max(0,r.x+brBestDelta); }
+          else if(drag.edge==="l"){ r.w=Math.max(MIN,r.w-brBestDelta); r.x=r.x+brBestDelta; }
           else if(drag.edge==="b"){ r.d=Math.max(MIN,r.d+brBestDelta); }
-          else if(drag.edge==="t"){ r.d=Math.max(MIN,r.d-brBestDelta); r.y=Math.max(0,r.y+brBestDelta); }
+          else if(drag.edge==="t"){ r.d=Math.max(MIN,r.d-brBestDelta); r.y=r.y+brBestDelta; }
           if(brBestGuide) brrsg=[brBestGuide];
         }
       }
@@ -4082,8 +4094,8 @@ svg.addEventListener("pointerup", function(e){
   if(pinch){ if(Object.keys(pointers).length<2) pinch=null; svg.classList.remove("dragging"); drag=null; return; }
   if(drag && drag.mode==="venue"){ if(drag.moved){ save(); render(); } drag=null; return; }
   if(drag && (drag.mode==="frame"||drag.mode==="frameresize")){ if(drag.moved){ save(); } renderFramePanel(); render(); drag=null; return; }
-  if(drag && drag.mode==="block"){ if(drag.moved){ recalcStageBBox(); save(); } renderStagePanel(); render(); svg.classList.remove("dragging"); drag=null; ensureVisible(); return; }
-  if(drag && drag.mode==="blkresize"){ if(drag.moved){ recalcStageBBox(); save(); } renderStagePanel(); render(); drag=null; ensureVisible(); return; }
+  if(drag && drag.mode==="block"){ if(drag.moved){ normalizeStageBBox(); save(); } renderStagePanel(); render(); svg.classList.remove("dragging"); drag=null; ensureVisible(); return; }
+  if(drag && drag.mode==="blkresize"){ if(drag.moved){ normalizeStageBBox(); save(); } renderStagePanel(); render(); drag=null; ensureVisible(); return; }
   if(drag && drag.mode==="newblk"){     /* fine Alt+trascina: crea il nuovo blocco se abbastanza grande */
     if(drag.el && drag.el.parentNode) drag.el.parentNode.removeChild(drag.el);
     var nr=drag.rect;
@@ -4091,7 +4103,7 @@ svg.addEventListener("pointerup", function(e){
       var base=state.stage.blocks[0], nb={x:placeCoord(nr.x,e), y:placeCoord(nr.y,e), w:Math.max(100,placeCoord(nr.w,e)), d:Math.max(100,placeCoord(nr.h,e))};
       if(base && base.h) nb.h=base.h;
       state.stage.blocks.push(nb); selBlock=state.stage.blocks.length-1;
-      recalcStageBBox(); save(); renderStagePanel(); render(); ensureVisible();
+      normalizeStageBBox(); save(); renderStagePanel(); render(); ensureVisible();
     } else render();
     drag=null; return;
   }
@@ -4272,8 +4284,8 @@ document.getElementById("blkW").addEventListener("change", function(){
   var b=stageBlocks(); if(selBlock==null||!b[selBlock]) return;
   var r=b[selBlock], cx=r.x+r.w/2, nw=Math.max(10, Math.round((+this.value||0)*100));   /* min 10 cm */
   r.w=nw;
-  if(r.shape==="semi") r.x=Math.max(0, Math.round(cx-nw/2));   /* semicerchio: allarga simmetrico attorno al centro */
-  recalcStageBBox(); render(); save();
+  if(r.shape==="semi") r.x=Math.round(cx-nw/2);   /* semicerchio: allarga simmetrico attorno al centro */
+  normalizeStageBBox(); render(); save();
 });
 document.getElementById("blkH").addEventListener("change", function(){
   var b=stageBlocks(); if(selBlock==null||!b[selBlock]) return;
