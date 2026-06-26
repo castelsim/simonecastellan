@@ -103,9 +103,9 @@ function makeVoice(freqs) {
 }
 
 // --- Voci attive ---
-var heldVoice = null, heldIdx = null;          // nota di prova (drone)
-var pedalVoice = null, pedalIdx = null, pedalStart = null;   // nota bloccata da HOLD
-var lastIdx = null;                            // ultima nota selezionata (persiste)
+var heldVoice = null, heldIdx = null;   // nota di prova (drone monofonico)
+var pedals = {};                        // note bloccate da HOLD: idx -> { voice, start }
+var lastIdx = null;                     // ultima nota selezionata (persiste)
 
 // --- Tastiera (2 ottave) ---
 var keyEls = {};
@@ -152,9 +152,19 @@ function bindKey(el, idx) {
   });
 }
 
-// Click su una nota: la tiene (drone); altra nota = sostituisce; stessa = spegne.
+// Click su una nota:
+//  - se è una nota bloccata (pedale) → la disattiva;
+//  - altrimenti è il drone di prova monofonico (altra nota = sostituisce, stessa = spegne).
 function toggleHold(idx) {
-  if (heldIdx === idx) {
+  if (pedals[idx]) {                      // nota tenuta → disattiva
+    commitPedal(idx);
+    pedals[idx].voice.stop();
+    delete pedals[idx];
+    rmCls(idx, 'pedal');
+    updateKeyGuess();
+    return;
+  }
+  if (heldIdx === idx) {                   // stessa nota di prova → spegne
     commitHeld();
     heldVoice.stop();
     rmCls(idx, 'on');
@@ -172,10 +182,13 @@ function toggleHold(idx) {
   updateKeyGuess();
 }
 
-// Cambio ottava: ri-aggancia le voci attive alla nuova ottava.
+// Cambio ottava: ri-aggancia tutte le voci attive (prova + pedali) alla nuova ottava.
 function refreshVoices() {
   if (heldVoice && heldIdx !== null) { heldVoice.stop(); heldVoice = makeVoice([freqForIdx(heldIdx)]); }
-  if (pedalVoice && pedalIdx !== null) { pedalVoice.stop(); pedalVoice = makeVoice([freqForIdx(pedalIdx)]); }
+  Object.keys(pedals).forEach(function (k) {
+    pedals[k].voice.stop();
+    pedals[k].voice = makeVoice([freqForIdx(Number(k))]);
+  });
 }
 
 // --- Stima della tonalità dalle note suonate (pesata per durata) ---
@@ -185,38 +198,40 @@ function commitHeld() {
   counts[heldIdx % 12] += (now - heldStart) / 1000 * SUSTAIN_W;
   heldStart = now;
 }
-function commitPedal() {
-  if (pedalIdx === null || pedalStart === null) return;
+function commitPedal(idx) {
+  var p = pedals[idx];
+  if (!p) return;
   var now = performance.now();
-  counts[pedalIdx % 12] += (now - pedalStart) / 1000 * SUSTAIN_W;
-  pedalStart = now;
+  counts[Number(idx) % 12] += (now - p.start) / 1000 * SUSTAIN_W;
+  p.start = now;
 }
 
-// HOLD: blocca l'ultima nota selezionata come pedale; ri-premendo la rilascia.
-function togglePedal() {
-  var holdBtn = document.getElementById('holdBtn');
-  if (pedalIdx !== null) {                  // rilascia il pedale
-    commitPedal();
-    pedalVoice.stop();
-    rmCls(pedalIdx, 'pedal');
-    pedalIdx = null; pedalVoice = null; pedalStart = null;
-    holdBtn.setAttribute('aria-pressed', 'false');
-    updateKeyGuess();
-    return;
-  }
-  var idx = (heldIdx !== null) ? heldIdx : lastIdx;   // nota corrente o ultima selezionata
-  if (idx === null) return;
-  if (heldIdx === idx) {                     // trasferisce il drone che sta suonando
+// HOLD: aggiunge l'ultima nota selezionata al set di note tenute (pedali).
+// Premendolo più volte su note diverse, le tiene tutte insieme.
+function addPedal() {
+  var idx = (heldIdx !== null) ? heldIdx : lastIdx;
+  if (idx === null || pedals[idx]) return;   // niente da tenere o già tenuta
+  if (heldIdx === idx) {                      // trasferisce il drone che sta suonando
     commitHeld();
-    pedalVoice = heldVoice; pedalIdx = idx; pedalStart = performance.now();
+    pedals[idx] = { voice: heldVoice, start: performance.now() };
     rmCls(idx, 'on');
     heldVoice = null; heldIdx = null; heldStart = null;
-  } else {                                   // l'ultima nota non suona più: la riattacca
-    pedalVoice = makeVoice([freqForIdx(idx)]);
-    pedalIdx = idx; pedalStart = performance.now();
+  } else {                                    // l'ultima nota non suona più: la riattacca
+    pedals[idx] = { voice: makeVoice([freqForIdx(idx)]), start: performance.now() };
   }
   addCls(idx, 'pedal');
-  holdBtn.setAttribute('aria-pressed', 'true');
+  updateKeyGuess();
+}
+
+// Stop: ferma tutto (pedali + nota di prova).
+function stopAll() {
+  Object.keys(pedals).forEach(function (k) {
+    commitPedal(k);
+    pedals[k].voice.stop();
+    rmCls(k, 'pedal');
+  });
+  pedals = {};
+  if (heldVoice) { commitHeld(); heldVoice.stop(); rmCls(heldIdx, 'on'); heldVoice = null; heldIdx = null; heldStart = null; }
   updateKeyGuess();
 }
 
@@ -272,17 +287,18 @@ function resetGuess() {
   counts = [0,0,0,0,0,0,0,0,0,0,0,0];
   var now = performance.now();
   heldStart = (heldIdx !== null) ? now : null;
-  pedalStart = (pedalIdx !== null) ? now : null;
+  Object.keys(pedals).forEach(function (k) { pedals[k].start = now; });
   resultEl.classList.add('hidden');
   keyGuessEl.innerHTML = '';
 }
 document.getElementById('resetGuess').addEventListener('click', resetGuess);
-document.getElementById('holdBtn').addEventListener('click', togglePedal);
+document.getElementById('holdBtn').addEventListener('click', addPedal);
+document.getElementById('stopBtn').addEventListener('click', stopAll);
 
-// Mentre tieni note (pedale e/o prova), accumula peso e aggiorna la stima live.
+// Mentre tieni note (pedali e/o prova), accumula peso e aggiorna la stima live.
 setInterval(function () {
   var active = false;
-  if (pedalIdx !== null) { commitPedal(); active = true; }
+  Object.keys(pedals).forEach(function (k) { commitPedal(k); active = true; });
   if (heldIdx !== null) { commitHeld(); active = true; }
   if (active) updateKeyGuess();
 }, 300);

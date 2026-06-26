@@ -13,10 +13,11 @@ non senti il centro tonale. Nessun riconoscimento automatico, nessuna AI, nessun
   tasti − / + per traslare l'intervallo di ottave.
 - **Drone**: cliccando una nota questa resta a suonare; cliccando un'altra si sostituisce,
   ricliccando la stessa si spegne. Suona sempre **una nota singola**.
-- **HOLD (pedale)**: blocca **l'ultima nota selezionata** come pedale fisso (anche se non sta
-  più suonando); puoi poi suonare altre note **sopra** per confrontarle col centro tonale.
-  Ri-premendo HOLD si rilascia. La nota-pedale ha un anello distintivo e accumula peso nella
-  stima finché è tenuta (tipicamente la tonica).
+- **HOLD (tieni note)**: blocca **l'ultima nota selezionata** come pedale (anche se non sta più
+  suonando). Premendolo su note diverse le **accumula tutte insieme**, così costruisci un drone
+  di più note su cui confrontare il brano. Ogni nota tenuta si disattiva **ricliccando il tasto**.
+  Le note-pedale hanno un anello distintivo e accumulano peso nella stima finché sono tenute.
+- **Stop**: ferma tutto (note tenute + nota di prova).
 - **Maggiore / Minore**: solo **visualizzazione** — evidenziano in tenue le note dell'accordo
   (3ª e 5ª) rispetto alla nota suonata. Nessun accordo in audio.
 - **Tonalità probabile**: pesa ogni nota in base a **quanto a lungo la tieni** (più la tieni,
