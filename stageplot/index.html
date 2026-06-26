@@ -2723,6 +2723,19 @@ function pointInPoly(px,py,pts){
   }
   return inside;
 }
+function polyArea(pts){ var a=0; for(var i=0,j=pts.length-1;i<pts.length;j=i++){ a+=(pts[j][0]+pts[i][0])*(pts[j][1]-pts[i][1]); } return Math.abs(a/2); }
+/* area reale del palco (somma dei blocchi) in m²: rettangolo=w·d, semicerchio=π·w·d/4 (mezza ellisse), quadrilatero=shoelace.
+   Per blocchi adiacenti (uso normale, niente sovrapposizioni) è esatta. */
+function stageAreaSqM(){
+  var cm2=0;
+  stageBlocks().forEach(function(r){
+    if(r.shape==="semi") cm2+=Math.PI*r.w*r.d/4;
+    else if(hasPts(r)) cm2+=polyArea(r.pts);
+    else cm2+=r.w*r.d;
+  });
+  return cm2/10000;
+}
+function fmtArea(m2){ return m2.toLocaleString("it-IT",{maximumFractionDigits:1})+" m²"; }
 function recalcStageBBox(){ var b=stageBlocks(), W=0, D=0; b.forEach(function(r){ blockCorners(r).forEach(function(p){ W=Math.max(W,p[0]); D=Math.max(D,p[1]); }); }); state.stage.w=W; state.stage.d=D; }
 function normalizeStageBBox(){
   var b=stageBlocks(), minX=Infinity, minY=Infinity;
@@ -2850,8 +2863,8 @@ function stageDimsMarkup(){
       s += '<text class="dim-h" x="'+cx+'" y="'+(hu?r.y-o2:r.y+r.d+o2+6)+'" text-anchor="middle">h '+r.h+' cm</text>';
     }
   });
-  /* ingombro totale del palco */
-  s += '<text class="dim-tot" x="'+(W/2)+'" y="-70" text-anchor="middle">PALCO '+fmtM(W)+' × '+fmtM(D)+'</text>';
+  /* area totale del palco in m² (le misure dei lati sono già lungo i bordi) */
+  s += '<text class="dim-tot" x="'+(W/2)+'" y="-70" text-anchor="middle">PALCO '+fmtArea(stageAreaSqM())+'</text>';
   return s;
 }
 /* overlay interattivo dei blocchi (solo in modalità "Modifica palco"): ogni blocco è una pedana modulare */
