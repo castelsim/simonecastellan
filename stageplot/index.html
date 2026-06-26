@@ -6338,6 +6338,7 @@ function svg2pdfFn(){ var s=window.svg2pdf; if(typeof s==="function") return s; 
 function loadSvg2Pdf(){ return loadJsPDF().then(function(){ return new Promise(function(res,rej){ svg2pdfFn() ? res() : rej(new Error("svg2pdf non disponibile")); }); }); }
 /* svg2pdf non applica il CSS <style>: appiattisco gli stili del testo (font, colore, allineamento)
    in attributi inline leggendo lo stile calcolato. Niente stroke → niente contorno bianco sopra il testo. */
+function rgbToHex(c){ var m=c&&c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/); return m?'#'+[+m[1],+m[2],+m[3]].map(function(v){return('0'+v.toString(16)).slice(-2)}).join(''):c; }
 function flattenTextStyles(rootEl){
   /* svg2pdf ignora paint-order:stroke, quindi disegnerebbe il bordo bianco sopra il fill.
      Soluzione: clona ogni <text> con alone chiaro come elemento halo (solo stroke, fill=none)
@@ -6352,7 +6353,7 @@ function flattenTextStyles(rootEl){
     if(cs.fontWeight) el.setAttribute("font-weight", (parseInt(cs.fontWeight,10)>=600?"bold":"normal"));
     if(cs.fontStyle && cs.fontStyle!=="normal") el.setAttribute("font-style", cs.fontStyle);
     if(cs.textAnchor) el.setAttribute("text-anchor", cs.textAnchor);
-    if(/^rgb/.test(cs.fill)) el.setAttribute("fill", cs.fill);
+    if(/^rgb/.test(cs.fill)) el.setAttribute("fill", rgbToHex(cs.fill));   /* svg2pdf: hex, non rgb() */
     if(cs.fillOpacity!=="" && +cs.fillOpacity<1) el.setAttribute("fill-opacity", cs.fillOpacity);
     var ls=parseFloat(cs.letterSpacing); if(ls) el.setAttribute("letter-spacing", ls);
     /* Raccoglie info halo per i <text> con tratto chiaro (alone bianco), PRIMA di azzerare stroke */
