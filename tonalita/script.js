@@ -82,7 +82,6 @@ function makeVoice(freq) {
   o.start(t);
   var stopped = false;
   return {
-    setFreq: function (f) { if (!stopped) { var t = ctx.currentTime; o.frequency.cancelScheduledValues(t); o.frequency.setValueAtTime(f, t); } },
     stop: function () {
       if (stopped) return;
       stopped = true;
@@ -180,13 +179,6 @@ function stopAll() {
   updateKeyGuess();
 }
 
-// Cambio ottava: aggiorna la frequenza delle voci attive senza interromperle.
-function refreshVoices() {
-  Object.keys(notes).forEach(function (idx) {
-    notes[idx].voice.setFreq(freqForIdx(Number(idx)));
-  });
-}
-
 function pearson(x, p) {
   var n = 12, sx = 0, sp = 0, sxp = 0, sxx = 0, spp = 0;
   for (var i = 0; i < n; i++) {
@@ -256,7 +248,6 @@ setInterval(function () {
 // --- Ottava (solo − / +) ---
 function setOctave(v) {
   octave = Math.max(MIN_OCT, Math.min(MAX_OCT, v));
-  refreshVoices();
 }
 document.getElementById('octDown').addEventListener('click', function () { setOctave(octave - 1); });
 document.getElementById('octUp').addEventListener('click', function () { setOctave(octave + 1); });
