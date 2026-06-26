@@ -2725,7 +2725,11 @@ function recalcStageBBox(){ var b=stageBlocks(), W=0, D=0; b.forEach(function(r)
 function normalizeStageBBox(){
   var b=stageBlocks(), minX=Infinity, minY=Infinity;
   b.forEach(function(r){ blockCorners(r).forEach(function(p){ minX=Math.min(minX,p[0]); minY=Math.min(minY,p[1]); }); });
-  var ox=minX<0?-minX:0, oy=minY<0?-minY:0;
+  if(!isFinite(minX)||!isFinite(minY)) return;
+  /* il bounding box del palco deve sempre essere a filo dell'origine: collasso QUALSIASI margine
+     vuoto a sinistra/sopra (offset positivo o negativo), così l'area resta sempre giusta anche
+     dopo aver tolto il blocco più a sinistra/in alto. */
+  var ox=-minX, oy=-minY;
   if(ox||oy){
     /* l'origine del palco torna a (0,0): sposto TUTTO della stessa quantità — blocchi, elementi,
        planimetria, cornice di stampa E la vista (viewBox). Così sullo schermo nulla si muove e la
@@ -4350,7 +4354,8 @@ function delSelBlock(){
   var b=stageBlocks();
   if(selBlock==null || b.length<=1) return;   /* serve almeno un blocco */
   state.stage.blocks.splice(selBlock,1); selBlock=0;
-  recalcStageBBox(); renderStagePanel(); render(); save();
+  normalizeStageBBox();   /* tolto un blocco: collassa l'eventuale margine vuoto a sx/sopra → area corretta */
+  renderStagePanel(); render(); save();
 }
 function blkField(id, key, isPos){
   document.getElementById(id).addEventListener("change", function(){
