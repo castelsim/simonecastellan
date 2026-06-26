@@ -134,6 +134,8 @@
   .stageblk-lbl{fill:#2563eb;font-size:15px;font-weight:700;pointer-events:none}
   .blk-edge{fill:rgba(37,99,235,.45);stroke:#2563eb;stroke-width:1.5}
   .blk-edge.ew{cursor:ew-resize} .blk-edge.ns{cursor:ns-resize}
+  .blk-corner{fill:#fff;stroke:#2563eb;stroke-width:2.5;cursor:grab}
+  .blk-corner:hover{fill:#dbeafe}
   .blkchip{border:1px solid #cfe0fb;background:#fff;color:#1f2937;border-radius:8px;padding:5px 10px;font-size:12px;cursor:pointer}
   .blkchip.sel{background:#2563eb;border-color:#2563eb;color:#fff;font-weight:600}
   body.dark .blkchip{background:#0f141c;border-color:#283142;color:#cbd5e1}
@@ -517,6 +519,8 @@
         <span><label>X (m)</label><input type="number" id="blkX" min="0" step="0.25"></span>
         <span><label>Y (m)</label><input type="number" id="blkY" min="0" step="0.25"></span>
       </div>
+      <p class="hint" style="font-size:11px;color:#6b7280;margin:7px 0 0">Trascina gli <b>angoli</b> sul palco per deformare il blocco in una forma libera (trapezio, ecc.).</p>
+      <button class="btn" id="bResetBlock" style="width:100%;margin-top:6px;font-size:12px;display:none">⊞ Raddrizza (torna rettangolo)</button>
       <button class="btn danger" id="bDelBlock" style="width:100%;margin-top:7px;font-size:12px">Elimina blocco</button>
     </div>
     <button class="btn primary" id="bStageDone" style="width:100%;margin-top:11px">Fatto</button>
@@ -2604,10 +2608,21 @@ function normalizeState(s){
   s.stage.blocks=s.stage.blocks.map(function(r){
     var o={x:Math.max(0,Math.round(r.x||0)), y:Math.max(0,Math.round(r.y||0)), w:Math.max(50,Math.round(r.w||100)), d:Math.max(50,Math.round(r.d||100))};
     if(r.shape==="semi"){ o.shape="semi"; o.flat=r.flat||"top"; }
+    /* quadrilatero libero (angoli deformati): retrocompat — i progetti vecchi non hanno pts e restano rettangoli */
+    else if(r.pts && r.pts.length===4 && r.pts.every(function(p){ return p && isFinite(p[0]) && isFinite(p[1]); })){
+      o.pts=r.pts.map(function(p){ return [Math.round(p[0]), Math.round(p[1])]; });
+      var xs=o.pts.map(function(p){return p[0];}), ys=o.pts.map(function(p){return p[1];});
+      var x0=Math.min.apply(null,xs), y0=Math.min.apply(null,ys);
+      o.x=Math.round(x0); o.y=Math.round(y0);
+      o.w=Math.max(1,Math.round(Math.max.apply(null,xs)-x0)); o.d=Math.max(1,Math.round(Math.max.apply(null,ys)-y0));
+    }
     if(r.h) o.h=Math.max(0,Math.round(r.h));
     return o;
   });
-  var bb={w:0,d:0}; s.stage.blocks.forEach(function(r){ bb.w=Math.max(bb.w,r.x+r.w); bb.d=Math.max(bb.d,r.y+r.d); });
+  var bb={w:0,d:0}; s.stage.blocks.forEach(function(r){
+    var corners=(r.pts&&r.pts.length===4)?r.pts:[[r.x,r.y],[r.x+r.w,r.y],[r.x+r.w,r.y+r.d],[r.x,r.y+r.d]];
+    corners.forEach(function(p){ bb.w=Math.max(bb.w,p[0]); bb.d=Math.max(bb.d,p[1]); });
+  });
   s.stage.w=bb.w; s.stage.d=bb.d;
   s.inputs=(s.inputs||[]).map(normalizeChannelRow);
   s.outputs=(s.outputs||[]).map(normalizeChannelRow);
@@ -2681,22 +2696,46 @@ function gridMarkup(){
 }
 /* ===== Palco a blocchi: il palco è l'unione di rettangoli/semicerchi (passerelle, ali, fronte curvo, L) ===== */
 function stageBlocks(){ var b=state.stage.blocks; return (b&&b.length)?b:[{x:0,y:0,w:state.stage.w,d:state.stage.d}]; }
-function isSingleRect(){ var b=stageBlocks(); return b.length===1 && b[0].shape!=="semi"; }
+function isSingleRect(){ var b=stageBlocks(); return b.length===1 && b[0].shape!=="semi" && !(b[0].pts&&b[0].pts.length===4); }
 function stageHeightNote(){ var h=stageBlocks()[0].h||0; return h?" · h "+h+" cm":""; }
-function recalcStageBBox(){ var b=stageBlocks(), W=0, D=0; b.forEach(function(r){ W=Math.max(W,r.x+r.w); D=Math.max(D,r.y+r.d); }); state.stage.w=W; state.stage.d=D; }
+/* angoli del blocco: r.pts (quadrilatero libero) se presente, altrimenti i 4 spigoli del rettangolo.
+   Ordine: TL, TR, BR, BL. Solo i blocchi rettangolari possono diventare quadrilateri (i semicerchi no). */
+function hasPts(r){ return !!(r.pts && r.pts.length===4 && r.shape!=="semi"); }
+function blockCorners(r){
+  if(hasPts(r)) return r.pts.map(function(p){ return [p[0],p[1]]; });
+  return [[r.x,r.y],[r.x+r.w,r.y],[r.x+r.w,r.y+r.d],[r.x,r.y+r.d]];
+}
+/* ricalcola x,y,w,d come bounding box dei 4 angoli (tiene allineato il resto del codice basato sul bbox) */
+function syncBlockBBox(r){
+  if(!hasPts(r)) return;
+  var xs=r.pts.map(function(p){return p[0];}), ys=r.pts.map(function(p){return p[1];});
+  var x0=Math.min.apply(null,xs), y0=Math.min.apply(null,ys);
+  r.x=Math.round(x0); r.y=Math.round(y0);
+  r.w=Math.max(1,Math.round(Math.max.apply(null,xs)-x0)); r.d=Math.max(1,Math.round(Math.max.apply(null,ys)-y0));
+}
+function pointInPoly(px,py,pts){
+  var inside=false;
+  for(var i=0,j=pts.length-1;i<pts.length;j=i++){
+    var xi=pts[i][0],yi=pts[i][1], xj=pts[j][0],yj=pts[j][1];
+    if(((yi>py)!==(yj>py)) && (px < (xj-xi)*(py-yi)/((yj-yi)||1e-9)+xi)) inside=!inside;
+  }
+  return inside;
+}
+function recalcStageBBox(){ var b=stageBlocks(), W=0, D=0; b.forEach(function(r){ blockCorners(r).forEach(function(p){ W=Math.max(W,p[0]); D=Math.max(D,p[1]); }); }); state.stage.w=W; state.stage.d=D; }
 function normalizeStageBBox(){
   var b=stageBlocks(), minX=Infinity, minY=Infinity;
-  b.forEach(function(r){ minX=Math.min(minX,r.x); minY=Math.min(minY,r.y); });
+  b.forEach(function(r){ blockCorners(r).forEach(function(p){ minX=Math.min(minX,p[0]); minY=Math.min(minY,p[1]); }); });
   var ox=minX<0?-minX:0, oy=minY<0?-minY:0;
   if(ox||oy){
-    b.forEach(function(r){ r.x+=ox; r.y+=oy; });
+    b.forEach(function(r){ r.x+=ox; r.y+=oy; if(hasPts(r)) r.pts=r.pts.map(function(p){ return [p[0]+ox,p[1]+oy]; }); });
     state.items.forEach(function(it){ it.x+=ox; it.y+=oy; });
   }
   var W=0, D=0;
-  b.forEach(function(r){ W=Math.max(W,r.x+r.w); D=Math.max(D,r.y+r.d); });
+  b.forEach(function(r){ blockCorners(r).forEach(function(p){ W=Math.max(W,p[0]); D=Math.max(D,p[1]); }); });
   state.stage.w=W; state.stage.d=D;
 }
-function isOutsideStage(it){ var px=it.x, py=it.y, b=stageBlocks(); return !b.some(function(r){ return px>=r.x&&px<=r.x+r.w&&py>=r.y&&py<=r.y+r.d; }); }
+function isOutsideStage(it){ var px=it.x, py=it.y, b=stageBlocks();
+  return !b.some(function(r){ return hasPts(r) ? pointInPoly(px,py,r.pts) : (px>=r.x&&px<=r.x+r.w&&py>=r.y&&py<=r.y+r.d); }); }
 /* path di un semicerchio (mezza ellisse) iscritto nel bbox del blocco; flat = lato dritto (di solito attaccato al palco) */
 function semiPath(r){
   var x=r.x, y=r.y, w=r.w, d=r.d, flat=r.flat||"top";
@@ -2705,8 +2744,10 @@ function semiPath(r){
   if(flat==="left")   return "M "+x+","+y+" A "+w+","+(d/2)+" 0 0 1 "+x+","+(y+d)+" Z";            /* bulge a destra */
   return "M "+(x+w)+","+y+" A "+w+","+(d/2)+" 0 0 0 "+(x+w)+","+(y+d)+" Z";                         /* right: bulge a sinistra */
 }
+function ptsAttr(pts){ return pts.map(function(p){ return p[0]+','+p[1]; }).join(' '); }
 function blockShapeSvg(r, cls){
   if(r.shape==="semi") return '<path'+(cls?' class="'+cls+'"':'')+' d="'+semiPath(r)+'"/>';
+  if(hasPts(r)) return '<polygon'+(cls?' class="'+cls+'"':'')+' points="'+ptsAttr(r.pts)+'"/>';
   return '<rect'+(cls?' class="'+cls+'"':'')+' x="'+r.x+'" y="'+r.y+'" width="'+r.w+'" height="'+r.d+'"/>';
 }
 /* spigoli rettilinei dell'unione dei blocchi (rettangoli), già fusi in segmenti massimi — per quotatura */
@@ -2749,15 +2790,15 @@ function stageFloorMarkup(){
   var clip='<defs><clipPath id="stageClip">'+b.map(function(r){ return blockShapeSvg(r,""); }).join('')+'</clipPath></defs>';
   var fills=b.map(function(r){ return blockShapeSvg(r,"stage-fill"); }).join('');
   var grid='<g clip-path="url(#stageClip)">'+gridMarkup()+'</g>';
-  if(b.some(function(r){ return r.shape==="semi"; })){
-    /* forme miste (rettangoli + semicerchi): bordo spesso disegnato DIETRO i riempimenti opachi.
-       I riempimenti coprono la parte interna del bordo e le giunzioni tra blocchi → resta visibile
-       solo il perimetro esterno: i blocchi (anche semicerchi+rettangoli) appaiono fusi in un'unica forma. */
+  if(b.some(function(r){ return r.shape==="semi" || hasPts(r); })){
+    /* forme miste (rettangoli + semicerchi + quadrilateri liberi): bordo spesso disegnato DIETRO i
+       riempimenti opachi. I riempimenti coprono la parte interna del bordo e le giunzioni tra blocchi →
+       resta visibile solo il perimetro esterno: i blocchi appaiono fusi in un'unica forma. */
     var sw2=SW*2, attr=' fill="none" stroke="#1f2937" stroke-width="'+sw2+'" stroke-linejoin="round" stroke-linecap="round"';
     var border=b.map(function(r){
-      return r.shape==="semi"
-        ? '<path'+attr+' d="'+semiPath(r)+'"/>'
-        : '<rect'+attr+' x="'+r.x+'" y="'+r.y+'" width="'+r.w+'" height="'+r.d+'"/>';
+      if(r.shape==="semi") return '<path'+attr+' d="'+semiPath(r)+'"/>';
+      if(hasPts(r)) return '<polygon'+attr+' points="'+ptsAttr(r.pts)+'"/>';
+      return '<rect'+attr+' x="'+r.x+'" y="'+r.y+'" width="'+r.w+'" height="'+r.d+'"/>';
     }).join('');
     return clip+border+fills+grid;   /* bordo sotto → coperto all'interno dai riempimenti opachi */
   }
@@ -2808,14 +2849,25 @@ function stageBlocksOverlay(){
     var cx=r.x+r.w/2, cy=r.y+r.d/2, selCls=(selBlock===i?' sel':'');
     var shape = r.shape==="semi"
       ? '<path class="stageblk'+selCls+'" data-block="'+i+'" d="'+semiPath(r)+'"/>'
-      : '<rect class="stageblk'+selCls+'" data-block="'+i+'" x="'+r.x+'" y="'+r.y+'" width="'+r.w+'" height="'+r.d+'"/>';
+      : hasPts(r)
+        ? '<polygon class="stageblk'+selCls+'" data-block="'+i+'" points="'+ptsAttr(r.pts)+'"/>'
+        : '<rect class="stageblk'+selCls+'" data-block="'+i+'" x="'+r.x+'" y="'+r.y+'" width="'+r.w+'" height="'+r.d+'"/>';
     var edges='';
-    if(selBlock===i){   /* maniglie sui lati: trascina per ridimensionare (larghezza coi lati l/r, profondità con t/b) — vale anche per i semicerchi */
-      var T=16;
-      edges+='<rect class="blk-edge ew" data-edge="r" data-block="'+i+'" x="'+(r.x+r.w-T/2)+'" y="'+r.y+'" width="'+T+'" height="'+r.d+'"/>'+
-             '<rect class="blk-edge ew" data-edge="l" data-block="'+i+'" x="'+(r.x-T/2)+'" y="'+r.y+'" width="'+T+'" height="'+r.d+'"/>'+
-             '<rect class="blk-edge ns" data-edge="b" data-block="'+i+'" x="'+r.x+'" y="'+(r.y+r.d-T/2)+'" width="'+r.w+'" height="'+T+'"/>'+
-             '<rect class="blk-edge ns" data-edge="t" data-block="'+i+'" x="'+r.x+'" y="'+(r.y-T/2)+'" width="'+r.w+'" height="'+T+'"/>';
+    if(selBlock===i){
+      /* maniglie sui lati: ridimensiona larghezza (l/r) e profondità (t/b). Solo per rettangoli non deformati e semicerchi. */
+      if(!hasPts(r)){
+        var T=16;
+        edges+='<rect class="blk-edge ew" data-edge="r" data-block="'+i+'" x="'+(r.x+r.w-T/2)+'" y="'+r.y+'" width="'+T+'" height="'+r.d+'"/>'+
+               '<rect class="blk-edge ew" data-edge="l" data-block="'+i+'" x="'+(r.x-T/2)+'" y="'+r.y+'" width="'+T+'" height="'+r.d+'"/>'+
+               '<rect class="blk-edge ns" data-edge="b" data-block="'+i+'" x="'+r.x+'" y="'+(r.y+r.d-T/2)+'" width="'+r.w+'" height="'+T+'"/>'+
+               '<rect class="blk-edge ns" data-edge="t" data-block="'+i+'" x="'+r.x+'" y="'+(r.y-T/2)+'" width="'+r.w+'" height="'+T+'"/>';
+      }
+      /* maniglie agli angoli: trascina un angolo per deformare il blocco in un quadrilatero libero (non per i semicerchi) */
+      if(r.shape!=="semi"){
+        blockCorners(r).forEach(function(p,ci){
+          edges+='<circle class="blk-corner" data-corner="'+ci+'" data-block="'+i+'" cx="'+p[0]+'" cy="'+p[1]+'" r="11"/>';
+        });
+      }
     }
     return shape+edges+'<text class="stageblk-lbl" x="'+cx+'" y="'+cy+'" text-anchor="middle" dominant-baseline="middle">Blocco '+(i+1)+'</text>';
   }).join('');
@@ -3878,6 +3930,14 @@ svg.addEventListener("pointerdown", function(e){
     svg.setPointerCapture(e.pointerId); return;
   }
   if(stageEdit){                            /* modalità forma palco: trascina i blocchi / i lati per ridimensionare */
+    var corner = e.target.closest ? e.target.closest(".blk-corner") : null;
+    if(corner){                             /* trascina un ANGOLO per deformare il blocco in un quadrilatero libero */
+      var ci=+corner.getAttribute("data-block"), cci=+corner.getAttribute("data-corner"); selBlock=ci; renderStagePanel();
+      var cr=stageBlocks()[ci];
+      if(!hasPts(cr)) cr.pts=blockCorners(cr);   /* prima deformazione: inizializza i 4 angoli dal rettangolo */
+      drag={mode:"blkcorner", bi:ci, ci:cci, moved:false};
+      render(); svg.setPointerCapture(e.pointerId); return;
+    }
     var edge = e.target.closest ? e.target.closest(".blk-edge") : null;
     if(edge){                               /* trascina un LATO per ingrandire/ridurre il blocco */
       var ei=+edge.getAttribute("data-block"), er=stageBlocks()[ei]; selBlock=ei; renderStagePanel();
@@ -3888,7 +3948,7 @@ svg.addEventListener("pointerdown", function(e){
     if(blk){
       var bi=+blk.getAttribute("data-block"); selBlock=bi; renderStagePanel();
       var r=stageBlocks()[bi];
-      drag={mode:"block", bi:bi, sp0:{x:sp.x,y:sp.y}, x0:r.x, y0:r.y, moved:false};
+      drag={mode:"block", bi:bi, sp0:{x:sp.x,y:sp.y}, x0:r.x, y0:r.y, pts0:(hasPts(r)?r.pts.map(function(p){return [p[0],p[1]];}):null), moved:false};
       render(); svg.setPointerCapture(e.pointerId); return;
     }
     drag={mode:"pan", px:e.clientX, py:e.clientY, vx:vb.x, vy:vb.y};
@@ -4040,7 +4100,16 @@ svg.addEventListener("pointermove", function(e){
       var bpy=bgrid?snap(drag.y0+bdy):Math.round(drag.y0+bdy);
       var bmag=bgrid?{sdx:0,sdy:0,guides:[]}:blockMagneticSnap(drag.bi,bpx,bpy);
       r.x=bpx+bmag.sdx; r.y=bpy+bmag.sdy;
+      if(drag.pts0){ var pdx=r.x-drag.x0, pdy=r.y-drag.y0; r.pts=drag.pts0.map(function(p){ return [p[0]+pdx,p[1]+pdy]; }); }   /* quadrilatero: trascina con sé tutti gli angoli */
       recalcStageBBox(); render(); renderSnapGuides(bmag.guides);
+    }
+  } else if(drag.mode==="blkcorner"){
+    sp=svgPoint(e); var r=stageBlocks()[drag.bi]; drag.moved=true;
+    if(r && hasPts(r)){
+      var cgrid=e.metaKey||e.ctrlKey;
+      var px=cgrid?snap(sp.x):Math.round(sp.x), py=cgrid?snap(sp.y):Math.round(sp.y);
+      r.pts[drag.ci]=[px,py]; syncBlockBBox(r);
+      recalcStageBBox(); render();
     }
   } else if(drag.mode==="blkresize"){
     sp=svgPoint(e); var r=stageBlocks()[drag.bi]; drag.moved=true;
@@ -4100,6 +4169,7 @@ svg.addEventListener("pointerup", function(e){
   if(drag && (drag.mode==="frame"||drag.mode==="frameresize")){ if(drag.moved){ save(); } renderFramePanel(); render(); drag=null; return; }
   if(drag && drag.mode==="block"){ if(drag.moved){ normalizeStageBBox(); save(); } renderStagePanel(); render(); svg.classList.remove("dragging"); drag=null; ensureVisible(); return; }
   if(drag && drag.mode==="blkresize"){ if(drag.moved){ normalizeStageBBox(); save(); } renderStagePanel(); render(); drag=null; ensureVisible(); return; }
+  if(drag && drag.mode==="blkcorner"){ if(drag.moved){ var cr=stageBlocks()[drag.bi]; if(cr) syncBlockBBox(cr); normalizeStageBBox(); save(); } renderStagePanel(); render(); drag=null; ensureVisible(); return; }
   if(drag && drag.mode==="newblk"){     /* fine Alt+trascina: crea il nuovo blocco se abbastanza grande */
     if(drag.el && drag.el.parentNode) drag.el.parentNode.removeChild(drag.el);
     var nr=drag.rect;
@@ -4224,8 +4294,9 @@ function renderStagePanel(){
   if(selBlock==null || !b[selBlock]){ bp.hidden=true; return; }
   bp.hidden=false;
   var r=b[selBlock];
-  document.getElementById("blkTitle").textContent = "Blocco "+(selBlock+1)+(r.shape==="semi"?" (semicerchio)":"");
+  document.getElementById("blkTitle").textContent = "Blocco "+(selBlock+1)+(r.shape==="semi"?" (semicerchio)":(hasPts(r)?" (deformato)":""));
   document.getElementById("bDelBlock").style.display = b.length>1 ? "" : "none";   /* serve almeno un blocco */
+  document.getElementById("bResetBlock").style.display = hasPts(r) ? "" : "none";   /* visibile solo se il blocco è un quadrilatero deformato */
   document.getElementById("blkW").value=r.w/100; document.getElementById("blkD").value=r.d/100;
   document.getElementById("blkX").value=r.x/100; document.getElementById("blkY").value=r.y/100;
   document.getElementById("blkH").value=r.h||0;
@@ -4278,18 +4349,30 @@ function delSelBlock(){
 function blkField(id, key, isPos){
   document.getElementById(id).addEventListener("change", function(){
     var b=stageBlocks(); if(selBlock==null||!b[selBlock]) return;
+    var r=b[selBlock];
     var v=Math.round((+this.value||0)*100);
     if(isPos) v=Math.max(0,v); else v=Math.max(10,v);   /* min 10 cm */
-    b[selBlock][key]=v; recalcStageBBox(); renderStagePanel(); render(); save();
+    if(hasPts(r)){   /* quadrilatero: i campi numerici agiscono sul bounding box (x/y traslano, d scala in verticale) */
+      if(key==="x"){ var dx=v-r.x; r.pts=r.pts.map(function(p){ return [p[0]+dx,p[1]]; }); }
+      else if(key==="y"){ var dy=v-r.y; r.pts=r.pts.map(function(p){ return [p[0],p[1]+dy]; }); }
+      else if(key==="d"){ var sc=v/Math.max(1,r.d); r.pts=r.pts.map(function(p){ return [p[0], Math.round(r.y+(p[1]-r.y)*sc)]; }); }
+      syncBlockBBox(r);
+    } else { r[key]=v; }
+    normalizeStageBBox(); renderStagePanel(); render(); save();
   });
 }
 blkField("blkD","d",false); blkField("blkX","x",true); blkField("blkY","y",true);
 document.getElementById("blkW").addEventListener("change", function(){
   var b=stageBlocks(); if(selBlock==null||!b[selBlock]) return;
   var r=b[selBlock], cx=r.x+r.w/2, nw=Math.max(10, Math.round((+this.value||0)*100));   /* min 10 cm */
-  r.w=nw;
-  if(r.shape==="semi") r.x=Math.round(cx-nw/2);   /* semicerchio: allarga simmetrico attorno al centro */
-  normalizeStageBBox(); render(); save();
+  if(hasPts(r)){ var sc=nw/Math.max(1,r.w); r.pts=r.pts.map(function(p){ return [Math.round(r.x+(p[0]-r.x)*sc), p[1]]; }); syncBlockBBox(r); }
+  else { r.w=nw; if(r.shape==="semi") r.x=Math.round(cx-nw/2); }   /* semicerchio: allarga simmetrico attorno al centro */
+  normalizeStageBBox(); renderStagePanel(); render(); save();
+});
+document.getElementById("bResetBlock").addEventListener("click", function(){
+  var b=stageBlocks(); if(selBlock==null||!b[selBlock]) return;
+  delete b[selBlock].pts;   /* torna rettangolo: x/y/w/d (bbox) restano quelli correnti */
+  normalizeStageBBox(); renderStagePanel(); render(); save();
 });
 document.getElementById("blkH").addEventListener("change", function(){
   var b=stageBlocks(); if(selBlock==null||!b[selBlock]) return;
