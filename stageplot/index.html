@@ -1983,6 +1983,8 @@ var TYPES = {
                '<rect class="ic thin" fill="none" x="'+(-it.w/2+7)+'" y="'+(-it.d/2+7)+'" width="'+(it.w-14)+'" height="'+(it.d-14)+'" rx="3"/>'; }},
   sedia:    {nome:"Sedia", dim:"46×46", cat:"Pedane e strutture", catalog:false, w:50,d:55, z:1.5,
              draw:function(){ return bar(0,3,46,46,'ic fBlack',9)+bar(0,-22,46,9,'ic fill',4); }},
+  sediabianca:{nome:"Sedia bianca", dim:"46×46", cat:"Pedane e strutture", w:50,d:55, z:1.5,   /* sedia chiara come quella dei musicisti (seatLight) */
+             draw:function(){ return bar(0,3,46,46,'ic soft',9)+bar(0,-22,46,9,'ic soft',4); }},
   sedialeggio:{nome:"Sedia + leggio", dim:"postazione", cat:"Pedane e strutture", w:75,d:105,
              draw:function(){ return bar(0,-22,46,46,'ic fBlack',9)+bar(0,-48,46,9,'ic fill',4)+leggioGlyph(38); }},
   leggio:   {nome:"Leggio", dim:"48×35", cat:"Pedane e strutture", catalog:false, w:50,d:35,
@@ -2478,7 +2480,7 @@ var COMP = {
 })();
 var DEFAULT_LABELS = {
   pedana:"PED", scala:"Scala", rampa:"Rampa", parapetto:"Parap.", fondale:"Backdrop", quinta:"Quinta", truss:"Truss", transenna:"Transenna",
-  tappeto:"Tappeto", tavolo:"Tavolo", sedia:"Sedia", sedialeggio:"Sedia+leggio", leggio:"Leggio", podio:"Podio", pedanacoro:"Coro riser",
+  tappeto:"Tappeto", tavolo:"Tavolo", sedia:"Sedia", sediabianca:"Sedia", sedialeggio:"Sedia+leggio", leggio:"Leggio", podio:"Podio", pedanacoro:"Coro riser",
   sgabello:"Sgab.", ventilatore:"Fan", metro:"", testo:"Testo",
   corno:"Corno", tromba:"Tba", trombone:"Tbn", tuba:"Tuba",
   flauto:"Fl", oboe:"Ob", clarinetto:"Cl", fagotto:"Fg", saxalto:"Sax A", saxtenore:"Sax T", saxbaritono:"Sax Bar",
@@ -3295,7 +3297,7 @@ function splitVoce(){
 }
 /* è scomponibile in elementi? */
 function isDecomposable(it){ if(!it) return false; var t=TYPES[it.type]; if(!t) return false;
-  return !!COMP[it.type] || !!t.gtr || !!DOUBLE_TYPES[it.type] || it.doppia===true || !!POSTAZ[it.type] || !!VOCE[it.type]; }
+  return !!COMP[it.type] || !!t.gtr || !!DOUBLE_TYPES[it.type] || it.doppia===true || !!POSTAZ[it.type] || !!VOCE[it.type] || it.type==="sedialeggio"; }
 /* dispatcher unico "Dividi in elementi" */
 function splitElement(){
   var it=getSel(); if(!it) return; var t=TYPES[it.type]; if(!t) return;
@@ -3304,6 +3306,21 @@ function splitElement(){
   if(DOUBLE_TYPES[it.type] || it.doppia===true) return splitDouble();
   if(POSTAZ[it.type]) return splitPostaz();
   if(VOCE[it.type]) return splitVoce();
+  if(it.type==="sedialeggio") return splitSediaLeggio();
+}
+/* "Sedia + leggio" → sedia (nera) + leggio come item indipendenti, nelle stesse posizioni del disegno combinato */
+function splitSediaLeggio(){
+  var it=getSel(); if(!it || it.type!=="sedialeggio") return;
+  var rot=(it.rot||0)*Math.PI/180, c=Math.cos(rot), s=Math.sin(rot), gid="g"+uid(), made=[];
+  function place(type,dx,dy){ var T=TYPES[type]; if(!T) return; made.push({id:uid(),type:type,
+    x:Math.round(it.x+dx*c-dy*s), y:Math.round(it.y+dx*s+dy*c), rot:it.rot||0, w:T.w, d:T.d, label:"", grp:gid}); }
+  place("sedia", 0, -25);   /* sedia nella stessa posizione del disegno combinato */
+  place("leggio", 0, 36);   /* leggio davanti */
+  if(!made.length) return;
+  state.items=state.items.filter(function(x){ return x.id!==it.id; });
+  made.forEach(function(m){ state.items.push(m); });
+  selSet={}; made.forEach(function(m){ selSet[m.id]=true; }); sel=made[made.length-1].id;
+  render(); save();
 }
 document.getElementById("pDivide").addEventListener("click", splitElement);
 document.getElementById("pSplit").addEventListener("click", splitDouble);
@@ -3684,7 +3701,7 @@ function miniSvg(k, over){
       /* — gruppi strutture — */
       [["Accessi e sicurezza", ["scala","rampa","parapetto","transenna"]],
        ["Scenografia",         ["fondale","quinta","tappeto"]],
-       ["Arredo e leggii",     ["tavolo","sedia","sedialeggio","leggio","podio","podiosp","sgabello"]],
+       ["Arredo e leggii",     ["tavolo","sediabianca","sedia","sedialeggio","leggio","podio","podiosp","sgabello"]],
        ["Accessori",           ["ventilatore"]]
       ].forEach(function(g){
         g[1].filter(function(k){ return TYPES[k] && TYPES[k].catalog!==false; }).forEach(function(k){
@@ -5484,7 +5501,7 @@ function countAccessori(){
     var mult = isDouble ? 2 : 1;
     var isStool = STOOL_POSTAZ[it.type]!=null;
     // sedie
-    if(it.type==="sedia"||it.type==="sedialeggio") sedie++;
+    if(it.type==="sedia"||it.type==="sediabianca"||it.type==="sedialeggio") sedie++;
     else if(POSTAZ[it.type] && it.sedia!==false && !isStool) sedie+=mult;
     else if(VOCE[it.type] && it.sedia===true) sedie++;
     else if(t.gtr && it.sedia===true) sedie++;
@@ -5914,7 +5931,7 @@ var H3D={ pedana:0,scala:40,rampa:40,parapetto:110,fondale:400,quinta:400,truss:
 var HIDDEN3D={ testo:1, metro:1, corrente:1, ciabatta:1, iem:1, headset:1, wireless:1 };
 /* descrizioni EN per il motore 3D (fallback = nome italiano) */
 var DESC3D={ pedana:"black stage riser/platform", podio:"square conductor podium with black trim",
-  pedanacoro:"choir riser with 3 steps", tappeto:"large muted-red orchestral rug", sedia:"black padded orchestra chair",
+  pedanacoro:"choir riser with 3 steps", tappeto:"large muted-red orchestral rug", sedia:"black padded orchestra chair", sediabianca:"white/light padded orchestra chair",
   sedialeggio:"black padded orchestra chair with black music stand", leggio:"black orchestral music stand",
   batteria:"5-piece acoustic drum kit (kick 22\", snare, 2 rack toms, floor tom, hi-hat, crash, ride, throne)",
   edrums:"electronic drum kit with mesh pads on rack", timpani:"4 copper concert timpani with stool",
@@ -5966,7 +5983,7 @@ var MAT3D={ black_metal:{type:"metal",color:"black",finish:"matte"},
   grey_metal:{type:"metal",color:"dark_grey",finish:"matte"} };
 /* material di default per tipo/asset (fallback black_tolex per ampli/tecnica, black_metal aste) */
 var TYPEMAT={ pedana:"stage_riser_black",pedanacoro:"stage_riser_black",podio:"stage_riser_black",scala:"stage_riser_black",rampa:"stage_riser_black",
-  tappeto:"muted_red_fabric", sedia:"black_padded_chair",sedialeggio:"black_padded_chair",panchetta:"black_padded_chair",sgabello:"black_padded_chair",
+  tappeto:"muted_red_fabric", sedia:"black_padded_chair",sediabianca:"white_padded_chair",sedialeggio:"black_padded_chair",panchetta:"black_padded_chair",sgabello:"black_padded_chair",
   leggio:"black_metal",astamic:"black_metal",giraffa:"black_metal",astabassa:"black_metal",coppiast:"black_metal",corista:"black_metal",truss:"silver_metal",transenna:"grey_metal",parapetto:"grey_metal",
   batteria:"drum_shell_and_heads",edrums:"black_metal",rullante:"drum_shell_and_heads",timbales:"drum_shell_and_heads",percussioni:"varnished_wood",cajon:"varnished_wood",
   timpani:"copper",timpani3:"copper",timpani2:"copper",grancassa:"dark_varnished_wood",piatto:"brass_polished",piatticoppia:"brass_polished",campane:"silver_metal",tamtam:"brass_polished",
