@@ -82,7 +82,7 @@ function makeVoice(freq) {
   o.start(t);
   var stopped = false;
   return {
-    setFreq: function (f) { if (!stopped) o.frequency.setValueAtTime(f, ctx.currentTime); },
+    setFreq: function (f) { if (!stopped) { var t = ctx.currentTime; o.frequency.cancelScheduledValues(t); o.frequency.setValueAtTime(f, t); } },
     stop: function () {
       if (stopped) return;
       stopped = true;
