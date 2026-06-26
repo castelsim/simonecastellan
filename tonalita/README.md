@@ -12,6 +12,9 @@ non senti il centro tonale. Nessun riconoscimento automatico, nessuna AI, nessun
 - **Tastiera** virtuale Web Audio (oscillatore sinusoidale puro), un'ottava Do→Si.
 - **Drone in hold (default)**: cliccando una nota questa resta a suonare; cliccando un'altra
   si sostituisce, ricliccando la stessa si spegne. Suona sempre **una nota singola**.
+- **HOLD (pedale)**: blocca la nota corrente come pedale fisso; puoi poi suonare altre note
+  **sopra** quella tenuta per confrontarle col centro tonale. Ri-premendo HOLD si rilascia.
+  La nota-pedale è evidenziata con un anello e accumula peso nella stima finché è tenuta.
 - **Maggiore / Minore**: solo **visualizzazione** — evidenziano in tenue le note dell'accordo
   (3ª e 5ª) rispetto alla nota suonata. Nessun accordo in audio.
 - **Tonalità probabile**: pesa ogni nota in base a **quanto a lungo la tieni** (più la tieni,

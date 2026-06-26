@@ -108,8 +108,10 @@ function makeVoice(freqs) {
   };
 }
 
-// --- Nota tenuta (drone) ---
+// --- Nota tenuta (drone di prova) ---
 var heldVoice = null, heldPc = null;
+// --- Nota bloccata da HOLD (pedale fisso, ci si suona sopra) ---
+var pedalVoice = null, pedalPc = null, pedalStart = null;
 
 // --- Tastiera ---
 var keyEls = {};
@@ -191,9 +193,45 @@ function commitHeld() {
   counts[heldPc] += (now - heldStart) / 1000 * SUSTAIN_W;
   heldStart = now;
 }
-// Mentre tieni una nota, accumula peso e aggiorna la stima in tempo reale.
+// Accredita alla nota del pedale il tempo trascorso da pedalStart.
+function commitPedal() {
+  if (pedalPc === null || pedalStart === null) return;
+  var now = performance.now();
+  counts[pedalPc] += (now - pedalStart) / 1000 * SUSTAIN_W;
+  pedalStart = now;
+}
+
+// HOLD: blocca la nota corrente come pedale; ri-premendo la rilascia.
+function togglePedal() {
+  var holdBtn = document.getElementById('holdBtn');
+  if (pedalPc !== null) {                 // rilascia il pedale
+    commitPedal();
+    pedalVoice.stop();
+    keyEls[pedalPc].classList.remove('pedal');
+    pedalPc = null; pedalVoice = null; pedalStart = null;
+    holdBtn.setAttribute('aria-pressed', 'false');
+    updateKeyGuess();
+    return;
+  }
+  if (heldPc === null) return;            // nessuna nota da tenere
+  commitHeld();
+  // trasferisce la nota di prova al pedale (senza ri-attaccare il suono)
+  pedalVoice = heldVoice; pedalPc = heldPc; pedalStart = performance.now();
+  keyEls[pedalPc].classList.remove('on');
+  keyEls[pedalPc].classList.add('pedal');
+  heldVoice = null; heldPc = null; heldStart = null;
+  holdBtn.setAttribute('aria-pressed', 'true');
+  updateChordHighlight();
+  updateKeyGuess();
+}
+document.getElementById('holdBtn').addEventListener('click', togglePedal);
+
+// Mentre tieni note (pedale e/o prova), accumula peso e aggiorna la stima live.
 setInterval(function () {
-  if (heldPc !== null) { commitHeld(); updateKeyGuess(); }
+  var active = false;
+  if (pedalPc !== null) { commitPedal(); active = true; }
+  if (heldPc !== null) { commitHeld(); active = true; }
+  if (active) updateKeyGuess();
 }, 300);
 
 function pearson(x, p) {
@@ -248,8 +286,10 @@ function updateKeyGuess() {
 
 function resetGuess() {
   counts = [0,0,0,0,0,0,0,0,0,0,0,0];
-  // se una nota è tenuta, riparte da ora ad accumulare peso
-  heldStart = (heldPc !== null) ? performance.now() : null;
+  // se ci sono note tenute, ripartono da ora ad accumulare peso
+  var now = performance.now();
+  heldStart = (heldPc !== null) ? now : null;
+  pedalStart = (pedalPc !== null) ? now : null;
   resultEl.classList.add('hidden');
   keyGuessEl.innerHTML = '';
 }
