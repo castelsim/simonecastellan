@@ -53,6 +53,12 @@
     <div class="input-wrap">
       <textarea id="textInput" placeholder="https://example.com" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
     </div>
+
+    <!-- Suggerimento tipo rilevato -->
+    <div class="hint" id="hint" hidden>
+      <span id="hintLabel"></span>
+      <button class="hint-btn" id="hintBtn" hidden></button>
+    </div>
   </main>
 
   <footer class="site-footer">
@@ -120,7 +126,115 @@
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
     }
 
-    $("textInput").addEventListener("input", update);
+    // ---- Rilevamento tipo probabilistico -----------------------------------
+    var DETECTORS = [
+      {
+        test: function (t) {
+          return /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(t) ? 0.95 : 0;
+        },
+        label: 'Looks like an email',
+        action: 'Format as mailto:',
+        format: function (t) { return 'mailto:' + t; }
+      },
+      {
+        test: function (t) {
+          // Già ha schema o @ → non è un telefono
+          if (/^[a-z]+:/i.test(t) || t.indexOf('@') !== -1) return 0;
+          var clean = t.replace(/[\s\-\(\)\.]/g, '').replace(/^\+/, '');
+          return /^\d{7,15}$/.test(clean) && /^[+\d\s\-\(\)\.]+$/.test(t) ? 0.80 : 0;
+        },
+        label: 'Looks like a phone number',
+        action: 'Format as tel:',
+        format: function (t) {
+          var d = t.replace(/[\s\-\(\)\.]/g, '');
+          if (d.charAt(0) !== '+') d = '+' + d;
+          return 'tel:' + d;
+        }
+      },
+      {
+        test: function (t) {
+          // Già ha schema → non serve
+          if (/^[a-z][a-z0-9+\-.]*:/i.test(t)) return 0;
+          if (t.indexOf('@') !== -1) return 0;
+          return /^(www\.)?[\w\-]+\.([a-z]{2,})([/?#]|$)/i.test(t) ? 0.85 : 0;
+        },
+        label: 'Missing https://',
+        action: 'Add https://',
+        format: function (t) { return 'https://' + t; }
+      },
+      {
+        test: function (t) {
+          return /^-?\d{1,3}\.\d+,\s*-?\d{1,3}\.\d+$/.test(t.trim()) ? 0.95 : 0;
+        },
+        label: 'Looks like coordinates',
+        action: 'Open in Maps',
+        format: function (t) {
+          return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(t.trim());
+        }
+      },
+      {
+        test: function (t) {
+          if (t.length < 8) return 0;
+          return /\b(via|piazza|corso|viale|vicolo|largo|street|avenue|road|blvd|square|rue|straße|calle)\b/i.test(t) ? 0.78 : 0;
+        },
+        label: 'Looks like an address',
+        action: 'Open in Maps',
+        format: function (t) {
+          return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(t.trim());
+        }
+      },
+      {
+        test: function (t) {
+          if (/^WIFI:/i.test(t)) return 0;
+          return /\b(wifi|wi-fi|ssid|password|rete)\b/i.test(t) ? 0.70 : 0;
+        },
+        label: 'Wi-Fi? Format: WIFI:T:WPA;S:name;P:pass;;',
+        action: null,
+        format: null
+      }
+    ];
+
+    var hintEl = $("hint"), hintLabel = $("hintLabel"), hintBtn = $("hintBtn");
+    var pendingFormat = null;
+
+    function detect(text) {
+      var best = null, bestScore = 0;
+      DETECTORS.forEach(function (d) {
+        var score = d.test(text);
+        if (score > bestScore) { bestScore = score; best = d; }
+      });
+      return (best && bestScore >= 0.70) ? best : null;
+    }
+
+    function updateHint(text) {
+      var d = text ? detect(text) : null;
+      if (!d) { hintEl.hidden = true; pendingFormat = null; return; }
+      hintLabel.textContent = d.label;
+      if (d.action && d.format) {
+        hintBtn.textContent = d.action + ' →';
+        hintBtn.hidden = false;
+        pendingFormat = d.format;
+      } else {
+        hintBtn.hidden = true;
+        pendingFormat = null;
+      }
+      hintEl.hidden = false;
+    }
+
+    hintBtn.addEventListener("click", function () {
+      if (!pendingFormat) return;
+      var input = $("textInput");
+      input.value = pendingFormat(input.value.trim());
+      hintEl.hidden = true;
+      pendingFormat = null;
+      update();
+    });
+    // ---- Fine rilevamento ------------------------------------------------
+
+    $("textInput").addEventListener("input", function () {
+      update();
+      updateHint($("textInput").value.trim());
+    });
 
     btnPng.addEventListener("click", function () {
       if (!currentQR) return;

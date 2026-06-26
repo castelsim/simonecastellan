@@ -99,6 +99,31 @@ h1 {
 .btn:disabled { opacity: .35; cursor: default; }
 
 /* Textarea */
+/* Suggerimento rilevamento tipo */
+.hint {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--faint);
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.hint-btn {
+  appearance: none;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  border-bottom: 1px solid var(--line);
+  line-height: 1.2;
+}
+.hint-btn:hover { color: var(--ink); border-color: var(--ink); }
+
 .input-wrap { margin-top: 24px; }
 textarea {
   width: 100%;
