@@ -6303,8 +6303,8 @@ function stageSceneSvg(){
     : '';
   var dims = A.custom ? '' : stageDimsMarkup();
   var W=state.stage.w, D=state.stage.d;
-  var zones='<text class="zone-lbl" x="'+(W/2)+'" y="-42" text-anchor="middle">FONDO PALCO</text>'+
-            '<text class="zone-lbl" x="'+(W/2)+'" y="'+(D+38)+'" text-anchor="middle">PUBBLICO</text>';
+  var zones='<text fill="#9ca3af" font-size="16" letter-spacing="2" text-anchor="middle" x="'+(W/2)+'" y="-42">FONDO PALCO</text>'+
+            '<text fill="#9ca3af" font-size="16" letter-spacing="2" text-anchor="middle" x="'+(W/2)+'" y="'+(D+38)+'">PUBBLICO</text>';
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+vb.x+' '+vb.y+' '+vb.w+' '+vb.h+'">'+
     '<style>'+css+'</style>'+DEFS+
     '<rect x="'+vb.x+'" y="'+vb.y+'" width="'+vb.w+'" height="'+vb.h+'" fill="#ffffff"/>'+
@@ -6564,11 +6564,8 @@ function buildPdfDoc(paperKey, N, orient, header){
       })
       .then(function(){
     if(!A.custom){
-      doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(150,150,150);
-      doc.text("FONDO PALCO", ix+stMmW/2, iy-3, {align:"center"});
-      doc.text("PUBBLICO", ix+stMmW/2, iy+stMmH+5, {align:"center"});
-      /* quote */
-      doc.setTextColor(107,114,128); doc.setFontSize(8.5);
+      /* quote dimensionali — solo senza area personalizzata */
+      doc.setFont("helvetica","normal"); doc.setTextColor(107,114,128); doc.setFontSize(8.5);
       doc.text((state.stage.w/100)+" m", ix+stMmW/2, iy-8, {align:"center"});
       doc.text((state.stage.d/100)+" m", ix-5, iy+stMmH/2, {align:"center", angle:90});
     }
