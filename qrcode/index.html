@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>QR Code</title>
+  <meta name="description" content="Generate a QR code from any text, locally in your browser. No account, no tracking." />
+  <meta name="theme-color" content="#ffffff" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="QR Code" />
+  <meta property="og:description" content="Generate a QR code from any text, locally in your browser." />
+  <meta property="og:locale" content="en" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <h1>QR Code</h1>
+    <p class="subtitle">Generate a QR code from any text.</p>
+
+    <!-- Preview — bordo sempre visibile -->
+    <div class="preview" id="preview">
+      <canvas id="canvas" class="hidden"></canvas>
+      <span class="empty-icon" id="emptyIcon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="22" height="22" rx="3" stroke="currentColor" stroke-width="3"/>
+          <rect x="10" y="10" width="10" height="10" rx="1" fill="currentColor"/>
+          <rect x="38" y="4" width="22" height="22" rx="3" stroke="currentColor" stroke-width="3"/>
+          <rect x="44" y="10" width="10" height="10" rx="1" fill="currentColor"/>
+          <rect x="4" y="38" width="22" height="22" rx="3" stroke="currentColor" stroke-width="3"/>
+          <rect x="10" y="44" width="10" height="10" rx="1" fill="currentColor"/>
+          <rect x="38" y="38" width="5" height="5" rx="1" fill="currentColor"/>
+          <rect x="47" y="38" width="5" height="5" rx="1" fill="currentColor"/>
+          <rect x="56" y="38" width="5" height="5" rx="1" fill="currentColor"/>
+          <rect x="38" y="47" width="5" height="5" rx="1" fill="currentColor"/>
+          <rect x="47" y="47" width="5" height="5" rx="1" fill="currentColor"/>
+          <rect x="56" y="56" width="5" height="5" rx="1" fill="currentColor"/>
+          <rect x="38" y="56" width="5" height="5" rx="1" fill="currentColor"/>
+        </svg>
+      </span>
+    </div>
+    <p class="note" id="note"></p>
+
+    <!-- Azioni -->
+    <div class="actions">
+      <button class="btn btn-secondary" id="btnPng" disabled>PNG</button>
+      <button class="btn btn-secondary" id="btnSvg" disabled>SVG</button>
+      <button class="btn btn-secondary" id="btnCopy" disabled>Copy</button>
+    </div>
+
+    <!-- Input -->
+    <div class="input-wrap">
+      <textarea id="textInput" placeholder="https://example.com" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+  </footer>
+
+  <script src="qrcode.min.js"></script>
+  <script>
+  (function () {
+    if (window.qrcode && qrcode.stringToBytesFuncs["UTF-8"])
+      qrcode.stringToBytes = qrcode.stringToBytesFuncs["UTF-8"];
+
+    var $ = function (id) { return document.getElementById(id); };
+    var MARGIN = 4, currentQR = null;
+    var canvas = $("canvas"), preview = $("preview"), emptyIcon = $("emptyIcon"), note = $("note");
+    var btnPng = $("btnPng"), btnSvg = $("btnSvg"), btnCopy = $("btnCopy");
+
+    function setActions(on) { btnPng.disabled = !on; btnSvg.disabled = !on; btnCopy.disabled = !on; }
+    function setNote(msg, err) { note.textContent = msg || ""; note.classList.toggle("error", !!err); }
+
+    function update() {
+      var text = $("textInput").value.trim();
+      if (!text) {
+        currentQR = null;
+        canvas.classList.add("hidden"); emptyIcon.classList.remove("hidden");
+        preview.classList.remove("has-qr");
+        setActions(false); setNote(""); return;
+      }
+      var qr;
+      try { qr = qrcode(0, "M"); qr.addData(text); qr.make(); }
+      catch (e) { setNote("Too much text — shorten it.", true); setActions(false); return; }
+      currentQR = qr;
+      draw(qr);
+      canvas.classList.remove("hidden"); emptyIcon.classList.add("hidden");
+      preview.classList.add("has-qr");
+      setActions(true); setNote("");
+    }
+
+    function draw(qr) {
+      var count = qr.getModuleCount(), total = count + MARGIN * 2;
+      var cell = Math.max(1, Math.floor(512 / total)), dim = total * cell;
+      canvas.width = dim; canvas.height = dim;
+      var ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, dim, dim);
+      ctx.fillStyle = "#1a1a1a";
+      for (var r = 0; r < count; r++)
+        for (var c = 0; c < count; c++)
+          if (qr.isDark(r, c)) ctx.fillRect((c + MARGIN) * cell, (r + MARGIN) * cell, cell, cell);
+    }
+
+    function toSVG(qr) {
+      var count = qr.getModuleCount(), cell = 10, total = count + MARGIN * 2, dim = total * cell, rects = "";
+      for (var r = 0; r < count; r++)
+        for (var c = 0; c < count; c++)
+          if (qr.isDark(r, c))
+            rects += '<rect x="'+(c+MARGIN)*cell+'" y="'+(r+MARGIN)*cell+'" width="'+cell+'" height="'+cell+'"/>';
+      return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+dim+' '+dim+'" shape-rendering="crispEdges">' +
+             '<rect width="100%" height="100%" fill="#fff"/><g fill="#1a1a1a">'+rects+'</g></svg>';
+    }
+
+    function download(blob, name) {
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = name;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    }
+
+    $("textInput").addEventListener("input", update);
+
+    btnPng.addEventListener("click", function () {
+      if (!currentQR) return;
+      canvas.toBlob(function (b) { download(b, "qr-code.png"); }, "image/png");
+    });
+    btnSvg.addEventListener("click", function () {
+      if (!currentQR) return;
+      download(new Blob([toSVG(currentQR)], { type: "image/svg+xml" }), "qr-code.svg");
+    });
+    btnCopy.addEventListener("click", function () {
+      if (!currentQR || !navigator.clipboard || !window.ClipboardItem) {
+        setNote("Copy not supported — use PNG.", true); return;
+      }
+      canvas.toBlob(function (b) {
+        navigator.clipboard.write([new ClipboardItem({ "image/png": b })])
+          .then(function () { setNote("Copied."); setTimeout(function () { setNote(""); }, 2000); })
+          .catch(function () { setNote("Couldn't copy — use PNG.", true); });
+      }, "image/png");
+    });
+  })();
+  </script>
+</body>
+</html>
