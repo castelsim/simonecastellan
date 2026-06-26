@@ -221,7 +221,8 @@ h1 {
 }
 .key-guess { font-size: 14px; color: var(--muted); }
 .key-guess b { color: var(--ink); font-weight: 600; }
-.key-guess .conf { color: var(--faint); font-size: 12px; margin-left: 4px; }
+.key-guess .conf { color: var(--faint); font-size: 12px; margin-left: 6px; }
+.key-guess .alt { display: block; color: var(--faint); font-size: 11px; margin-top: 2px; }
 .reset-link {
   appearance: none;
   border: none;

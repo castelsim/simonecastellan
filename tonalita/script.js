@@ -37,8 +37,13 @@ var CHORD_TONES = {
 
 var MIN_OCT = 2, MAX_OCT = 6;
 
-// Nomi note per il risultato.
-var NOTE_NAMES = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
+// Nomi delle tonalità con lo spelling convenzionale (bemolli/diesis per chiave).
+var MAJOR_NAMES = ['Do', 'Re♭', 'Re', 'Mi♭', 'Mi', 'Fa', 'Fa♯', 'Sol', 'La♭', 'La', 'Si♭', 'Si'];
+var MINOR_NAMES = ['Do', 'Do♯', 'Re', 'Mi♭', 'Mi', 'Fa', 'Fa♯', 'Sol', 'Sol♯', 'La', 'Si♭', 'Si'];
+function keyName(c) {
+  var arr = (c.mode === 'major') ? MAJOR_NAMES : MINOR_NAMES;
+  return arr[c.t] + (c.mode === 'major' ? ' maggiore' : ' minore');
+}
 
 // Profili di Krumhansl-Schmuckler (tonica in posizione 0).
 var KS_MAJOR = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88];
@@ -212,10 +217,10 @@ function estimateKey() {
     });
   }
   cands.sort(function (a, b) { return b.r - a.r; });
-  // confidenza: softmax sulle correlazioni
+  // confidenza: softmax sulle correlazioni (per tutti i candidati)
   var temp = 0.18, maxr = cands[0].r, sum = 0;
-  cands.forEach(function (c) { sum += Math.exp((c.r - maxr) / temp); });
-  cands[0].conf = 1 / sum;
+  cands.forEach(function (c) { c.conf = Math.exp((c.r - maxr) / temp); sum += c.conf; });
+  cands.forEach(function (c) { c.conf /= sum; });
   return cands;
 }
 
@@ -225,10 +230,19 @@ function updateKeyGuess() {
   var total = 0, distinct = 0;
   counts.forEach(function (c) { total += c; if (c > 0) distinct++; });
   if (total < 3 || distinct < 2) { resultEl.classList.add('hidden'); return; }
-  var best = estimateKey()[0];
-  var name = NOTE_NAMES[best.t] + (best.mode === 'major' ? ' maggiore' : ' minore');
-  var pct = Math.round(best.conf * 100);
-  keyGuessEl.innerHTML = 'Tonalità probabile: <b>' + name + '</b><span class="conf">' + pct + '%</span>';
+  var cands = estimateKey();
+  var top = cands[0], second = cands[1];
+  var pct = Math.round(top.conf * 100);
+  var label = top.conf >= 0.55 ? 'netta' : (top.conf >= 0.35 ? 'probabile' : 'incerta');
+  var conf = '<span class="conf">' + label + ' · ' + pct + '%</span>';
+  // se la seconda ipotesi è quasi identica (tipico magg ↔ relativa min), mostrale insieme
+  var ratio = top.r > 0 ? second.r / top.r : 0;
+  if (ratio > 0.92) {
+    keyGuessEl.innerHTML = 'Tonalità probabile: <b>' + keyName(top) + '</b> o <b>' + keyName(second) + '</b>' + conf;
+  } else {
+    keyGuessEl.innerHTML = 'Tonalità probabile: <b>' + keyName(top) + '</b>' + conf +
+      '<span class="alt">oppure ' + keyName(second) + '</span>';
+  }
   resultEl.classList.remove('hidden');
 }
 
