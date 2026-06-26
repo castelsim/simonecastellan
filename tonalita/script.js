@@ -96,7 +96,7 @@ function makeVoice(freq) {
   };
 }
 
-// --- Note attive: idx -> { voice, start, locked } ---
+// --- Note attive: idx -> { voice, start } ---
 var notes = {};
 
 // --- Tastiera (2 ottave) ---
@@ -149,12 +149,12 @@ function toggleNote(idx) {
   if (notes[idx]) {
     commitNote(idx);
     notes[idx].voice.stop();
-    rmCls(idx, 'on'); rmCls(idx, 'pedal');
+    rmCls(idx, 'on');
     delete notes[idx];
     updateKeyGuess();
     return;
   }
-  notes[idx] = { voice: makeVoice(freqForIdx(idx)), start: performance.now(), locked: false };
+  notes[idx] = { voice: makeVoice(freqForIdx(idx)), start: performance.now() };
   counts[idx % 12] += BASE_W;
   addCls(idx, 'on');
   updateKeyGuess();
@@ -169,23 +169,12 @@ function commitNote(idx) {
   nt.start = now;
 }
 
-// HOLD: blocca le note che stanno suonando in quel momento.
-function holdNotes() {
-  Object.keys(notes).forEach(function (idx) {
-    if (!notes[idx].locked) {
-      notes[idx].locked = true;
-      rmCls(idx, 'on');
-      addCls(idx, 'pedal');
-    }
-  });
-}
-
 // STOP: chiude tutte le note.
 function stopAll() {
   Object.keys(notes).forEach(function (idx) {
     commitNote(idx);
     notes[idx].voice.stop();
-    rmCls(idx, 'on'); rmCls(idx, 'pedal');
+    rmCls(idx, 'on');
   });
   notes = {};
   updateKeyGuess();
@@ -256,7 +245,6 @@ function resetGuess() {
 }
 
 document.getElementById('resetGuess').addEventListener('click', resetGuess);
-document.getElementById('holdBtn').addEventListener('click', holdNotes);
 document.getElementById('stopBtn').addEventListener('click', stopAll);
 
 // Mentre tieni note, accumula peso e aggiorna la stima in tempo reale.

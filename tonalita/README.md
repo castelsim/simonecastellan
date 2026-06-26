@@ -13,9 +13,8 @@ non senti il centro tonale. Nessun riconoscimento automatico, nessuna AI, nessun
   tasti − / + per traslare l'intervallo di ottave.
 - **Note sostenute (polifoniche)**: cliccando una nota questa resta a suonare; puoi cliccarne
   più d'una per farle suonare insieme. Ricliccando un tasto la sua nota si spegne.
-- **HOLD / STOP** (pulsanti gemelli): **HOLD** blocca le note che stanno suonando in quel momento
-  (così restano come riferimento, evidenziate con un anello); **STOP** chiude tutte le note.
-  Le note bloccate continuano ad accumulare peso nella stima finché suonano (tipicamente la tonica).
+- **STOP**: chiude tutte le note. Le note attive accumulano peso nella stima finché suonano
+  (tipicamente la tonica, che tieni più a lungo).
 - **Maggiore / Minore**: solo **visualizzazione** — evidenziano in tenue le note dell'accordo
   (3ª e 5ª) rispetto alla nota suonata. Nessun accordo in audio.
 - **Tonalità probabile**: pesa ogni nota in base a **quanto a lungo la tieni** (più la tieni,
