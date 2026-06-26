@@ -6,8 +6,7 @@
 // tonalità. Tutto client-side.
 //   - Player <audio> minimale (play/pausa, avanzamento, volume), 1x.
 //   - Tastiera Web Audio a 2 ottave, oscillatori sinusoidali puri.
-//   - Clic = nota sostenuta (polifonica). HOLD blocca le note che
-//     stanno suonando in quel momento; STOP le chiude tutte.
+//   - Clic = nota sostenuta (polifonica); riclic = spegne; STOP chiude tutto.
 //   - Stima probabilistica della tonalità (Krumhansl, pesata per durata).
 // Nessun riconoscimento automatico, nessuna AI, nessun backend.
 // ============================================================
