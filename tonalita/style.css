@@ -128,9 +128,9 @@ h1 {
 .keyboard {
   position: relative;
   width: 100%;
-  height: 96px;
+  height: 104px;
   display: flex;
-  gap: 3px;
+  gap: 2px;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -143,8 +143,8 @@ h1 {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding-bottom: 6px;
-  font-size: 10px;
+  padding-bottom: 5px;
+  font-size: 9px;
   font-weight: 600;
   transition: background .08s ease, color .08s ease;
 }
@@ -161,11 +161,11 @@ h1 {
   position: absolute;
   top: 0;
   height: 60%;
-  width: 9%;
+  width: 4.6%;
   background: var(--ink);
-  border-radius: 0 0 5px 5px;
+  border-radius: 0 0 4px 4px;
   color: #cfcfcf;
-  font-size: 8px;
+  font-size: 7px;
   z-index: 2;
 }
 .key.black:hover { background: #333; }

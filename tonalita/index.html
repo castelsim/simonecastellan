@@ -49,11 +49,10 @@
     <!-- Tastiera -->
     <div id="keyboard" class="keyboard"></div>
 
-    <!-- Ottava -->
+    <!-- Ottava (solo − / +) -->
     <div class="ctrl-row">
       <span class="oct" role="group" aria-label="Ottava">
         <button type="button" id="octDown" class="step sm" aria-label="Ottava giù">−</button>
-        <span id="octLabel" class="oct-label">Ott. 3</span>
         <button type="button" id="octUp" class="step sm" aria-label="Ottava su">+</button>
       </span>
     </div>
@@ -61,13 +60,6 @@
     <!-- Hold (pedale) -->
     <div class="ctrl-row">
       <button type="button" id="holdBtn" class="btn btn-secondary hold" aria-pressed="false">HOLD</button>
-    </div>
-
-    <!-- Visualizzazione accordo (nascosto) -->
-    <div class="seg modes hidden" role="group" aria-label="Mostra accordo">
-      <button type="button" class="seg-btn active" data-chord="none">Nota</button>
-      <button type="button" class="seg-btn" data-chord="major">Maggiore</button>
-      <button type="button" class="seg-btn" data-chord="minor">Minore</button>
     </div>
 
     <!-- Tonalità stimata dalle note suonate -->

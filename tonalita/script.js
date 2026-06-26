@@ -2,40 +2,38 @@
 
 // ============================================================
 // Tonalità — strumento manuale d'ascolto.
-// Carica un brano, suona note/accordi sopra l'audio e trova a
-// orecchio la tonalità. Tutto client-side.
+// Carica un brano, suona note tenute (drone) sopra l'audio e trova
+// a orecchio la tonalità. Tutto client-side.
 //   - Player <audio> minimale (play/pausa, avanzamento, volume), 1x.
-//   - Tastiera Web Audio, oscillatori sinusoidali puri.
-//   - Le note restano in "hold" (drone): cliccando un'altra nota
-//     si sostituisce, ricliccando la stessa si spegne. Stop ferma tutto.
+//   - Tastiera Web Audio a 2 ottave, oscillatori sinusoidali puri.
+//   - HOLD: blocca l'ultima nota selezionata come pedale fisso; si
+//     possono suonare altre note sopra per confrontarle.
+//   - Stima probabilistica della tonalità (Krumhansl, pesata per durata).
 // Nessun riconoscimento automatico, nessuna AI, nessun backend.
 // ============================================================
 
-// --- Note (italiano) e intervalli ---
+// --- Pattern di un'ottava (offset in semitoni dal Do) ---
 var WHITE = [
-  { pc: 0,  name: 'Do'  },
-  { pc: 2,  name: 'Re'  },
-  { pc: 4,  name: 'Mi'  },
-  { pc: 5,  name: 'Fa'  },
-  { pc: 7,  name: 'Sol' },
-  { pc: 9,  name: 'La'  },
-  { pc: 11, name: 'Si'  }
+  { off: 0,  name: 'Do'  },
+  { off: 2,  name: 'Re'  },
+  { off: 4,  name: 'Mi'  },
+  { off: 5,  name: 'Fa'  },
+  { off: 7,  name: 'Sol' },
+  { off: 9,  name: 'La'  },
+  { off: 11, name: 'Si'  }
 ];
+// pos = confine tra tasti bianchi (1..6) su cui appoggiare il tasto nero
 var BLACK = [
-  { pc: 1,  name: 'Do#',  pos: 1 },
-  { pc: 3,  name: 'Re#',  pos: 2 },
-  { pc: 6,  name: 'Fa#',  pos: 4 },
-  { pc: 8,  name: 'Sol#', pos: 5 },
-  { pc: 10, name: 'La#',  pos: 6 }
+  { off: 1,  name: 'Do#',  pos: 1 },
+  { off: 3,  name: 'Re#',  pos: 2 },
+  { off: 6,  name: 'Fa#',  pos: 4 },
+  { off: 8,  name: 'Sol#', pos: 5 },
+  { off: 10, name: 'La#',  pos: 6 }
 ];
+var OCTAVES_SHOWN = 2;
+var WHITES = 7 * OCTAVES_SHOWN;   // 14
 
-// Note aggiunte (oltre alla tonica) per la sola visualizzazione dell'accordo.
-var CHORD_TONES = {
-  major: [4, 7],
-  minor: [3, 7]
-};
-
-var MIN_OCT = 2, MAX_OCT = 6;
+var MIN_OCT = 2, MAX_OCT = 5;
 
 // Nomi delle tonalità con lo spelling convenzionale (bemolli/diesis per chiave).
 var MAJOR_NAMES = ['Do', 'Re♭', 'Re', 'Mi♭', 'Mi', 'Fa', 'Fa♯', 'Sol', 'La♭', 'La', 'Si♭', 'Si'];
@@ -50,10 +48,9 @@ var KS_MAJOR = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29
 var KS_MINOR = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17];
 
 // --- Stato ---
-var chordView = null;   // null | 'major' | 'minor' — solo evidenziazione
 var octave = 3;
-var counts = [0,0,0,0,0,0,0,0,0,0,0,0];   // peso accumulato per ogni nota
-var heldStart = null;                      // istante (ms) in cui è iniziata la nota tenuta
+var counts = [0,0,0,0,0,0,0,0,0,0,0,0];   // peso accumulato per ogni classe di nota
+var heldStart = null;
 var SUSTAIN_W = 1.0;                        // peso per secondo di nota tenuta
 var BASE_W = 0.4;                           // piccolo peso d'avvio a ogni nota suonata
 
@@ -72,11 +69,8 @@ function audio() {
 }
 
 function freqOf(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
-function baseMidi(pc, oct) { return 12 * (oct + 1) + pc; }   // Do4 = 60
-
-function freqFor(pc, oct) {
-  return freqOf(baseMidi(pc, oct));   // sempre una nota singola
-}
+function midiForIdx(idx) { return 12 * (octave + 1) + idx; }   // idx 0..23 dal Do di "octave"
+function freqForIdx(idx) { return freqOf(midiForIdx(idx)); }
 
 function makeVoice(freqs) {
   var t = audio().currentTime;
@@ -108,131 +102,123 @@ function makeVoice(freqs) {
   };
 }
 
-// --- Nota tenuta (drone di prova) ---
-var heldVoice = null, heldPc = null;
-// --- Nota bloccata da HOLD (pedale fisso, ci si suona sopra) ---
-var pedalVoice = null, pedalPc = null, pedalStart = null;
+// --- Voci attive ---
+var heldVoice = null, heldIdx = null;          // nota di prova (drone)
+var pedalVoice = null, pedalIdx = null, pedalStart = null;   // nota bloccata da HOLD
+var lastIdx = null;                            // ultima nota selezionata (persiste)
 
-// --- Tastiera ---
+// --- Tastiera (2 ottave) ---
 var keyEls = {};
+function addCls(idx, c) { if (keyEls[idx]) keyEls[idx].classList.add(c); }
+function rmCls(idx, c)  { if (keyEls[idx]) keyEls[idx].classList.remove(c); }
+
 function buildKeyboard() {
   var kb = document.getElementById('keyboard');
-  WHITE.forEach(function (k) {
-    var el = document.createElement('button');
-    el.type = 'button';
-    el.className = 'key white';
-    el.textContent = k.name;
-    el.dataset.pc = k.pc;
-    kb.appendChild(el);
-    keyEls[k.pc] = el;
-    bindKey(el, k.pc);
-  });
-  BLACK.forEach(function (k) {
-    var el = document.createElement('button');
-    el.type = 'button';
-    el.className = 'key black';
-    el.textContent = k.name;
-    el.dataset.pc = k.pc;
-    el.style.left = 'calc(' + (k.pos * 100 / 7) + '% - 4.5%)';
-    kb.appendChild(el);
-    keyEls[k.pc] = el;
-    bindKey(el, k.pc);
-  });
+  for (var o = 0; o < OCTAVES_SHOWN; o++) {
+    WHITE.forEach(function (w) {
+      var idx = w.off + 12 * o;
+      var el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'key white';
+      el.textContent = w.name;
+      el.dataset.idx = idx;
+      kb.appendChild(el);
+      keyEls[idx] = el;
+      bindKey(el, idx);
+    });
+  }
+  for (var o2 = 0; o2 < OCTAVES_SHOWN; o2++) {
+    BLACK.forEach(function (b) {
+      var idx = b.off + 12 * o2;
+      var boundary = b.pos + 7 * o2;            // 1..13 nella griglia di 14 bianchi
+      var el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'key black';
+      el.textContent = b.name;
+      el.dataset.idx = idx;
+      el.style.left = 'calc(' + (boundary * 100 / WHITES) + '% - 2.3%)';
+      kb.appendChild(el);
+      keyEls[idx] = el;
+      bindKey(el, idx);
+    });
+  }
 }
 
-function highlight(pc) { if (keyEls[pc]) keyEls[pc].classList.add('on'); }
-function unhighlight(pc) { if (keyEls[pc]) keyEls[pc].classList.remove('on'); }
-
-// Evidenzia in tenue le note dell'accordo (oltre alla tonica suonata).
-function clearGhost() {
-  Object.keys(keyEls).forEach(function (pc) { keyEls[pc].classList.remove('ghost'); });
-}
-function updateChordHighlight() {
-  clearGhost();
-  if (!chordView || heldPc === null) return;
-  CHORD_TONES[chordView].forEach(function (iv) {
-    var pc = (heldPc + iv) % 12;
-    if (pc !== heldPc && keyEls[pc]) keyEls[pc].classList.add('ghost');
-  });
-}
-
-function bindKey(el, pc) {
+function bindKey(el, idx) {
   el.addEventListener('pointerdown', function (e) {
     e.preventDefault();
     audio();
-    toggleHold(pc);
+    toggleHold(idx);
   });
 }
 
-// Click su una nota: la tiene; altra nota = sostituisce; stessa nota = spegne.
-function toggleHold(pc) {
-  if (heldPc === pc) {
-    commitHeld();                // accredita la durata finora tenuta
+// Click su una nota: la tiene (drone); altra nota = sostituisce; stessa = spegne.
+function toggleHold(idx) {
+  if (heldIdx === idx) {
+    commitHeld();
     heldVoice.stop();
-    unhighlight(heldPc);
-    heldVoice = null; heldPc = null; heldStart = null;
-    updateChordHighlight();
+    rmCls(idx, 'on');
+    heldVoice = null; heldIdx = null; heldStart = null;
     updateKeyGuess();
     return;
   }
-  if (heldVoice) { commitHeld(); heldVoice.stop(); unhighlight(heldPc); }
-  heldVoice = makeVoice([freqFor(pc, octave)]);
-  heldPc = pc;
+  if (heldVoice) { commitHeld(); heldVoice.stop(); rmCls(heldIdx, 'on'); }
+  heldVoice = makeVoice([freqForIdx(idx)]);
+  heldIdx = idx;
   heldStart = performance.now();
-  counts[pc] += BASE_W;          // piccolo peso d'avvio
-  highlight(pc);
-  updateChordHighlight();
+  lastIdx = idx;
+  counts[idx % 12] += BASE_W;
+  addCls(idx, 'on');
   updateKeyGuess();
 }
 
-// --- Stima della tonalità dalle note suonate ---
-// Accredita alla nota tenuta il tempo trascorso da heldStart (più la tieni, più pesa).
+// Cambio ottava: ri-aggancia le voci attive alla nuova ottava.
+function refreshVoices() {
+  if (heldVoice && heldIdx !== null) { heldVoice.stop(); heldVoice = makeVoice([freqForIdx(heldIdx)]); }
+  if (pedalVoice && pedalIdx !== null) { pedalVoice.stop(); pedalVoice = makeVoice([freqForIdx(pedalIdx)]); }
+}
+
+// --- Stima della tonalità dalle note suonate (pesata per durata) ---
 function commitHeld() {
-  if (heldPc === null || heldStart === null) return;
+  if (heldIdx === null || heldStart === null) return;
   var now = performance.now();
-  counts[heldPc] += (now - heldStart) / 1000 * SUSTAIN_W;
+  counts[heldIdx % 12] += (now - heldStart) / 1000 * SUSTAIN_W;
   heldStart = now;
 }
-// Accredita alla nota del pedale il tempo trascorso da pedalStart.
 function commitPedal() {
-  if (pedalPc === null || pedalStart === null) return;
+  if (pedalIdx === null || pedalStart === null) return;
   var now = performance.now();
-  counts[pedalPc] += (now - pedalStart) / 1000 * SUSTAIN_W;
+  counts[pedalIdx % 12] += (now - pedalStart) / 1000 * SUSTAIN_W;
   pedalStart = now;
 }
 
-// HOLD: blocca la nota corrente come pedale; ri-premendo la rilascia.
+// HOLD: blocca l'ultima nota selezionata come pedale; ri-premendo la rilascia.
 function togglePedal() {
   var holdBtn = document.getElementById('holdBtn');
-  if (pedalPc !== null) {                 // rilascia il pedale
+  if (pedalIdx !== null) {                  // rilascia il pedale
     commitPedal();
     pedalVoice.stop();
-    keyEls[pedalPc].classList.remove('pedal');
-    pedalPc = null; pedalVoice = null; pedalStart = null;
+    rmCls(pedalIdx, 'pedal');
+    pedalIdx = null; pedalVoice = null; pedalStart = null;
     holdBtn.setAttribute('aria-pressed', 'false');
     updateKeyGuess();
     return;
   }
-  if (heldPc === null) return;            // nessuna nota da tenere
-  commitHeld();
-  // trasferisce la nota di prova al pedale (senza ri-attaccare il suono)
-  pedalVoice = heldVoice; pedalPc = heldPc; pedalStart = performance.now();
-  keyEls[pedalPc].classList.remove('on');
-  keyEls[pedalPc].classList.add('pedal');
-  heldVoice = null; heldPc = null; heldStart = null;
+  var idx = (heldIdx !== null) ? heldIdx : lastIdx;   // nota corrente o ultima selezionata
+  if (idx === null) return;
+  if (heldIdx === idx) {                     // trasferisce il drone che sta suonando
+    commitHeld();
+    pedalVoice = heldVoice; pedalIdx = idx; pedalStart = performance.now();
+    rmCls(idx, 'on');
+    heldVoice = null; heldIdx = null; heldStart = null;
+  } else {                                   // l'ultima nota non suona più: la riattacca
+    pedalVoice = makeVoice([freqForIdx(idx)]);
+    pedalIdx = idx; pedalStart = performance.now();
+  }
+  addCls(idx, 'pedal');
   holdBtn.setAttribute('aria-pressed', 'true');
-  updateChordHighlight();
   updateKeyGuess();
 }
-document.getElementById('holdBtn').addEventListener('click', togglePedal);
-
-// Mentre tieni note (pedale e/o prova), accumula peso e aggiorna la stima live.
-setInterval(function () {
-  var active = false;
-  if (pedalPc !== null) { commitPedal(); active = true; }
-  if (heldPc !== null) { commitHeld(); active = true; }
-  if (active) updateKeyGuess();
-}, 300);
 
 function pearson(x, p) {
   var n = 12, sx = 0, sp = 0, sxp = 0, sxx = 0, spp = 0;
@@ -255,7 +241,6 @@ function estimateKey() {
     });
   }
   cands.sort(function (a, b) { return b.r - a.r; });
-  // confidenza: softmax sulle correlazioni (per tutti i candidati)
   var temp = 0.18, maxr = cands[0].r, sum = 0;
   cands.forEach(function (c) { c.conf = Math.exp((c.r - maxr) / temp); sum += c.conf; });
   cands.forEach(function (c) { c.conf /= sum; });
@@ -273,7 +258,6 @@ function updateKeyGuess() {
   var pct = Math.round(top.conf * 100);
   var label = top.conf >= 0.55 ? 'netta' : (top.conf >= 0.35 ? 'probabile' : 'incerta');
   var conf = '<span class="conf">' + label + ' · ' + pct + '%</span>';
-  // se la seconda ipotesi è quasi identica (tipico magg ↔ relativa min), mostrale insieme
   var ratio = top.r > 0 ? second.r / top.r : 0;
   if (ratio > 0.92) {
     keyGuessEl.innerHTML = 'Tonalità probabile: <b>' + keyName(top) + '</b> o <b>' + keyName(second) + '</b>' + conf;
@@ -286,40 +270,27 @@ function updateKeyGuess() {
 
 function resetGuess() {
   counts = [0,0,0,0,0,0,0,0,0,0,0,0];
-  // se ci sono note tenute, ripartono da ora ad accumulare peso
   var now = performance.now();
-  heldStart = (heldPc !== null) ? now : null;
-  pedalStart = (pedalPc !== null) ? now : null;
+  heldStart = (heldIdx !== null) ? now : null;
+  pedalStart = (pedalIdx !== null) ? now : null;
   resultEl.classList.add('hidden');
   keyGuessEl.innerHTML = '';
 }
 document.getElementById('resetGuess').addEventListener('click', resetGuess);
+document.getElementById('holdBtn').addEventListener('click', togglePedal);
 
-// Riavvia la nota tenuta (dopo cambio ottava)
-function refreshHeld() {
-  if (heldVoice && heldPc !== null) {
-    heldVoice.stop();
-    heldVoice = makeVoice([freqFor(heldPc, octave)]);
-  }
-}
+// Mentre tieni note (pedale e/o prova), accumula peso e aggiorna la stima live.
+setInterval(function () {
+  var active = false;
+  if (pedalIdx !== null) { commitPedal(); active = true; }
+  if (heldIdx !== null) { commitHeld(); active = true; }
+  if (active) updateKeyGuess();
+}, 300);
 
-
-// --- Controlli UI ---
-var modeBtns = document.querySelectorAll('.seg-btn');
-modeBtns.forEach(function (btn) {
-  btn.addEventListener('click', function () {
-    var v = btn.dataset.chord;
-    chordView = (v === 'none') ? null : v;   // "Nota" = nessuna evidenziazione
-    modeBtns.forEach(function (b) { b.classList.toggle('active', b === btn); });
-    updateChordHighlight();
-  });
-});
-
-var octLabel = document.getElementById('octLabel');
+// --- Ottava (solo − / +) ---
 function setOctave(v) {
   octave = Math.max(MIN_OCT, Math.min(MAX_OCT, v));
-  octLabel.textContent = 'Ott. ' + octave;
-  refreshHeld();
+  refreshVoices();
 }
 document.getElementById('octDown').addEventListener('click', function () { setOctave(octave - 1); });
 document.getElementById('octUp').addEventListener('click', function () { setOctave(octave + 1); });
@@ -353,7 +324,7 @@ fileIn.addEventListener('change', function () {
   au.load();
   fileName.textContent = f.name;
   player.classList.remove('hidden');
-  resetGuess();   // nuova canzone, nuova stima
+  resetGuess();
 });
 
 playBtn.addEventListener('click', function () {
@@ -376,4 +347,3 @@ volEl.addEventListener('input', function () { au.volume = volEl.value / 100; });
 
 // --- Avvio ---
 buildKeyboard();
-setOctave(3);
