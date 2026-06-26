@@ -5,7 +5,8 @@
 // Carica un brano, suona note sopra l'audio e trova a orecchio la
 // tonalità. Tutto client-side.
 //   - Player <audio> minimale (play/pausa, avanzamento, volume), 1x.
-//   - Tastiera Web Audio a 2 ottave, oscillatori sinusoidali puri.
+//   - Tastiera Web Audio a 1 ottava; +/− cambia "pagina" di ottava.
+//   - Note premute restano al loro pitch assoluto anche cambiando ottava.
 //   - Clic = nota sostenuta (polifonica); riclic = spegne; STOP chiude tutto.
 //   - Stima probabilistica della tonalità (Krumhansl, pesata per durata).
 // Nessun riconoscimento automatico, nessuna AI, nessun backend.
@@ -28,10 +29,9 @@ var BLACK = [
   { off: 8,  name: 'Sol#', pos: 5 },
   { off: 10, name: 'La#',  pos: 6 }
 ];
-var OCTAVES_SHOWN = 2;
-var WHITES = 7 * OCTAVES_SHOWN;   // 14
+var WHITES = 7;
 
-var MIN_OCT = 2, MAX_OCT = 5;
+var MIN_OCT = 2, MAX_OCT = 6;
 
 // Nomi delle tonalità con lo spelling convenzionale (bemolli/diesis per chiave).
 var MAJOR_NAMES = ['Do', 'Re♭', 'Re', 'Mi♭', 'Mi', 'Fa', 'Fa♯', 'Sol', 'La♭', 'La', 'Si♭', 'Si'];
@@ -66,8 +66,7 @@ function audio() {
 }
 
 function freqOf(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
-function midiForIdx(idx) { return 12 * (octave + 1) + idx; }   // idx 0..23 dal Do di "octave"
-function freqForIdx(idx) { return freqOf(midiForIdx(idx)); }
+function midiForIdx(idx) { return 12 * (octave + 1) + idx; }   // idx 0..11 nella pagina corrente
 
 function makeVoice(freq) {
   var t = audio().currentTime;
@@ -95,44 +94,39 @@ function makeVoice(freq) {
   };
 }
 
-// --- Note attive: idx -> { voice, start } ---
+// --- Note attive: midi assoluto -> { voice, start } ---
 var notes = {};
 
-// --- Tastiera (2 ottave) ---
+// --- Tastiera (1 ottava) ---
 var keyEls = {};
 function addCls(idx, c) { if (keyEls[idx]) keyEls[idx].classList.add(c); }
 function rmCls(idx, c)  { if (keyEls[idx]) keyEls[idx].classList.remove(c); }
 
 function buildKeyboard() {
   var kb = document.getElementById('keyboard');
-  for (var o = 0; o < OCTAVES_SHOWN; o++) {
-    WHITE.forEach(function (w) {
-      var idx = w.off + 12 * o;
-      var el = document.createElement('button');
-      el.type = 'button';
-      el.className = 'key white';
-      el.textContent = w.name;
-      el.dataset.idx = idx;
-      kb.appendChild(el);
-      keyEls[idx] = el;
-      bindKey(el, idx);
-    });
-  }
-  for (var o2 = 0; o2 < OCTAVES_SHOWN; o2++) {
-    BLACK.forEach(function (b) {
-      var idx = b.off + 12 * o2;
-      var boundary = b.pos + 7 * o2;            // 1..13 nella griglia di 14 bianchi
-      var el = document.createElement('button');
-      el.type = 'button';
-      el.className = 'key black';
-      el.textContent = b.name;
-      el.dataset.idx = idx;
-      el.style.left = 'calc(' + (boundary * 100 / WHITES) + '% - 2.3%)';
-      kb.appendChild(el);
-      keyEls[idx] = el;
-      bindKey(el, idx);
-    });
-  }
+  WHITE.forEach(function (w) {
+    var idx = w.off;
+    var el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'key white';
+    el.textContent = w.name;
+    el.dataset.idx = idx;
+    kb.appendChild(el);
+    keyEls[idx] = el;
+    bindKey(el, idx);
+  });
+  BLACK.forEach(function (b) {
+    var idx = b.off;
+    var el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'key black';
+    el.textContent = b.name;
+    el.dataset.idx = idx;
+    el.style.left = 'calc(' + (b.pos * 100 / WHITES) + '% - 4%)';
+    kb.appendChild(el);
+    keyEls[idx] = el;
+    bindKey(el, idx);
+  });
 }
 
 function bindKey(el, idx) {
@@ -145,35 +139,38 @@ function bindKey(el, idx) {
 
 // Clic su una nota: la accende (sostenuta) oppure la spegne se è già attiva.
 function toggleNote(idx) {
-  if (notes[idx]) {
-    commitNote(idx);
-    notes[idx].voice.stop();
+  var midi = midiForIdx(idx);
+  if (notes[midi]) {
+    commitNote(midi);
+    notes[midi].voice.stop();
     rmCls(idx, 'on');
-    delete notes[idx];
+    delete notes[midi];
     updateKeyGuess();
     return;
   }
-  notes[idx] = { voice: makeVoice(freqForIdx(idx)), start: performance.now() };
-  counts[idx % 12] += BASE_W;
+  notes[midi] = { voice: makeVoice(freqOf(midi)), start: performance.now() };
+  counts[midi % 12] += BASE_W;
   addCls(idx, 'on');
   updateKeyGuess();
 }
 
 // Accredita a una nota il tempo trascorso da start (più la tieni, più pesa).
-function commitNote(idx) {
-  var nt = notes[idx];
+function commitNote(midi) {
+  var nt = notes[midi];
   if (!nt) return;
   var now = performance.now();
-  counts[Number(idx) % 12] += (now - nt.start) / 1000 * SUSTAIN_W;
+  counts[midi % 12] += (now - nt.start) / 1000 * SUSTAIN_W;
   nt.start = now;
 }
 
-// STOP: chiude tutte le note.
+// STOP: chiude tutte le note in tutte le ottave.
 function stopAll() {
-  Object.keys(notes).forEach(function (idx) {
-    commitNote(idx);
-    notes[idx].voice.stop();
-    rmCls(idx, 'on');
+  Object.keys(notes).forEach(function (midi) {
+    var m = Number(midi);
+    commitNote(m);
+    notes[m].voice.stop();
+    var idx = m - 12 * (octave + 1);
+    if (idx >= 0 && idx < 12) rmCls(idx, 'on');
   });
   notes = {};
   updateKeyGuess();
@@ -230,7 +227,7 @@ function updateKeyGuess() {
 function resetGuess() {
   counts = [0,0,0,0,0,0,0,0,0,0,0,0];
   var now = performance.now();
-  Object.keys(notes).forEach(function (idx) { notes[idx].start = now; });
+  Object.keys(notes).forEach(function (midi) { notes[midi].start = now; });
   resultEl.classList.add('hidden');
   keyGuessEl.innerHTML = '';
 }
@@ -241,13 +238,18 @@ document.getElementById('stopBtn').addEventListener('click', stopAll);
 // Mentre tieni note, accumula peso e aggiorna la stima in tempo reale.
 setInterval(function () {
   var active = false;
-  Object.keys(notes).forEach(function (idx) { commitNote(idx); active = true; });
+  Object.keys(notes).forEach(function (midi) { commitNote(Number(midi)); active = true; });
   if (active) updateKeyGuess();
 }, 300);
 
-// --- Ottava (solo − / +) ---
+// --- Ottava: +/− cambia pagina; le note già attive restano al loro pitch ---
 function setOctave(v) {
   octave = Math.max(MIN_OCT, Math.min(MAX_OCT, v));
+  // Aggiorna la visualizzazione: .on solo sulle note attive nella pagina corrente
+  for (var i = 0; i < 12; i++) {
+    var midi = midiForIdx(i);
+    if (notes[midi]) { addCls(i, 'on'); } else { rmCls(i, 'on'); }
+  }
 }
 document.getElementById('octDown').addEventListener('click', function () { setOctave(octave - 1); });
 document.getElementById('octUp').addEventListener('click', function () { setOctave(octave + 1); });
