@@ -2727,8 +2727,14 @@ function normalizeStageBBox(){
   b.forEach(function(r){ blockCorners(r).forEach(function(p){ minX=Math.min(minX,p[0]); minY=Math.min(minY,p[1]); }); });
   var ox=minX<0?-minX:0, oy=minY<0?-minY:0;
   if(ox||oy){
+    /* l'origine del palco torna a (0,0): sposto TUTTO della stessa quantità — blocchi, elementi,
+       planimetria, cornice di stampa E la vista (viewBox). Così sullo schermo nulla si muove e la
+       planimetria resta allineata al palco (prima saltava perché spostavo solo blocchi+elementi). */
     b.forEach(function(r){ r.x+=ox; r.y+=oy; if(hasPts(r)) r.pts=r.pts.map(function(p){ return [p[0]+ox,p[1]+oy]; }); });
     state.items.forEach(function(it){ it.x+=ox; it.y+=oy; });
+    if(state.venue){ state.venue.x=(state.venue.x||0)+ox; state.venue.y=(state.venue.y||0)+oy; }
+    if(state.printFrame){ state.printFrame.x=(state.printFrame.x||0)+ox; state.printFrame.y=(state.printFrame.y||0)+oy; }
+    if(typeof vb!=="undefined" && vb){ vb.x+=ox; vb.y+=oy; }
   }
   var W=0, D=0;
   b.forEach(function(r){ blockCorners(r).forEach(function(p){ W=Math.max(W,p[0]); D=Math.max(D,p[1]); }); });
