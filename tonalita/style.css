@@ -212,8 +212,9 @@ h1 {
 }
 .oct { display: inline-flex; align-items: center; gap: 8px; }
 .oct-label { font-size: 12px; font-weight: 600; color: var(--ink); min-width: 46px; }
-.hold { letter-spacing: .5px; min-width: 96px; transition: background .15s ease, color .15s ease; }
-.hold[aria-pressed="true"] { background: var(--ink); color: #fff; }
+/* Pulsanti gemelli HOLD / STOP, simmetrici */
+.pair-row { gap: 10px; }
+.pair { min-width: 116px; letter-spacing: .5px; }
 
 /* Tonalità stimata */
 .result {

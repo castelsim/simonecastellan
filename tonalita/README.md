@@ -11,13 +11,11 @@ non senti il centro tonale. Nessun riconoscimento automatico, nessuna AI, nessun
 - **Player** minimale: play/pausa, barra di avanzamento e volume. Audio sempre a velocità 1×.
 - **Tastiera** virtuale Web Audio (oscillatore sinusoidale puro), **2 ottave**; sotto solo i
   tasti − / + per traslare l'intervallo di ottave.
-- **Drone**: cliccando una nota questa resta a suonare; cliccando un'altra si sostituisce,
-  ricliccando la stessa si spegne. Suona sempre **una nota singola**.
-- **HOLD (tieni note)**: blocca **l'ultima nota selezionata** come pedale (anche se non sta più
-  suonando). Premendolo su note diverse le **accumula tutte insieme**, così costruisci un drone
-  di più note su cui confrontare il brano. Ogni nota tenuta si disattiva **ricliccando il tasto**.
-  Le note-pedale hanno un anello distintivo e accumulano peso nella stima finché sono tenute.
-- **Stop**: ferma tutto (note tenute + nota di prova).
+- **Note sostenute (polifoniche)**: cliccando una nota questa resta a suonare; puoi cliccarne
+  più d'una per farle suonare insieme. Ricliccando un tasto la sua nota si spegne.
+- **HOLD / STOP** (pulsanti gemelli): **HOLD** blocca le note che stanno suonando in quel momento
+  (così restano come riferimento, evidenziate con un anello); **STOP** chiude tutte le note.
+  Le note bloccate continuano ad accumulare peso nella stima finché suonano (tipicamente la tonica).
 - **Maggiore / Minore**: solo **visualizzazione** — evidenziano in tenue le note dell'accordo
   (3ª e 5ª) rispetto alla nota suonata. Nessun accordo in audio.
 - **Tonalità probabile**: pesa ogni nota in base a **quanto a lungo la tieni** (più la tieni,
