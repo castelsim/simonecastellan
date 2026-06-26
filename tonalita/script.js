@@ -82,6 +82,7 @@ function makeVoice(freq) {
   o.start(t);
   var stopped = false;
   return {
+    setFreq: function (f) { if (!stopped) o.frequency.setValueAtTime(f, ctx.currentTime); },
     stop: function () {
       if (stopped) return;
       stopped = true;
@@ -179,11 +180,10 @@ function stopAll() {
   updateKeyGuess();
 }
 
-// Cambio ottava: ri-aggancia tutte le note attive alla nuova ottava.
+// Cambio ottava: aggiorna la frequenza delle voci attive senza interromperle.
 function refreshVoices() {
   Object.keys(notes).forEach(function (idx) {
-    notes[idx].voice.stop();
-    notes[idx].voice = makeVoice(freqForIdx(Number(idx)));
+    notes[idx].voice.setFreq(freqForIdx(Number(idx)));
   });
 }
 
