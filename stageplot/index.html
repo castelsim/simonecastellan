@@ -216,7 +216,7 @@
   .mcard label{display:block;font-size:12px;color:#6b7280;margin:9px 0 3px;font-weight:600}
   .mcard select{width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;font-size:14px;background:#fff}
   .mcard .mstatus{font-size:12.5px}
-  .mcard .mstatus.ok{color:#15803d}  .mcard .mstatus.err{color:#b91c1c}
+  .mcard .mstatus.ok{color:#15803d}  .mcard .mstatus.err{color:#b91c1c}  .mcard .mstatus.warn{color:#b45309}
   .pa-card{border:2px solid #e5e7eb;border-radius:10px;padding:14px 12px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;user-select:none}
   .pa-card.sel{border-color:#2563eb;background:#eff6ff}
   .pa-card:hover:not(.sel){border-color:#93c5fd;background:#f0f9ff}
@@ -6404,9 +6404,23 @@ function scaleFits(N, paperKey, orient){
   var L=pdfLayout(paperKey, orient), A=printArea(), DM=A.custom?0:80;
   return (A.w+2*DM)*10/N<=L.drawW && (A.h+2*DM)*10/N<=L.drawH;
 }
+/* Geometria del disegno sul foglio a scala 1:N (mm). Se il contenuto sfora l'area utile, NON lo rimpicciolisce:
+   tiene la scala esatta (10/N mm per cm) e RITAGLIA la parte centrale che ci sta (cropVb). */
+function pdfStageBox(N, paperKey, orient, cartH){
+  var L=pdfLayout(paperKey, orient, cartH), A=printArea(), DM=A.custom?0:80;
+  var mmPerCm=10/N;
+  var fullMmW=(A.w+2*DM)*mmPerCm, fullMmH=(A.h+2*DM)*mmPerCm;
+  var visMmW=Math.min(fullMmW, L.drawW), visMmH=Math.min(fullMmH, L.drawH);
+  var ix=L.drawX+(L.drawW-visMmW)/2, iy=L.drawY+(L.drawH-visMmH)/2;
+  var cropCmW=visMmW/mmPerCm, cropCmH=visMmH/mmPerCm;
+  var cx=A.x-DM+(A.w+2*DM)/2, cy=A.y-DM+(A.h+2*DM)/2;   /* centro della scena (area + margine quote) */
+  var vb={x:cx-cropCmW/2, y:cy-cropCmH/2, w:cropCmW, h:cropCmH};
+  var cropped = visMmW < fullMmW-0.05 || visMmH < fullMmH-0.05;
+  return {L:L, A:A, ix:ix, iy:iy, mmW:visMmW, mmH:visMmH, vb:vb, cropped:cropped, mmPerCm:mmPerCm};
+}
 function autoScale(paperKey, orient){
   for(var i=0;i<SCALES.length;i++){ if(scaleFits(SCALES[i],paperKey,orient)) return SCALES[i]; }
-  return 0;  /* non entra nemmeno a 1:200 */
+  return SCALES[SCALES.length-1];  /* non entra nemmeno a 1:500 → usa la scala più piccola e ritaglia ciò che ci sta */
 }
 function resolveScale(paperKey, scaleSel, orient){
   return scaleSel==="auto" ? autoScale(paperKey, orient) : parseInt(scaleSel,10);
@@ -6414,10 +6428,12 @@ function resolveScale(paperKey, scaleSel, orient){
 /* SVG dell'area di stampa: palco + griglia + elementi + quote dimensionali.
    Con area di stampa automatica (non personalizzata) espande il viewBox di 80 unità per lato
    per includere i label di quota (posizionati fuori dal rettangolo palco). */
-function stageSceneSvg(){
+function stageSceneSvg(cropVb){
   recalcStageBBox();
   var A=printArea(), DM=A.custom?0:80;
-  var vb={x:A.x-DM, y:A.y-DM, w:A.w+2*DM, h:A.h+2*DM};
+  /* cropVb (opzionale): finestra ritagliata quando il disegno non entra nel foglio — si stampa solo la
+     parte centrale che ci sta, sempre in scala. Senza cropVb = scena intera (area + margine quote). */
+  var vb=cropVb || {x:A.x-DM, y:A.y-DM, w:A.w+2*DM, h:A.h+2*DM};
   var keep=sel, keepSet=selSet; sel=null; selSet={};
   var sorted=sortedItems();
   var items=''; sorted.forEach(function(it){ items+=itemMarkup(it); });
@@ -6575,13 +6591,13 @@ function svgComplexity(svgEl){
 /* disegna la planimetria come VETTORE puro nel PDF (qualità infinita). Style isolato in shadow DOM per non toccare la pagina.
    Se l'SVG è troppo complesso (icone persone ad alta fedeltà, archi numerosi) rigetta subito così buildPdfDoc
    cade nel catch raster — evita che svg2pdf blocchi il main thread fino a far crashare Chrome. */
-function drawStageVector(doc, ix, iy, wMm, hMm){
+function drawStageVector(doc, ix, iy, wMm, hMm, cropVb){
   return loadSvg2Pdf().then(function(){
     var host=document.createElement("div");
     host.style.cssText="position:fixed;left:-99999px;top:0;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none";
     document.body.appendChild(host);
     var root=host.attachShadow ? host.attachShadow({mode:"open"}) : host;
-    root.innerHTML=stageSceneSvg();
+    root.innerHTML=stageSceneSvg(cropVb);
     var svgEl=root.querySelector("svg");
     flattenTextStyles(svgEl);
     flattenGradients(svgEl);
@@ -6638,16 +6654,14 @@ function pdfScaleBar(doc, x, y, N){
 function pdfPreviewSvg(paperKey, N, orient, header){
   var scW=90, baseL=pdfLayout(paperKey, orient, 22);
   var ch=cartHForHeader(header, baseL.pw-2*baseL.M-scW);
-  var L=pdfLayout(paperKey, orient, ch), A=printArea();
-  var fits = N && scaleFits(N, paperKey, orient);
   var Ng = N || 500;
-  var stMmW=A.w*10/Ng, stMmH=A.h*10/Ng;
-  var ix=L.drawX+(L.drawW-stMmW)/2, iy=L.drawY+(L.drawH-stMmH)/2;
-  var scene = stageSceneSvg().replace(/^<svg /, '<svg x="'+ix+'" y="'+iy+'" width="'+stMmW+'" height="'+stMmH+'" preserveAspectRatio="none" ');
+  var box=pdfStageBox(Ng, paperKey, orient, ch), L=box.L, A=box.A;
+  var stMmW=box.mmW, stMmH=box.mmH, ix=box.ix, iy=box.iy;
+  var scene = stageSceneSvg(box.vb).replace(/^<svg /, '<svg x="'+ix+'" y="'+iy+'" width="'+stMmW+'" height="'+stMmH+'" preserveAspectRatio="none" ');
   var cy=L.ph-L.cartH;
   var sub=[]; if(state.luogo) sub.push(state.luogo);
   sub.push(new Date().toLocaleDateString("it-IT")); sub.push((A.custom?"area ":"palco ")+(A.w/100)+"×"+(A.h/100)+" m");
-  var stroke = A.custom ? '#9ca3af' : (fits?(isSingleRect()?'#1f2937':'none'):'#dc2626');
+  var stroke = A.custom ? '#9ca3af' : (box.cropped ? '#9ca3af' : (isSingleRect()?'#1f2937':'none'));
   var labels = A.custom ? '' :
     '<text x="'+(ix+stMmW/2)+'" y="'+(iy-1.6)+'" font-size="3" fill="#9a9a9a" text-anchor="middle">FONDO PALCO</text>'+
     '<text x="'+(ix+stMmW/2)+'" y="'+(iy+stMmH+4)+'" font-size="3" fill="#9a9a9a" text-anchor="middle">PUBBLICO</text>';
@@ -6662,7 +6676,7 @@ function pdfPreviewSvg(paperKey, N, orient, header){
     cartClip+
     '<rect x="0" y="0" width="'+L.pw+'" height="'+L.ph+'" fill="#fff"/>'+
     scene+
-    '<rect x="'+ix+'" y="'+iy+'" width="'+stMmW+'" height="'+stMmH+'" fill="'+(fits?'none':'rgba(220,38,38,.06)')+'" stroke="'+stroke+'" stroke-width="0.5"/>'+
+    '<rect x="'+ix+'" y="'+iy+'" width="'+stMmW+'" height="'+stMmH+'" fill="none" stroke="'+stroke+'" stroke-width="0.5"/>'+
     labels+
     '<line x1="'+L.M+'" y1="'+cy+'" x2="'+(L.pw-L.M)+'" y2="'+cy+'" stroke="#1f2937" stroke-width="0.4"/>'+
     '<text clip-path="url(#cartClip)" x="'+L.M+'" y="'+(cy+7)+'" font-size="6" font-weight="700" fill="#111827">'+esc(state.titolo||"Stage plot")+'</text>'+
@@ -6675,24 +6689,23 @@ function pdfPreviewSvg(paperKey, N, orient, header){
 function buildPdfDoc(paperKey, N, orient, header){
   var baseL=pdfLayout(paperKey, orient, 22);
   var cartH=cartHForHeader(header, baseL.pw-2*baseL.M-90);
-  var L=pdfLayout(paperKey, orient, cartH), A=printArea();
-  var stMmW=A.w*10/N, stMmH=A.h*10/N;
-  var ix=L.drawX+(L.drawW-stMmW)/2, iy=L.drawY+(L.drawH-stMmH)/2;
+  var box=pdfStageBox(N, paperKey, orient, cartH), L=box.L, A=box.A;
+  var stMmW=box.mmW, stMmH=box.mmH, ix=box.ix, iy=box.iy;
   return loadJsPDF().then(function(){
     var jsPDF=window.jspdf.jsPDF;
     var doc=new jsPDF({orientation:L.orient, unit:"mm", format:paperKey, compress:true});
-    /* --- PAG 1: planimetria in scala — sempre vettore (svg2pdf) --- */
-    return drawStageVector(doc, ix, iy, stMmW, stMmH)
+    /* --- PAG 1: planimetria in scala — sempre vettore (svg2pdf). Se sfora, ritaglia (box.vb) tenendo la scala --- */
+    return drawStageVector(doc, ix, iy, stMmW, stMmH, box.vb)
       .catch(function(e){
         /* svg2pdf ha lanciato un'eccezione (non dovrebbe succedere) → raster come ultima spiaggia */
         var pxW=Math.round(stMmW/25.4*300), pxH=Math.round(stMmH/25.4*300);
         var scale=Math.min(1, 4000/Math.max(pxW,pxH,1));
         pxW=Math.round(pxW*scale); pxH=Math.round(pxH*scale);
-        return svgToDataUrl(stageSceneSvg(), pxW, pxH, "image/png").then(function(dataUrl){ doc.addImage(dataUrl, "PNG", ix, iy, stMmW, stMmH); });
+        return svgToDataUrl(stageSceneSvg(box.vb), pxW, pxH, "image/png").then(function(dataUrl){ doc.addImage(dataUrl, "PNG", ix, iy, stMmW, stMmH); });
       })
       .then(function(){
-    if(!A.custom){
-      /* quote dimensionali — solo senza area personalizzata */
+    if(!A.custom && !box.cropped){
+      /* quote dimensionali — solo senza area personalizzata e quando il palco intero ci sta (se ritagliato sarebbero fuorvianti) */
       doc.setFont("helvetica","normal"); doc.setTextColor(107,114,128); doc.setFontSize(8.5);
       doc.text((state.stage.w/100)+" m", ix+stMmW/2, iy-8, {align:"center"});
       doc.text((state.stage.d/100)+" m", ix-5, iy+stMmH/2, {align:"center", angle:90});
@@ -6734,9 +6747,7 @@ function exportPdf(paperKey, scaleSel, orient, header){
   var oTxt=(orient==="portrait"?"verticale":"orizzontale");
   var aTxt=printArea().custom?"L'area di stampa":"Il palco";
   if(!N){ info.className="mstatus err"; info.textContent=aTxt+" non entra nemmeno a 1:500 su "+paperKey.toUpperCase()+" "+oTxt+". Prova un foglio più grande, l'altro orientamento o riduci l'area."; return; }
-  if(!scaleFits(N, paperKey, orient)){
-    info.className="mstatus err"; info.textContent="A 1:"+N+" "+(printArea().custom?"l'area":"il palco")+" sfora il foglio "+paperKey.toUpperCase()+" "+oTxt+". Scegli Automatica o un foglio più grande."; return;
-  }
+  /* se a 1:N il disegno sfora il foglio NON è più un errore: si stampa la parte centrale che ci sta, in scala (vedi pdfStageBox) */
   var name=fileName()+".pdf";
   /* chiedi SUBITO dove salvare (mentre c'è il gesto utente): su desktop con browser compatibili apre il selettore di sistema */
   var pick = (typeof window.showSaveFilePicker==="function" && !isMobile())
@@ -6838,11 +6849,11 @@ function pdfChannelPage(doc, L, paperKey){
     var oTxt=orient.value==="portrait"?"verticale":"orizzontale";
     if(!N){ info.className="mstatus err"; info.textContent="Non entra nemmeno a 1:500 su "+paper.value.toUpperCase()+" "+oTxt+" — prova un foglio più grande o l'altro orientamento."; }
     else {
-      var fits=scaleFits(N, paper.value, orient.value);
       var _A=printArea(), mmW=Math.round(_A.w*10/N), mmH=Math.round(_A.h*10/N);
-      info.className="mstatus"+(fits?"":" err");
+      var box=pdfStageBox(N, paper.value, orient.value, 22);
+      info.className="mstatus"+(box.cropped?" warn":"");
       info.innerHTML="Scala risultante <b>1:"+N+"</b> · disegno "+mmW+"×"+mmH+" mm su "+paper.value.toUpperCase()+" "+oTxt+
-        (fits? "" : " — <b>sfora il foglio</b>");
+        (box.cropped? " — più grande del foglio: <b>verrà stampata la parte centrale che ci sta</b>, sempre in scala. Scegli <b>Automatica</b> o un foglio più grande per averlo tutto." : "");
     }
     try{ document.getElementById("pdfPreview").innerHTML = pdfPreviewSvg(paper.value, N, orient.value, header.value); }catch(e){}
   }
