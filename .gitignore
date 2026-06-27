@@ -7,6 +7,7 @@ simone_castellan_modificato.pdf
 *.pdf
 *.png
 !og-image.png
+!live-production-os/assets/stageplot-preview.png
 .DS_Store
 stato attuale/
 BACKUP/
