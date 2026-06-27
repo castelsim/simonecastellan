@@ -383,6 +383,23 @@
       font-size: 13px;
     }
 
+    .paid {
+      margin: 0 0 20px;
+      border: 1px solid #bbf7d0;
+      background: #f0fdf4;
+      border-radius: 8px;
+      padding: 14px 16px;
+      color: var(--good);
+      font-weight: 800;
+    }
+
+    .paid span {
+      display: block;
+      margin-top: 4px;
+      color: var(--ink);
+      font-weight: 500;
+    }
+
     .price small {
       display: block;
       margin-top: 2px;
@@ -605,6 +622,7 @@
         <h2>Generatore brief</h2>
         <p>Hai gia' pagato? Compila qui i dati per la consegna. Vuoi provare prima? Generalo gratis e mandamelo: ti dico subito cosa serve. Resta tutto sul tuo browser.</p>
       </div>
+      <div class="paid" id="paySuccess" hidden>Pagamento ricevuto. Grazie!<span>Compila il brief qui sotto e invialo: ricevi conferma e le eventuali domande mancanti entro 24h.</span></div>
       <div class="intake">
         <form id="briefForm">
           <label>Nome cliente
@@ -758,6 +776,14 @@
 
     const saved = localStorage.getItem("lpos_last_brief");
     if (saved) output.textContent = saved;
+
+    // Ritorno da Stripe: mostra conferma pagamento e porta al brief
+    if (new URLSearchParams(location.search).has("session_id")) {
+      const paid = document.querySelector("#paySuccess");
+      if (paid) paid.hidden = false;
+      const intake = document.querySelector("#intake");
+      if (intake) intake.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   </script>
 </body>
 </html>
