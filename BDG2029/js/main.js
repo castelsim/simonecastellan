@@ -10,11 +10,15 @@ const badge = document.getElementById('badge');
 const listenBtn = document.getElementById('ascolta');
 const fsBtn = document.getElementById('fullscreen');
 const hint = document.getElementById('audio-hint');
+const attesaHero = document.getElementById('attesa-hero');
+const attesaHeroN = document.getElementById('attesa-hero-n');
 
 const mobile = matchMedia('(max-width: 700px)').matches;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const scene = new Scene(canvas, { maxParticles: mobile ? 350 : 900, reducedMotion });
 const audio = new GranularEngine();
+// coerenza audio↔visivo: la selezione (promozioni/espulsioni) suona in forma aggregata
+scene.onSelection = (nProm, nEvict) => audio.selection(nProm, nEvict);
 
 let lastBlockMs = null;
 let lastLiveMsg = 0;
@@ -46,25 +50,32 @@ function wire(src) {
     if (!feedActive(src)) return;
     // sgrana i lotti nel tempo, così l'arrivo appare continuo
     setTimeout(() => {
-      scene.addTx(e.detail);
-      audio.grain(feeTier(e.detail.feeRate));
+      const prt = scene.addTx(e.detail);
+      // il suono arriva dalla direzione in cui la particella entra in scena
+      const pan = prt ? Math.max(-0.9, Math.min(0.9, Math.cos(prt.ang) * 1.1)) : 0;
+      audio.grain(feeTier(e.detail.feeRate), Math.min(1, (e.detail.vsize ?? 140) / 1200), pan);
     }, Math.random() * 1100);
   });
   src.addEventListener('projected', (e) => {
     if (!feedActive(src)) return;
     scene.setBlock(e.detail.feeFloor, e.detail.fillRatio);
     if (e.detail.bands) scene.setCrowd(e.detail.bands);
+    audio.setMacro({ medianFee: e.detail.medianFee, fillRatio: e.detail.fillRatio });
   });
   src.addEventListener('stats', (e) => {
     if (!feedActive(src)) return;
+    const n = e.detail.pending.toLocaleString('it-IT');
     const conto = document.getElementById('conto-attesa');
-    if (conto) conto.textContent = e.detail.pending.toLocaleString('it-IT');
+    if (conto) conto.textContent = n;
+    attesaHeroN.textContent = n;
+    attesaHero.hidden = false; // compare solo al primo dato reale, mai un placeholder
+    audio.setMacro({ pending: e.detail.pending });
   });
   src.addEventListener('block', (e) => {
     if (!feedActive(src)) return;
     lastBlockMs = e.detail.timestampMs;
     scene.triggerBeat();
-    audio.chord();
+    audio.blockCycle();
   });
   src.addEventListener('init', (e) => {
     if (src === live) {
@@ -136,6 +147,21 @@ function frame(now) {
 }
 requestAnimationFrame(frame);
 addEventListener('resize', () => scene.resize());
+
+// pannello di regia (?mixer=1): slider live sui parametri audio + copia valori
+if (new URLSearchParams(location.search).has('mixer')) {
+  import('./mixer.js').then((m) => m.buildMixer(audio));
+}
+
+// modalità prova (?prova=1): il tasto B scatena il ciclo del blocco, per regia e verifica
+if (new URLSearchParams(location.search).has('prova')) {
+  addEventListener('keydown', (e) => {
+    if (e.key === 'b' || e.key === 'B') {
+      scene.triggerBeat();
+      audio.blockCycle();
+    }
+  });
+}
 
 // hook di debug per le verifiche manuali
 window.__bdg = { scene, audio, sim, live };
