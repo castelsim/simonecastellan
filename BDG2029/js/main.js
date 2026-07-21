@@ -12,6 +12,7 @@ const fsBtn = document.getElementById('fullscreen');
 const hint = document.getElementById('audio-hint');
 const attesaHero = document.getElementById('attesa-hero');
 const attesaHeroN = document.getElementById('attesa-hero-n');
+const focusN = document.getElementById('focus-n');
 
 const mobile = matchMedia('(max-width: 700px)').matches;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -23,6 +24,9 @@ scene.onSelection = (nProm, nEvict) => audio.selection(nProm, nEvict);
 let lastBlockMs = null;
 let lastLiveMsg = 0;
 let mode = 'connecting';
+// ultimo stato reale della rete: con questo il simulatore parte dallo stesso punto,
+// così un'eventuale caduta di connessione non fa «uscire in massa» le particelle
+const lastLiveState = { feeFloor: null, fillRatio: null, pending: null };
 
 const live = new MempoolFeed();
 const sim = new SimFeed();
@@ -37,6 +41,7 @@ function setMode(m) {
     : 'connessione alla rete…';
   if (m === 'sim') {
     if (lastBlockMs == null) lastBlockMs = Date.now();
+    sim.seed(lastLiveState); // continuità: il sim riprende da dove era la rete vera
     sim.start();
   } else {
     sim.stop();
@@ -45,9 +50,17 @@ function setMode(m) {
 
 function feedActive(src) { return (mode === 'sim') === (src === sim); }
 
+// I messaggi della rete vera hanno la precedenza: appena ne arriva uno, torniamo «live»
+// PRIMA di ogni altro controllo — così un blocco reale non viene mai scartato perché
+// eravamo momentaneamente in simulazione.
+function liveGuard(src) {
+  if (src === live) { lastLiveMsg = performance.now(); setMode('live'); }
+  return feedActive(src);
+}
+
 function wire(src) {
   src.addEventListener('tx', (e) => {
-    if (!feedActive(src)) return;
+    if (!liveGuard(src)) return;
     // sgrana i lotti nel tempo, così l'arrivo appare continuo
     setTimeout(() => {
       const prt = scene.addTx(e.detail);
@@ -57,28 +70,36 @@ function wire(src) {
     }, Math.random() * 1100);
   });
   src.addEventListener('projected', (e) => {
-    if (!feedActive(src)) return;
+    if (!liveGuard(src)) return;
+    if (src === live) {
+      lastLiveState.feeFloor = e.detail.feeFloor;
+      lastLiveState.fillRatio = e.detail.fillRatio;
+    }
     scene.setBlock(e.detail.feeFloor, e.detail.fillRatio);
     if (e.detail.bands) scene.setCrowd(e.detail.bands);
     audio.setMacro({ medianFee: e.detail.medianFee, fillRatio: e.detail.fillRatio });
   });
   src.addEventListener('stats', (e) => {
-    if (!feedActive(src)) return;
+    if (!liveGuard(src)) return;
+    if (src === live) lastLiveState.pending = e.detail.pending;
     const n = e.detail.pending.toLocaleString('it-IT');
     const conto = document.getElementById('conto-attesa');
     if (conto) conto.textContent = n;
     attesaHeroN.textContent = n;
+    if (focusN) focusN.textContent = n; // didascalia della modalità focus
     attesaHero.hidden = false; // compare solo al primo dato reale, mai un placeholder
     audio.setMacro({ pending: e.detail.pending });
   });
   src.addEventListener('block', (e) => {
-    if (!feedActive(src)) return;
+    if (!liveGuard(src)) return;
     lastBlockMs = e.detail.timestampMs;
     scene.triggerBeat();
     audio.blockCycle();
   });
   src.addEventListener('init', (e) => {
     if (src === live) {
+      lastLiveMsg = performance.now();
+      setMode('live');
       lastBlockMs = e.detail.tipTimestampMs;
       scene.seedCycle(Date.now() - lastBlockMs);
     }
@@ -90,13 +111,14 @@ wire(sim);
 live.addEventListener('status', (e) => {
   if (e.detail.state === 'up') lastLiveMsg = performance.now();
 });
-for (const ev of ['tx', 'projected', 'block', 'stats']) {
-  live.addEventListener(ev, () => { lastLiveMsg = performance.now(); setMode('live'); });
-}
 
-// watchdog: 8 s senza messaggi live → simulazione entro ~10 s.
+// watchdog: una volta connessi, si «cavalcano» i cali brevi (le particelle restano in
+// orbita, nessuna riorganizzazione) — si passa alla simulazione solo dopo un'assenza
+// prolungata. A freddo (mai connessi) si passa prima, per non lasciare la scena vuota.
 setInterval(() => {
-  if (performance.now() - lastLiveMsg > 8_000) setMode('sim');
+  const gap = performance.now() - lastLiveMsg;
+  const limit = mode === 'live' ? 30_000 : 9_000;
+  if (gap > limit) setMode('sim');
 }, 2000);
 
 live.connect();
@@ -128,14 +150,34 @@ listenBtn.addEventListener('click', async () => {
   }
 });
 
-// schermo intero (dov'è supportato; su iPhone l'icona resta nascosta)
+// schermo intero → modalità focus: solo l'installazione e la didascalia.
+// I controlli spariscono dopo qualche secondo e riappaiono muovendo il mouse.
+let idleTimer = null;
+function resetIdle() {
+  document.body.classList.remove('idle');
+  clearTimeout(idleTimer);
+  if (document.body.classList.contains('focus')) {
+    idleTimer = setTimeout(() => document.body.classList.add('idle'), 3000);
+  }
+}
+function setFocus(on) {
+  document.body.classList.toggle('focus', on);
+  document.body.classList.remove('idle');
+  clearTimeout(idleTimer);
+  if (on) resetIdle();
+}
 if (document.documentElement.requestFullscreen) {
   fsBtn.hidden = false;
   fsBtn.addEventListener('click', () => {
     if (document.fullscreenElement) document.exitFullscreen();
     else document.documentElement.requestFullscreen();
   });
+  document.addEventListener('fullscreenchange', () => setFocus(!!document.fullscreenElement));
+  addEventListener('mousemove', () => { if (document.body.classList.contains('focus')) resetIdle(); });
 }
+
+// anteprima della modalità focus senza schermo intero (per la regia): ?focus=1
+if (new URLSearchParams(location.search).has('focus')) setFocus(true);
 
 // ciclo di rendering
 let prev = performance.now();
@@ -164,4 +206,9 @@ if (new URLSearchParams(location.search).has('prova')) {
 }
 
 // hook di debug per le verifiche manuali
-window.__bdg = { scene, audio, sim, live };
+window.__bdg = {
+  scene, audio, sim, live,
+  getMode: () => mode,
+  setMode, // per riprodurre gli scenari di rete in verifica
+  lastLiveState,
+};
