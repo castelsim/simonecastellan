@@ -248,6 +248,9 @@ blockquote {
 
 .scala { margin-top: 1.6rem; font-family: var(--mono); font-size: 0.85rem; color: var(--ambra); letter-spacing: 0.04em; }
 
+/* link di ritorno all'hub (in fondo alla pagina installazione) */
+.torna-hub { display: inline-block; margin-top: 0.4rem; font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.06em; }
+
 /* ---------- footer ---------- */
 
 footer {

@@ -3,86 +3,129 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Il Battito di Bitcoin — installazione audiovisiva</title>
-<meta name="description" content="Migliaia di scambi reali tra persone di tutto il mondo, trasformati in suono e luce. In diretta. Installazione audiovisiva di Simone Castellan per Bassano del Grappa 2029.">
+<title>Dentro Bitcoin — Bassano Capitale italiana della Cultura 2029</title>
+<meta name="description" content="«Dentro Bitcoin»: mostra educativa e interattiva proposta da CryptoBassano per la candidatura di Bassano del Grappa a Capitale italiana della Cultura 2029. Chi siamo, la rassegna stampa e l'anteprima dal vivo dell'installazione «Il Battito di Bitcoin».">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="canonical" href="https://simonecastellan.com/BDG2029/">
-<meta property="og:title" content="Il Battito di Bitcoin">
-<meta property="og:description" content="Migliaia di scambi reali tra persone di tutto il mondo, trasformati in suono e luce. In diretta.">
+<meta property="og:title" content="Dentro Bitcoin — Bassano 2029">
+<meta property="og:description" content="Mostra educativa e interattiva su Bitcoin, proposta da CryptoBassano per Bassano Capitale della Cultura 2029. Con l'installazione dal vivo «Il Battito di Bitcoin».">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://simonecastellan.com/BDG2029/">
 <meta property="og:image" content="https://simonecastellan.com/BDG2029/assets/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="style.css">
+<style>
+  :root{
+    --nero:#050506; --nero3:#101013; --testo:#ede7dc; --tenue:#a89f90;
+    --ambra:#ffb25e; --caldo:#ffe8c8; --linea:rgba(255,178,94,.14);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{ background:var(--nero); color:var(--testo); font-family:var(--serif); font-size:1.1rem; line-height:1.66; }
+  a{ color:var(--ambra); text-underline-offset:3px; }
+  .wrap{ max-width:47rem; margin:0 auto; padding:0 1.5rem; }
+
+  header{ position:relative; text-align:center; padding:5.5rem 1.5rem 3.6rem; overflow:hidden; }
+  header::before{ content:""; position:absolute; inset:-30% 0 auto; height:360px;
+                  background:radial-gradient(60% 100% at 50% 0%, rgba(255,178,94,.15), transparent 70%); pointer-events:none; }
+  .occhiello{ position:relative; font-family:var(--mono); font-size:.7rem; letter-spacing:.32em; text-transform:uppercase; color:var(--tenue); }
+  header h1{ position:relative; margin-top:1.1rem; font-size:clamp(1.9rem,6vw,3.2rem); font-weight:500;
+             letter-spacing:.06em; text-transform:uppercase; text-shadow:0 0 70px rgba(255,178,94,.35); }
+  .claim{ position:relative; margin-top:1rem; color:var(--caldo); font-style:italic; font-size:clamp(1rem,2.4vw,1.2rem); }
+
+  section{ padding:3.6rem 0; }
+  section + section{ border-top:1px solid var(--linea); }
+  h2{ font-size:clamp(1.5rem,4.4vw,2rem); font-weight:500; margin-bottom:1.1rem; text-wrap:balance; }
+  h2 .tag{ display:block; font-family:var(--mono); font-size:.68rem; letter-spacing:.24em; text-transform:uppercase; color:var(--ambra); margin-bottom:.55rem; }
+  p{ text-wrap:pretty; }
+  p.intro strong{ color:var(--caldo); }
+
+  .collegamenti{ margin-top:1.7rem; display:flex; flex-wrap:wrap; gap:.55rem; }
+  .pill{ display:inline-flex; align-items:center; gap:.35rem; font-family:var(--mono); font-size:.8rem; letter-spacing:.03em;
+         color:var(--testo); text-decoration:none; border:1px solid rgba(255,178,94,.4); border-radius:999px;
+         padding:.5rem 1rem; transition:.2s ease; background:rgba(255,178,94,.03); }
+  .pill:hover, .pill:focus-visible{ color:var(--nero); background:var(--ambra); border-color:var(--ambra); }
+
+  .rassegna{ list-style:none; margin:1.8rem 0 0; display:grid; gap:1.5rem; }
+  .rassegna li{ display:grid; gap:.3rem; padding-left:1rem; border-left:2px solid rgba(255,178,94,.3); }
+  .rassegna .fonte{ font-family:var(--mono); font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ambra); }
+  .rassegna li a.tit{ font-size:1.12rem; color:var(--testo); }
+  .rassegna li a.tit:hover{ color:var(--caldo); }
+  .rassegna .ctx{ font-size:.92rem; color:var(--tenue); }
+
+  .anteprima .wrap{ max-width:62rem; }
+  .anteprima p.intro{ margin-bottom:1.6rem; }
+  .frame{ position:relative; border:1px solid rgba(255,178,94,.28); border-radius:18px; overflow:hidden;
+          background:#000; box-shadow:0 30px 80px -30px rgba(0,0,0,.9), 0 0 90px rgba(255,178,94,.07); }
+  .frame iframe{ display:block; width:100%; height:66vh; min-height:440px; border:0; background:#000; }
+  .frame .etichetta{ position:absolute; z-index:2; top:1rem; left:1.1rem; font-family:var(--mono); font-size:.64rem;
+          letter-spacing:.16em; text-transform:uppercase; color:var(--caldo);
+          background:rgba(5,5,6,.55); padding:.32rem .7rem; border-radius:7px; }
+  .frame .etichetta::before{ content:"●"; color:var(--ambra); margin-right:.45rem; font-size:.7em; vertical-align:1px; }
+  .cta{ text-align:center; margin-top:1.7rem; }
+  .cta a{ display:inline-flex; align-items:center; gap:.5rem; font-family:var(--mono); font-size:.9rem; letter-spacing:.04em;
+          text-decoration:none; color:var(--nero); background:var(--ambra); font-weight:700; padding:.9rem 1.8rem; border-radius:999px; transition:.2s; }
+  .cta a:hover{ background:var(--caldo); }
+  .cta .nota{ display:block; margin-top:.8rem; font-size:.85rem; color:var(--tenue); font-style:italic; }
+
+  footer{ max-width:47rem; margin:2rem auto 0; padding:2.5rem 1.5rem 3.5rem; border-top:1px solid var(--linea);
+          font-size:.85rem; color:var(--tenue); }
+  footer p + p{ margin-top:.7rem; }
+
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+</style>
 </head>
 <body>
 
-<header class="hero" id="inizio">
-  <canvas id="scena" aria-hidden="true"></canvas>
-  <div class="hero-alto">
-    <p class="occhiello">installazione audiovisiva · Bassano del Grappa 2029</p>
-    <h1>Il Battito di Bitcoin</h1>
-  </div>
-  <p class="sottotitolo">Migliaia di scambi reali tra persone di tutto il mondo, trasformati in suono e luce. In diretta.</p>
-  <p class="focus-attesa" aria-hidden="true"><span id="focus-n">—</span> in attesa</p>
-  <p class="stato">
-    <span id="badge" data-state="connecting">connessione alla rete…</span>
-    <span id="attesa-hero" class="attesa-hero" hidden> · <span id="attesa-hero-n">—</span> transazioni in attesa</span>
-  </p>
-  <div class="controlli">
-    <span id="audio-hint" hidden>attiva il suono</span>
-    <button id="ascolta" aria-pressed="false" aria-label="attiva l'audio">
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" stroke="none"/>
-        <path class="onda" d="M16 9a4 4 0 0 1 0 6"/>
-        <path class="onda" d="M18.5 6.5a8 8 0 0 1 0 11"/>
-      </svg>
-    </button>
-    <button id="fullscreen" aria-label="schermo intero" hidden>
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4"/>
-      </svg>
-    </button>
-  </div>
-  <a class="scroll-hint" href="#bassano2029" aria-label="scorri alla sezione informativa">↓</a>
+<header>
+  <p class="occhiello">candidatura · Bassano del Grappa 2029</p>
+  <h1>Dentro Bitcoin</h1>
+  <p class="claim">Una mostra educativa e interattiva alla scoperta della tecnologia Bitcoin.</p>
 </header>
 
 <main>
+  <section><div class="wrap">
+    <h2><span class="tag">chi c'è dietro</span>CryptoBassano</h2>
+    <p class="intro">Un gruppo del territorio bassanese che <strong>dal 2021</strong> organizza incontri pubblici e gratuiti per spiegare, con parole semplici, Bitcoin e le nuove tecnologie. «Dentro Bitcoin» nasce da questo lavoro, con <strong>Cre-Ta Innovation Hub</strong> (Cassola) e <strong>BitPolito</strong> (Politecnico di Torino).</p>
+    <div class="collegamenti">
+      <a class="pill" href="https://cryptobassano.it" target="_blank" rel="noopener">↗ Sito · cryptobassano.it</a>
+      <a class="pill" href="https://www.eventbrite.it/o/crypto-bassano-63098457873" target="_blank" rel="noopener">↗ Eventi passati</a>
+      <a class="pill" href="https://www.instagram.com/cryptobassano/" target="_blank" rel="noopener">↗ Instagram</a>
+      <a class="pill" href="https://www.facebook.com/cryptobassano/" target="_blank" rel="noopener">↗ Facebook</a>
+    </div>
+  </div></section>
 
-<section id="bassano2029" class="sezione">
-  <h2>Cosa stai guardando</h2>
-  <ul class="glifi">
-    <li><span class="glifo" style="--c:#ff9a3c"></span><div><strong>Ogni particella è una transazione reale.</strong> Qualcuno sta inviando valore a qualcun altro, adesso.</div></li>
-    <li><span class="glifo glifo-grad"></span><div><strong>Il colore è la commissione offerta.</strong> Ghiaccio chi può aspettare, fuoco chi paga per entrare&nbsp;subito.</div></li>
-    <li><span class="glifo glifo-big" style="--c:#ffe8c8"></span><div><strong>La dimensione è il peso.</strong> Quanto spazio quella transazione occupa nel&nbsp;blocco.</div></li>
-    <li><span class="glifo glifo-scia"></span><div><strong>La scia è il valore trasferito.</strong> Appare solo quando una transazione si muove: più bitcoin trasporta, più lunga la traccia che&nbsp;lascia.</div></li>
-    <li><span class="glifo glifo-nube"></span><div><strong>La galassia intorno è la fila vera.</strong> <span id="conto-attesa">Migliaia di</span> transazioni in attesa in questo momento, rappresentate da un campione in lenta orbita: chi offre meno sta più lontano, quasi fermo, e aspetterà più&nbsp;a&nbsp;lungo.</div></li>
-    <li><span class="glifo glifo-anello"></span><div><strong>L'anello è il battito della rete.</strong> Si carica in circa 10&nbsp;minuti — il tempo medio tra due blocchi — e dentro prende forma il prossimo&nbsp;blocco.</div></li>
-    <li><span class="glifo glifo-alone" style="--c:#ffb25e"></span><div><strong>Il blocco resta aperto fino all'ultimo istante.</strong> Chi offre di più entra; chi offre meno viene superato e torna in&nbsp;attesa.</div></li>
-    <li><span class="glifo glifo-live" style="--c:#ffb25e"></span><div><strong>Tutto è in diretta</strong> da mempool.space. Senza rete, una simulazione&nbsp;dichiarata.</div></li>
-  </ul>
-</section>
+  <section><div class="wrap">
+    <h2><span class="tag">terze parti</span>Ne hanno parlato</h2>
+    <ul class="rassegna">
+      <li>
+        <span class="fonte">Confartigianato Vicenza · Digital Innovation Hub — set 2024</span>
+        <a class="tit" href="https://www.confartigianatovicenza.it/blockchain-opportunita-e-sfide-per-il-futuro/" target="_blank" rel="noopener">Blockchain: opportunità e sfide per il futuro</a>
+        <span class="ctx">Incontro co-organizzato con CryptoBassano.</span>
+      </li>
+      <li>
+        <span class="fonte">Blockchain Italia — nov 2023</span>
+        <a class="tit" href="https://www.blockchainitalia.io/it/blockchain-italia-e-cryptobassano-insieme/" target="_blank" rel="noopener">Blockchain Italia e CryptoBassano, insieme</a>
+        <span class="ctx">Collaborazione per la divulgazione sul territorio.</span>
+      </li>
+    </ul>
+  </div></section>
 
-<section class="sezione">
-  <h2>L'installazione</h2>
-  <p>Questa pagina è una traduzione per lo schermo. L'opera vera si vive <em>al buio, con il corpo</em>: una stanza dove la rete Bitcoin diventa suono che ti circonda — ogni transazione un piccolo suono collocato nello spazio, la potenza di calcolo un basso continuo che si sente nel petto, l'unica luce un anello sospeso. L'attesa stringe la stanza minuto dopo minuto; il blocco la scioglie in un accordo; poi tre secondi di silenzio: ciò che è entrato non torna più in&nbsp;discussione.</p>
-  <blockquote>«Ogni suono che sentirai sta accadendo adesso.»<br><span class="nota-blockquote">— l'unica istruzione data al visitatore</span></blockquote>
-  <p class="scala">studio 7.1.4 &nbsp;→&nbsp; stanza buia 8–12 canali &nbsp;→&nbsp; planetario 24 canali</p>
-  <p class="stato-progetto">Progetto <strong>in sviluppo</strong>: primo prototipo previsto nel 2026 nello studio Dolby&nbsp;Atmos dell'autore. Nome di lavorazione: <em>Camera&nbsp;Cieca</em>.</p>
-</section>
-
-<section class="sezione">
-  <h2>Bassano del Grappa&nbsp;2029</h2>
-  <p>«Il Battito di Bitcoin» è l'installazione principale candidata per <strong>«Dentro Bitcoin»</strong>, un percorso didattico e interattivo per comprendere il funzionamento della blockchain e di Bitcoin, proposto da <a href="https://cryptobassano.it">CryptoBassano</a> per Bassano del Grappa, <strong>Capitale italiana della Cultura&nbsp;2029</strong>.</p>
-</section>
-
+  <section class="anteprima"><div class="wrap">
+    <h2><span class="tag">l'opera</span>Anteprima dell'installazione</h2>
+    <p class="intro">«Il Battito di Bitcoin»: gli scambi reali della rete Bitcoin diventano luce e suono, in diretta. Qui sotto una finestra dal vivo — per l'esperienza intera, attiva il suono e lo schermo intero dai comandi nella finestra.</p>
+    <div class="frame">
+      <span class="etichetta">in diretta</span>
+      <iframe src="installazione.html?focus=1" title="Anteprima dell'installazione «Il Battito di Bitcoin»" loading="lazy" allow="fullscreen" allowfullscreen></iframe>
+    </div>
+  </div></section>
 </main>
 
 <footer>
-  <p><strong>Simone Castellan</strong> — compositore elettroacustico e tecnico del suono, studio certificato Dolby&nbsp;Atmos. <a href="https://simonecastellan.com">simonecastellan.com</a> · <a href="mailto:castellansimone@gmail.com">castellansimone@gmail.com</a></p>
-  <p>Dati in tempo reale da <a href="https://mempool.space">mempool.space</a> · Nessun cookie, nessun tracciamento · © 2026 Simone&nbsp;Castellan</p>
+  <p>«Dentro Bitcoin» è proposto da <a href="https://cryptobassano.it">CryptoBassano</a> per Bassano del Grappa, Capitale italiana della Cultura 2029. Installazione e pagina a cura di <strong>Simone Castellan</strong> — <a href="https://simonecastellan.com">simonecastellan.com</a> · <a href="mailto:castellansimone@gmail.com">castellansimone@gmail.com</a>.</p>
+  <p>Dati dell'installazione in tempo reale da <a href="https://mempool.space">mempool.space</a> · Nessun cookie, nessun tracciamento · © 2026 Simone&nbsp;Castellan</p>
 </footer>
 
-<script type="module" src="js/main.js"></script>
 </body>
 </html>
