@@ -108,6 +108,7 @@ h1 {
 }
 #focus-n { color: var(--caldo); }
 
+body.focus { overflow: hidden; }
 body.focus main,
 body.focus footer,
 body.focus .hero-alto,

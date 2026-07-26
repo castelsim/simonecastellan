@@ -63,11 +63,7 @@
           letter-spacing:.16em; text-transform:uppercase; color:var(--caldo);
           background:rgba(5,5,6,.55); padding:.32rem .7rem; border-radius:7px; }
   .frame .etichetta::before{ content:"●"; color:var(--ambra); margin-right:.45rem; font-size:.7em; vertical-align:1px; }
-  .cta{ text-align:center; margin-top:1.7rem; }
-  .cta a{ display:inline-flex; align-items:center; gap:.5rem; font-family:var(--mono); font-size:.9rem; letter-spacing:.04em;
-          text-decoration:none; color:var(--nero); background:var(--ambra); font-weight:700; padding:.9rem 1.8rem; border-radius:999px; transition:.2s; }
-  .cta a:hover{ background:var(--caldo); }
-  .cta .nota{ display:block; margin-top:.8rem; font-size:.85rem; color:var(--tenue); font-style:italic; }
+  .anteprima .didascalia{ margin-top:1.4rem; font-size:.98rem; color:var(--tenue); text-wrap:pretty; }
 
   footer{ max-width:47rem; margin:2rem auto 0; padding:2.5rem 1.5rem 3.5rem; border-top:1px solid var(--linea);
           font-size:.85rem; color:var(--tenue); }
@@ -114,11 +110,12 @@
 
   <section class="anteprima"><div class="wrap">
     <h2><span class="tag">l'opera</span>Anteprima dell'installazione</h2>
-    <p class="intro">«Il Battito di Bitcoin»: gli scambi reali della rete Bitcoin diventano luce e suono, in diretta. Qui sotto una finestra dal vivo — per l'esperienza intera, attiva il suono e lo schermo intero dai comandi nella finestra.</p>
+    <p class="intro">«Il Battito di Bitcoin»: gli scambi reali della rete Bitcoin diventano luce e suono, in diretta.</p>
     <div class="frame">
       <span class="etichetta">in diretta</span>
-      <iframe src="installazione.html?focus=1" title="Anteprima dell'installazione «Il Battito di Bitcoin»" loading="lazy" allow="fullscreen" allowfullscreen></iframe>
+      <iframe src="installazione.html?focus=1" title="Anteprima dell'installazione «Il Battito di Bitcoin»" loading="lazy" allow="fullscreen" allowfullscreen scrolling="no"></iframe>
     </div>
+    <p class="didascalia">Ogni punto di luce è una transazione reale sulla rete Bitcoin, in questo momento. L'anello è il «battito» della rete: si completa in circa dieci minuti — il tempo medio tra un blocco e il successivo — e al suo interno prende forma il prossimo blocco. Colore e movimento raccontano le commissioni e il valore trasferito. Attiva il suono e lo schermo intero dai comandi nella finestra.</p>
   </div></section>
 </main>
 
