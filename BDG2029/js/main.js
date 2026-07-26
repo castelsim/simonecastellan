@@ -13,6 +13,7 @@ const hint = document.getElementById('audio-hint');
 const attesaHero = document.getElementById('attesa-hero');
 const attesaHeroN = document.getElementById('attesa-hero-n');
 const focusN = document.getElementById('focus-n');
+const subN = document.getElementById('sub-n'); // numero live dentro la frase-sottotitolo
 
 const mobile = matchMedia('(max-width: 700px)').matches;
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -87,6 +88,7 @@ function wire(src) {
     if (conto) conto.textContent = n;
     attesaHeroN.textContent = n;
     if (focusN) focusN.textContent = n; // didascalia della modalità focus
+    if (subN) subN.textContent = n; // numero vivo nella frase
     attesaHero.hidden = false; // compare solo al primo dato reale, mai un placeholder
     audio.setMacro({ pending: e.detail.pending });
   });

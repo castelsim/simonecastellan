@@ -117,8 +117,8 @@ body.focus footer,
 body.focus .hero-alto,
 body.focus .stato,
 body.focus .scroll-hint { display: none; }
-body.focus .sottotitolo { bottom: 8.5svh; }
-body.focus .focus-attesa { display: block; }
+body.focus .sottotitolo { bottom: 6svh; }
+/* il numero live è ora nella frase-sottotitolo: niente riga «N in attesa» separata */
 /* i controlli spariscono con l'immersione e riappaiono muovendo il mouse */
 body.focus.idle .controlli { opacity: 0; pointer-events: none; }
 .controlli { transition: opacity 0.5s ease; }
