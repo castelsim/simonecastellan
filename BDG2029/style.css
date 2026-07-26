@@ -109,6 +109,9 @@ h1 {
 #focus-n { color: var(--caldo); }
 
 body.focus { overflow: hidden; }
+/* in focus l'installazione si adatta esattamente al contenitore (es. la finestra anteprima),
+   senza il minimo di 560px che altrimenti la fa eccedere e tagliare */
+body.focus .hero { min-height: 0; }
 body.focus main,
 body.focus footer,
 body.focus .hero-alto,
