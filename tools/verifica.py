@@ -97,6 +97,7 @@ def controlla_collegamenti_interni():
         "/cv/": ["index.html", "profilo/index.html", "en/profile/index.html"],
         "/en/profile/": ["index.html", "profilo/index.html", "cv/index.html"],
         "/privacy/": ["index.html", "profilo/index.html", "cv/index.html"],
+        "/tienimi-presente/": ["index.html", "profilo/index.html"],
     }
     for meta, sorgenti in attese.items():
         if not any(f'href="{meta}"' in leggi(s) for s in sorgenti):
@@ -112,6 +113,23 @@ def controlla_firma_contatto():
                    f"senza quella riga non si distingue un contatto arrivato dal sistema")
 
 
+def controlla_uscita_leggera():
+    """«Tienimi presente» è l'unica traccia che resta delle conversazioni che non arrivano
+    a WhatsApp: se sparisce dal protocollo o si rompe il modulo, il cerchio torna aperto."""
+    url = "https://simonecastellan.com/tienimi-presente/"
+    for f in ("profilo/index.html", "llms.txt", "en/profile/index.html"):
+        if url not in leggi(f):
+            errore(f"{f} non offre più l'uscita leggera {url}: le conversazioni senza "
+                   f"WhatsApp tornano a non lasciare traccia")
+    pagina = leggi("tienimi-presente/index.html")
+    if 'id="sito"' not in pagina:
+        errore("tienimi-presente: manca il campo-esca anti-bot (id=\"sito\")")
+    if "track.send" not in pagina:
+        errore("tienimi-presente: il modulo non usa track.send — l'invio non arriverebbe al foglio")
+    if "track.send" not in leggi("track.js"):
+        errore("track.js non espone più track.send: il modulo Tienimi presente non può inviare")
+
+
 def controlla_sitemap():
     xml = leggi("sitemap.xml")
     urls = re.findall(r"<loc>https://simonecastellan\.com/(.*?)</loc>", xml)
@@ -119,7 +137,7 @@ def controlla_sitemap():
         percorso = os.path.join(ROOT, u, "index.html") if u else os.path.join(ROOT, "index.html")
         if not os.path.exists(percorso):
             errore(f"la sitemap elenca /{u} ma il file non esiste")
-    pubblicate = {"", "profilo/", "cv/", "en/profile/", "privacy/", "BDG2029/"}
+    pubblicate = {"", "profilo/", "cv/", "en/profile/", "privacy/", "tienimi-presente/", "BDG2029/"}
     mancanti = pubblicate - set(urls)
     if mancanti:
         errore("pagine pubblicate ma assenti dalla sitemap: " + ", ".join(sorted(mancanti)))
@@ -163,6 +181,7 @@ def main():
     controlla_versione_profilo(home)
     controlla_collegamenti_interni()
     controlla_firma_contatto()
+    controlla_uscita_leggera()
     controlla_sitemap()
     controlla_json_ld()
     controlla_hreflang()

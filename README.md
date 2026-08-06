@@ -4,8 +4,8 @@ Sito personale di Simone Castellan — tecnico del suono e produttore audio.
 
 Home minimale in stile "Ask AI": il pulsante apre ChatGPT con **una riga** che invita ad aprire
 `/profilo`, dove l'assistente trova le istruzioni per fare da mediatore («curriculum dinamico»).
-La home resta volutamente nuda: un pulsante, due contatti, e in fondo due parole per non lasciare
-il profilo irraggiungibile.
+La home resta volutamente nuda: il nome, un pulsante, tre contatti, e in fondo due parole per non
+lasciare il profilo irraggiungibile.
 
 ## Pagine
 
@@ -15,6 +15,7 @@ il profilo irraggiungibile.
 | `/profilo/` | profilo esteso, fonte di verità dei contenuti (per umani e AI) |
 | `/en/profile/` | stesso profilo in inglese |
 | `/cv/` | curriculum in una pagina, stampabile in PDF dal browser |
+| `/tienimi-presente/` | l'uscita leggera: due righe (anche anonime) che finiscono nel foglio delle statistiche |
 | `/privacy/` | cosa raccoglie il sito (nessun cookie, statistiche anonime) |
 | `/BDG2029/` | «Dentro Bitcoin», installazione per Bassano Capitale della Cultura 2029 |
 | `/audio-mp3/` `/bpm/` `/tonalita/` `/qrcode/` | piccoli strumenti web |
@@ -33,6 +34,10 @@ il profilo irraggiungibile.
 - **Statistiche**: `track.js`, una sola copia per tutte le pagine. Gli assistenti AI non eseguono
   JavaScript, quindi lì non compaiono: il segnale che il sistema funziona è il rapporto fra i clic
   sul pulsante e i messaggi che arrivano firmati `— dal profilo AI di simonecastellan.com`.
+- **Il cerchio si chiude con `/tienimi-presente/`**: chi non è pronto a scrivere su WhatsApp lascia
+  due righe (contatto facoltativo) che finiscono come riga `messaggio` nello stesso foglio delle
+  statistiche, via `track.send`. La Connection Card la offre come alternativa; il modulo ha un
+  campo-esca anti-bot e `verifica.py` controlla che nessun pezzo del giro sparisca.
 
 ## Quali assistenti, e perché solo ChatGPT
 

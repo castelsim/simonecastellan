@@ -116,6 +116,10 @@
       display:flex; flex-direction:column; align-items:center; justify-content:center;
       min-height:100vh; padding:24px; text-align:center;
     }
+    .over{
+      font-size:12px; font-weight:400; letter-spacing:1.6px; text-transform:uppercase;
+      color:#9aa0a6; margin-bottom:12px;
+    }
     .label{
       font-size:23px; font-weight:400; color:#3c4043; letter-spacing:.1px;
       margin-bottom:22px;
@@ -161,7 +165,9 @@
     <span id="escape-hint"> (oppure menu ⋯ → «Apri nel browser»)</span>
   </div>
 
-  <h1 class="label">Ask more about Simone Castellan:</h1>
+  <!-- Il nome sta nell'<h1> statico: è quello che resta a chi non esegue JavaScript. -->
+  <h1 class="over">Simone Castellan</h1>
+  <p class="label">Ask more about Simone Castellan:</p>
 
   <div class="pills" id="pills"></div>
   <noscript>
@@ -174,6 +180,8 @@
     <a id="wa" href="#" target="_blank" rel="noopener" aria-label="Scrivi su WhatsApp — apri in una nuova scheda">WhatsApp</a>
     ·
     <a id="email" href="mailto:castellansimone@gmail.com">Email</a>
+    ·
+    <a id="tienimi" href="/tienimi-presente/">Tienimi presente</a>
   </div>
 
   <!-- Sezione "Applicativi web" nascosta dalla landing (2026-07-06). Le pagine restano attive e raggiungibili via URL diretto: stageplot.it, /audio-mp3/, /bpm/, /tonalita/, /qrcode/. Per riattivare, rimuovere i tag di commento.
@@ -292,6 +300,7 @@
 
     document.getElementById("wa").addEventListener("click", function(){ track("click", "WhatsApp"); });
     document.getElementById("email").addEventListener("click", function(){ track("click", "Email"); });
+    document.getElementById("tienimi").addEventListener("click", function(){ track("click", "TienimiPresente"); });
 
     // Copia il prompt negli appunti: sync (execCommand, affidabile prima di navigare) + async best-effort.
     function copyText(text){

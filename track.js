@@ -42,6 +42,30 @@
     } catch (e) {}
   }
 
+  // Variante per chi ha bisogno dell'esito (il modulo «Tienimi presente»): stesso
+  // canale e stesso foglio, ma torna una Promise — un messaggio perso è un contatto
+  // perso, quindi lì il fire-and-forget del beacon non basta.
+  track.send = function (event, target) {
+    var body = "";
+    try {
+      var p = new URLSearchParams(location.search);
+      body = JSON.stringify({
+        event: event,
+        target: target || "",
+        src: p.get("utm_source") || p.get("src") || "",
+        ref: document.referrer || "",
+        lang: navigator.language || "",
+        screen: window.innerWidth + "x" + window.innerHeight,
+        path: location.pathname,
+        ua: navigator.userAgent || ""
+      });
+    } catch (e) { return Promise.reject(e); }
+    return fetch(ANALYTICS_URL, {
+      method: "POST", mode: "no-cors", keepalive: true,
+      headers: { "Content-Type": "text/plain;charset=UTF-8" }, body: body
+    });
+  };
+
   window.track = track;
   track("pageview");
 })();
