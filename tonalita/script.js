@@ -203,12 +203,28 @@ function estimateKey() {
   return cands;
 }
 
+// Pallini sulle note della tonalità stimata (scala maggiore / minore naturale):
+// si vede a colpo d'occhio quali tasti «stanno dentro» e si verifica a orecchio.
+var MAJOR_SCALE = [0, 2, 4, 5, 7, 9, 11];
+var MINOR_SCALE = [0, 2, 3, 5, 7, 8, 10];
+function markScale(cand) {
+  var inkey = null;
+  if (cand) {
+    inkey = {};
+    var iv = (cand.mode === 'major') ? MAJOR_SCALE : MINOR_SCALE;
+    iv.forEach(function (s) { inkey[(cand.t + s) % 12] = true; });
+  }
+  for (var i = 0; i < 12; i++) {
+    if (inkey && inkey[i]) addCls(i, 'inkey'); else rmCls(i, 'inkey');
+  }
+}
+
 var resultEl = document.getElementById('result');
 var keyGuessEl = document.getElementById('keyGuess');
 function updateKeyGuess() {
   var total = 0, distinct = 0;
   counts.forEach(function (c) { total += c; if (c > 0) distinct++; });
-  if (total < 3 || distinct < 2) { resultEl.classList.add('hidden'); return; }
+  if (total < 3 || distinct < 2) { resultEl.classList.add('hidden'); markScale(null); return; }
   var cands = estimateKey();
   var top = cands[0], second = cands[1];
   var pct = Math.round(top.conf * 100);
@@ -221,6 +237,7 @@ function updateKeyGuess() {
     keyGuessEl.innerHTML = 'Tonalità probabile: <b>' + keyName(top) + '</b>' + conf +
       '<span class="alt">oppure ' + keyName(second) + '</span>';
   }
+  markScale(top);
   resultEl.classList.remove('hidden');
 }
 
@@ -230,6 +247,7 @@ function resetGuess() {
   Object.keys(notes).forEach(function (midi) { notes[midi].start = now; });
   resultEl.classList.add('hidden');
   keyGuessEl.innerHTML = '';
+  markScale(null);
 }
 
 document.getElementById('resetGuess').addEventListener('click', resetGuess);
@@ -243,8 +261,10 @@ setInterval(function () {
 }, 300);
 
 // --- Ottava: +/− cambia pagina; le note già attive restano al loro pitch ---
+var octNumEl = document.getElementById('octNum');
 function setOctave(v) {
   octave = Math.max(MIN_OCT, Math.min(MAX_OCT, v));
+  octNumEl.innerHTML = 'Do' + octave + '–Si' + octave + '<small>ottava ' + octave + '</small>';
   // Aggiorna la visualizzazione: .on solo sulle note attive nella pagina corrente
   for (var i = 0; i < 12; i++) {
     var midi = midiForIdx(i);
@@ -294,9 +314,14 @@ au.addEventListener('pause', function () { playBtn.textContent = '▶'; });
 au.addEventListener('ended', function () { playBtn.textContent = '▶'; });
 
 au.addEventListener('loadedmetadata', function () { durEl.textContent = fmtTime(au.duration); });
+// Mentre il dito trascina il cursore, timeupdate NON deve riposizionarlo:
+// altrimenti la maniglia salta via da sotto il dito a ogni aggiornamento.
+var seeking = false;
+seek.addEventListener('pointerdown', function () { seeking = true; });
+window.addEventListener('pointerup',  function () { seeking = false; });
 au.addEventListener('timeupdate', function () {
   curEl.textContent = fmtTime(au.currentTime);
-  if (au.duration) seek.value = Math.round((au.currentTime / au.duration) * 1000);
+  if (au.duration && !seeking) seek.value = Math.round((au.currentTime / au.duration) * 1000);
 });
 seek.addEventListener('input', function () {
   if (au.duration) au.currentTime = (seek.value / 1000) * au.duration;
@@ -306,3 +331,4 @@ volEl.addEventListener('input', function () { au.volume = volEl.value / 100; });
 
 // --- Avvio ---
 buildKeyboard();
+setOctave(octave);

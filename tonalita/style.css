@@ -13,6 +13,11 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Ottava −/+, STOP e play si premono anche a raffica: senza questo, su mobile
+   il doppio tocco veloce fa partire lo zoom (stesso male curato in /bpm/). */
+button, input { touch-action: manipulation; }
+button { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 html, body { height: 100%; }
 
 body {
@@ -211,7 +216,18 @@ h1 {
   flex-wrap: wrap;
 }
 .oct { display: inline-flex; align-items: center; gap: 8px; }
-.oct-label { font-size: 12px; font-weight: 600; color: var(--ink); min-width: 46px; }
+.oct-label { font-size: 13px; font-weight: 600; color: var(--ink); min-width: 64px; text-align: center; }
+.oct-label small { display: block; font-size: 9px; font-weight: 400; color: var(--faint); text-transform: uppercase; letter-spacing: .8px; }
+
+/* Note della tonalità stimata: pallino sul tasto (T2) */
+.key.white { position: relative; }
+.key.inkey::after {
+  content: '';
+  position: absolute; left: 50%; transform: translateX(-50%);
+  width: 6px; height: 6px; border-radius: 50%;
+}
+.key.white.inkey::after { bottom: 22px; background: #0d9488; }
+.key.black.inkey::after { bottom: 7px;  background: #5eead4; }
 /* Pulsanti gemelli HOLD / STOP, simmetrici */
 .pair-row { gap: 10px; }
 .pair { min-width: 116px; letter-spacing: .5px; }
