@@ -2,8 +2,11 @@
 
 // ============================================================
 // Audio to MP3 Light — tutto client-side, nessun upload.
-// Pipeline: file -> decodeAudioData -> resample 48kHz stereo
+// Pipeline per OGNI file: decodeAudioData -> resample 48kHz stereo
 //           -> Int16 -> Web Worker (lamejs) -> MP3 128kbps CBR
+// Più file insieme: coda SEQUENZIALE — un decode alla volta tiene
+// bassa la memoria (i WAV decodificati pesano), e l'istanza ffmpeg
+// di fallback è comunque una sola.
 // ============================================================
 
 var TARGET_RATE = 48000;
@@ -17,15 +20,18 @@ var statusText = document.getElementById('statusText');
 var progressEl = document.getElementById('progress');
 var progressBar= document.getElementById('progressBar');
 var resultBox  = document.getElementById('result');
-var fileNameEl = document.getElementById('fileName');
+var fileListEl = document.getElementById('fileList');
+var actionsBox = document.getElementById('actionsBox');
 var sendBtn    = document.getElementById('sendBtn');
 var sendHint   = document.getElementById('sendHint');
 var downloadBtn= document.getElementById('downloadBtn');
 var errorBox   = document.getElementById('error');
 var resetBtn   = document.getElementById('resetBtn');
 
-var currentBlob = null;
-var currentName = 'audio.mp3';
+// La coda: un elemento per ogni file scelto.
+// { file, name, blob|null, failed, started, li, stateEl }
+var jobs = [];
+var queueRunning = false;
 
 // Email di Simone, usata come ripiego quando manca la condivisione di file.
 var MAIL_TO = 'castellansimone@gmail.com';
@@ -45,17 +51,12 @@ function setStatus(msg) {
 }
 
 function resetUI() {
-  hide(statusBox); hide(resultBox); hide(errorBox);
+  hide(statusBox); hide(resultBox); hide(errorBox); hide(actionsBox); hide(sendHint);
   setProgress(0);
-  currentBlob = null;
+  jobs = [];
+  fileListEl.innerHTML = '';
   fileInput.value = '';
-  dropZone.classList.remove('hidden');
-}
-
-function fail(msg) {
-  hide(statusBox); hide(resultBox);
-  errorBox.querySelector('.error-msg').textContent = msg;
-  show(errorBox);
+  show(dropZone);
 }
 
 // --- Decodifica audio ---
@@ -157,7 +158,6 @@ function getFfmpeg() {
 
 function convertWithFfmpeg(file) {
   return getFfmpeg().then(function (ff) {
-    setStatus('Conversione in corso…');
     setProgress(0.1);
     ff.setProgress(function (p) {
       if (p && typeof p.ratio === 'number' && p.ratio >= 0 && p.ratio <= 1) {
@@ -181,43 +181,18 @@ function convertWithFfmpeg(file) {
   });
 }
 
-// --- Mostra il risultato ---
-function finish(blob, origSize) {
-  currentBlob = blob;
-  setProgress(1);
-  fileNameEl.textContent = currentName;
-  hide(sendHint);
-  hide(statusBox);
-  show(resultBox);
-  setupSend();
-}
-
-// --- Flusso principale: prima la via veloce, poi ffmpeg ---
-function handleFile(file) {
-  if (!file) return;
-  hide(errorBox);
-  hide(dropZone);
-  show(statusBox);
-  hide(resultBox);
-  setProgress(0);
-  setStatus('Lettura del file…');
-
-  var origSize = file.size;
-  currentName = (file.name.replace(/\.[^.]+$/, '') || 'audio') + '.mp3';
-
-  file.arrayBuffer()
+// --- Conversione di UN file: prima la via veloce, poi ffmpeg ---
+function convertFile(file) {
+  return file.arrayBuffer()
     .then(function (ab) {
-      setStatus('Decodifica audio…');
       setProgress(0.15);
       return decode(ab);
     })
     .then(function (audioBuffer) {
       // VIA VELOCE: Web Audio + lamejs
-      setStatus('Conversione in corso…');
       setProgress(0.3);
       return resample(audioBuffer).then(function (rendered) {
         setProgress(0.5);
-        setStatus('Creazione MP3…');
         var left  = floatToInt16(rendered.getChannelData(0));
         var right = floatToInt16(rendered.getChannelData(1));
         return encode(left, right);
@@ -227,82 +202,204 @@ function handleFile(file) {
       // Formato non gestito dal browser → FALLBACK ffmpeg (qualsiasi formato).
       console.warn('Via veloce non disponibile, uso ffmpeg:', decodeErr);
       return convertWithFfmpeg(file);
-    })
-    .then(function (blob) {
-      finish(blob, origSize);
-    })
-    .catch(function (err) {
-      console.error(err);
-      var name = String((err && (err.message || err.name)) || err);
-      var msg;
-      if (name === 'needs-reload') {
-        // Il service worker che abilita l'isolamento non controlla ancora la
-        // pagina (prima visita, o dopo un hard-refresh che lo bypassa).
-        // Ricarico UNA volta da solo: al reload normale il SW si attiva.
-        if (!sessionStorage.getItem('a2m_reloaded')) {
-          sessionStorage.setItem('a2m_reloaded', '1');
-          setStatus('Attivazione del convertitore… ricarico la pagina.');
-          setTimeout(function () { location.reload(); }, 600);
-          return;
-        }
-        msg = 'Convertitore avanzato non attivabile in questo browser. ' +
-              'Prova con WAV, MP3, M4A, AAC o AIFF, che funzionano sempre.';
-      } else if (name === 'engine-missing') {
-        msg = 'Convertitore avanzato non disponibile. Prova con WAV, MP3, M4A, AAC o AIFF.';
-      } else {
-        msg = 'Impossibile convertire questo file. Assicurati che sia un file audio valido.';
-      }
-      fail(msg);
     });
 }
 
+// --- Righe dell'elenco ---
+function mp3NameFor(file) {
+  var base = (file.name.replace(/\.[^.]+$/, '') || 'audio');
+  var name = base + '.mp3', n = 2;
+  // Due file con lo stesso nome darebbero due MP3 indistinguibili nei download.
+  while (jobs.some(function (j) { return j.name === name; })) {
+    name = base + ' (' + n + ').mp3'; n++;
+  }
+  return name;
+}
+
+function addRow(job) {
+  var li = document.createElement('li');
+  li.className = 'f-row';
+  var nm = document.createElement('span');
+  nm.className = 'f-name';
+  // Finche' non e' convertito il file resta quello originale: il nome .mp3
+  // comparirebbe anche sulle righe fallite, dove non esiste nessun MP3.
+  nm.textContent = job.file.name;
+  job.nameEl = nm;
+  var st = document.createElement('span');
+  st.className = 'f-state';
+  st.textContent = 'in coda';
+  li.appendChild(nm); li.appendChild(st);
+  fileListEl.appendChild(li);
+  job.li = li; job.stateEl = st;
+}
+
+function rowDone(job) {
+  job.li.classList.add('ok');
+  job.nameEl.textContent = job.name;
+  job.stateEl.textContent = '';
+  var b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'f-dl';
+  b.textContent = 'Scarica';
+  b.addEventListener('click', function () { downloadBlob(job.blob, job.name); });
+  job.stateEl.appendChild(b);
+}
+
+function rowError(job, msg) {
+  job.li.classList.add('ko');
+  job.stateEl.textContent = msg;
+}
+
+// --- Coda ---
+function handleFiles(list) {
+  var files = Array.prototype.slice.call(list || []);
+  if (!files.length) return;
+  hide(errorBox); hide(actionsBox); hide(sendHint);
+  hide(dropZone);
+  show(resultBox); show(statusBox);
+  files.forEach(function (f) {
+    var job = { file: f, name: mp3NameFor(f), blob: null, failed: false, started: false };
+    jobs.push(job);
+    addRow(job);
+  });
+  if (!queueRunning) runQueue();
+}
+
+function runQueue() {
+  var next = null;
+  for (var i = 0; i < jobs.length; i++) {
+    if (!jobs[i].started) { next = jobs[i]; break; }
+  }
+  if (!next) {
+    queueRunning = false;
+    finishBatch();
+    return;
+  }
+  queueRunning = true;
+  next.started = true;
+  var pos = jobs.indexOf(next) + 1;
+  setProgress(0);
+  setStatus(jobs.length > 1
+    ? 'File ' + pos + ' di ' + jobs.length + ' — ' + next.file.name
+    : 'Conversione in corso…');
+  next.stateEl.textContent = 'conversione…';
+  convertFile(next.file).then(
+    function (blob) {
+      next.blob = blob;
+      rowDone(next);
+      runQueue();
+    },
+    function (err) {
+      next.failed = true;
+      if (scheduleReloadIfNeeded(err)) return;   // la pagina sta per ricaricarsi
+      console.error(err);
+      rowError(next, shortErrorFor(err));
+      runQueue();
+    }
+  );
+}
+
+function scheduleReloadIfNeeded(err) {
+  var name = String((err && (err.message || err.name)) || err);
+  // Il service worker che abilita l'isolamento non controlla ancora la pagina
+  // (prima visita, o hard-refresh che lo bypassa). Ricarico UNA volta da solo:
+  // al reload normale il SW si attiva. I file vanno riscelti, come prima.
+  if (name !== 'needs-reload' || sessionStorage.getItem('a2m_reloaded')) return false;
+  sessionStorage.setItem('a2m_reloaded', '1');
+  setStatus('Attivazione del convertitore… ricarico la pagina.');
+  setTimeout(function () { location.reload(); }, 600);
+  return true;
+}
+
+function shortErrorFor(err) {
+  var name = String((err && (err.message || err.name)) || err);
+  if (name === 'needs-reload' || name === 'engine-missing') {
+    return 'non convertibile in questo browser';
+  }
+  return 'non convertito';
+}
+
+function finishBatch() {
+  hide(statusBox);
+  var ok = jobs.filter(function (j) { return j.blob; });
+  if (!ok.length) {
+    hide(resultBox);
+    fileListEl.innerHTML = '';
+    jobs = [];
+    errorBox.querySelector('.error-msg').textContent =
+      'Impossibile convertire. Assicurati che siano file audio validi ' +
+      '(WAV, MP3, M4A, AAC e AIFF funzionano sempre).';
+    show(errorBox);
+    return;
+  }
+  downloadBtn.textContent = ok.length > 1 ? 'Scarica tutti (' + ok.length + ')' : 'Scarica MP3';
+  show(actionsBox);
+}
+
 // --- Download ---
-function doDownload() {
-  if (!currentBlob) return;
-  var url = URL.createObjectURL(currentBlob);
+function downloadBlob(blob, name) {
+  var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
-  a.download = currentName;
+  a.download = name;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
 }
 
-// --- Invio a Simone (default) ---
-// Obiettivo del tool: far arrivare il file a Simone, di norma via WhatsApp.
-// I link wa.me NON possono allegare un file, quindi:
-//  - se il dispositivo supporta la condivisione di file (tipico mobile),
-//    uso la Web Share API: l'utente passa il file e sceglie WhatsApp -> Simone;
-//  - altrimenti (desktop) scarico l'MP3 e apro la chat di Simone gia' pronta,
-//    con l'istruzione di allegare il file appena scaricato.
-function canShareFile() {
-  try {
-    var f = new File([currentBlob], currentName, { type: 'audio/mpeg' });
-    return !!(navigator.canShare && navigator.canShare({ files: [f] }));
-  } catch (e) { return false; }
+function downloadAll() {
+  var ok = jobs.filter(function (j) { return j.blob; });
+  // Un download alla volta, distanziati: al primo giro il browser può chiedere
+  // il permesso per i download multipli — è normale, basta un sì.
+  ok.forEach(function (j, i) {
+    setTimeout(function () { downloadBlob(j.blob, j.name); }, i * 350);
+  });
 }
 
-function setupSend() {
-  sendBtn.onclick = function () {
-    if (canShareFile()) {
-      // Menu di condivisione di sistema: scegliendo Mail (Mac/iPhone) il file e'
-      // GIA' allegato. Unico modo per allegare un file via browser.
-      var f = new File([currentBlob], currentName, { type: 'audio/mpeg' });
-      navigator.share({ files: [f], title: currentName, text: 'File audio convertito.' })
-        .catch(function () { /* annullato dall'utente: ignoro */ });
-    } else {
-      // Ripiego (browser senza condivisione di file): scarico e apro una mail
-      // gia' indirizzata a Simone; l'allegato lo aggiunge l'utente a mano.
-      doDownload();
-      var subject = encodeURIComponent('File audio: ' + currentName);
-      var body = encodeURIComponent('Ciao Simone, ti allego il file audio (' + currentName + ').');
-      window.location.href = 'mailto:' + MAIL_TO + '?subject=' + subject + '&body=' + body;
-      sendHint.textContent = 'File scaricato. Allega il file appena scaricato all’email che si è aperta.';
-      show(sendHint);
-    }
-  };
+// --- Invio a Simone (default) ---
+// Obiettivo del tool: far arrivare i file a Simone, di norma via WhatsApp.
+// I link wa.me NON possono allegare file, quindi:
+//  - se il dispositivo supporta la condivisione di file (tipico mobile),
+//    uso la Web Share API con TUTTI gli MP3 riusciti insieme;
+//  - altrimenti (desktop) scarico gli MP3 e apro la chat email di Simone
+//    gia' pronta, con l'istruzione di allegare i file appena scaricati.
+function shareableFiles() {
+  try {
+    var fs = jobs.filter(function (j) { return j.blob; }).map(function (j) {
+      return new File([j.blob], j.name, { type: 'audio/mpeg' });
+    });
+    if (fs.length && navigator.canShare && navigator.canShare({ files: fs })) return fs;
+  } catch (e) {}
+  return null;
 }
+
+sendBtn.addEventListener('click', function () {
+  var fs = shareableFiles();
+  if (fs) {
+    // Menu di condivisione di sistema: scegliendo Mail (Mac/iPhone) i file sono
+    // GIA' allegati. Unico modo per allegare file via browser.
+    navigator.share({
+      files: fs,
+      title: fs.length > 1 ? fs.length + ' file audio' : fs[0].name,
+      text: fs.length > 1 ? 'File audio convertiti.' : 'File audio convertito.'
+    }).catch(function () { /* annullato dall'utente: ignoro */ });
+  } else {
+    // Ripiego (browser senza condivisione di file): scarico e apro una mail
+    // gia' indirizzata a Simone; gli allegati li aggiunge l'utente a mano.
+    downloadAll();
+    var ok = jobs.filter(function (j) { return j.blob; });
+    var what = ok.length > 1 ? ok.length + ' file audio' : ('File audio: ' + ok[0].name);
+    var subject = encodeURIComponent(what);
+    var body = encodeURIComponent('Ciao Simone, ti allego ' +
+      (ok.length > 1 ? 'i file audio convertiti.' : 'il file audio (' + ok[0].name + ').'));
+    window.location.href = 'mailto:' + MAIL_TO + '?subject=' + subject + '&body=' + body;
+    sendHint.textContent = ok.length > 1
+      ? 'File scaricati. Allegali all’email che si è aperta.'
+      : 'File scaricato. Allega il file appena scaricato all’email che si è aperta.';
+    show(sendHint);
+  }
+});
 
 // --- Eventi UI ---
 // Il pulsante e' dentro la drop zone: fermo il bubbling per non aprire
@@ -310,7 +407,8 @@ function setupSend() {
 pickBtn.addEventListener('click', function (e) { e.stopPropagation(); fileInput.click(); });
 dropZone.addEventListener('click', function () { fileInput.click(); });
 fileInput.addEventListener('change', function () {
-  if (fileInput.files && fileInput.files[0]) handleFile(fileInput.files[0]);
+  if (fileInput.files && fileInput.files.length) handleFiles(fileInput.files);
+  fileInput.value = '';   // riscegliere gli stessi file deve ri-scattare il change
 });
 
 ['dragenter', 'dragover'].forEach(function (ev) {
@@ -327,10 +425,10 @@ fileInput.addEventListener('change', function () {
 });
 dropZone.addEventListener('drop', function (e) {
   var dt = e.dataTransfer;
-  if (dt && dt.files && dt.files[0]) handleFile(dt.files[0]);
+  if (dt && dt.files && dt.files.length) handleFiles(dt.files);
 });
 
-downloadBtn.addEventListener('click', doDownload);
+downloadBtn.addEventListener('click', downloadAll);
 resetBtn.addEventListener('click', resetUI);
 
 // Evita che il browser apra il file se rilasciato fuori dalla drop zone.
