@@ -42,7 +42,10 @@
     </div>
     <p class="note" id="note"></p>
 
-    <!-- Azioni -->
+    <!-- Azioni: Condividi compare solo dove il sistema sa condividere file -->
+    <div class="actions share-row">
+      <button class="btn btn-primary" id="btnShare" disabled hidden>Condividi</button>
+    </div>
     <div class="actions">
       <button class="btn btn-secondary" id="btnPng" disabled>PNG</button>
       <button class="btn btn-secondary" id="btnSvg" disabled>SVG</button>
@@ -58,6 +61,21 @@
     <div class="hint" id="hint" hidden>
       <span id="hintLabel"></span>
       <button class="hint-btn" id="hintBtn" hidden></button>
+    </div>
+
+    <!-- Wi-Fi guidato: compone la stringa WIFI: dai campi, il QR si aggiorna da solo -->
+    <div class="wifi-form" id="wifiForm" hidden>
+      <label for="wifiSsid">Nome rete (SSID)</label>
+      <input id="wifiSsid" type="text" autocomplete="off" autocorrect="off" spellcheck="false">
+      <label for="wifiPass" id="wifiPassLabel">Password</label>
+      <input id="wifiPass" type="text" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="wifi-row">
+        <span class="seg" role="group" aria-label="Sicurezza della rete">
+          <button type="button" class="on" id="wifiWpa">WPA/WPA2</button>
+          <button type="button" id="wifiOpen">Rete aperta</button>
+        </span>
+        <button type="button" class="wifi-close" id="wifiClose">chiudi</button>
+      </div>
     </div>
   </main>
 
@@ -75,9 +93,9 @@
     var $ = function (id) { return document.getElementById(id); };
     var MARGIN = 4, currentQR = null;
     var canvas = $("canvas"), preview = $("preview"), emptyIcon = $("emptyIcon"), note = $("note");
-    var btnPng = $("btnPng"), btnSvg = $("btnSvg"), btnCopy = $("btnCopy");
+    var btnPng = $("btnPng"), btnSvg = $("btnSvg"), btnCopy = $("btnCopy"), btnShare = $("btnShare");
 
-    function setActions(on) { btnPng.disabled = !on; btnSvg.disabled = !on; btnCopy.disabled = !on; }
+    function setActions(on) { btnPng.disabled = !on; btnSvg.disabled = !on; btnCopy.disabled = !on; btnShare.disabled = !on; }
     function setNote(msg, err) { note.textContent = msg || ""; note.classList.toggle("error", !!err); }
 
     function update() {
@@ -189,14 +207,15 @@
           if (/^WIFI:/i.test(t)) return 0;
           return /\b(wifi|wi-fi|ssid|password|rete)\b/i.test(t) ? 0.70 : 0;
         },
-        label: 'Wi-Fi? Formato: WIFI:T:WPA;S:nome;P:password;;',
-        action: null,
-        format: null
+        label: 'Sembra una rete Wi-Fi',
+        action: 'Compila i campi',
+        format: null,
+        openWifi: true
       }
     ];
 
     var hintEl = $("hint"), hintLabel = $("hintLabel"), hintBtn = $("hintBtn");
-    var pendingFormat = null;
+    var pendingFormat = null, pendingOpen = false;
 
     function detect(text) {
       var best = null, bestScore = 0;
@@ -209,20 +228,29 @@
 
     function updateHint(text) {
       var d = text ? detect(text) : null;
-      if (!d) { hintEl.hidden = true; pendingFormat = null; return; }
+      if (!d) { hintEl.hidden = true; pendingFormat = null; pendingOpen = false; return; }
       hintLabel.textContent = d.label;
-      if (d.action && d.format) {
+      if (d.action && (d.format || d.openWifi)) {
         hintBtn.textContent = d.action + ' →';
         hintBtn.hidden = false;
         pendingFormat = d.format;
+        pendingOpen = !!d.openWifi;
       } else {
         hintBtn.hidden = true;
         pendingFormat = null;
+        pendingOpen = false;
       }
       hintEl.hidden = false;
     }
 
     hintBtn.addEventListener("click", function () {
+      if (pendingOpen) {
+        wifiForm.hidden = false;
+        hintEl.hidden = true;
+        pendingOpen = false;
+        wifiSsid.focus();
+        return;
+      }
       if (!pendingFormat) return;
       var input = $("textInput");
       input.value = pendingFormat(input.value.trim());
@@ -232,9 +260,55 @@
     });
     // ---- Fine rilevamento ------------------------------------------------
 
+    // ---- Wi-Fi guidato: i campi compongono la stringa WIFI:, il QR segue ----
+    var wifiForm = $("wifiForm"), wifiSsid = $("wifiSsid"), wifiPass = $("wifiPass");
+    var wifiSec = 'WPA';
+    function wifiEsc(v) { return v.replace(/([\\;,:"])/g, '\\$1'); }
+    function wifiRender() {
+      var s = wifiSsid.value.trim();
+      if (!s) return;
+      $("textInput").value = (wifiSec === 'WPA')
+        ? 'WIFI:T:WPA;S:' + wifiEsc(s) + ';P:' + wifiEsc(wifiPass.value) + ';;'
+        : 'WIFI:T:nopass;S:' + wifiEsc(s) + ';;';
+      update();   // niente updateHint: il modulo resta aperto
+    }
+    wifiSsid.addEventListener("input", wifiRender);
+    wifiPass.addEventListener("input", wifiRender);
+    $("wifiWpa").addEventListener("click", function () {
+      wifiSec = 'WPA';
+      this.classList.add("on"); $("wifiOpen").classList.remove("on");
+      wifiPass.disabled = false; $("wifiPassLabel").style.opacity = "";
+      wifiRender();
+    });
+    $("wifiOpen").addEventListener("click", function () {
+      wifiSec = 'nopass';
+      this.classList.add("on"); $("wifiWpa").classList.remove("on");
+      wifiPass.disabled = true; $("wifiPassLabel").style.opacity = ".4";
+      wifiRender();
+    });
+    $("wifiClose").addEventListener("click", function () { wifiForm.hidden = true; });
+    // ---- Fine Wi-Fi guidato ---------------------------------------------
+
     $("textInput").addEventListener("input", function () {
+      wifiForm.hidden = true;   // se si torna a scrivere a mano, il modulo si fa da parte
       update();
       updateHint($("textInput").value.trim());
+    });
+
+    // Condividi: menu di sistema col PNG già allegato (solo dove il browser
+    // sa condividere file — tipicamente mobile e Safari/Chrome su Mac).
+    try {
+      if (navigator.canShare && navigator.canShare({ files: [new File([""], "qr.png", { type: "image/png" })] })) {
+        btnShare.hidden = false;
+      }
+    } catch (e) {}
+    btnShare.addEventListener("click", function () {
+      if (!currentQR) return;
+      canvas.toBlob(function (b) {
+        var f = new File([b], "qr-code.png", { type: "image/png" });
+        navigator.share({ files: [f], title: "QR code" })
+          .catch(function () { /* annullato dall'utente: ignoro */ });
+      }, "image/png");
     });
 
     btnPng.addEventListener("click", function () {

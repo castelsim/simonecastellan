@@ -15,6 +15,9 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 
+/* Come su /bpm/ e /tonalita/: niente zoom da doppio tocco sui controlli. */
+button, input, textarea { touch-action: manipulation; }
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background: var(--bg);
@@ -96,7 +99,55 @@ h1 {
 }
 .btn-secondary { background: var(--pill); color: var(--ink); }
 .btn-secondary:hover { background: var(--pill-hover); }
+.btn-primary { background: var(--ink); color: #fff; }
+.btn-primary:hover { background: #000; }
 .btn:disabled { opacity: .35; cursor: default; }
+.actions.share-row { margin-top: 16px; }
+.actions.share-row + .actions { margin-top: 9px; }
+
+/* Wi-Fi guidato */
+.wifi-form {
+  margin-top: 14px;
+  text-align: left;
+  background: #fafbfc;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  padding: 14px 16px 16px;
+}
+.wifi-form label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--muted-2);
+  margin: 10px 0 4px;
+}
+.wifi-form label:first-child { margin-top: 0; }
+.wifi-form input {
+  width: 100%;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--ink);
+  background: #fff;
+}
+.wifi-form input:focus { outline: none; border-color: var(--ink); }
+.wifi-row { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+.seg { display: inline-flex; border: 1px solid var(--line-soft); border-radius: 999px; overflow: hidden; background: #fff; }
+.seg button {
+  appearance: none; border: none; background: transparent;
+  padding: 7px 13px; font-size: 12.5px; font-weight: 600;
+  color: var(--muted); cursor: pointer; font-family: inherit;
+}
+.seg button.on { background: var(--ink); color: #fff; }
+.wifi-close {
+  appearance: none; border: none; background: none;
+  font-family: inherit; font-size: 12.5px; color: var(--muted);
+  cursor: pointer; border-bottom: 1px solid var(--line); padding: 0 0 1px;
+}
+.wifi-close:hover { color: var(--ink); }
 
 /* Textarea */
 /* Suggerimento rilevamento tipo */
@@ -110,6 +161,9 @@ h1 {
   justify-content: center;
   gap: 6px;
 }
+/* display:flex qui sopra batte la regola [hidden] del browser: senza questa
+   riga il suggerimento restava visibile anche da nascosto. */
+.hint[hidden] { display: none; }
 .hint-btn {
   appearance: none;
   border: none;
