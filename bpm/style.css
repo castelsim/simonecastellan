@@ -16,6 +16,11 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 
+/* TAP e +/− si premono a raffica: senza questo, su mobile il doppio tocco
+   veloce fa partire lo zoom della pagina. Il pinch-zoom resta attivo. */
+button, input { touch-action: manipulation; }
+button { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background: var(--bg);

@@ -187,7 +187,15 @@ bpmInput.addEventListener('keydown', function (e) {
   if (e.key === 'ArrowDown') { e.preventDefault(); setBpm(getBpm() - 1); }
 });
 
-tapBtn.addEventListener('click', onTap);
+// Il battito conta quando il dito TOCCA (pointerdown), non quando si stacca:
+// il rilascio ha una durata variabile che sporcherebbe il tempo misurato.
+// Il click resta solo per la tastiera (Enter): quei click hanno e.detail === 0.
+if (window.PointerEvent) {
+  tapBtn.addEventListener('pointerdown', onTap);
+  tapBtn.addEventListener('click', function (e) { if (e.detail === 0) onTap(); });
+} else {
+  tapBtn.addEventListener('click', onTap);
+}
 // La barra spaziatrice batte il tempo (comodo da tastiera).
 window.addEventListener('keydown', function (e) {
   if (e.code === 'Space' && document.activeElement !== bpmInput) {
