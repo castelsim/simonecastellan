@@ -46,7 +46,7 @@ var KS_MAJOR = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29
 var KS_MINOR = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17];
 
 // --- Stato ---
-var octave = 3;
+var octave = 4;   // si parte dall'ottava del Do centrale
 var counts = [0,0,0,0,0,0,0,0,0,0,0,0];   // peso accumulato per ogni classe di nota
 var SUSTAIN_W = 1.0;                        // peso per secondo di nota tenuta
 var BASE_W = 0.4;                           // piccolo peso d'avvio a ogni nota suonata
