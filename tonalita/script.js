@@ -294,9 +294,14 @@ au.addEventListener('pause', function () { playBtn.textContent = '▶'; });
 au.addEventListener('ended', function () { playBtn.textContent = '▶'; });
 
 au.addEventListener('loadedmetadata', function () { durEl.textContent = fmtTime(au.duration); });
+// Mentre il dito trascina il cursore, timeupdate NON deve riposizionarlo:
+// altrimenti la maniglia salta via da sotto il dito a ogni aggiornamento.
+var seeking = false;
+seek.addEventListener('pointerdown', function () { seeking = true; });
+window.addEventListener('pointerup',  function () { seeking = false; });
 au.addEventListener('timeupdate', function () {
   curEl.textContent = fmtTime(au.currentTime);
-  if (au.duration) seek.value = Math.round((au.currentTime / au.duration) * 1000);
+  if (au.duration && !seeking) seek.value = Math.round((au.currentTime / au.duration) * 1000);
 });
 seek.addEventListener('input', function () {
   if (au.duration) au.currentTime = (seek.value / 1000) * au.duration;
