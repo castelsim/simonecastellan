@@ -98,6 +98,12 @@ def controlla_collegamenti_interni():
         "/en/profile/": ["index.html", "profilo/index.html", "cv/index.html"],
         "/privacy/": ["index.html", "profilo/index.html", "cv/index.html"],
         "/tienimi-presente/": ["index.html", "profilo/index.html"],
+        # Gli strumenti sono tornati visibili l'08/08/2026 (riga discreta nel footer della home):
+        # se il link sparisce tornano pagine fantasma raggiungibili solo a memoria.
+        "/audio-mp3/": ["index.html"],
+        "/bpm/": ["index.html"],
+        "/tonalita/": ["index.html"],
+        "/qrcode/": ["index.html"],
     }
     for meta, sorgenti in attese.items():
         if not any(f'href="{meta}"' in leggi(s) for s in sorgenti):
@@ -137,7 +143,8 @@ def controlla_sitemap():
         percorso = os.path.join(ROOT, u, "index.html") if u else os.path.join(ROOT, "index.html")
         if not os.path.exists(percorso):
             errore(f"la sitemap elenca /{u} ma il file non esiste")
-    pubblicate = {"", "profilo/", "cv/", "en/profile/", "privacy/", "tienimi-presente/", "BDG2029/"}
+    pubblicate = {"", "profilo/", "cv/", "en/profile/", "privacy/", "tienimi-presente/", "BDG2029/",
+                  "audio-mp3/", "bpm/", "tonalita/", "qrcode/"}
     mancanti = pubblicate - set(urls)
     if mancanti:
         errore("pagine pubblicate ma assenti dalla sitemap: " + ", ".join(sorted(mancanti)))

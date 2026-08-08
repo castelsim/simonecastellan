@@ -144,10 +144,8 @@
     .credit{position:fixed; left:0; right:0; bottom:16px; text-align:center; font-size:12px; color:#6b7075; letter-spacing:.2px}
     .credit a{color:#6b7075; text-decoration:none; border-bottom:1px solid #d6d9de}
     .credit a:hover{color:#1a1a1a}
-    .tools{margin-top:64px; font-size:12px; color:#9aa0a6}
-    .tools a{display:inline-block; margin-top:9px; color:#9aa0a6; text-decoration:none; border-bottom:1px solid #d6d9de; padding-bottom:1px}
-    .tools a:hover{color:#1a1a1a}
-    .tools-cap{display:block; font-size:10px; text-transform:uppercase; letter-spacing:1.2px; color:#b0b4ba; margin-bottom:5px}
+    .credit .toolrow{margin-bottom:7px; color:#9aa0a6}
+    .credit .toolrow a{color:#9aa0a6}
     .escape{display:none; position:fixed; top:0; left:0; right:0; background:#f1f3f4; color:#5f6368;
       font-size:13px; line-height:1.5; padding:10px 16px; text-align:center; z-index:10}
     .escape a{color:#1a1a1a; font-weight:600; text-decoration:underline}
@@ -184,18 +182,16 @@
     <a id="tienimi" href="/tienimi-presente/">Tienimi presente</a>
   </div>
 
-  <!-- Sezione "Applicativi web" nascosta dalla landing (2026-07-06). Le pagine restano attive e raggiungibili via URL diretto: stageplot.it, /audio-mp3/, /bpm/, /tonalita/, /qrcode/. Per riattivare, rimuovere i tag di commento.
-  <div class="tools">
-    <span class="tools-cap">Applicativi web</span>
-    <a href="https://stageplot.it/" aria-label="Stage Plot — applicativo web per realizzare stage plot di concerti (su stageplot.it)">Stage Plot</a><br>
-    <a href="/audio-mp3/" aria-label="Converti Audio in MP3 — converte un file audio in un MP3 leggero pronto da inviare">MP3</a><br>
-    <a href="/bpm/" aria-label="BPM — dal BPM ai tempi di delay e riverbero in millisecondi">BPM</a><br>
-    <a href="/tonalita/" aria-label="Tonalità — prova note e accordi sopra un brano per trovare a orecchio la tonalità">Tonalità</a><br>
-    <a href="/qrcode/" aria-label="QR Code — genera un QR code da qualsiasi testo nel browser">QR Code</a>
-  </div>
-  -->
-
-  <footer class="credit">Designed and built by Simone Castellan. · <a href="/profilo/">Profilo</a> · <a href="/privacy/">Privacy</a></footer>
+  <footer class="credit">
+    <!-- Gli strumenti erano nascosti dal 06/07/2026 (URL diretto soltanto); rimessi l'08/08 come riga discreta. -->
+    <div class="toolrow" id="toolrow">
+      <a href="/audio-mp3/" aria-label="Converti Audio in MP3 — converte un file audio in un MP3 leggero pronto da inviare">MP3</a> ·
+      <a href="/bpm/" aria-label="BPM — dal BPM ai tempi di delay e riverbero in millisecondi">BPM</a> ·
+      <a href="/tonalita/" aria-label="Tonalità — prova note e accordi sopra un brano per trovare a orecchio la tonalità">Tonalità</a> ·
+      <a href="/qrcode/" aria-label="QR Code — genera un QR code da qualsiasi testo nel browser">QR Code</a>
+    </div>
+    Designed and built by Simone Castellan. · <a href="/profilo/">Profilo</a> · <a href="/privacy/">Privacy</a>
+  </footer>
 
   <script src="/track.js"></script>
   <script>
@@ -301,6 +297,11 @@
     document.getElementById("wa").addEventListener("click", function(){ track("click", "WhatsApp"); });
     document.getElementById("email").addEventListener("click", function(){ track("click", "Email"); });
     document.getElementById("tienimi").addEventListener("click", function(){ track("click", "TienimiPresente"); });
+
+    document.getElementById("toolrow").addEventListener("click", function(e){
+      var a = e.target.closest && e.target.closest("a");
+      if (a) track("click", "Tool:" + a.textContent.trim());
+    });
 
     // Copia il prompt negli appunti: sync (execCommand, affidabile prima di navigare) + async best-effort.
     function copyText(text){

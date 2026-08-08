@@ -4,8 +4,8 @@ Sito personale di Simone Castellan — tecnico del suono e produttore audio.
 
 Home minimale in stile "Ask AI": il pulsante apre ChatGPT con **una riga** che invita ad aprire
 `/profilo`, dove l'assistente trova le istruzioni per fare da mediatore («curriculum dinamico»).
-La home resta volutamente nuda: il nome, un pulsante, tre contatti, e in fondo due parole per non
-lasciare il profilo irraggiungibile.
+La home resta volutamente nuda: il nome, un pulsante, tre contatti, e in fondo la riga degli
+strumenti e due parole per non lasciare il profilo irraggiungibile.
 
 ## Pagine
 
