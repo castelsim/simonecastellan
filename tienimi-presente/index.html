@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tienimi presente — Simone Castellan</title>
+  <meta name="description" content="Non hai un progetto adesso? Lascia due righe a Simone Castellan: quando capiterà, saprà perché ricontattarti. Anonimo se vuoi, nessuna iscrizione.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://simonecastellan.com/tienimi-presente/">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="theme-color" content="#ffffff">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "url": "https://simonecastellan.com/tienimi-presente/",
+    "name": "Tienimi presente — Simone Castellan",
+    "inLanguage": "it",
+    "about": { "@id": "https://simonecastellan.com/#person" }
+  }
+  </script>
+  <style>
+    :root{ --ink:#1a1a1a; --muted:#5f6368; --line:#d6d9de; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+          color:var(--ink); background:#fff; line-height:1.55;
+          display:flex; flex-direction:column; align-items:center; justify-content:center;
+          min-height:100vh; padding:24px; }
+    .tp{ max-width:430px; width:100%; }
+    h1{ font-size:23px; font-weight:600; margin-bottom:10px; text-align:center; }
+    .sub{ font-size:14px; color:var(--muted); margin-bottom:26px; text-align:center; }
+    label{ display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
+    textarea,input[type=text]{ width:100%; border:1px solid var(--line); border-radius:10px;
+      padding:11px 13px; font:inherit; font-size:15px; color:var(--ink); background:#fff; }
+    textarea{ min-height:96px; resize:vertical; }
+    textarea:focus,input[type=text]:focus{ outline:none; border-color:#9aa0a6; }
+    .field{ margin-bottom:18px; }
+    .send{ display:block; width:100%; background:var(--ink); color:#fff; border:none;
+      border-radius:999px; padding:13px; font-size:16px; font-weight:600; cursor:pointer; }
+    .send:hover{ background:#333; }
+    .send[disabled]{ background:#9aa0a6; cursor:default; }
+    .fine{ font-size:12px; color:#9aa0a6; margin-top:14px; text-align:center; }
+    .fine a{ color:#9aa0a6; }
+    .errore{ display:none; font-size:13.5px; color:#b3261e; margin-top:14px; text-align:center; }
+    .errore a{ color:#b3261e; }
+    #grazie{ display:none; text-align:center; }
+    /* Il campo-esca per i bot: un umano non lo vede e non lo compila. */
+    .sito-web{ position:absolute; left:-9999px; top:-9999px; height:0; overflow:hidden; }
+    .ns{ font-size:14px; color:var(--muted); text-align:center; }
+    .ns a{ color:var(--ink); }
+    .credit{ position:fixed; left:0; right:0; bottom:16px; text-align:center;
+      font-size:12px; color:#6b7075; letter-spacing:.2px; }
+    .credit a{ color:#6b7075; text-decoration:none; border-bottom:1px solid #d6d9de; }
+    .credit a:hover{ color:#1a1a1a; }
+  </style>
+</head>
+<body>
+
+  <div class="tp" id="modulo">
+    <h1>Tienimi presente</h1>
+    <p class="sub">Non hai un progetto adesso? Lasciami due righe: quando capiterà, saprò perché ricontattarti.</p>
+
+    <noscript>
+      <p class="ns">Questo modulo richiede JavaScript. In alternativa scrivi a
+        <a href="mailto:castellansimone@gmail.com?subject=Tienimi%20presente">castellansimone@gmail.com</a>.</p>
+    </noscript>
+
+    <div class="field">
+      <label for="msg">Per cosa potresti aver bisogno di me?</label>
+      <textarea id="msg" maxlength="1000" placeholder="Es. registrazione di un coro a dicembre, mix di un EP, il suono di una rassegna estiva…"></textarea>
+    </div>
+    <div class="field">
+      <label for="chi">Un contatto, se vuoi che ti risponda (facoltativo)</label>
+      <input id="chi" type="text" maxlength="200" placeholder="Email, telefono o profilo social">
+    </div>
+    <div class="sito-web" aria-hidden="true">
+      <label for="sito">Sito web</label>
+      <input id="sito" type="text" tabindex="-1" autocomplete="off">
+    </div>
+    <button class="send" id="invia">Invia</button>
+    <p class="errore" id="errore">Non sono riuscito a inviare. Riprova, oppure scrivi a
+      <a href="mailto:castellansimone@gmail.com?subject=Tienimi%20presente">castellansimone@gmail.com</a>.</p>
+    <p class="fine">Arriva direttamente a Simone. Nessun cookie, nessuna iscrizione: solo quello che
+      scrivi qui. <a href="/privacy/">Privacy</a></p>
+  </div>
+
+  <div class="tp" id="grazie">
+    <h1>Ricevuto, grazie.</h1>
+    <p class="sub">Se hai lasciato un contatto, Simone ti risponde appena può.<br>Altrimenti: torna quando vuoi.</p>
+  </div>
+
+  <footer class="credit">Designed and built by Simone Castellan. · <a href="/">Home</a> · <a href="/profilo/">Profilo</a> · <a href="/privacy/">Privacy</a></footer>
+
+  <script src="/track.js"></script>
+  <script>
+    var invia = document.getElementById("invia");
+    invia.addEventListener("click", function(){
+      var msg = document.getElementById("msg").value.trim();
+      var chi = document.getElementById("chi").value.trim();
+      var esca = document.getElementById("sito").value;
+      var errore = document.getElementById("errore");
+      if (!msg) { document.getElementById("msg").focus(); return; }
+
+      function grazie(){
+        document.getElementById("modulo").style.display = "none";
+        document.getElementById("grazie").style.display = "block";
+      }
+      // Bot che compila il campo invisibile: ringraziamo senza inviare nulla.
+      if (esca) { grazie(); return; }
+
+      // Stesso canale delle statistiche (track.js → foglio privato); il contatto
+      // facoltativo viaggia nella stessa cella del messaggio, così resta leggibile insieme.
+      var testo = msg + (chi ? "\n[contatto] " + chi : "");
+      if (!(window.track && window.track.send)) {
+        errore.style.display = "block";
+        return;
+      }
+      invia.disabled = true;
+      window.track.send("messaggio", testo).then(grazie, function(){
+        invia.disabled = false;
+        errore.style.display = "block";
+      });
+    });
+  </script>
+</body>
+</html>

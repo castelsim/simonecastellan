@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Converti Audio in MP3 — leggero e pronto da inviare</title>
-  <meta name="description" content="Carica un file audio (WAV, AIFF, MP3, M4A, AAC…) e ottieni in un attimo un MP3 leggero pronto per WhatsApp, email o messaggi. Tutto nel tuo browser: i file non vengono caricati online." />
+  <meta name="description" content="Carica uno o più file audio (WAV, AIFF, MP3, M4A, AAC…) e ottieni in un attimo MP3 leggeri pronti per WhatsApp, email o messaggi. Tutto nel tuo browser: i file non vengono caricati online." />
   <meta name="theme-color" content="#ffffff" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Converti Audio in MP3" />
-  <meta property="og:description" content="Carica un file audio e ottieni un MP3 leggero pronto da inviare. Funziona nel browser, niente upload." />
+  <meta property="og:description" content="Carica uno o più file audio e ottieni MP3 leggeri pronti da inviare. Funziona nel browser, niente upload." />
   <meta property="og:image" content="og-image.svg" />
   <meta property="og:locale" content="it_IT" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -30,11 +30,11 @@
     </header>
 
     <!-- Drop zone -->
-    <section id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Carica o trascina un file audio">
-      <p class="dz-title">Trascina qui il file audio</p>
-      <p class="dz-or">oppure</p>
+    <section id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Carica o trascina uno o più file audio">
+      <p class="dz-title">Trascina qui i file audio</p>
+      <p class="dz-or">anche più di uno insieme — oppure</p>
       <button type="button" id="pickBtn" class="btn btn-secondary">Carica file</button>
-      <input type="file" id="fileInput" accept="audio/*,video/*,.wav,.aiff,.aif,.aifc,.flac,.ogg,.oga,.opus,.m4a,.mp4,.aac,.mp3,.wma,.amr,.ac3,.alac,.caf,.mka,.weba,.3gp" hidden />
+      <input type="file" id="fileInput" multiple accept="audio/*,video/*,.wav,.aiff,.aif,.aifc,.flac,.ogg,.oga,.opus,.m4a,.mp4,.aac,.mp3,.wma,.amr,.ac3,.alac,.caf,.mka,.weba,.3gp" hidden />
     </section>
 
     <!-- Stato / progresso -->
@@ -45,18 +45,16 @@
       </div>
     </section>
 
-    <!-- Risultato -->
+    <!-- Risultato: una riga per ogni file della coda -->
     <section id="result" class="result hidden">
-      <div class="result-head">
-        <span id="fileName" class="result-name">audio.mp3</span>
-      </div>
+      <ul id="fileList" class="filelist" aria-live="polite"></ul>
 
-      <div class="actions">
+      <div class="actions hidden" id="actionsBox">
         <button type="button" id="sendBtn" class="btn btn-primary">Condividi</button>
         <button type="button" id="downloadBtn" class="btn btn-secondary">Scarica MP3</button>
+        <p id="sendHint" class="send-hint hidden"></p>
+        <button type="button" id="resetBtn" class="btn btn-ghost">Converti altri file</button>
       </div>
-      <p id="sendHint" class="send-hint hidden"></p>
-      <button type="button" id="resetBtn" class="btn btn-ghost">Converti un altro file</button>
     </section>
 
     <!-- Errore -->
@@ -71,6 +69,7 @@
 
   <footer class="site-footer">
     Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    · <a href="https://simonecastellan.com/profilo/" target="_blank" rel="noopener">Profilo</a>
   </footer>
 
   <!-- Motore di fallback universale (caricato leggero ~22KB; il core pesante

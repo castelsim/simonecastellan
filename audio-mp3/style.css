@@ -111,14 +111,27 @@ h1 {
   transition: width .2s ease;
 }
 
-/* Risultato */
-.result-head {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--ink);
-  margin-bottom: 20px;
-  word-break: break-all;
+/* Risultato — elenco dei file in coda, una riga ciascuno */
+.filelist { list-style: none; text-align: left; margin-bottom: 18px; }
+.f-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 9px 2px;
+  border-bottom: 1px solid var(--pill);
+  font-size: 14px;
 }
+.f-row:last-child { border-bottom: none; }
+.f-name { color: var(--ink); font-weight: 500; word-break: break-all; }
+.f-state { color: var(--faint); font-size: 13px; white-space: nowrap; flex: 0 0 auto; }
+.f-row.ko .f-state { color: #c5221f; }
+.f-dl {
+  appearance: none; border: none;
+  background: var(--pill); color: var(--ink);
+  border-radius: 999px; padding: 5px 14px;
+  font-size: 12.5px; font-weight: 600; font-family: inherit;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+.f-dl:hover { background: var(--pill-hover); }
 
 .metrics {
   display: grid;
