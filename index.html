@@ -146,9 +146,15 @@
     .credit a:hover{color:#1a1a1a}
     /* «Tools»: stesso maiuscoletto spaziato dell'occhiello in cima, così la
        pagina si chiude in simmetria senza aggiungere peso. */
-    .toolslink{margin-top:34px; font-size:12px; letter-spacing:1.6px; text-transform:uppercase;
-      color:#9aa0a6; text-decoration:none; border-bottom:1px solid #e3e5e8; padding-bottom:3px}
-    .toolslink:hover{color:#1a1a1a; border-color:#c2c6cc}
+    .toolslink{margin-top:34px; text-decoration:none; display:block}
+    .tl-word{display:block; width:max-content; margin:0 auto; font-size:12px; letter-spacing:1.6px;
+      text-transform:uppercase; color:#9aa0a6; border-bottom:1px solid #e3e5e8; padding-bottom:3px;
+      transition:color .15s ease, border-color .15s ease}
+    /* La riga sotto non dice quanti sono: il numero andrebbe corretto a ogni
+       strumento nuovo, e prima o poi resterebbe sbagliato. */
+    .tl-sub{display:block; margin-top:7px; font-size:12px; color:#b3b8bd; transition:color .15s ease}
+    .toolslink:hover .tl-word{color:#1a1a1a; border-color:#c2c6cc}
+    .toolslink:hover .tl-sub{color:#5f6368}
     .escape{display:none; position:fixed; top:0; left:0; right:0; background:#f1f3f4; color:#5f6368;
       font-size:13px; line-height:1.5; padding:10px 16px; text-align:center; z-index:10}
     .escape a{color:#1a1a1a; font-weight:600; text-decoration:underline}
@@ -186,9 +192,13 @@
   </div>
 
   <!-- Un solo appiglio invece della fila dei sette nomi (che su iPhone andava a
-       due righe): la parola è gemella dell'occhiello in cima, e l'elenco vero
-       vive in /tools/. -->
-  <a class="toolslink" id="toolslink" href="/tools/">Tools</a>
+       due righe): stesso maiuscoletto dell'occhiello in cima, e l'elenco vero
+       vive in /tools/. «Tools» da solo non diceva cosa ci fosse dietro a chi
+       arriva la prima volta: due parole in italiano tolgono il dubbio. -->
+  <a class="toolslink" id="toolslink" href="/tools/">
+    <span class="tl-word">Tools</span>
+    <span class="tl-sub">strumenti gratuiti da usare nel browser</span>
+  </a>
 
   <footer class="credit">
     Designed and built by Simone Castellan. · <a href="/profilo/">Profilo</a> · <a href="/privacy/">Privacy</a>

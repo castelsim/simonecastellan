@@ -106,6 +106,7 @@ def controlla_collegamenti_interni():
         "/tonalita/": ["tools/index.html"],
         "/qrcode/": ["tools/index.html"],
         "/comprimi-immagini/": ["tools/index.html"],
+        "/comprimi-pdf/": ["tools/index.html"],
         "/rumore-rosa/": ["tools/index.html"],
         "/ritardo-diffusori/": ["tools/index.html"],
     }
@@ -149,7 +150,7 @@ def controlla_sitemap():
             errore(f"la sitemap elenca /{u} ma il file non esiste")
     pubblicate = {"", "profilo/", "cv/", "en/profile/", "privacy/", "tienimi-presente/", "BDG2029/",
                   "tools/", "audio-mp3/", "bpm/", "tonalita/", "qrcode/",
-                  "comprimi-immagini/", "rumore-rosa/", "ritardo-diffusori/"}
+                  "comprimi-immagini/", "comprimi-pdf/", "rumore-rosa/", "ritardo-diffusori/"}
     mancanti = pubblicate - set(urls)
     if mancanti:
         errore("pagine pubblicate ma assenti dalla sitemap: " + ", ".join(sorted(mancanti)))

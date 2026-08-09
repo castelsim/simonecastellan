@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Comprimi PDF — sotto il peso che ti chiedono</title>
+  <meta name="description" content="Alleggerisci un PDF finché non passa il limite di 1, 2, 5 o 10 MB: serve per domande, moduli, PEC e portali che rifiutano gli allegati troppo grandi. Funziona nel browser, il documento non viene caricato online." />
+  <meta name="theme-color" content="#ffffff" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Comprimi PDF" />
+  <meta property="og:description" content="Porta un PDF sotto il peso richiesto da moduli, PEC e portali. Funziona nel browser: il documento non esce dal tuo dispositivo." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>Comprimi PDF</h1>
+    </header>
+
+    <!-- Peso da rispettare: i limiti che chiedono davvero i portali -->
+    <div class="seg" id="targetSeg" role="group" aria-label="Peso massimo">
+      <button type="button" class="seg-btn" data-kb="1024">1 MB</button>
+      <button type="button" class="seg-btn" data-kb="2048">2 MB</button>
+      <button type="button" class="seg-btn active" data-kb="5120">5 MB</button>
+      <button type="button" class="seg-btn" data-kb="10240">10 MB</button>
+    </div>
+
+    <section id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Carica o trascina un PDF">
+      <p class="dz-title">Trascina qui il PDF</p>
+      <p class="dz-or">oppure</p>
+      <button type="button" id="pickBtn" class="btn btn-secondary">Carica un PDF</button>
+      <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden />
+    </section>
+
+    <!-- Avviso: il documento ha testo vero -->
+    <section id="warnBox" class="warn hidden">
+      <p class="warn-title">Questo PDF contiene testo selezionabile</p>
+      <p class="warn-msg">Per alleggerirlo le pagine vengono trasformate in immagini: resterà
+        identico da vedere e da stampare, ma il testo non sarà più selezionabile né ricercabile.
+        Su un documento scansionato non cambia nulla.</p>
+      <div class="warn-actions">
+        <button type="button" id="goAnyway" class="btn btn-primary">Comprimi lo stesso</button>
+        <button type="button" id="cancelBtn" class="btn btn-ghost">Lascia perdere</button>
+      </div>
+    </section>
+
+    <!-- Lavorazione -->
+    <section id="status" class="status hidden" aria-live="polite">
+      <p id="statusText" class="status-text">Apro il documento…</p>
+      <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
+    </section>
+
+    <!-- Risultato -->
+    <section id="result" class="result hidden">
+      <ul class="filelist"><li class="f-row" id="row">
+        <span class="f-txt">
+          <span class="f-name" id="fName"></span>
+          <span class="f-state" id="fState"></span>
+        </span>
+      </li></ul>
+      <div class="actions" id="actionsBox">
+        <button type="button" id="shareBtn" class="btn btn-primary hidden">Condividi</button>
+        <button type="button" id="downloadBtn" class="btn btn-secondary">Scarica</button>
+        <button type="button" id="forceBtn" class="btn btn-secondary hidden">Rimpiccioliscilo comunque</button>
+        <button type="button" id="resetBtn" class="btn btn-ghost">Comprimi un altro PDF</button>
+      </div>
+    </section>
+
+    <p class="privacy">Il documento non viene caricato online: tutto avviene sul tuo dispositivo.</p>
+  </main>
+
+  <footer class="site-footer">
+    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    · <a href="https://simonecastellan.com/tools/" target="_blank" rel="noopener">Altri strumenti</a>
+  </footer>
+
+  <script src="vendor/pdf.min.js"></script>
+  <script src="vendor/pdf-lib.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
