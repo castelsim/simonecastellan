@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Immagini per i social — una foto, tutti i formati</title>
+  <meta name="description" content="Carica una foto e ottieni le dimensioni giuste per Instagram, TikTok, Facebook, LinkedIn, X e YouTube: post verticale 4:5, quadrato, Story 9:16, copertina 16:9 e anteprima link. Il ritaglio si sposta con un dito e l'immagine non viene mai deformata. Tutto sul tuo dispositivo, niente da caricare online." />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="canonical" href="https://simonecastellan.com/immagini-social/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Immagini per i social — una foto, tutti i formati" />
+  <meta property="og:description" content="Una foto sola diventa post verticale, quadrato, Story e copertina, nelle misure giuste per Instagram, TikTok, Facebook, LinkedIn, X e YouTube. Nel browser, senza caricare niente online." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:url" content="https://simonecastellan.com/immagini-social/" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>Immagini per i social</h1>
+      <p class="subtitle">Una foto. Tutti i formati.</p>
+    </header>
+
+    <!-- Il tool per primo: la spiegazione sta sotto, per chi la cerca. -->
+    <section id="dropZone" class="dropzone" role="button" tabindex="0"
+             aria-label="Carica o trascina una foto">
+      <p class="dz-title">Trascina qui una foto</p>
+      <p class="dz-or">oppure</p>
+      <button type="button" id="pickBtn" class="btn btn-secondary">Scegli una foto</button>
+      <input type="file" id="fileInput" accept="image/*" hidden />
+    </section>
+
+    <p class="claims">Elaborazione sul tuo dispositivo · nessun caricamento · gratis</p>
+
+    <!-- Lavorazione -->
+    <section id="status" class="status hidden" aria-live="polite">
+      <p id="statusText" class="status-text">Apro la foto…</p>
+    </section>
+
+    <!-- Errore -->
+    <section id="error" class="errore hidden" aria-live="assertive">
+      <p class="errore-msg" id="erroreMsg"></p>
+      <button type="button" id="erroreBtn" class="btn btn-ghost">Prova con un'altra foto</button>
+    </section>
+
+    <!-- Tutto ciò che appare dopo il caricamento -->
+    <section id="lavoro" class="lavoro hidden">
+
+      <div class="riga-foto">
+        <span id="nomeFoto" class="nome-foto"></span>
+        <button type="button" id="cambiaBtn" class="link-piccolo">cambia foto</button>
+      </div>
+
+      <p class="domanda">Per cosa ti serve?</p>
+      <div id="scelte" class="chips" role="group" aria-label="Piattaforme"></div>
+
+      <div id="risultati" class="risultati" aria-live="polite"></div>
+
+      <p class="aiuto" id="aiuto">
+        Trascina dentro un'anteprima per spostare l'inquadratura: si muovono tutte insieme.
+        Per sistemarne una sola, usa «solo questa».
+      </p>
+
+      <div class="riga-zoom">
+        <label for="zoom">Inquadratura</label>
+        <input type="range" id="zoom" class="range" min="100" max="250" step="1" value="100"
+               aria-label="Da più larga a più stretta" />
+        <button type="button" id="centraBtn" class="link-piccolo">rimetti al centro</button>
+      </div>
+
+      <div class="azioni">
+        <button type="button" id="zipBtn" class="btn btn-primary">Scarica tutto</button>
+        <button type="button" id="condividiBtn" class="btn btn-secondary hidden">Condividi</button>
+      </div>
+
+      <details class="avanzate">
+        <summary>Formato dei file</summary>
+        <div class="seg" id="formatoSeg" role="group" aria-label="Formato di uscita">
+          <button type="button" class="seg-btn active" data-fmt="auto">Automatico</button>
+          <button type="button" class="seg-btn" data-fmt="jpg">JPG</button>
+          <button type="button" class="seg-btn" data-fmt="png">PNG</button>
+          <button type="button" class="seg-btn" data-fmt="webp">WebP</button>
+        </div>
+        <p class="avanzate-nota">Automatico usa JPG, e passa a PNG se la tua immagine ha parti trasparenti.</p>
+      </details>
+    </section>
+
+    <p class="privacy">Le foto non vengono caricate online: il lavoro avviene sul tuo dispositivo.</p>
+
+    <!-- Spiegazione e domande: sotto il tool, per chi arriva da una ricerca -->
+    <section class="spiega">
+      <h2>Perché le misure contano</h2>
+      <p>Ogni social ritaglia da sé le immagini che non hanno le proporzioni che si aspetta, e lo fa
+        dal centro: teste tagliate, scritte a metà, loghi fuori dall'inquadratura. Dare al social
+        un'immagine già delle proporzioni giuste vuol dire decidere tu cosa si vede.</p>
+      <p>Questo strumento non deforma mai la foto: taglia. Tu scegli dove, trascinando l'anteprima.</p>
+
+      <h2>Domande</h2>
+      <h3>Le mie foto vengono caricate da qualche parte?</h3>
+      <p>No. Il ritaglio e il salvataggio avvengono dentro il browser, sul tuo telefono o computer.
+        La pagina non manda le immagini a nessun server, nemmeno al mio.</p>
+
+      <h3>Che dimensioni usa?</h3>
+      <p>Post verticale 1080×1350 (4:5), quadrato 1080×1080, Story e Reel 1080×1920 (9:16),
+        copertina YouTube 1280×720, post orizzontale X 1600×900, anteprima link 1200×630.
+        Sono le misure consigliate ad agosto 2026.</p>
+
+      <h3>E se la mia foto ha pochi pixel?</h3>
+      <p>Se manca poco, viene portata alla misura giusta: fino al doppio l'ingrandimento non si
+        vede, soprattutto dopo che il social ricomprime. Oltre il doppio si vedrebbe, e allora il
+        file esce più piccolo mantenendo le proporzioni corrette — con la misura vera scritta sotto
+        l'anteprima. Meglio un file un po' più piccolo che una foto sgranata.</p>
+
+      <h3>Perché alcuni formati sono uguali fra social diversi?</h3>
+      <p>Perché lo sono davvero: la Story di Instagram, quella di Facebook e il video di TikTok
+        chiedono la stessa identica immagine. Il file viene calcolato una volta sola e salvato con
+        il nome di ciascuno.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    · <a href="https://simonecastellan.com/tools/" target="_blank" rel="noopener">Altri strumenti</a>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="preset.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
