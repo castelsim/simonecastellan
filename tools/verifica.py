@@ -104,6 +104,9 @@ def controlla_collegamenti_interni():
         "/bpm/": ["index.html"],
         "/tonalita/": ["index.html"],
         "/qrcode/": ["index.html"],
+        "/comprimi-immagini/": ["index.html"],
+        "/rumore-rosa/": ["index.html"],
+        "/ritardo-diffusori/": ["index.html"],
     }
     for meta, sorgenti in attese.items():
         if not any(f'href="{meta}"' in leggi(s) for s in sorgenti):
@@ -144,7 +147,8 @@ def controlla_sitemap():
         if not os.path.exists(percorso):
             errore(f"la sitemap elenca /{u} ma il file non esiste")
     pubblicate = {"", "profilo/", "cv/", "en/profile/", "privacy/", "tienimi-presente/", "BDG2029/",
-                  "audio-mp3/", "bpm/", "tonalita/", "qrcode/"}
+                  "audio-mp3/", "bpm/", "tonalita/", "qrcode/",
+                  "comprimi-immagini/", "rumore-rosa/", "ritardo-diffusori/"}
     mancanti = pubblicate - set(urls)
     if mancanti:
         errore("pagine pubblicate ma assenti dalla sitemap: " + ", ".join(sorted(mancanti)))

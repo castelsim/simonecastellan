@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Ritardo diffusori — dalla distanza ai millisecondi</title>
+  <meta name="description" content="Quanti millisecondi mettere sul delay di una torre o di un diffusore di riempimento: inserisci la distanza in metri e leggi il ritardo, corretto con la temperatura dell'aria. Funziona anche al contrario, dai millisecondi ai metri." />
+  <meta name="theme-color" content="#ffffff" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Ritardo diffusori" />
+  <meta property="og:description" content="Dalla distanza ai millisecondi per allineare torri e riempimenti, con la correzione in temperatura. Anche al contrario." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>Ritardo diffusori</h1>
+      <p class="subtitle">dalla distanza ai millisecondi</p>
+    </header>
+
+    <!-- Distanza -->
+    <section class="field" aria-label="Distanza dal palco">
+      <span class="field-label">Distanza dal palco</span>
+      <div class="field-row">
+        <button type="button" id="dDown" class="step" aria-label="Meno un metro">−</button>
+        <div class="field-num">
+          <!-- text, non number: in Italia si scrive «12,5» e un campo numerico
+               con la virgola resta vuoto. Qui la virgola si accetta. -->
+          <input type="text" id="dist" class="num" value="20"
+                 inputmode="decimal" autocomplete="off" aria-label="Distanza in metri" />
+          <span class="unit">m</span>
+        </div>
+        <button type="button" id="dUp" class="step" aria-label="Più un metro">+</button>
+      </div>
+    </section>
+
+    <!-- Risultato -->
+    <section class="out" aria-label="Ritardo">
+      <div class="field-num big">
+        <input type="text" id="ms" class="num num-big" value="58,3"
+               inputmode="decimal" autocomplete="off" aria-label="Ritardo in millisecondi" />
+        <span class="unit unit-big">ms</span>
+      </div>
+      <p class="sub-out" id="subOut"></p>
+      <button type="button" id="haas" class="haas">
+        <span id="haasText"></span>
+      </button>
+    </section>
+
+    <!-- Temperatura -->
+    <section class="temp" aria-label="Temperatura dell'aria">
+      <div class="temp-head">
+        <span>Temperatura</span>
+        <span id="tempVal" class="temp-val">20 °C · 343,4 m/s</span>
+      </div>
+      <input type="range" id="temp" class="range" min="-5" max="45" step="1" value="20"
+             aria-label="Temperatura dell'aria in gradi" />
+    </section>
+
+    <p class="hint">
+      Il ritardo allinea il suono della torre a quello del palco. In genere si aggiungono
+      5–15 ms in più: l'orecchio segue chi arriva per primo e la voce resta sul palco.
+      Tocca la pillola qui sopra per copiare il valore. I millisecondi si possono
+      anche scrivere: la distanza si ricava da soli.
+    </p>
+  </main>
+
+  <footer class="site-footer">
+    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    · <a href="https://simonecastellan.com/profilo/" target="_blank" rel="noopener">Profilo</a>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

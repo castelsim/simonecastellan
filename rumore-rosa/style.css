@@ -1,0 +1,227 @@
+/* Stile coerente con simonecastellan.com — minimale, monocromatico, luce. */
+:root {
+  --bg: #ffffff;
+  --text: #3c4043;
+  --ink: #1a1a1a;
+  --muted: #5f6368;
+  --muted-2: #80868b;
+  --faint: #9aa0a6;
+  --pill: #f1f3f4;
+  --pill-hover: #e6e8ea;
+  --line: #c2c6cc;
+  --line-soft: #dadce0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+/* Play/Stop e presets si premono anche a raffica: senza questo, su mobile il
+   doppio tocco veloce fa partire lo zoom della pagina (come in /bpm/). */
+button, input { touch-action: manipulation; }
+button { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px 20px calc(64px + env(safe-area-inset-bottom));
+  text-align: center;
+}
+
+.card { width: 100%; max-width: 440px; }
+
+header { margin-bottom: 20px; }
+h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2px; }
+.subtitle { font-size: 15px; color: var(--muted); margin-top: 8px; }
+
+/* Segmented */
+.seg {
+  display: inline-flex;
+  gap: 3px;
+  background: var(--pill);
+  border-radius: 999px;
+  padding: 4px;
+  max-width: 100%;
+}
+.seg-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 15px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s ease, color .15s ease;
+}
+.seg-btn.active { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.seg.small { margin-top: 22px; }
+.seg.small .seg-btn { font-size: 12.5px; padding: 6px 14px; }
+
+/* Play grande, gemello del TAP di /bpm/ */
+.play-big {
+  appearance: none;
+  border: none;
+  background: var(--pill);
+  color: var(--ink);
+  font-family: inherit;
+  width: 170px;
+  height: 170px;
+  border-radius: 28px;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  cursor: pointer;
+  margin: 24px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s ease, color .15s ease;
+}
+.play-big:hover { background: var(--pill-hover); }
+.play-big.on { background: var(--ink); color: #fff; }
+.play-big.on:hover { background: #000; }
+
+.readout {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--faint);
+  min-height: 1.2em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Frequenza */
+.freq { margin-top: 18px; }
+.freq-field { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.freq-input {
+  appearance: textfield;
+  -moz-appearance: textfield;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  width: 5ch;
+  text-align: center;
+  padding: 0;
+}
+.freq-input:focus { outline: none; }
+.freq-input::-webkit-outer-spin-button,
+.freq-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.freq-unit { font-size: 13px; font-weight: 600; color: var(--muted-2); letter-spacing: 1px; }
+
+.step {
+  appearance: none;
+  border: none;
+  background: var(--pill);
+  color: var(--ink);
+  width: 38px; height: 38px;
+  border-radius: 999px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: background .15s ease;
+}
+.step.sm { width: 32px; height: 32px; font-size: 16px; }
+.step:hover { background: var(--pill-hover); }
+.step:active { background: var(--line-soft); }
+
+.presets { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.pset {
+  appearance: none;
+  border: none;
+  background: var(--pill);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 13px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.pset:hover { background: var(--pill-hover); color: var(--ink); }
+.pset.active { background: var(--ink); color: #fff; }
+
+/* Livello */
+.level { margin-top: 26px; }
+.level-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--muted-2);
+  margin-bottom: 9px;
+}
+.level-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+.range {
+  appearance: none; -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line-soft);
+  cursor: pointer;
+  outline: none;
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--ink);
+  cursor: pointer;
+}
+.range::-moz-range-thumb {
+  width: 18px; height: 18px;
+  border: none; border-radius: 50%;
+  background: var(--ink);
+  cursor: pointer;
+}
+
+.hint {
+  margin-top: 24px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--faint);
+}
+
+/* Footer fisso, come il credit del sito */
+.site-footer {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: 16px;
+  text-align: center;
+  font-size: 12px;
+  color: #6b7075;
+  letter-spacing: .2px;
+}
+.site-footer a { color: #6b7075; text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 1px; }
+.site-footer a:hover { color: var(--ink); }
+
+.hidden { display: none !important; }
+
+@media (max-width: 460px) {
+  h1 { font-size: 22px; }
+  .subtitle { font-size: 14px; }
+  .seg-btn { padding: 7px 12px; }
+  .play-big { width: 150px; height: 150px; font-size: 23px; }
+}
