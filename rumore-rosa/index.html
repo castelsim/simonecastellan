@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Rumore rosa e toni di test — per tarare un impianto</title>
+  <meta name="description" content="Rumore rosa, rumore bianco, sinusoidi e sweep 20 Hz–20 kHz direttamente dal browser, con livello regolabile e uscita su Solo L o Solo R. Serve a tarare un PA, cercare i fischi e capire quale cassa sta suonando. Niente da installare." />
+  <meta name="theme-color" content="#ffffff" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Rumore rosa e toni di test" />
+  <meta property="og:description" content="Rosa, bianco, sinusoide e sweep dal browser: livello in dBFS e uscita Solo L / Solo R. Per tarare un impianto senza generatore." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>Rumore rosa</h1>
+      <p class="subtitle">e toni di test, per tarare un impianto</p>
+    </header>
+
+    <!-- Sorgente -->
+    <div class="seg" id="kindSeg" role="group" aria-label="Segnale">
+      <button type="button" class="seg-btn active" data-kind="pink">Rosa</button>
+      <button type="button" class="seg-btn" data-kind="white">Bianco</button>
+      <button type="button" class="seg-btn" data-kind="sine">Sinusoide</button>
+      <button type="button" class="seg-btn" data-kind="sweep">Sweep</button>
+    </div>
+
+    <!-- Play / Stop -->
+    <button type="button" id="playBtn" class="play-big" aria-pressed="false">PLAY</button>
+    <p id="readout" class="readout">Rumore rosa</p>
+
+    <!-- Frequenza (solo sinusoide) -->
+    <section id="freqBox" class="freq hidden" aria-label="Frequenza">
+      <div class="freq-field">
+        <button type="button" id="fDown" class="step sm" aria-label="Frequenza più bassa">−</button>
+        <input type="number" id="freq" class="freq-input" value="440" min="20" max="20000" step="1"
+               inputmode="numeric" aria-label="Frequenza in hertz" />
+        <span class="freq-unit">Hz</span>
+        <button type="button" id="fUp" class="step sm" aria-label="Frequenza più alta">+</button>
+      </div>
+      <div class="presets" id="presets">
+        <button type="button" class="pset" data-f="100">100</button>
+        <button type="button" class="pset" data-f="250">250</button>
+        <button type="button" class="pset" data-f="440">440</button>
+        <button type="button" class="pset" data-f="1000">1k</button>
+        <button type="button" class="pset" data-f="4000">4k</button>
+        <button type="button" class="pset" data-f="10000">10k</button>
+      </div>
+    </section>
+
+    <!-- Livello -->
+    <section class="level" aria-label="Livello">
+      <div class="level-head">
+        <span>Livello</span>
+        <span id="levelVal" class="level-val">−20 dBFS</span>
+      </div>
+      <input type="range" id="level" class="range" min="-60" max="-12" step="1" value="-20"
+             aria-label="Livello in dBFS" />
+    </section>
+
+    <!-- Uscita -->
+    <div class="seg small" id="routeSeg" role="group" aria-label="Uscita">
+      <button type="button" class="seg-btn active" data-route="stereo">Stereo</button>
+      <button type="button" class="seg-btn" data-route="left">Solo L</button>
+      <button type="button" class="seg-btn" data-route="right">Solo R</button>
+    </div>
+
+    <p class="hint">
+      Alza dal mixer, non dal telefono: qui il livello è quello del segnale.
+      Su iPhone togli la modalità silenziosa, altrimenti non esce nulla.
+    </p>
+  </main>
+
+  <footer class="site-footer">
+    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    · <a href="https://simonecastellan.com/profilo/" target="_blank" rel="noopener">Profilo</a>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

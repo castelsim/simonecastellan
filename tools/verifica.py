@@ -98,12 +98,16 @@ def controlla_collegamenti_interni():
         "/en/profile/": ["index.html", "profilo/index.html", "cv/index.html"],
         "/privacy/": ["index.html", "profilo/index.html", "cv/index.html"],
         "/tienimi-presente/": ["index.html", "profilo/index.html"],
-        # Gli strumenti sono tornati visibili l'08/08/2026 (riga discreta nel footer della home):
-        # se il link sparisce tornano pagine fantasma raggiungibili solo a memoria.
-        "/audio-mp3/": ["index.html"],
-        "/bpm/": ["index.html"],
-        "/tonalita/": ["index.html"],
-        "/qrcode/": ["index.html"],
+        # Dal 09/08/2026 gli strumenti stanno tutti in /tools/ e la home ci arriva
+        # con una parola sola: se salta quel link, sette pagine diventano fantasmi.
+        "/tools/": ["index.html"],
+        "/audio-mp3/": ["tools/index.html"],
+        "/bpm/": ["tools/index.html"],
+        "/tonalita/": ["tools/index.html"],
+        "/qrcode/": ["tools/index.html"],
+        "/comprimi-immagini/": ["tools/index.html"],
+        "/rumore-rosa/": ["tools/index.html"],
+        "/ritardo-diffusori/": ["tools/index.html"],
     }
     for meta, sorgenti in attese.items():
         if not any(f'href="{meta}"' in leggi(s) for s in sorgenti):
@@ -144,7 +148,8 @@ def controlla_sitemap():
         if not os.path.exists(percorso):
             errore(f"la sitemap elenca /{u} ma il file non esiste")
     pubblicate = {"", "profilo/", "cv/", "en/profile/", "privacy/", "tienimi-presente/", "BDG2029/",
-                  "audio-mp3/", "bpm/", "tonalita/", "qrcode/"}
+                  "tools/", "audio-mp3/", "bpm/", "tonalita/", "qrcode/",
+                  "comprimi-immagini/", "rumore-rosa/", "ritardo-diffusori/"}
     mancanti = pubblicate - set(urls)
     if mancanti:
         errore("pagine pubblicate ma assenti dalla sitemap: " + ", ".join(sorted(mancanti)))
@@ -152,7 +157,8 @@ def controlla_sitemap():
 
 
 def controlla_json_ld():
-    for f in ("index.html", "profilo/index.html", "cv/index.html", "en/profile/index.html"):
+    for f in ("index.html", "profilo/index.html", "cv/index.html", "en/profile/index.html",
+              "tools/index.html"):
         for blocco in re.findall(r'<script type="application/ld\+json">(.*?)</script>', leggi(f), re.S):
             try:
                 json.loads(blocco)

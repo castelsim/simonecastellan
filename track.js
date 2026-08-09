@@ -17,8 +17,14 @@
 (function () {
   var ANALYTICS_URL = "https://script.google.com/macros/s/AKfycbw2b2lcSidmlfcv-sPn8bDSTX7DbwoanhVypGuBoMmJ2yooRQQNaGp9D-gzVc6wIuof3Q/exec";
 
+  // Le prove fatte in locale (server di sviluppo, file aperto a mano) finivano nel
+  // foglio insieme alle visite vere, senza un campo che le distinguesse: ogni
+  // anteprima di una pagina nuova sporcava le statistiche. Qui non si parte.
+  var IN_LOCALE = /^(localhost|127\.0\.0\.1|\[::1\]|0\.0\.0\.0)$/.test(location.hostname) ||
+                  location.protocol === "file:";
+
   function track(event, target) {
-    if (!ANALYTICS_URL) return;
+    if (!ANALYTICS_URL || IN_LOCALE) return;
     try {
       var p = new URLSearchParams(location.search);
       var body = JSON.stringify({
@@ -45,6 +51,8 @@
   // Variante per chi ha bisogno dell'esito (il modulo «Tienimi presente»): stesso
   // canale e stesso foglio, ma torna una Promise — un messaggio perso è un contatto
   // perso, quindi lì il fire-and-forget del beacon non basta.
+  // Questa NON è bloccata in locale apposta: il modulo si prova da qui, e un
+  // messaggio in più nel foglio si riconosce (lo si è scritto apposta).
   track.send = function (event, target) {
     var body = "";
     try {
