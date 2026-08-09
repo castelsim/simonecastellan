@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Comprimi PDF — sotto il peso che ti chiedono</title>
-  <meta name="description" content="Alleggerisci un PDF finché non passa il limite di 1, 2, 5 o 10 MB: serve per domande, moduli, PEC e portali che rifiutano gli allegati troppo grandi. Funziona nel browser, il documento non viene caricato online." />
+  <meta name="description" content="Alleggerisci un PDF finché non passa il limite di 1, 2, 5 o 10 MB, senza trasformarlo in immagini: vengono ricompresse solo le foto e le scansioni dentro il documento, mentre il testo resta selezionabile e ricercabile. Serve per domande, moduli, PEC e portali che rifiutano gli allegati troppo grandi. Funziona nel browser, il documento non viene caricato online." />
   <meta name="theme-color" content="#ffffff" />
 
   <!-- Open Graph -->
@@ -23,6 +23,8 @@
   <main class="card">
     <header>
       <h1>Comprimi PDF</h1>
+      <p class="subtitle">Alleggerisce le immagini dentro il documento: il testo resta testo,
+        selezionabile e ricercabile.</p>
     </header>
 
     <!-- Peso da rispettare: i limiti che chiedono davvero i portali -->
@@ -40,14 +42,14 @@
       <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden />
     </section>
 
-    <!-- Avviso: il documento ha testo vero -->
+    <!-- Avviso: si sta per rinunciare al testo. Compare solo se lo si chiede. -->
     <section id="warnBox" class="warn hidden">
-      <p class="warn-title">Questo PDF contiene testo selezionabile</p>
-      <p class="warn-msg">Per alleggerirlo le pagine vengono trasformate in immagini: resterà
-        identico da vedere e da stampare, ma il testo non sarà più selezionabile né ricercabile.
-        Su un documento scansionato non cambia nulla.</p>
+      <p class="warn-title">Così ogni pagina diventa una fotografia</p>
+      <p class="warn-msg">Il documento resterà identico da vedere e da stampare, ma il testo
+        smetterà di essere testo: non si potrà più selezionare, cercare o copiare. Su un
+        documento già scansionato non cambia nulla.</p>
       <div class="warn-actions">
-        <button type="button" id="goAnyway" class="btn btn-primary">Comprimi lo stesso</button>
+        <button type="button" id="goAnyway" class="btn btn-primary">Va bene, procedi</button>
         <button type="button" id="cancelBtn" class="btn btn-ghost">Lascia perdere</button>
       </div>
     </section>
@@ -70,6 +72,7 @@
         <button type="button" id="shareBtn" class="btn btn-primary hidden">Condividi</button>
         <button type="button" id="downloadBtn" class="btn btn-secondary">Scarica</button>
         <button type="button" id="forceBtn" class="btn btn-secondary hidden">Rimpiccioliscilo comunque</button>
+        <button type="button" id="rasterBtn" class="btn btn-secondary hidden">Stringi ancora, anche a costo del testo</button>
         <button type="button" id="resetBtn" class="btn btn-ghost">Comprimi un altro PDF</button>
       </div>
     </section>

@@ -152,6 +152,7 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
   font-variant-numeric: tabular-nums;
 }
 .f-row.ko .f-state { color: #c5221f; }
+.f-hint { display: inline-block; margin-top: 3px; color: var(--faint); font-size: 12px; }
 .f-state b { color: var(--ink); font-weight: 600; }
 .f-dl {
   appearance: none; border: none;
