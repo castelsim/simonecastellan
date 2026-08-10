@@ -20,6 +20,13 @@
 
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Nascosto dal 10/08/2026 per scelta di Simone: la pagina resta in piedi e
+       raggiungibile con l'indirizzo diretto, ma non compare in /tools/ né nella
+       sitemap, e i motori non la indicizzano. Per rimetterla in circolo: togliere
+       questo «noindex», rimettere la voce in tools/index.html (link + JSON-LD),
+       la riga nella sitemap e le due voci in tools/verifica.py. -->
+  <meta name="robots" content="noindex, follow" />
 </head>
 <body>
   <main class="card">
