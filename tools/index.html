@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Strumenti gratuiti — tarare un impianto, alleggerire un file, trovare una tonalità</title>
-  <meta name="description" content="Strumenti gratuiti che funzionano nel browser, in ordine di problema: tarare un impianto, allineare una torre di ritardo, trovare i tempi di delay, capire la tonalità di un brano, mandare un audio leggero, far stare una foto sotto il limite, passare un link o una rete Wi-Fi. Niente da installare, niente che finisce online." />
+  <meta name="description" content="Strumenti gratuiti che funzionano nel browser, nati da problemi incontrati davvero in studio e dal vivo: StagePlot per il palco e il rider, e poi tarare un impianto, allineare una torre di ritardo, trovare i tempi di delay, capire la tonalità di un brano, mandare un audio leggero, far stare un file sotto il limite. Niente da installare, niente che finisce online." />
   <meta name="theme-color" content="#ffffff" />
   <link rel="canonical" href="https://simonecastellan.com/tools/" />
 
@@ -48,12 +48,102 @@
 <body>
   <main class="card">
     <header>
-      <h1>Strumenti</h1>
-      <p class="subtitle">Funzionano nel browser: niente da installare, niente che finisce online.</p>
+      <span class="cap">Strumenti</span>
+      <h1>Trasformo piccoli attriti quotidiani in strumenti.</h1>
+      <p class="intro">Lavorando succede spesso la stessa cosa: qualcosa di semplice che richiede
+        tre software, due conversioni e dieci minuti di passaggi a mano. Quando l'attrito si ripete,
+        invece di rifarlo ogni volta costruisco lo strumento che lo risolve.</p>
+      <p class="intro">Non parto da un'idea di software: parto da qualcosa che è successo davvero
+        in sala o in studio. Il problema si affronta una volta; dalla volta dopo si usa e basta —
+        io o chiunque altro.</p>
     </header>
+
+    <!-- Il progetto più strutturato: sta qui in evidenza, non nell'elenco, perché
+         non è una piccola utility. Il disegno è vettoriale e stilizzato — pesa
+         nulla, resta nitido a ogni scala e non invecchia come uno screenshot. -->
+    <section class="feat">
+      <div class="shot">
+        <svg viewBox="0 0 800 520" role="img"
+             aria-label="Schema di uno stage plot visto dall'alto: batteria su pedana, amplificatori, tastiere, microfoni, monitor spia, e accanto la channel list numerata">
+          <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+            <!-- palco -->
+            <rect x="16" y="16" width="536" height="488" rx="14" fill="#ffffff" stroke="#e3e5e8"/>
+            <!-- pedana batteria -->
+            <rect x="204" y="54" width="160" height="118" rx="10" fill="#f4f5f7" stroke="#e8eaed"/>
+            <circle cx="226" cy="112" r="17" fill="none" stroke="#cdd1d6" stroke-dasharray="2 3"/>
+            <circle cx="342" cy="112" r="17" fill="none" stroke="#cdd1d6" stroke-dasharray="2 3"/>
+            <circle cx="260" cy="96" r="13" fill="#e8eaed" stroke="#d5d9dd"/>
+            <circle cx="308" cy="96" r="13" fill="#e8eaed" stroke="#d5d9dd"/>
+            <circle cx="284" cy="132" r="24" fill="#dfe2e6" stroke="#c8ccd1"/>
+            <!-- amplificatori -->
+            <rect x="56"  y="150" width="76" height="42" rx="7" fill="#eceef0" stroke="#dfe2e6"/>
+            <rect x="436" y="150" width="76" height="42" rx="7" fill="#eceef0" stroke="#dfe2e6"/>
+            <!-- tastiere -->
+            <rect x="408" y="252" width="112" height="30" rx="5" fill="#eceef0" stroke="#dfe2e6"/>
+            <!-- microfoni: voce al centro, due cori -->
+            <circle cx="284" cy="318" r="11" fill="#1a1a1a"/>
+            <circle cx="160" cy="318" r="9"  fill="#5f6368"/>
+            <circle cx="408" cy="318" r="9"  fill="#5f6368"/>
+            <!-- monitor spia; il centrale è l'unico accento di colore -->
+            <path d="M48 424 H128 L116 398 H60 Z"    fill="#e8eaed" stroke="#d5d9dd"/>
+            <path d="M146 424 H226 L214 398 H158 Z"  fill="#e8eaed" stroke="#d5d9dd"/>
+            <path d="M244 424 H324 L312 398 H256 Z"  fill="#2563eb"/>
+            <path d="M342 424 H422 L410 398 H354 Z"  fill="#e8eaed" stroke="#d5d9dd"/>
+            <path d="M440 424 H520 L508 398 H452 Z"  fill="#e8eaed" stroke="#d5d9dd"/>
+            <line x1="60" y1="452" x2="508" y2="452" stroke="#e3e5e8" stroke-dasharray="3 4"/>
+            <!-- font-size generosi: l'SVG viene disegnato a circa 0,65× della sua
+                 viewBox, quindi sotto i 13 px qui le etichette spariscono. -->
+            <g font-size="14" letter-spacing=".8" fill="#b3b8bd" text-anchor="middle">
+              <text x="284" y="192">BATTERIA</text>
+              <text class="lbl-min" x="94"  y="210">CHITARRA</text>
+              <text class="lbl-min" x="474" y="210">BASSO</text>
+              <text class="lbl-min" x="464" y="302">TASTIERE</text>
+              <text x="284" y="350">VOCE</text>
+              <text x="284" y="476">FRONTE PALCO</text>
+            </g>
+            <!-- channel list: il documento che nasce dal disegno -->
+            <text x="592" y="42" font-size="14" letter-spacing=".8" fill="#b3b8bd">CHANNEL LIST</text>
+            <g>
+              <circle cx="600" cy="76"  r="11" fill="#f1f3f4"/><text x="600" y="79.5" font-size="12" fill="#5f6368" text-anchor="middle">1</text>
+              <rect x="620" y="72"  width="132" height="8" rx="4" fill="#e3e5e8"/>
+              <circle cx="600" cy="112" r="11" fill="#f1f3f4"/><text x="600" y="115.5" font-size="12" fill="#5f6368" text-anchor="middle">2</text>
+              <rect x="620" y="108" width="98"  height="8" rx="4" fill="#e3e5e8"/>
+              <circle cx="600" cy="148" r="11" fill="#f1f3f4"/><text x="600" y="151.5" font-size="12" fill="#5f6368" text-anchor="middle">3</text>
+              <rect x="620" y="144" width="146" height="8" rx="4" fill="#e3e5e8"/>
+              <circle cx="600" cy="184" r="11" fill="#f1f3f4"/><text x="600" y="187.5" font-size="12" fill="#5f6368" text-anchor="middle">4</text>
+              <rect x="620" y="180" width="112" height="8" rx="4" fill="#e3e5e8"/>
+              <circle cx="600" cy="220" r="11" fill="#f1f3f4"/><text x="600" y="223.5" font-size="12" fill="#5f6368" text-anchor="middle">5</text>
+              <rect x="620" y="216" width="134" height="8" rx="4" fill="#e3e5e8"/>
+              <circle cx="600" cy="256" r="11" fill="#1a1a1a"/><text x="600" y="259.5" font-size="12" fill="#ffffff" text-anchor="middle">6</text>
+              <rect x="620" y="252" width="120" height="8" rx="4" fill="#c8ccd1"/>
+              <circle cx="600" cy="292" r="11" fill="#f1f3f4"/><text x="600" y="295.5" font-size="12" fill="#5f6368" text-anchor="middle">7</text>
+              <rect x="620" y="288" width="92"  height="8" rx="4" fill="#e3e5e8"/>
+              <circle cx="600" cy="328" r="11" fill="#f1f3f4"/><text x="600" y="331.5" font-size="12" fill="#5f6368" text-anchor="middle">8</text>
+              <rect x="620" y="324" width="140" height="8" rx="4" fill="#e3e5e8"/>
+            </g>
+            <text x="592" y="392" font-size="14" letter-spacing=".8" fill="#b3b8bd">RIDER PDF</text>
+            <rect x="592" y="406" width="106" height="66" rx="6" fill="#ffffff" stroke="#e3e5e8"/>
+            <g fill="#e8eaed">
+              <rect x="604" y="420" width="58" height="6" rx="3"/>
+              <rect x="604" y="434" width="82" height="5" rx="2.5"/>
+              <rect x="604" y="446" width="70" height="5" rx="2.5"/>
+              <rect x="604" y="458" width="78" height="5" rx="2.5"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+
+      <span class="cap">Progetto</span>
+      <h2>StagePlot.it</h2>
+      <p>Disegni il palco trascinando microfoni, strumenti e luci. Da lì escono channel list,
+        monitor, cablaggi, elettrico e il rider in PDF — e restano collegati: cambi una cosa
+        sul palco, i documenti si aggiornano.</p>
+      <a class="cta" id="splink" href="https://stageplot.it/">Apri stageplot.it ›</a>
+    </section>
 
     <!-- In ordine di problema, non di nome: chi arriva sa cosa gli serve,
          raramente sa come si chiama lo strumento che lo risolve. -->
+    <span class="list-cap">Piccoli strumenti</span>
     <div class="list">
       <a class="task" href="/rumore-rosa/">
         <span class="verb">Tarare un impianto</span>
@@ -106,8 +196,9 @@
     </div>
 
     <p class="foot">
-      Gratuiti e senza pubblicità: nessun file viene caricato online, il lavoro avviene
-      sul tuo dispositivo. Se ne manca uno, <a href="/tienimi-presente/">dimmelo</a>.
+      Gratuiti e senza pubblicità. Funzionano nel browser: nessun file viene caricato online,
+      il lavoro avviene sul tuo dispositivo. Se ne manca uno,
+      <a href="/tienimi-presente/">dimmelo</a>.
     </p>
   </main>
 
@@ -122,6 +213,8 @@
       var a = e.target.closest && e.target.closest('.task');
       if (a) track('click', 'Tool:' + a.querySelector('.tool').textContent.replace('›', '').trim());
     });
+    // StagePlot esce dal sito: senza questo clic non si saprebbe che il blocco funziona.
+    document.getElementById('splink').addEventListener('click', function () { track('click', 'StagePlot'); });
   </script>
 </body>
 </html>
