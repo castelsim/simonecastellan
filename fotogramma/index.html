@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Estrai un fotogramma — una foto dal tuo video</title>
+  <meta name="description" content="Carica un video, scorri fino all'istante giusto e salva quel fotogramma come immagine, alla risoluzione piena del video. Serve per la copertina di un Reel o di un video YouTube. Funziona nel browser: il video non viene caricato online." />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="canonical" href="https://simonecastellan.com/fotogramma/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Estrai un fotogramma" />
+  <meta property="og:description" content="Una foto presa dal tuo video, alla risoluzione piena. Nel browser, senza caricare niente online." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:url" content="https://simonecastellan.com/fotogramma/" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>Estrai un fotogramma</h1>
+      <p class="subtitle">Una foto presa dal tuo video, per farne una copertina.</p>
+    </header>
+
+    <section id="dropZone" class="dropzone" role="button" tabindex="0"
+             aria-label="Carica o trascina un video">
+      <p class="dz-title">Trascina qui un video</p>
+      <p class="dz-or">oppure</p>
+      <button type="button" id="pickBtn" class="btn btn-secondary">Scegli un video</button>
+      <input type="file" id="fileInput" accept="video/*" hidden />
+    </section>
+
+    <p class="claims">Elaborazione sul tuo dispositivo · nessun caricamento · gratis</p>
+
+    <section id="error" class="errore hidden" aria-live="assertive">
+      <p class="errore-msg" id="erroreMsg"></p>
+      <button type="button" id="erroreBtn" class="btn btn-ghost">Prova con un altro video</button>
+    </section>
+
+    <section id="lavoro" class="lavoro hidden">
+      <div class="riga-file">
+        <span id="schedaVideo" class="scheda"></span>
+        <button type="button" id="cambiaBtn" class="link-piccolo">cambia video</button>
+      </div>
+
+      <video id="video" class="video" playsinline preload="metadata"></video>
+
+      <div class="riga-tempo">
+        <input type="range" id="barra" class="range" min="0" max="1000" value="0" step="1"
+               aria-label="Punto del video" />
+        <span id="tempo" class="tempo">0:00</span>
+      </div>
+
+      <div class="passi" role="group" aria-label="Sposta di un fotogramma">
+        <button type="button" class="step" id="indietroMolto" aria-label="Indietro di un secondo">«</button>
+        <button type="button" class="step" id="indietro" aria-label="Indietro di un fotogramma">‹</button>
+        <button type="button" class="step play" id="playBtn" aria-label="Riproduci o metti in pausa">▶</button>
+        <button type="button" class="step" id="avanti" aria-label="Avanti di un fotogramma">›</button>
+        <button type="button" class="step" id="avantiMolto" aria-label="Avanti di un secondo">»</button>
+      </div>
+
+      <p class="strisciaTitolo">Oppure salta qui</p>
+      <div id="striscia" class="striscia"></div>
+
+      <div class="azioni">
+        <button type="button" id="salvaBtn" class="btn btn-primary">Salva questo fotogramma</button>
+        <button type="button" id="condividiBtn" class="btn btn-secondary hidden">Condividi</button>
+      </div>
+
+      <details class="avanzate">
+        <summary>Formato del file</summary>
+        <div class="seg" id="formatoSeg" role="group" aria-label="Formato">
+          <button type="button" class="seg-btn active" data-fmt="jpg">JPG</button>
+          <button type="button" class="seg-btn" data-fmt="png">PNG</button>
+        </div>
+        <p class="avanzate-nota">Il fotogramma esce alla risoluzione piena del video. JPG va bene
+          quasi sempre; PNG solo se il fotogramma deve restare senza alcuna perdita.</p>
+      </details>
+    </section>
+
+    <p class="privacy">Il video non viene caricato online: tutto avviene sul tuo dispositivo.</p>
+
+    <section class="spiega">
+      <h2>A cosa serve</h2>
+      <p>La copertina di un video la scegli tu, ma per averla devi tirarla fuori dal video: fare uno
+        screenshot rovina la qualità e ti porta dietro l'interfaccia del lettore. Qui il fotogramma
+        esce pulito e alla risoluzione piena, esattamente com'è nel file.</p>
+
+      <h2>Domande</h2>
+      <h3>Il video viene caricato da qualche parte?</h3>
+      <p>No. Viene aperto dentro il browser, sul tuo dispositivo, e il fotogramma si disegna lì.
+        Niente esce da casa tua.</p>
+
+      <h3>Quanto è grande l'immagine che ottengo?</h3>
+      <p>Quanto il video: se il video è 1920×1080, il fotogramma è 1920×1080. Non viene ingrandito
+        né rimpicciolito.</p>
+
+      <h3>Perché il mio video non si apre?</h3>
+      <p>Il browser sa aprire i formati più diffusi (MP4, MOV, WebM). Se il tuo video usa una
+        codifica particolare potrebbe non farcela: in quel caso non c'è modo di leggerlo qui senza
+        installare qualcosa, e non è il genere di cosa che questo sito fa.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    · <a href="https://simonecastellan.com/tools/" target="_blank" rel="noopener">Altri strumenti</a>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
