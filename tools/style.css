@@ -9,6 +9,7 @@
   --pill: #f1f3f4;
   --line: #c2c6cc;
   --line-soft: #dadce0;
+  --hair: #eef0f2;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,21 +24,24 @@ body {
   min-height: 100vh;
   padding: 56px 20px calc(72px + env(safe-area-inset-bottom));
   text-align: center;
+  -webkit-font-smoothing: antialiased;
 }
 
-.card { width: 100%; max-width: 560px; }
+.card { width: 100%; max-width: 620px; }
 
-/* Intestazione centrata, prosa a sinistra: due paragrafi centrati non si
-   leggono. Dall'agosto 2026 questa pagina non è più un elenco — porta il
-   perché degli strumenti, che la home (volutamente nuda) non racconta. */
+/* Menu: la stessa nota discreta della home. */
+.nav { position: absolute; top: 18px; left: 0; right: 0; text-align: center;
+  font-size: 13px; line-height: 1; letter-spacing: .1px; }
+.nav a { color: var(--faint); text-decoration: none; transition: color .15s ease; }
+.nav a:hover, .nav a[aria-current="page"] { color: var(--ink); }
+.nav .sep { color: var(--line-soft); margin: 0 8px; }
+/* StagePlot è l'unica voce che porta fuori dal sito: la freccia lo dice prima del clic. */
+.nav .out { white-space: nowrap; }
+.nav .out svg { width: 9px; height: 9px; margin-left: 3px; }
+
 header { margin-bottom: 8px; }
-.cap {
-  display: block;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 1.6px;
-  color: var(--faint);
-}
+.cap { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1.6px;
+  color: var(--faint); }
 h1 {
   margin-top: 12px;
   font-size: clamp(24px, 4.6vw, 30px);
@@ -47,126 +51,83 @@ h1 {
   line-height: 1.2;
   text-wrap: balance;   /* evita l'ultima riga con una parola sola */
 }
-.intro { margin-top: 18px; text-align: left; font-size: 15.5px; line-height: 1.66; color: var(--text); }
+.sotto { max-width: 470px; margin: 14px auto 0; font-size: 15px; color: var(--muted); line-height: 1.6; }
 
-/* StagePlot: progetto, non tredicesima riga dell'elenco. È l'unico blocco
-   della pagina con un'immagine — basta quello a distinguerlo. */
-.feat { margin: 46px 0 40px; text-align: left; }
-.shot {
-  background: #f8f9fa;
-  border: 1px solid #e8eaed;
-  border-radius: 16px;
-  padding: 20px;
-  overflow: hidden;
-}
-.shot svg { display: block; width: 100%; height: auto; }
-.feat .cap { margin-top: 26px; }
-.feat h2 {
-  margin-top: 11px;
-  font-size: 22px;
-  font-weight: 500;
+/* ── Ricerca ──────────────────────────────────────────────────────────
+   Il campo cerca anche nelle parole di chi ha il problema (data-k nel markup),
+   non solo nei nomi: chi ha un file troppo grande scrive «pesante». */
+.cerca { position: relative; margin: 34px 0 12px; }
+.cerca input {
+  width: 100%;
+  font: 16px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;  /* 16px: sotto, iOS zooma al focus */
   color: var(--ink);
-  letter-spacing: -0.3px;
+  background: #f6f7f8;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 14px 44px 14px 46px;
+  outline: none;
+  transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
 }
-.feat p { margin-top: 12px; font-size: 15px; line-height: 1.62; color: var(--text); }
-.cta {
-  display: inline-block;
-  margin-top: 18px;
-  font-size: 14.5px;
-  font-weight: 600;
-  color: var(--ink);
-  text-decoration: none;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 3px;
-  transition: border-color .15s ease;
+.cerca input:focus { background: #fff; border-color: var(--line-soft); box-shadow: 0 0 0 4px #f4f5f6; }
+.cerca input::placeholder { color: var(--faint); }
+.cerca input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.lente { position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+  width: 17px; height: 17px; color: var(--faint); pointer-events: none; }
+.pulisci {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  width: 30px; height: 30px; border: 0; background: none; color: var(--muted-2);
+  cursor: pointer; border-radius: 50%; font-size: 18px; line-height: 1;
+  display: none; align-items: center; justify-content: center;
 }
-.cta:hover { border-color: var(--ink); }
+.pulisci:hover { background: #eceef0; color: var(--ink); }
+body.ha-testo .pulisci { display: flex; }
 
-.list-cap { display: block; margin-bottom: 6px; text-align: left; font-size: 11px;
-  text-transform: uppercase; letter-spacing: 1.6px; color: var(--faint); }
-
-/* Riga «problema → strumento»: il compito porta il peso visivo, il nome
-   dello strumento resta di servizio. */
-.task {
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-  padding: 15px 8px;
-  border-top: 1px solid #eef0f2;
-  text-decoration: none;
-  border-radius: 12px;
-  transition: background .15s ease;
+.chips { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; }
+.chip {
+  font: 13px/1 inherit; background: #f6f7f8; color: var(--muted);
+  border: 1px solid transparent; border-radius: 999px; padding: 9px 14px;
+  cursor: pointer; transition: background .12s ease, color .12s ease;
 }
-.task:first-child { border-top: none; }
-.task:hover { background: #fafbfc; }
-.task:hover .tool { color: var(--muted); }
-.verb { flex: 1; font-size: 15.5px; color: var(--ink); line-height: 1.4; }
-.tool {
-  flex: 0 0 auto;
-  font-size: 12px;
-  color: var(--faint);
-  letter-spacing: .2px;
-  white-space: nowrap;
-  transition: color .15s ease;
-}
+.chip:hover { background: #eceef0; }
+.chip[aria-pressed="true"] { background: var(--ink); color: #fff; }
 
-/* Titolo di gruppo: il momento in cui lo strumento serve */
-.group {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .8px;
-  color: var(--muted-2);
-  text-align: left;
-  margin: 34px 0 4px;
-}
-.group em {
-  font-style: normal;
-  font-weight: 400;
-  text-transform: none;
-  letter-spacing: 0;
-  font-size: 11.5px;
-  color: var(--faint);
-}
+.conta { margin-top: 20px; text-align: left; font-size: 11px; text-transform: uppercase;
+  letter-spacing: 1.4px; color: var(--faint); }
 
-/* Righe */
-.list { text-align: left; }
-.row {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  padding: 13px 8px;
-  border-top: 1px solid #eef0f2;
-  text-decoration: none;
-  border-radius: 12px;
-  transition: background .15s ease;
+/* ── Griglia ─────────────────────────────────────────────────────────── */
+.griglia { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.cella {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
+  text-align: left; padding: 17px 16px;
+  border: 1px solid var(--hair); border-radius: 14px; text-decoration: none;
+  transition: border-color .15s ease, background .15s ease, transform .15s ease;
 }
-.row:first-child { border-top: none; }
-.row:hover { background: #fafbfc; }
-.row:hover .go { color: var(--muted-2); }
+.cella:hover { border-color: var(--line-soft); background: #fafbfc; }
+.cella:active { transform: scale(.99); }
+/* display:flex batte la regola del browser su [hidden]: senza questa riga il
+   filtro non nasconderebbe niente (già successo altrove nel sito). */
+.cella[hidden] { display: none; }
+.cella img { width: 34px; height: 34px; border-radius: 9px; display: block; }
+.cella .p { font-size: 15px; color: var(--ink); line-height: 1.35; }
+.cella .n { font-size: 12px; color: var(--faint); }
 
-/* display:block obbligatorio: uno span inline ignora width/height e l'SVG
-   al 100% si stira a tutta la riga. */
-.ico { display: block; width: 34px; height: 34px; flex: 0 0 auto; border-radius: 9px; overflow: hidden; }
-.ico svg { display: block; width: 100%; height: 100%; }
+.vuoto { padding: 34px 0; color: var(--faint); font-size: 14.5px; line-height: 1.6; }
+.vuoto a { color: var(--muted); border-bottom: 1px solid var(--line-soft); text-decoration: none; }
+.vuoto a:hover { color: var(--ink); }
 
-.txt { min-width: 0; }
-.nm { display: block; font-size: 15px; font-weight: 600; color: var(--ink); }
-.ds { display: block; font-size: 12.5px; color: var(--muted-2); margin-top: 3px; line-height: 1.45; }
-.go { margin-left: auto; flex: 0 0 auto; color: var(--line-soft); font-size: 19px; line-height: 1; transition: color .15s ease; }
+/* Il progetto principale, detto a parole: il menu da solo non lo direbbe. */
+.progetto { margin-top: 30px; text-align: left; font-size: 14.5px; line-height: 1.6; color: var(--muted); }
+.progetto a { color: var(--ink); font-weight: 600; text-decoration: none;
+  border-bottom: 1px solid var(--line); padding-bottom: 2px; }
+.progetto a:hover { border-color: var(--ink); }
 
-.foot {
-  margin-top: 34px;
-  font-size: 12px;
-  line-height: 1.65;
-  color: var(--faint);
-}
+.foot { margin-top: 30px; font-size: 12px; line-height: 1.65; color: var(--faint); }
 .foot a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line-soft); }
 .foot a:hover { color: var(--ink); }
 
 /* Footer, come sulle pagine degli strumenti */
 .site-footer {
-  margin-top: 44px;
+  margin-top: 42px;
   text-align: center;
   font-size: 12px;
   color: #6b7075;
@@ -175,13 +136,15 @@ h1 {
 .site-footer a { color: #6b7075; text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 1px; }
 .site-footer a:hover { color: var(--ink); }
 
-@media (max-width: 460px) {
-  body { padding-top: 42px; }
-  .intro { font-size: 15px; }
-  /* Sotto i 460 px il disegno viene scalato a ~0,42×: le etichette secondarie
-     diventano illeggibili e sporcano. Restano le tre che raccontano la cosa. */
-  .lbl-min { display: none; }
-  .shot { padding: 12px; border-radius: 12px; }
-  .feat { margin: 36px 0 32px; }
-  .row { padding: 12px 4px; }
+@media (max-width: 540px) {
+  body { padding-top: 46px; }
+  .sotto { font-size: 14.5px; }
+  /* Una colonna di righe alte: bersagli comodi col pollice, e non si scorre il doppio. */
+  .griglia { grid-template-columns: 1fr; gap: 0; }
+  .cella { flex-direction: row; align-items: center; gap: 13px;
+    border: 0; border-top: 1px solid var(--hair); border-radius: 12px; padding: 14px 6px; }
+  .cella .p { flex: 1; font-size: 15px; }
+  .cella .n { display: none; }   /* il nome dello strumento non aiuta chi cerca il problema */
+  .nav { font-size: 12.5px; }
+  .nav .sep { margin: 0 6px; }
 }

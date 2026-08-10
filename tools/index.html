@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Strumenti gratuiti — tarare un impianto, alleggerire un file, trovare una tonalità</title>
-  <meta name="description" content="Strumenti gratuiti che funzionano nel browser, nati da problemi incontrati davvero in studio e dal vivo: StagePlot per il palco e il rider, e poi tarare un impianto, allineare una torre di ritardo, trovare i tempi di delay, capire la tonalità di un brano, mandare un audio leggero, far stare un file sotto il limite. Niente da installare, niente che finisce online." />
+  <meta name="description" content="Strumenti gratuiti che funzionano nel browser, nati da problemi incontrati davvero in studio e dal vivo: tarare un impianto, allineare una torre di ritardo, trovare i tempi di delay, capire la tonalità di un brano, mandare un audio leggero, far stare una foto o un PDF sotto il limite, passare un link o una rete Wi-Fi. Niente da installare, niente che finisce online." />
   <meta name="theme-color" content="#ffffff" />
   <link rel="canonical" href="https://simonecastellan.com/tools/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Strumenti gratuiti — Simone Castellan" />
-  <meta property="og:description" content="In ordine di problema, non di nome: tarare un impianto, allineare una torre, alleggerire un file. Funzionano nel browser, niente da installare." />
+  <meta property="og:description" content="Nati da problemi incontrati davvero, in sala e in studio. Funzionano nel browser: niente da installare, niente che finisce online." />
   <meta property="og:image" content="og-image.svg" />
   <meta property="og:url" content="https://simonecastellan.com/tools/" />
   <meta property="og:locale" content="it_IT" />
@@ -35,9 +35,9 @@
       { "@type": "ListItem", "position": 4, "name": "Capire la tonalità di un brano — Tonalità", "url": "https://simonecastellan.com/tonalita/" },
       { "@type": "ListItem", "position": 5, "name": "Mandare un audio senza intasare la chat — Converti in MP3", "url": "https://simonecastellan.com/audio-mp3/" },
       { "@type": "ListItem", "position": 6, "name": "Sapere se una foto o un video va bene per i social — Posso pubblicarlo?", "url": "https://simonecastellan.com/posso-pubblicarlo/" },
-      { "@type": "ListItem", "position": 7, "name": "Tirare fuori una copertina da un video — Estrai un fotogramma", "url": "https://simonecastellan.com/fotogramma/" },
-      { "@type": "ListItem", "position": 8, "name": "Preparare una foto per i social — Immagini social", "url": "https://simonecastellan.com/immagini-social/" },
-      { "@type": "ListItem", "position": 9, "name": "Capire come è andato un post o una campagna — Metriche social", "url": "https://simonecastellan.com/metriche-social/" },
+      { "@type": "ListItem", "position": 7, "name": "Preparare una foto per i social — Immagini social", "url": "https://simonecastellan.com/immagini-social/" },
+      { "@type": "ListItem", "position": 8, "name": "Capire come è andato un post o una campagna — Metriche social", "url": "https://simonecastellan.com/metriche-social/" },
+      { "@type": "ListItem", "position": 9, "name": "Prendere una foto dal video — Estrai un fotogramma", "url": "https://simonecastellan.com/fotogramma/" },
       { "@type": "ListItem", "position": 10, "name": "Far stare una foto sotto il limite — Comprimi immagini", "url": "https://simonecastellan.com/comprimi-immagini/" },
       { "@type": "ListItem", "position": 11, "name": "Far stare un PDF sotto il limite — Comprimi PDF", "url": "https://simonecastellan.com/comprimi-pdf/" },
       { "@type": "ListItem", "position": 12, "name": "Passare un link o una rete Wi-Fi — QR Code", "url": "https://simonecastellan.com/qrcode/" }
@@ -46,159 +46,82 @@
   </script>
 </head>
 <body>
+  <nav class="nav" id="nav" aria-label="Pagine del sito">
+    <a href="/profilo/">Profilo</a><span class="sep">·</span><a href="/cv/">CV</a><span class="sep">·</span><a href="/tools/" aria-current="page">Tools</a><span class="sep">·</span><a class="out" href="https://stageplot.it/" target="_blank" rel="noopener">StagePlot<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></a><span class="sep">·</span><a href="/en/profile/" hreflang="en" lang="en">EN</a>
+  </nav>
+
   <main class="card">
     <header>
       <span class="cap">Strumenti</span>
       <h1>Trasformo piccoli attriti quotidiani in strumenti.</h1>
-      <p class="intro">Lavorando succede spesso la stessa cosa: qualcosa di semplice che richiede
-        tre software, due conversioni e dieci minuti di passaggi a mano. Quando l'attrito si ripete,
-        invece di rifarlo ogni volta costruisco lo strumento che lo risolve.</p>
-      <p class="intro">Non parto da un'idea di software: parto da qualcosa che è successo davvero
-        in sala o in studio. Il problema si affronta una volta; dalla volta dopo si usa e basta —
-        io o chiunque altro.</p>
+      <p class="sotto">Nati da problemi incontrati davvero, in sala e in studio. Funzionano nel
+        browser: niente da installare, niente che finisce online.</p>
     </header>
 
-    <!-- Il progetto più strutturato: sta qui in evidenza, non nell'elenco, perché
-         non è una piccola utility. Il disegno è vettoriale e stilizzato — pesa
-         nulla, resta nitido a ogni scala e non invecchia come uno screenshot. -->
-    <section class="feat">
-      <div class="shot">
-        <svg viewBox="0 0 800 520" role="img"
-             aria-label="Schema di uno stage plot visto dall'alto: batteria su pedana, amplificatori, tastiere, microfoni, monitor spia, e accanto la channel list numerata">
-          <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
-            <!-- palco -->
-            <rect x="16" y="16" width="536" height="488" rx="14" fill="#ffffff" stroke="#e3e5e8"/>
-            <!-- pedana batteria -->
-            <rect x="204" y="54" width="160" height="118" rx="10" fill="#f4f5f7" stroke="#e8eaed"/>
-            <circle cx="226" cy="112" r="17" fill="none" stroke="#cdd1d6" stroke-dasharray="2 3"/>
-            <circle cx="342" cy="112" r="17" fill="none" stroke="#cdd1d6" stroke-dasharray="2 3"/>
-            <circle cx="260" cy="96" r="13" fill="#e8eaed" stroke="#d5d9dd"/>
-            <circle cx="308" cy="96" r="13" fill="#e8eaed" stroke="#d5d9dd"/>
-            <circle cx="284" cy="132" r="24" fill="#dfe2e6" stroke="#c8ccd1"/>
-            <!-- amplificatori -->
-            <rect x="56"  y="150" width="76" height="42" rx="7" fill="#eceef0" stroke="#dfe2e6"/>
-            <rect x="436" y="150" width="76" height="42" rx="7" fill="#eceef0" stroke="#dfe2e6"/>
-            <!-- tastiere -->
-            <rect x="408" y="252" width="112" height="30" rx="5" fill="#eceef0" stroke="#dfe2e6"/>
-            <!-- microfoni: voce al centro, due cori -->
-            <circle cx="284" cy="318" r="11" fill="#1a1a1a"/>
-            <circle cx="160" cy="318" r="9"  fill="#5f6368"/>
-            <circle cx="408" cy="318" r="9"  fill="#5f6368"/>
-            <!-- monitor spia; il centrale è l'unico accento di colore -->
-            <path d="M48 424 H128 L116 398 H60 Z"    fill="#e8eaed" stroke="#d5d9dd"/>
-            <path d="M146 424 H226 L214 398 H158 Z"  fill="#e8eaed" stroke="#d5d9dd"/>
-            <path d="M244 424 H324 L312 398 H256 Z"  fill="#2563eb"/>
-            <path d="M342 424 H422 L410 398 H354 Z"  fill="#e8eaed" stroke="#d5d9dd"/>
-            <path d="M440 424 H520 L508 398 H452 Z"  fill="#e8eaed" stroke="#d5d9dd"/>
-            <line x1="60" y1="452" x2="508" y2="452" stroke="#e3e5e8" stroke-dasharray="3 4"/>
-            <!-- font-size generosi: l'SVG viene disegnato a circa 0,65× della sua
-                 viewBox, quindi sotto i 13 px qui le etichette spariscono. -->
-            <g font-size="14" letter-spacing=".8" fill="#b3b8bd" text-anchor="middle">
-              <text x="284" y="192">BATTERIA</text>
-              <text class="lbl-min" x="94"  y="210">CHITARRA</text>
-              <text class="lbl-min" x="474" y="210">BASSO</text>
-              <text class="lbl-min" x="464" y="302">TASTIERE</text>
-              <text x="284" y="350">VOCE</text>
-              <text x="284" y="476">FRONTE PALCO</text>
-            </g>
-            <!-- channel list: il documento che nasce dal disegno -->
-            <text x="592" y="42" font-size="14" letter-spacing=".8" fill="#b3b8bd">CHANNEL LIST</text>
-            <g>
-              <circle cx="600" cy="76"  r="11" fill="#f1f3f4"/><text x="600" y="79.5" font-size="12" fill="#5f6368" text-anchor="middle">1</text>
-              <rect x="620" y="72"  width="132" height="8" rx="4" fill="#e3e5e8"/>
-              <circle cx="600" cy="112" r="11" fill="#f1f3f4"/><text x="600" y="115.5" font-size="12" fill="#5f6368" text-anchor="middle">2</text>
-              <rect x="620" y="108" width="98"  height="8" rx="4" fill="#e3e5e8"/>
-              <circle cx="600" cy="148" r="11" fill="#f1f3f4"/><text x="600" y="151.5" font-size="12" fill="#5f6368" text-anchor="middle">3</text>
-              <rect x="620" y="144" width="146" height="8" rx="4" fill="#e3e5e8"/>
-              <circle cx="600" cy="184" r="11" fill="#f1f3f4"/><text x="600" y="187.5" font-size="12" fill="#5f6368" text-anchor="middle">4</text>
-              <rect x="620" y="180" width="112" height="8" rx="4" fill="#e3e5e8"/>
-              <circle cx="600" cy="220" r="11" fill="#f1f3f4"/><text x="600" y="223.5" font-size="12" fill="#5f6368" text-anchor="middle">5</text>
-              <rect x="620" y="216" width="134" height="8" rx="4" fill="#e3e5e8"/>
-              <circle cx="600" cy="256" r="11" fill="#1a1a1a"/><text x="600" y="259.5" font-size="12" fill="#ffffff" text-anchor="middle">6</text>
-              <rect x="620" y="252" width="120" height="8" rx="4" fill="#c8ccd1"/>
-              <circle cx="600" cy="292" r="11" fill="#f1f3f4"/><text x="600" y="295.5" font-size="12" fill="#5f6368" text-anchor="middle">7</text>
-              <rect x="620" y="288" width="92"  height="8" rx="4" fill="#e3e5e8"/>
-              <circle cx="600" cy="328" r="11" fill="#f1f3f4"/><text x="600" y="331.5" font-size="12" fill="#5f6368" text-anchor="middle">8</text>
-              <rect x="620" y="324" width="140" height="8" rx="4" fill="#e3e5e8"/>
-            </g>
-            <text x="592" y="392" font-size="14" letter-spacing=".8" fill="#b3b8bd">RIDER PDF</text>
-            <rect x="592" y="406" width="106" height="66" rx="6" fill="#ffffff" stroke="#e3e5e8"/>
-            <g fill="#e8eaed">
-              <rect x="604" y="420" width="58" height="6" rx="3"/>
-              <rect x="604" y="434" width="82" height="5" rx="2.5"/>
-              <rect x="604" y="446" width="70" height="5" rx="2.5"/>
-              <rect x="604" y="458" width="78" height="5" rx="2.5"/>
-            </g>
-          </g>
-        </svg>
-      </div>
-
-      <span class="cap">Progetto</span>
-      <h2>StagePlot.it</h2>
-      <p>Disegni il palco trascinando microfoni, strumenti e luci. Da lì escono channel list,
-        monitor, cablaggi, elettrico e il rider in PDF — e restano collegati: cambi una cosa
-        sul palco, i documenti si aggiornano.</p>
-      <a class="cta" id="splink" href="https://stageplot.it/">Apri stageplot.it ›</a>
-    </section>
-
-    <!-- In ordine di problema, non di nome: chi arriva sa cosa gli serve,
-         raramente sa come si chiama lo strumento che lo risolve. -->
-    <span class="list-cap">Piccoli strumenti</span>
-    <div class="list">
-      <a class="task" href="/rumore-rosa/">
-        <span class="verb">Tarare un impianto</span>
-        <span class="tool">Rumore rosa <span aria-hidden="true">›</span></span>
-      </a>
-      <a class="task" href="/ritardo-diffusori/">
-        <span class="verb">Allineare una torre di ritardo</span>
-        <span class="tool">Ritardo diffusori <span aria-hidden="true">›</span></span>
-      </a>
-      <a class="task" href="/bpm/">
-        <span class="verb">Trovare i tempi di delay e riverbero</span>
-        <span class="tool">BPM <span aria-hidden="true">›</span></span>
-      </a>
-      <a class="task" href="/tonalita/">
-        <span class="verb">Capire la tonalità di un brano</span>
-        <span class="tool">Tonalità <span aria-hidden="true">›</span></span>
-      </a>
-      <a class="task" href="/audio-mp3/">
-        <span class="verb">Mandare un audio senza intasare la chat</span>
-        <span class="tool">Converti in MP3 <span aria-hidden="true">›</span></span>
-      </a>
-      <a class="task" href="/posso-pubblicarlo/">
-        <span class="verb">Sapere se una foto o un video va bene per i social</span>
-        <span class="tool">Posso pubblicarlo? <span aria-hidden="true">›</span></span>
-      </a>
-      <a class="task" href="/fotogramma/">
-        <span class="verb">Tirare fuori una copertina da un video</span>
-        <span class="tool">Estrai un fotogramma <span aria-hidden="true">›</span></span>
-      </a>
-      <a class="task" href="/immagini-social/">
-        <span class="verb">Preparare una foto per i social</span>
-        <span class="tool">Immagini social <span aria-hidden="true">›</span></span>
-      </a>
-      <a class="task" href="/metriche-social/">
-        <span class="verb">Capire come è andato un post o una campagna</span>
-        <span class="tool">Metriche social <span aria-hidden="true">›</span></span>
-      </a>
-      <a class="task" href="/comprimi-immagini/">
-        <span class="verb">Far stare una foto sotto il limite</span>
-        <span class="tool">Comprimi immagini <span aria-hidden="true">›</span></span>
-      </a>
-      <a class="task" href="/comprimi-pdf/">
-        <span class="verb">Far stare un PDF sotto il limite</span>
-        <span class="tool">Comprimi PDF <span aria-hidden="true">›</span></span>
-      </a>
-      <a class="task" href="/qrcode/">
-        <span class="verb">Passare un link o una rete Wi-Fi</span>
-        <span class="tool">QR Code <span aria-hidden="true">›</span></span>
-      </a>
+    <!-- Ricerca e filtri li accende il JavaScript: senza, resterebbero due comandi
+         che non fanno niente, e i dodici strumenti si vedono comunque tutti. -->
+    <div class="cerca" id="cerca" hidden>
+      <svg class="lente" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+      <input id="q" type="search" placeholder="Cosa ti serve? «pesante», «palco», «wi-fi»…" autocomplete="off" aria-label="Cerca fra gli strumenti" aria-controls="griglia">
+      <button class="pulisci" id="pulisci" type="button" aria-label="Cancella la ricerca">×</button>
     </div>
+    <div class="chips" id="chips" hidden></div>
+    <p class="conta" id="conta" hidden aria-live="polite"></p>
+
+    <!-- I dodici link stanno nel markup, non li costruisce il JavaScript: è quello che
+         leggono i motori, le AI e chi ha gli script spenti. Il filtro nasconde, non crea.
+         data-k = le parole di chi cerca, non i nomi degli strumenti: chi ha un file troppo
+         grande scrive «pesante», non «comprimi». -->
+    <div class="griglia" id="griglia">
+      <a class="cella" href="/rumore-rosa/" data-g="sala" data-k="rosa bianco sweep sinusoide impianto taratura pa casse diffusori livello palco sala suono prova segnale tarare equalizzare">
+        <img src="/rumore-rosa/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Tarare un impianto</span><span class="n">Rumore rosa</span></a>
+      <a class="cella" href="/ritardo-diffusori/" data-g="sala" data-k="delay tower metri millisecondi haas distanza temperatura palco sala torre ritardo allineare sincronizzare eco">
+        <img src="/ritardo-diffusori/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Allineare una torre di ritardo</span><span class="n">Ritardo diffusori</span></a>
+      <a class="cella" href="/bpm/" data-g="musica" data-k="tempo battute millisecondi riverbero pre-delay mix studio metronomo brano">
+        <img src="/bpm/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Trovare i tempi di delay e riverbero</span><span class="n">BPM</span></a>
+      <a class="cella" href="/tonalita/" data-g="musica" data-k="accordi note scala orecchio pianoforte key tonalita brano canzone cantare trasporre">
+        <img src="/tonalita/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Capire la tonalità di un brano</span><span class="n">Tonalità</span></a>
+      <a class="cella" href="/audio-mp3/" data-g="mandare" data-k="wav aiff leggero whatsapp provino mix pesante troppo grande audio mandare inviare convertire mp3">
+        <img src="/audio-mp3/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Mandare un audio senza intasare la chat</span><span class="n">Converti in MP3</span></a>
+      <a class="cella" href="/posso-pubblicarlo/" data-g="social" data-k="formato peso durata instagram tiktok reel story limiti facebook youtube pubblicare caricare va bene video foto">
+        <img src="/posso-pubblicarlo/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Sapere se una foto o un video va bene</span><span class="n">Posso pubblicarlo?</span></a>
+      <a class="cella" href="/immagini-social/" data-g="social" data-k="ritaglio formati story reel copertina safe zone foto immagine ridimensionare adattare post">
+        <img src="/immagini-social/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Preparare una foto per i social</span><span class="n">Immagini social</span></a>
+      <a class="cella" href="/fotogramma/" data-g="social" data-k="video frame copertina miniatura thumbnail fotogramma istante screenshot">
+        <img src="/fotogramma/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Prendere una foto dal video</span><span class="n">Estrai un fotogramma</span></a>
+      <a class="cella" href="/metriche-social/" data-g="social" data-k="engagement rate cpc copertura interazioni campagna statistiche numeri risultati post andato">
+        <img src="/metriche-social/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Capire com'è andato un post</span><span class="n">Metriche social</span></a>
+      <a class="cella" href="/comprimi-immagini/" data-g="mandare" data-k="peso megabyte jpeg heic ridurre pesante troppo grande limite allegato foto immagine alleggerire comprimere">
+        <img src="/comprimi-immagini/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Far stare una foto sotto il limite</span><span class="n">Comprimi immagini</span></a>
+      <a class="cella" href="/comprimi-pdf/" data-g="mandare" data-k="peso megabyte documento bando allegato pesante troppo grande limite pdf alleggerire comprimere mail">
+        <img src="/comprimi-pdf/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Far stare un PDF sotto il limite</span><span class="n">Comprimi PDF</span></a>
+      <a class="cella" href="/qrcode/" data-g="mandare" data-k="wifi link stampa locandina condividere qr codice rete password passare indirizzo">
+        <img src="/qrcode/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Passare un link o una rete Wi-Fi</span><span class="n">QR Code</span></a>
+    </div>
+    <p class="vuoto" id="vuoto" hidden></p>
+
+    <!-- Il menu porta a StagePlot, ma una voce di menu non dice che è il progetto
+         principale: quello va scritto. -->
+    <p class="progetto">
+      Il progetto più grande è <a href="https://stageplot.it/" id="splink" target="_blank" rel="noopener">StagePlot</a>:
+      disegni il palco e ne escono channel list, monitor, cablaggi, elettrico e il rider in PDF.
+    </p>
 
     <p class="foot">
-      Gratuiti e senza pubblicità. Funzionano nel browser: nessun file viene caricato online,
-      il lavoro avviene sul tuo dispositivo. Se ne manca uno,
-      <a href="/tienimi-presente/">dimmelo</a>.
+      Gratuiti e senza pubblicità. Nessun file viene caricato online: il lavoro avviene
+      sul tuo dispositivo. Se ne manca uno, <a href="/tienimi-presente/">dimmelo</a>.
     </p>
   </main>
 
@@ -208,13 +131,71 @@
 
   <script src="/track.js"></script>
   <script>
-    // Quale problema porta qui la gente: è l'unico modo per saperlo.
-    document.querySelector('main').addEventListener('click', function (e) {
-      var a = e.target.closest && e.target.closest('.task');
-      if (a) track('click', 'Tool:' + a.querySelector('.tool').textContent.replace('›', '').trim());
+    var track = window.track || function(){};
+
+    var GRUPPI = [
+      { id:"",        t:"Tutti" },
+      { id:"sala",    t:"In sala" },
+      { id:"musica",  t:"Con la musica" },
+      { id:"social",  t:"Foto e video" },
+      { id:"mandare", t:"Da mandare" }
+    ];
+    var celle  = [].slice.call(document.querySelectorAll('.cella'));
+    var conta  = document.getElementById('conta');
+    var vuoto  = document.getElementById('vuoto');
+    var chips  = document.getElementById('chips');
+    var cerca  = document.getElementById('cerca');
+    var q      = document.getElementById('q');
+
+    chips.innerHTML = GRUPPI.map(function(g,i){
+      return '<button class="chip" type="button" data-f="'+g.id+'" aria-pressed="'+(i===0?'true':'false')+'">'+g.t+'</button>';
+    }).join('');
+    cerca.hidden = false; chips.hidden = false; conta.hidden = false;
+
+    var filtro = "", testo = "";
+    function disegna(){
+      var n = 0;
+      celle.forEach(function(a){
+        var ok = true;
+        if (filtro && a.dataset.g !== filtro) ok = false;
+        if (ok && testo) {
+          var s = (a.textContent + ' ' + a.dataset.k).toLowerCase();
+          ok = testo.toLowerCase().split(/\s+/).every(function(w){ return s.indexOf(w) > -1; });
+        }
+        a.hidden = !ok;
+        if (ok) n++;
+      });
+      document.body.classList.toggle('ha-testo', !!testo);
+      conta.textContent = testo
+        ? n + (n === 1 ? ' strumento' : ' strumenti') + ' per «' + testo + '»'
+        : n + (n === 1 ? ' strumento' : ' strumenti');
+      vuoto.hidden = n > 0;
+      if (!n) vuoto.innerHTML = 'Niente per «' + testo.replace(/</g,'&lt;') +
+        '».<br>Se ti serve uno strumento che non c\'è, <a href="/tienimi-presente/">dimmelo</a>.';
+    }
+    q.addEventListener('input', function(){ testo = q.value.trim(); disegna(); });
+    document.getElementById('pulisci').addEventListener('click', function(){
+      q.value = ''; testo = ''; q.focus(); disegna();
     });
-    // StagePlot esce dal sito: senza questo clic non si saprebbe che il blocco funziona.
-    document.getElementById('splink').addEventListener('click', function () { track('click', 'StagePlot'); });
+    chips.addEventListener('click', function(e){
+      var b = e.target.closest('.chip'); if (!b) return;
+      filtro = b.dataset.f;
+      [].forEach.call(chips.children, function(c){ c.setAttribute('aria-pressed', c === b ? 'true' : 'false'); });
+      disegna();
+      track('click', 'Filtro:' + (b.textContent || 'Tutti'));
+    });
+    disegna();
+
+    // Quale problema porta qui la gente: è l'unico modo per saperlo.
+    document.getElementById('griglia').addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('.cella');
+      if (a) track('click', 'Tool:' + a.querySelector('.n').textContent.trim());
+    });
+    document.getElementById('splink').addEventListener('click', function(){ track('click', 'StagePlot'); });
+    document.getElementById('nav').addEventListener('click', function(e){
+      var a = e.target.closest && e.target.closest('a');
+      if (a) track('click', 'Nav:' + a.textContent.trim());
+    });
   </script>
 </body>
 </html>
