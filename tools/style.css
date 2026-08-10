@@ -25,11 +25,65 @@ body {
   text-align: center;
 }
 
-.card { width: 100%; max-width: 480px; }
+.card { width: 100%; max-width: 560px; }
 
+/* Intestazione centrata, prosa a sinistra: due paragrafi centrati non si
+   leggono. Dall'agosto 2026 questa pagina non è più un elenco — porta il
+   perché degli strumenti, che la home (volutamente nuda) non racconta. */
 header { margin-bottom: 8px; }
-h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2px; }
-.subtitle { font-size: 15px; color: var(--muted); margin-top: 10px; line-height: 1.55; }
+.cap {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.6px;
+  color: var(--faint);
+}
+h1 {
+  margin-top: 12px;
+  font-size: clamp(24px, 4.6vw, 30px);
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  text-wrap: balance;   /* evita l'ultima riga con una parola sola */
+}
+.intro { margin-top: 18px; text-align: left; font-size: 15.5px; line-height: 1.66; color: var(--text); }
+
+/* StagePlot: progetto, non tredicesima riga dell'elenco. È l'unico blocco
+   della pagina con un'immagine — basta quello a distinguerlo. */
+.feat { margin: 46px 0 40px; text-align: left; }
+.shot {
+  background: #f8f9fa;
+  border: 1px solid #e8eaed;
+  border-radius: 16px;
+  padding: 20px;
+  overflow: hidden;
+}
+.shot svg { display: block; width: 100%; height: auto; }
+.feat .cap { margin-top: 26px; }
+.feat h2 {
+  margin-top: 11px;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.3px;
+}
+.feat p { margin-top: 12px; font-size: 15px; line-height: 1.62; color: var(--text); }
+.cta {
+  display: inline-block;
+  margin-top: 18px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 3px;
+  transition: border-color .15s ease;
+}
+.cta:hover { border-color: var(--ink); }
+
+.list-cap { display: block; margin-bottom: 6px; text-align: left; font-size: 11px;
+  text-transform: uppercase; letter-spacing: 1.6px; color: var(--faint); }
 
 /* Riga «problema → strumento»: il compito porta il peso visivo, il nome
    dello strumento resta di servizio. */
@@ -123,7 +177,11 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
 
 @media (max-width: 460px) {
   body { padding-top: 42px; }
-  h1 { font-size: 22px; }
-  .subtitle { font-size: 14px; }
+  .intro { font-size: 15px; }
+  /* Sotto i 460 px il disegno viene scalato a ~0,42×: le etichette secondarie
+     diventano illeggibili e sporcano. Restano le tre che raccontano la cosa. */
+  .lbl-min { display: none; }
+  .shot { padding: 12px; border-radius: 12px; }
+  .feat { margin: 36px 0 32px; }
   .row { padding: 12px 4px; }
 }
