@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Calcolatore metriche social — engagement rate, CTR, CPC, CPM</title>
+  <meta name="description" content="Inserisci solo i numeri che hai — follower, like, commenti, copertura, impression, clic, spesa, conversioni — e ottieni engagement rate, CTR, CPC, CPM, tasso di conversione, costo per conversione e frequenza, ognuno spiegato in una riga. Nessun campo obbligatorio, nessun account, tutto nel browser." />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="canonical" href="https://simonecastellan.com/metriche-social/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Calcolatore metriche social" />
+  <meta property="og:description" content="Metti i numeri che hai, escono le metriche che si possono calcolare — spiegate in una riga. Engagement rate, CTR, CPC, CPM, conversioni." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:url" content="https://simonecastellan.com/metriche-social/" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>Metriche social</h1>
+      <p class="subtitle">Metti i numeri che hai. Esce tutto quello che si può calcolare.</p>
+    </header>
+
+    <form id="modulo" class="campi" autocomplete="off">
+      <!-- I campi li costruisce lo script leggendo l'elenco delle metriche:
+           così aggiungerne uno non vuol dire toccare l'interfaccia. -->
+    </form>
+
+    <section id="risultati" class="risultati" aria-live="polite"></section>
+
+    <p id="vuoto" class="vuoto">Compila anche solo due campi: le metriche compaiono da sole.</p>
+
+    <div class="azioni">
+      <button type="button" id="copiaBtn" class="btn btn-secondary hidden">Copia i risultati</button>
+      <button type="button" id="puliciBtn" class="btn btn-ghost hidden">Svuota tutto</button>
+    </div>
+
+    <p class="privacy">Nessun account, nessun invio: i numeri restano nel tuo browser.</p>
+
+    <section class="spiega">
+      <h2>Come funziona</h2>
+      <p>Non c'è nessun campo obbligatorio e non serve sapere quali dati servono a quale formula:
+        scrivi i numeri che hai sotto mano — quelli che ti dà il pannello statistiche del social o
+        della campagna — e sotto compaiono solo le metriche che con quei numeri si possono
+        davvero calcolare, ognuna con una riga che dice cosa significa.</p>
+
+      <h2>Domande</h2>
+      <h3>Su cosa calcola l'engagement rate?</h3>
+      <p>Se hai la copertura (le persone che hanno visto il contenuto) lo calcola su quella, che è
+        il modo più onesto. Se hai solo i follower lo calcola sui follower, che è il modo più
+        diffuso. Te lo scrive accanto al risultato, così sai sempre quale dei due stai guardando.</p>
+
+      <h3>Perché alcune metriche non compaiono?</h3>
+      <p>Perché mancano i numeri per calcolarle. Il CPC ha bisogno di spesa e clic, il CPM di
+        spesa e impression: appena aggiungi il numero che manca, la metrica appare.</p>
+
+      <h3>I miei dati vengono salvati?</h3>
+      <p>No. Nessun invio, nessun account, nessun cookie: i numeri restano nella pagina e
+        spariscono quando la chiudi.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    · <a href="https://simonecastellan.com/tools/" target="_blank" rel="noopener">Altri strumenti</a>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
