@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Posso pubblicarlo? — controlla foto e video per i social</title>
+  <meta name="description" content="Trascina una foto o un video e scopri subito se va bene per Instagram, TikTok, Facebook, LinkedIn, X e YouTube: peso, proporzioni, dimensioni e durata, spiegati in parole normali. Dove serve, il pulsante che lo sistema. Tutto sul tuo dispositivo, niente da caricare online." />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="canonical" href="https://simonecastellan.com/posso-pubblicarlo/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Posso pubblicarlo? — controlla foto e video per i social" />
+  <meta property="og:description" content="Trascina un file e scopri dove puoi pubblicarlo, in parole normali. Nel browser, senza caricare niente online." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:url" content="https://simonecastellan.com/posso-pubblicarlo/" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>Posso pubblicarlo?</h1>
+      <p class="subtitle">Trascina una foto o un video: ti dico dove va bene e dove no.</p>
+    </header>
+
+    <section id="dropZone" class="dropzone" role="button" tabindex="0"
+             aria-label="Carica o trascina una foto o un video">
+      <p class="dz-title">Trascina qui il file</p>
+      <p class="dz-or">foto o video — oppure</p>
+      <button type="button" id="pickBtn" class="btn btn-secondary">Scegli un file</button>
+      <input type="file" id="fileInput" accept="image/*,video/*" hidden />
+    </section>
+
+    <p class="claims">Controllo sul tuo dispositivo · nessun caricamento · gratis</p>
+
+    <section id="status" class="status hidden" aria-live="polite">
+      <p class="status-text" id="statusText">Guardo il file…</p>
+    </section>
+
+    <section id="error" class="errore hidden" aria-live="assertive">
+      <p class="errore-msg" id="erroreMsg"></p>
+      <button type="button" id="erroreBtn" class="btn btn-ghost">Prova con un altro file</button>
+    </section>
+
+    <section id="esito" class="esito hidden">
+      <div class="riga-file">
+        <span id="scheda" class="scheda"></span>
+        <button type="button" id="cambiaBtn" class="link-piccolo">cambia file</button>
+      </div>
+      <div id="elenco" class="elenco" aria-live="polite"></div>
+      <p class="nota-finale" id="notaFinale"></p>
+    </section>
+
+    <p class="privacy">Il file non viene caricato online: il controllo avviene sul tuo dispositivo.</p>
+
+    <section class="spiega">
+      <h2>A cosa serve</h2>
+      <p>Ogni piattaforma ha le sue regole su peso, proporzioni e durata, e quando non le rispetti
+        non te lo dice quasi mai: taglia da sola, comprime, o rifiuta il caricamento dopo che hai
+        aspettato. Qui lo sai prima, e sai anche cosa fare.</p>
+
+      <h2>Domande</h2>
+      <h3>Il mio file viene caricato da qualche parte?</h3>
+      <p>No. Peso, dimensioni, proporzioni e durata si leggono dentro il browser, sul tuo
+        dispositivo. Niente viene mandato a un server, nemmeno al mio.</p>
+
+      <h3>Cosa controlla esattamente?</h3>
+      <p>Il peso massimo accettato, le proporzioni che la piattaforma mostra senza tagliare, quanti
+        pixel servono perché non esca sgranata e, per i video, la durata. Le regole stanno tutte in
+        un unico elenco aggiornabile, con la data dell'ultimo controllo.</p>
+
+      <h3>Perché su alcune cose dice «probabilmente»?</h3>
+      <p>Perché non tutti i limiti sono dichiarati chiaramente dalle piattaforme, e cambiano spesso.
+        Quando una regola non è confermata da una fonte solida la uso per darti un consiglio, mai
+        per bocciare il tuo file.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    · <a href="https://simonecastellan.com/tools/" target="_blank" rel="noopener">Altri strumenti</a>
+  </footer>
+
+  <script src="/comune/specifiche.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

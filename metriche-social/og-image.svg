@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#ffffff"/>
+  <g transform="translate(600,235)" fill="none" stroke="#1a1a1a" stroke-width="12" stroke-linecap="round">
+    <path d="M-230 90 L-230 20"/>
+    <path d="M-140 90 L-140 -40" opacity="0.8"/>
+    <path d="M-50 90 L-50 -100" opacity="0.6"/>
+    <path d="M40 90 L40 -20" opacity="0.45"/>
+    <path d="M130 90 L130 -70" opacity="0.3"/>
+    <path d="M-250 120 L230 120" opacity="0.25"/>
+  </g>
+  <text x="600" y="440" text-anchor="middle" font-family="-apple-system, Segoe UI, Roboto, Arial, sans-serif"
+        font-size="58" font-weight="500" fill="#1a1a1a">Metriche social</text>
+  <text x="600" y="504" text-anchor="middle" font-family="-apple-system, Segoe UI, Roboto, Arial, sans-serif"
+        font-size="29" fill="#5f6368">metti i numeri che hai, esce quello che si può calcolare</text>
+</svg>
