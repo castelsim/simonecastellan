@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Bando in chiaro — trasforma un bando in una scheda leggibile</title>
+  <meta name="description" content="Trascina il PDF di un bando o incolla il testo: il testo viene estratto sul tuo dispositivo e preparato con le istruzioni giuste per ottenere una scheda chiara — cos'è, a chi è rivolto, cosa offre, requisiti, scadenza, come partecipare. Nessun file viene caricato online." />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="canonical" href="https://simonecastellan.com/bando-in-chiaro/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Bando in chiaro" />
+  <meta property="og:description" content="Da un PDF di quaranta pagine a una scheda con le sei cose che contano. Il testo si estrae sul tuo dispositivo." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:url" content="https://simonecastellan.com/bando-in-chiaro/" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>Bando in chiaro</h1>
+      <p class="subtitle">Quaranta pagine di burocrazia, sei cose che contano.</p>
+    </header>
+
+    <section id="dropZone" class="dropzone" role="button" tabindex="0"
+             aria-label="Carica o trascina il PDF del bando">
+      <p class="dz-title">Trascina qui il PDF del bando</p>
+      <p class="dz-or">oppure</p>
+      <button type="button" id="pickBtn" class="btn btn-secondary">Scegli il PDF</button>
+      <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden />
+      <p class="dz-alt">…oppure incolla il testo qui sotto</p>
+    </section>
+
+    <section class="incolla">
+      <label class="sr-only" for="testo">Testo del bando</label>
+      <textarea id="testo" class="testo" rows="6"
+                placeholder="Incolla qui il testo del bando, dell'avviso o della manifestazione d'interesse."></textarea>
+      <p id="conta" class="conta"></p>
+    </section>
+
+    <section id="status" class="status hidden" aria-live="polite">
+      <p class="status-text" id="statusText">Leggo il PDF…</p>
+    </section>
+
+    <section id="error" class="errore hidden" aria-live="assertive">
+      <p class="errore-msg" id="erroreMsg"></p>
+    </section>
+
+    <div class="azioni">
+      <button type="button" id="apriBtn" class="btn btn-primary" disabled>Copia tutto e apri ChatGPT</button>
+      <button type="button" id="copiaBtn" class="btn btn-secondary" disabled>Copia soltanto</button>
+    </div>
+
+    <details class="avanzate">
+      <summary>Cosa verrà chiesto</summary>
+      <pre id="anteprimaPrompt" class="prompt"></pre>
+      <p class="avanzate-nota">Sono le istruzioni che accompagnano il testo: chiedono una scheda
+        con voci fisse e vietano di inventare ciò che nel documento non c'è.</p>
+    </details>
+
+    <p class="privacy">Il PDF non viene caricato online: il testo si estrae sul tuo dispositivo.
+      A ChatGPT il testo lo mandi tu, incollandolo.</p>
+
+    <section class="spiega">
+      <h2>Come funziona</h2>
+      <p>Un bando è scritto per resistere a un ricorso, non per essere capito in fretta. Le
+        informazioni che servono davvero — chi può partecipare, cosa si ottiene, entro quando, con
+        quali documenti — stanno sparse in quaranta pagine di rimandi.</p>
+      <p>Questo strumento fa due cose: tira fuori il testo dal PDF senza mandarlo da nessuna parte,
+        e lo accompagna con le istruzioni giuste perché un assistente ti restituisca una scheda
+        ordinata invece di un riassunto generico. L'ultimo passo lo fai tu: incolli e leggi.</p>
+
+      <h2>Domande</h2>
+      <h3>Il bando viene caricato da qualche parte?</h3>
+      <p>Il PDF no: viene letto dentro il browser. Il testo finisce negli appunti, e sei tu a
+        decidere se e dove incollarlo. Se il documento è riservato, tienine conto prima di
+        incollarlo in un servizio esterno.</p>
+
+      <h3>Posso fidarmi della scheda che ottengo?</h3>
+      <p>Le istruzioni chiedono espressamente di non inventare e di scrivere «non indicato» quando
+        un dato non c'è. Resta il fatto che la scadenza e i requisiti vanno sempre riletti sul
+        documento originale prima di muoversi: la scheda serve a capire in fretta se il bando ti
+        riguarda, non a sostituirlo.</p>
+
+      <h3>E se il PDF è una scansione?</h3>
+      <p>Se le pagine sono fotografie, dentro non c'è testo da estrarre e te lo dico. In quel caso
+        serve un riconoscimento del testo, che questo strumento non fa.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    · <a href="https://simonecastellan.com/tools/" target="_blank" rel="noopener">Altri strumenti</a>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- pdf.js sta già nel sito per il compressore: si riusa quello, non se ne scarica un altro. -->
+  <script src="/comprimi-pdf/vendor/pdf.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
