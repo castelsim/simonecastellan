@@ -113,9 +113,14 @@
     body{
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
       background:#ffffff; color:#3c4043;
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      min-height:100vh; padding:24px; text-align:center;
+      display:flex; flex-direction:column;
+      min-height:100vh; text-align:center;
     }
+    /* Il contenuto resta centrato nello spazio che avanza sotto la barra:
+       così il menu è un elemento del flusso (con la sua riga) e non copre nulla. */
+    main{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:24px}
+    a:focus-visible{outline:2px solid #1a1a1a; outline-offset:3px; border-radius:6px}
     /* Il nome è la prima cosa; sotto, due righe che dicono il mestiere.
        Prima il sito non lo diceva affatto: chi non premeva il pulsante se ne
        andava senza sapere di cosa si occupa Simone. */
@@ -135,22 +140,20 @@
       white-space:nowrap}
     .sub a:hover{color:#1a1a1a}
     .askline{margin-top:13px; font-size:13px; color:#9aa0a6}
-    /* Menu: una nota in cima, non una barra di navigazione. Stesso grigio
-       dell'occhiello TOOLS, nessuno sfondo — la pillola è la forma del pulsante
-       ChatGPT e non va prestata a nient'altro.
-       È «absolute» e non «fixed» apposta: su uno schermo basso scorre via col
-       contenuto invece di restare sopra il testo. */
-    .nav{position:absolute; top:18px; left:0; right:0; text-align:center;
+    /* Menu: identico a quello di /tools/, così le due pagine sono lo stesso sito.
+       Nessuno sfondo e nessuna pillola — la pillola è la forma del pulsante
+       ChatGPT e non va prestata a nient'altro. */
+    .nav{border-bottom:1px solid #eef0f2; padding:19px 24px; text-align:center;
       font-size:13px; line-height:1; letter-spacing:.1px}
     .nav a{color:#9aa0a6; text-decoration:none; transition:color .15s ease}
-    .nav a:hover{color:#1a1a1a}
+    .nav a:hover, .nav a[aria-current="page"]{color:#1a1a1a}
     .nav .sep{color:#dadce0; margin:0 8px}
     /* StagePlot è l'unica voce che porta fuori dal sito: la freccia lo dice prima del clic. */
     .nav .out{white-space:nowrap}
     .nav .out svg{width:9px; height:9px; margin-left:3px}
-    /* Col banner del browser in-app aperto il menu finirebbe sotto: si sposta. */
-    body.has-escape .nav{top:76px}
-    @media (max-width:560px){ .nav{font-size:12.5px} .nav .sep{margin:0 6px} }
+    /* Col banner del browser in-app aperto il menu finirebbe sotto: scende tutto. */
+    body.has-escape{padding-top:58px}
+    @media (max-width:560px){ .nav{font-size:12.5px; padding:16px 20px} .nav .sep{margin:0 6px} }
     .pills{margin-top:32px; display:flex; flex-wrap:wrap; gap:12px; justify-content:center}
     .pill{
       display:inline-flex; align-items:center; gap:9px;
@@ -168,7 +171,9 @@
     .contact a:hover{color:#1a1a1a}
     .ns{margin-top:18px; font-size:14px; color:#5f6368}
     .ns a{color:#1a1a1a}
-    .credit{position:fixed; left:0; right:0; bottom:16px; text-align:center; font-size:12px; color:#6b7075; letter-spacing:.2px}
+    /* Nel flusso, non più fisso: col layout a colonna il footer sta già in fondo
+       da solo, e su uno schermo basso non finisce sopra il contenuto. */
+    .credit{padding:0 24px 22px; text-align:center; font-size:12px; color:#6b7075; letter-spacing:.2px}
     .credit a{color:#6b7075; text-decoration:none; border-bottom:1px solid #d6d9de}
     .credit a:hover{color:#1a1a1a}
     /* «Tools»: stesso maiuscoletto spaziato dell'occhiello in cima, così la
@@ -199,48 +204,50 @@
     <span id="escape-hint"> (oppure menu ⋯ → «Apri nel browser»)</span>
   </div>
 
-  <!-- Le quattro pagine che dalla home non avevano una porta: /cv/ si raggiungeva
-       solo passando da /profilo/, e /en/profile/ aveva il solo hreflang. -->
+  <!-- CV fuori dal menu: viveva accanto a Profilo e portava quasi allo stesso posto.
+       «Home» è la via di ritorno da ogni pagina; /cv/ resta linkato da /profilo/. -->
   <nav class="nav" id="nav" aria-label="Pagine del sito">
-    <a href="/profilo/">Profilo</a><span class="sep">·</span><a href="/cv/">CV</a><span class="sep">·</span><a href="/tools/">Tools</a><span class="sep">·</span><a class="out" href="https://stageplot.it/" target="_blank" rel="noopener">StagePlot<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></a><span class="sep">·</span><a href="/en/profile/" hreflang="en" lang="en">EN</a>
+    <a href="/" aria-current="page">Home</a><span class="sep">·</span><a href="/profilo/">Profilo</a><span class="sep">·</span><a href="/tools/">Tools</a><span class="sep">·</span><a class="out" href="https://stageplot.it/" target="_blank" rel="noopener">StagePlot<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></a><span class="sep">·</span><a href="/en/profile/" hreflang="en" lang="en">EN</a>
   </nav>
 
-  <!-- Il nome sta nell'<h1> statico: è quello che resta a chi non esegue JavaScript. -->
-  <h1>Simone Castellan</h1>
-  <p class="lead">Mi occupo di tecnologia applicata al suono — in studio e dal vivo.</p>
-  <p class="sub">Insegno elettroacustica alla
-    <a href="https://musica.fondazionemilano.eu/" target="_blank" rel="noopener">Civica Scuola Claudio Abbado</a>
-    di Milano e lavoro in
-    <a href="https://www.avasoundlivemusic.eu" target="_blank" rel="noopener">AVA Sound Live Music</a>,
-    studio certificato Dolby Atmos.</p>
+  <main>
+    <!-- Il nome sta nell'<h1> statico: è quello che resta a chi non esegue JavaScript. -->
+    <h1>Simone Castellan</h1>
+    <p class="lead">Mi occupo di tecnologia applicata al suono — in studio e dal vivo.</p>
+    <p class="sub">Insegno elettroacustica alla
+      <a href="https://musica.fondazionemilano.eu/" target="_blank" rel="noopener">Civica Scuola Claudio Abbado</a>
+      di Milano e lavoro in
+      <a href="https://www.avasoundlivemusic.eu" target="_blank" rel="noopener">AVA Sound Live Music</a>,
+      studio certificato Dolby Atmos.</p>
 
-  <div class="pills" id="pills"></div>
-  <p class="askline">Ask more about Simone Castellan</p>
-  <noscript>
-    <p class="ns">I pulsanti richiedono JavaScript. Il profilo completo è leggibile qui:
-      <a href="/profilo/">simonecastellan.com/profilo</a></p>
-  </noscript>
+    <div class="pills" id="pills"></div>
+    <p class="askline">Ask more about Simone Castellan</p>
+    <noscript>
+      <p class="ns">I pulsanti richiedono JavaScript. Il profilo completo è leggibile qui:
+        <a href="/profilo/">simonecastellan.com/profilo</a></p>
+    </noscript>
 
-  <div class="contact">
-    Oppure scrivimi su
-    <a id="wa" href="#" target="_blank" rel="noopener" aria-label="Scrivi su WhatsApp — apri in una nuova scheda">WhatsApp</a>
-    ·
-    <a id="email" href="mailto:castellansimone@gmail.com">Email</a>
-    ·
-    <a id="tienimi" href="/tienimi-presente/">Tienimi presente</a>
-  </div>
+    <div class="contact">
+      Oppure scrivimi su
+      <a id="wa" href="#" target="_blank" rel="noopener" aria-label="Scrivi su WhatsApp — apri in una nuova scheda">WhatsApp</a>
+      ·
+      <a id="email" href="mailto:castellansimone@gmail.com">Email</a>
+      ·
+      <a id="tienimi" href="/tienimi-presente/">Tienimi presente</a>
+    </div>
 
   <!-- Un solo appiglio invece della fila dei sette nomi (che su iPhone andava a
        due righe): stesso maiuscoletto dell'occhiello in cima, e l'elenco vero
        vive in /tools/. «Tools» da solo non diceva cosa ci fosse dietro a chi
        arriva la prima volta: due parole in italiano tolgono il dubbio. -->
-  <a class="toolslink" id="toolslink" href="/tools/">
-    <span class="tl-word">Tools</span>
-    <span class="tl-sub">strumenti gratuiti da usare nel browser</span>
-  </a>
+    <a class="toolslink" id="toolslink" href="/tools/">
+      <span class="tl-word">Tools</span>
+      <span class="tl-sub">strumenti gratuiti da usare nel browser</span>
+    </a>
+  </main>
 
   <footer class="credit">
-    Designed and built by Simone Castellan. · <a href="/profilo/">Profilo</a> · <a href="/privacy/">Privacy</a>
+    Designed and built by Simone Castellan. · <a href="/cv/">CV</a> · <a href="/privacy/">Privacy</a>
   </footer>
 
   <script src="/track.js"></script>
