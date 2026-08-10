@@ -153,26 +153,29 @@ var SOCIAL = [
 
 /* Le misure consigliate per l'esportazione, cioè quelle che usa lo strumento
    che prepara le immagini. Stanno qui accanto alle regole di controllo perché
-   sono la stessa materia: se cambia una, cambia l'altra. */
+   sono la stessa materia: se cambia una, cambia l'altra.
+
+   Il campo «uso» rimanda alla voce corrispondente qui sopra: serve a ritrovare
+   le zone coperte dall'interfaccia senza riscriverle una seconda volta. */
 var SOCIAL_FORMATI = [
   {
     id: 'instagram', nome: 'Instagram',
     formati: [
       { id: 'post-4x5',   etichetta: 'Post verticale',  nota: 'il più consigliato', w: 1080, h: 1350 },
       { id: 'post-1x1',   etichetta: 'Post quadrato',   w: 1080, h: 1080 },
-      { id: 'story-9x16', etichetta: 'Story e Reel',    w: 1080, h: 1920 }
+      { id: 'story-9x16', etichetta: 'Story e Reel',    w: 1080, h: 1920, uso: 'story' }
     ]
   },
   {
     id: 'tiktok', nome: 'TikTok',
-    formati: [ { id: 'post-9x16', etichetta: 'Video e foto', w: 1080, h: 1920 } ]
+    formati: [ { id: 'post-9x16', etichetta: 'Video e foto', w: 1080, h: 1920, uso: 'video' } ]
   },
   {
     id: 'facebook', nome: 'Facebook',
     formati: [
       { id: 'post-1x1',   etichetta: 'Post quadrato',  w: 1080, h: 1080 },
       { id: 'post-4x5',   etichetta: 'Post verticale', w: 1080, h: 1350 },
-      { id: 'story-9x16', etichetta: 'Story',          w: 1080, h: 1920 },
+      { id: 'story-9x16', etichetta: 'Story',          w: 1080, h: 1920, uso: 'story' },
       { id: 'link-191x1', etichetta: 'Anteprima link', nota: 'quando condividi un indirizzo', w: 1200, h: 630 }
     ]
   },
@@ -193,9 +196,24 @@ var SOCIAL_FORMATI = [
   },
   {
     id: 'youtube', nome: 'YouTube',
-    formati: [ { id: 'copertina-16x9', etichetta: 'Copertina del video', w: 1280, h: 720 } ]
+    formati: [ { id: 'copertina-16x9', etichetta: 'Copertina del video', w: 1280, h: 720, uso: 'copertina' } ]
   }
 ];
 
 // Con quale si parte, dove serve una scelta iniziale.
 var PIATTAFORME_INIZIALI = ['instagram'];
+
+/* Dove l'interfaccia della piattaforma copre l'immagine: nome utente e barra
+   dei comandi in alto, campo per rispondere in basso, colonna dei pulsanti a
+   destra. Le percentuali sono del lato corrispondente. Restituisce null se
+   per quel formato non c'è niente da coprire. */
+function zonaCoperta(piattaformaId, usoId) {
+  if (!usoId) return null;
+  for (var i = 0; i < SOCIAL.length; i++) {
+    if (SOCIAL[i].id !== piattaformaId) continue;
+    for (var j = 0; j < SOCIAL[i].usi.length; j++) {
+      if (SOCIAL[i].usi[j].id === usoId) return SOCIAL[i].usi[j].coperto || null;
+    }
+  }
+  return null;
+}

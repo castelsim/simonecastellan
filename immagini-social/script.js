@@ -25,6 +25,7 @@ var attive = PIATTAFORME_INIZIALI.slice();
 var fuoco = { x: 0.5, y: 0.5 };
 var zoom = 1;
 var staccati = {};          // chiave voce → { x, y, zoom } per chi è stato ritoccato da solo
+var mostraCoperto = false;  // il velo sulle zone che la piattaforma si prende
 var voci = [];              // una per anteprima disegnata
 
 var LATO_LAVORO = 1600;     // oltre non serve: le anteprime sono piccole
@@ -92,7 +93,8 @@ function costruisciVoci() {
         piattaformaId: p.id,
         etichetta: f.etichetta,
         nota: f.nota || '',
-        w: f.w, h: f.h
+        w: f.w, h: f.h,
+        coperto: zonaCoperta(p.id, f.uso)     // null dove non c'è niente da coprire
       });
     });
   });
@@ -106,6 +108,34 @@ function disegnaAnteprima(voce) {
   g.clearRect(0, 0, c.width, c.height);
   g.imageSmoothingQuality = 'high';
   g.drawImage(lavoro, r.x, r.y, r.w, r.h, 0, 0, c.width, c.height);
+  if (mostraCoperto && voce.coperto) velo(g, c, voce.coperto);
+}
+
+/* Il velo sulle zone dove la piattaforma mette la sua roba addosso: in una
+   Story il nome di chi pubblica sta in alto e la barra per rispondere in
+   basso, su TikTok c'è anche la colonna dei pulsanti a destra. Serve a
+   guardare, non finisce mai nel file esportato. */
+function velo(g, c, z) {
+  g.save();
+  g.fillStyle = 'rgba(20,20,20,.55)';
+  var alto = Math.round(c.height * (z.alto || 0));
+  var basso = Math.round(c.height * (z.basso || 0));
+  var sin = Math.round(c.width * (z.sinistra || 0));
+  var des = Math.round(c.width * (z.destra || 0));
+  if (alto) g.fillRect(0, 0, c.width, alto);
+  if (basso) g.fillRect(0, c.height - basso, c.width, basso);
+  if (sin) g.fillRect(0, alto, sin, c.height - alto - basso);
+  if (des) g.fillRect(c.width - des, alto, des, c.height - alto - basso);
+  // L'angolo dove YouTube stampa la durata del video.
+  if (z.angoloDurata) {
+    var w = Math.round(c.width * 0.22), h = Math.round(c.height * 0.14);
+    g.fillRect(c.width - w - 4, c.height - h - 4, w, h);
+  }
+  g.strokeStyle = 'rgba(255,255,255,.75)';
+  g.lineWidth = 1;
+  g.setLineDash([3, 3]);
+  g.strokeRect(sin + 0.5, alto + 0.5, c.width - sin - des - 1, c.height - alto - basso - 1);
+  g.restore();
 }
 
 function disegnaTutte() { voci.forEach(disegnaAnteprima); }
@@ -580,6 +610,11 @@ function chip(p) {
 }
 
 SOCIAL_FORMATI.forEach(function (p) { scelteBox.appendChild(chip(p)); });
+
+document.getElementById('copertoCheck').addEventListener('change', function () {
+  mostraCoperto = this.checked;
+  disegnaTutte();
+});
 
 zoomInput.addEventListener('input', function () {
   zoom = Number(zoomInput.value) / 100;
