@@ -46,8 +46,9 @@
   </script>
 </head>
 <body>
+  <!-- «Home» è la via di ritorno; CV è uscito perché portava quasi dove porta Profilo. -->
   <nav class="nav" id="nav" aria-label="Pagine del sito">
-    <a href="/profilo/">Profilo</a><span class="sep">·</span><a href="/cv/">CV</a><span class="sep">·</span><a href="/tools/" aria-current="page">Tools</a><span class="sep">·</span><a class="out" href="https://stageplot.it/" target="_blank" rel="noopener">StagePlot<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></a><span class="sep">·</span><a href="/en/profile/" hreflang="en" lang="en">EN</a>
+    <a href="/">Home</a><span class="sep">·</span><a href="/profilo/">Profilo</a><span class="sep">·</span><a href="/tools/" aria-current="page">Tools</a><span class="sep">·</span><a class="out" href="https://stageplot.it/" target="_blank" rel="noopener">StagePlot<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></a><span class="sep">·</span><a href="/en/profile/" hreflang="en" lang="en">EN</a>
   </nav>
 
   <main class="card">
@@ -60,12 +61,14 @@
 
     <!-- Ricerca e filtri li accende il JavaScript: senza, resterebbero due comandi
          che non fanno niente, e i dodici strumenti si vedono comunque tutti. -->
-    <div class="cerca" id="cerca" hidden>
-      <svg class="lente" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
-      <input id="q" type="search" placeholder="Cosa ti serve? «pesante», «palco», «wi-fi»…" autocomplete="off" aria-label="Cerca fra gli strumenti" aria-controls="griglia">
-      <button class="pulisci" id="pulisci" type="button" aria-label="Cancella la ricerca">×</button>
+    <div class="comandi" id="comandi" hidden>
+      <div class="cerca">
+        <svg class="lente" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+        <input id="q" type="search" placeholder="Cosa ti serve? «pesante», «palco», «wi-fi»…" autocomplete="off" aria-label="Cerca fra gli strumenti" aria-controls="griglia">
+        <button class="pulisci" id="pulisci" type="button" aria-label="Cancella la ricerca">×</button>
+      </div>
+      <div class="chips" id="chips"></div>
     </div>
-    <div class="chips" id="chips" hidden></div>
     <p class="conta" id="conta" hidden aria-live="polite"></p>
 
     <!-- I dodici link stanno nel markup, non li costruisce il JavaScript: è quello che
@@ -144,17 +147,24 @@
     var conta  = document.getElementById('conta');
     var vuoto  = document.getElementById('vuoto');
     var chips  = document.getElementById('chips');
-    var cerca  = document.getElementById('cerca');
     var q      = document.getElementById('q');
+    var ridotto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     chips.innerHTML = GRUPPI.map(function(g,i){
       return '<button class="chip" type="button" data-f="'+g.id+'" aria-pressed="'+(i===0?'true':'false')+'">'+g.t+'</button>';
     }).join('');
-    cerca.hidden = false; chips.hidden = false; conta.hidden = false;
+    document.getElementById('comandi').hidden = false; conta.hidden = false;
 
     var filtro = "", testo = "";
     function disegna(){
-      var n = 0;
+      // FLIP: si misura dove sta ogni casella PRIMA del filtro, si applica il filtro,
+      // si misura dove è finita, la si rimette indietro con una transform e la si lascia
+      // andare. Così le caselle rimaste scivolano nella nuova posizione invece di
+      // saltarci: si vede che la griglia si è ricomposta, non ricaricata.
+      var prima = new Map();
+      if (!ridotto) celle.forEach(function(a){ if (!a.hidden) prima.set(a, a.getBoundingClientRect()); });
+
+      var n = 0, nuovi = [];
       celle.forEach(function(a){
         var ok = true;
         if (filtro && a.dataset.g !== filtro) ok = false;
@@ -162,9 +172,28 @@
           var s = (a.textContent + ' ' + a.dataset.k).toLowerCase();
           ok = testo.toLowerCase().split(/\s+/).every(function(w){ return s.indexOf(w) > -1; });
         }
+        var era = !a.hidden;
         a.hidden = !ok;
-        if (ok) n++;
+        a.classList.remove('scorre','entra');
+        a.style.transform = '';
+        if (ok) { n++; if (!era) nuovi.push(a); }
       });
+
+      if (!ridotto) {
+        celle.forEach(function(a){
+          if (a.hidden || !prima.has(a)) return;
+          var p = prima.get(a), o = a.getBoundingClientRect();
+          var dx = p.left - o.left, dy = p.top - o.top;
+          if (!dx && !dy) return;
+          a.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+          a.getBoundingClientRect();   // forza il ricalcolo: senza, il browser accorpa i due
+                                       // stati e l'animazione non parte affatto
+          a.classList.add('scorre');
+          a.style.transform = '';
+        });
+        nuovi.forEach(function(a){ a.classList.add('entra'); });
+      }
+
       document.body.classList.toggle('ha-testo', !!testo);
       conta.textContent = testo
         ? n + (n === 1 ? ' strumento' : ' strumenti') + ' per «' + testo + '»'
