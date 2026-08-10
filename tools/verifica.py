@@ -105,6 +105,7 @@ def controlla_collegamenti_interni():
         "/bpm/": ["tools/index.html"],
         "/tonalita/": ["tools/index.html"],
         "/qrcode/": ["tools/index.html"],
+        "/posso-pubblicarlo/": ["tools/index.html"],
         "/immagini-social/": ["tools/index.html"],
         "/comprimi-immagini/": ["tools/index.html"],
         "/comprimi-pdf/": ["tools/index.html"],
@@ -151,7 +152,7 @@ def controlla_sitemap():
             errore(f"la sitemap elenca /{u} ma il file non esiste")
     pubblicate = {"", "profilo/", "cv/", "en/profile/", "privacy/", "tienimi-presente/", "BDG2029/",
                   "tools/", "audio-mp3/", "bpm/", "tonalita/", "qrcode/",
-                  "comprimi-immagini/", "comprimi-pdf/", "immagini-social/",
+                  "comprimi-immagini/", "comprimi-pdf/", "immagini-social/", "posso-pubblicarlo/",
                   "rumore-rosa/", "ritardo-diffusori/"}
     mancanti = pubblicate - set(urls)
     if mancanti:

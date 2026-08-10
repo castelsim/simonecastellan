@@ -83,7 +83,7 @@ function statoDi(chiave) {
 
 function costruisciVoci() {
   voci = [];
-  PIATTAFORME.forEach(function (p) {
+  SOCIAL_FORMATI.forEach(function (p) {
     if (attive.indexOf(p.id) === -1) return;
     p.formati.forEach(function (f) {
       voci.push({
@@ -579,7 +579,7 @@ function chip(p) {
   return b;
 }
 
-PIATTAFORME.forEach(function (p) { scelteBox.appendChild(chip(p)); });
+SOCIAL_FORMATI.forEach(function (p) { scelteBox.appendChild(chip(p)); });
 
 zoomInput.addEventListener('input', function () {
   zoom = Number(zoomInput.value) / 100;
