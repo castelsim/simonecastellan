@@ -24,8 +24,9 @@
 <body>
   <main class="card">
     <header>
+      <p class="occhiello">Instagram · TikTok · Facebook · LinkedIn · X · YouTube</p>
       <h1>Immagini per i social</h1>
-      <p class="subtitle">Una foto. Tutti i formati.</p>
+      <p class="subtitle">Una foto. Tutti i formati, nelle misure giuste.</p>
     </header>
 
     <!-- Il tool per primo: la spiegazione sta sotto, per chi la cerca. -->
@@ -58,15 +59,14 @@
         <button type="button" id="cambiaBtn" class="link-piccolo">cambia foto</button>
       </div>
 
+      <!-- Una piattaforma alla volta: sedici formati tutti insieme sono un muro.
+           «Tutte» resta in testa per chi pubblica lo stesso post su più social. -->
       <p class="domanda">Per cosa ti serve?</p>
       <div id="scelte" class="chips" role="group" aria-label="Piattaforme"></div>
 
-      <div id="risultati" class="risultati" aria-live="polite"></div>
-
-      <p class="aiuto" id="aiuto">
-        Trascina dentro un'anteprima per spostare l'inquadratura: si muovono tutte insieme.
-        Per sistemarne una sola, usa «solo questa».
-      </p>
+      <div class="lavoro">
+        <div id="risultati" class="tavolo" aria-live="polite"></div>
+      </div>
 
       <!-- La safe zone è un interruttore, non una pagina a parte: serve mentre
            si guarda l'anteprima, non dopo aver ricaricato la foto altrove. -->
@@ -75,21 +75,15 @@
         <span>Mostra dove la piattaforma copre l'immagine</span>
       </label>
 
-      <div class="riga-zoom">
-        <label for="zoom">Inquadratura</label>
-        <input type="range" id="zoom" class="range" min="100" max="250" step="1" value="100"
-               aria-label="Da più larga a più stretta" />
-        <button type="button" id="centraBtn" class="link-piccolo">rimetti al centro</button>
-      </div>
-
       <div class="azioni">
         <button type="button" id="zipBtn" class="btn btn-primary">Scarica tutto</button>
         <button type="button" id="condividiBtn" class="btn btn-secondary hidden">Condividi</button>
+        <button type="button" id="centraBtn" class="btn btn-ghost">Rimetti tutto al centro</button>
       </div>
 
       <details class="avanzate">
         <summary>Formato dei file</summary>
-        <div class="seg" id="formatoSeg" role="group" aria-label="Formato di uscita">
+        <div class="seg-out" id="formatoSeg" role="group" aria-label="Formato di uscita">
           <button type="button" class="seg-btn active" data-fmt="auto">Automatico</button>
           <button type="button" class="seg-btn" data-fmt="jpg">JPG</button>
           <button type="button" class="seg-btn" data-fmt="png">PNG</button>
@@ -107,7 +101,10 @@
       <p>Ogni social ritaglia da sé le immagini che non hanno le proporzioni che si aspetta, e lo fa
         dal centro: teste tagliate, scritte a metà, loghi fuori dall'inquadratura. Dare al social
         un'immagine già delle proporzioni giuste vuol dire decidere tu cosa si vede.</p>
-      <p>Questo strumento non deforma mai la foto: taglia. Tu scegli dove, trascinando l'anteprima.</p>
+      <p>Questo strumento non deforma mai la foto. Di solito taglia, e sei tu a scegliere dove
+        trascinando l'anteprima; se preferisci non perdere niente, «Adatta» mette la foto intera
+        dentro il formato su uno sfondo a tinta unita. In nessuno dei due casi l'immagine viene
+        stirata.</p>
 
       <h2>Domande</h2>
       <h3>Le mie foto vengono caricate da qualche parte?</h3>
@@ -124,6 +121,12 @@
         vede, soprattutto dopo che il social ricomprime. Oltre il doppio si vedrebbe, e allora il
         file esce più piccolo mantenendo le proporzioni corrette — con la misura vera scritta sotto
         l'anteprima. Meglio un file un po' più piccolo che una foto sgranata.</p>
+
+      <h3>Posso sistemare un formato senza toccare gli altri?</h3>
+      <p>Sì. Trascinare un'anteprima sposta l'inquadratura di tutte insieme — è il modo veloce, e
+        serve a dire una volta sola dov'è il soggetto. Ma appena usi un comando su una destinazione
+        (zoom, Adatta, Ruota), quella diventa indipendente e da lì in poi la muovi da sola: te lo
+        segnala la scritta «da sola» accanto al nome. «Azzera» la rimette insieme al gruppo.</p>
 
       <h3>Perché alcuni formati sono uguali fra social diversi?</h3>
       <p>Perché lo sono davvero: la Story di Instagram, quella di Facebook e il video di TikTok

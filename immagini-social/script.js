@@ -1,16 +1,21 @@
 /* Immagini per i social — una foto, tutti i formati.
 
-   Due idee tengono in piedi tutto il resto:
+   Tre idee tengono in piedi tutto il resto:
 
-   1. UN SOLO RITAGLIO. Sei piattaforme fanno sedici formati: regolarli uno per
-      uno sarebbe un lavoro, non uno strumento. Qui c'è un punto focale solo —
-      dove sta il soggetto — e ogni formato ci si allinea. Trascini dentro
-      un'anteprima qualsiasi e si spostano tutte insieme; se un formato proprio
-      non va, lo si stacca con «solo questa».
+   1. UN SOLO PUNTO FOCALE. Sedici formati regolati uno per uno sarebbero un
+      lavoro, non uno strumento. Si dice una volta sola dov'è il soggetto —
+      trascinando una qualsiasi anteprima — e tutte si allineano.
 
-   2. SI TAGLIA, NON SI DEFORMA. Il ritaglio ha sempre le proporzioni del
-      formato richiesto, e se la foto è più piccola non viene ingrandita: si
-      esporta alla misura massima possibile e lo si scrive.
+   2. CHI SI TOCCA, SI STACCA. Appena si usa un comando su una destinazione
+      (zoom, Adatta, Ruota) quella diventa indipendente: da lì in poi si muove
+      da sola e lo dichiara con l'etichetta «da sola». «Azzera» la rimette nel
+      gruppo. Così il caso veloce resta veloce e il caso difficile è possibile.
+
+   3. NON SI DEFORMA MAI. «Riempi» taglia mantenendo le proporzioni del formato;
+      «Adatta» mette la foto intera dentro il formato su uno sfondo a tinta
+      unita. In nessuno dei due casi l'immagine viene stirata. E se la foto ha
+      pochi pixel non viene ingrandita oltre il doppio: esce più piccola e lo
+      si scrive.
 
    Niente librerie: bastano createImageBitmap, canvas e una manciata di righe
    per scrivere uno ZIP. */
@@ -21,10 +26,11 @@ var nomeBase = '';
 var haTrasparenza = false;
 var formatoScelto = 'auto';
 
-var attive = PIATTAFORME_INIZIALI.slice();
+var attiva = 'tutte';       // una piattaforma alla volta, oppure «tutte»
 var fuoco = { x: 0.5, y: 0.5 };
-var zoom = 1;
-var staccati = {};          // chiave voce → { x, y, zoom } per chi è stato ritoccato da solo
+var soli = {};              // chiave voce → stato di chi si è staccato dal gruppo
+var ALTEZZA_TELA = 172;     // px dell'anteprima; la larghezza segue le proporzioni
+var SFONDI = [['#ffffff', 'bianco'], ['#0d1313', 'nero'], ['#8ca39e', 'grigio']];
 var mostraCoperto = false;  // il velo sulle zone che la piattaforma si prende
 var voci = [];              // una per anteprima disegnata
 
@@ -42,7 +48,6 @@ var lavoroBox = document.getElementById('lavoro');
 var scelteBox = document.getElementById('scelte');
 var risultati = document.getElementById('risultati');
 var nomeFoto  = document.getElementById('nomeFoto');
-var zoomInput = document.getElementById('zoom');
 var zipBtn    = document.getElementById('zipBtn');
 var condividiBtn = document.getElementById('condividiBtn');
 var formatoSeg= document.getElementById('formatoSeg');
@@ -76,8 +81,20 @@ function ritaglio(sw, sh, tw, th, fx, fy, z) {
   return { x: x, y: y, w: cw, h: ch };
 }
 
+/* Lo stato di una destinazione: quello del gruppo finché non si stacca. */
 function statoDi(chiave) {
-  return staccati[chiave] || { x: fuoco.x, y: fuoco.y, zoom: zoom };
+  return soli[chiave] || { x: fuoco.x, y: fuoco.y, zoom: 1, modo: 'riempi',
+                           sfondo: '#ffffff', ruota: 0 };
+}
+/* Toccare un comando stacca la destinazione dal gruppo: da lì in poi vive di
+   vita propria. Restituisce lo stato scrivibile. */
+function stacca(chiave) {
+  if (!soli[chiave]) {
+    var s = statoDi(chiave);
+    soli[chiave] = { x: s.x, y: s.y, zoom: s.zoom, modo: s.modo,
+                     sfondo: s.sfondo, ruota: s.ruota };
+  }
+  return soli[chiave];
 }
 
 // --- Le voci da mostrare ----------------------------------------------------
@@ -85,7 +102,7 @@ function statoDi(chiave) {
 function costruisciVoci() {
   voci = [];
   SOCIAL_FORMATI.forEach(function (p) {
-    if (attive.indexOf(p.id) === -1) return;
+    if (attiva !== 'tutte' && attiva !== p.id) return;
     p.formati.forEach(function (f) {
       voci.push({
         chiave: p.id + '/' + f.id,
@@ -100,14 +117,59 @@ function costruisciVoci() {
   });
 }
 
+/* Ruotare la sorgente una volta sola costa meno che ruotare a ogni disegno, e
+   soprattutto lascia intatto tutto il resto del codice: ritaglio, misure e
+   riduzione lavorano su un'immagine normale, che sia girata o no. */
+var cacheRuota = {};
+function ruotata(img, gradi) {
+  gradi = ((gradi % 360) + 360) % 360;
+  if (!gradi) return img;
+  var k = (img === sorgente ? 'S' : 'L') + gradi;
+  if (cacheRuota[k]) return cacheRuota[k];
+  var giro = gradi % 180 !== 0;
+  var c = document.createElement('canvas');
+  c.width = giro ? img.height : img.width;
+  c.height = giro ? img.width : img.height;
+  var g = c.getContext('2d');
+  g.translate(c.width / 2, c.height / 2);
+  g.rotate(gradi * Math.PI / 180);
+  g.drawImage(img, -img.width / 2, -img.height / 2);
+  cacheRuota[k] = c;
+  return c;
+}
+function scordaRotazioni() {
+  Object.keys(cacheRuota).forEach(function (k) { cacheRuota[k].width = 0; });
+  cacheRuota = {};
+}
+
+/* Il disegno vero, uguale per l'anteprima e per il file esportato: cambia solo
+   la sorgente (ridotta o piena) e la misura del bersaglio. Se le due strade
+   fossero separate, l'anteprima mentirebbe. */
+function componi(g, cw, ch, img, voce, s) {
+  var src = ruotata(img, s.ruota);
+  if (s.modo === 'adatta') {
+    g.fillStyle = s.sfondo;
+    g.fillRect(0, 0, cw, ch);
+    var k = Math.min(cw / src.width, ch / src.height) * s.zoom;
+    var dw = src.width * k, dh = src.height * k;
+    // x/y spostano l'immagine dentro la cornice, ma solo per la parte che sborda
+    var x = (cw - dw) / 2 + (s.x - 0.5) * Math.max(0, dw - cw);
+    var y = (ch - dh) / 2 + (s.y - 0.5) * Math.max(0, dh - ch);
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(src, x, y, dw, dh);
+  } else {
+    var r = ritaglio(src.width, src.height, voce.w, voce.h, s.x, s.y, s.zoom);
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(src, r.x, r.y, r.w, r.h, 0, 0, cw, ch);
+  }
+}
+
 function disegnaAnteprima(voce) {
   var c = voce.canvas;
   var s = statoDi(voce.chiave);
-  var r = ritaglio(lavoro.width, lavoro.height, voce.w, voce.h, s.x, s.y, s.zoom);
   var g = c.getContext('2d');
   g.clearRect(0, 0, c.width, c.height);
-  g.imageSmoothingQuality = 'high';
-  g.drawImage(lavoro, r.x, r.y, r.w, r.h, 0, 0, c.width, c.height);
+  componi(g, c.width, c.height, lavoro, voce, s);
   if (mostraCoperto && voce.coperto) velo(g, c, voce.coperto);
 }
 
@@ -151,88 +213,182 @@ var INGRANDIMENTO_MAX = 2;   // oltre il doppio si vede, sotto no
    dicendolo. */
 function misuraUscita(voce) {
   var s = statoDi(voce.chiave);
-  var r = ritaglio(sorgente.width, sorgente.height, voce.w, voce.h, s.x, s.y, s.zoom);
+  var src = ruotata(sorgente, s.ruota);
+  if (s.modo === 'adatta') {
+    /* Con lo sfondo la cornice è sempre piena: non c'è niente da ridurre. Resta
+       da dire se la foto dentro viene ingrandita troppo per reggere. */
+    var k = Math.min(voce.w / src.width, voce.h / src.height) * s.zoom;
+    return { w: voce.w, h: voce.h, piena: k <= INGRANDIMENTO_MAX, adatta: true };
+  }
+  var r = ritaglio(src.width, src.height, voce.w, voce.h, s.x, s.y, s.zoom);
   var massimo = Math.round(r.w * INGRANDIMENTO_MAX);
   var w = Math.min(voce.w, Math.max(Math.round(r.w), massimo));
   var h = Math.round(w * voce.h / voce.w);
   return { w: w, h: h, ritaglio: r, piena: w >= voce.w, ingrandita: w > Math.round(r.w) };
 }
 
+/* Una riga per destinazione: l'anteprima a sinistra, il nome e i comandi a
+   destra. I comandi stanno sempre in vista — sono quattro, e nasconderli
+   dietro un clic per «pulizia» costa più di quanto renda. */
 function schedaVoce(voce) {
   var box = document.createElement('div');
-  box.className = 'formato';
+  box.className = 'dest';
+
+  var telaBox = document.createElement('div');
+  telaBox.className = 'telaBox';
+  /* L'altezza passa da una variabile CSS e non da uno stile inline: così il
+     foglio di stile può rimetterla ad «auto» sul telefono, dove l'anteprima va
+     a piena larghezza. Con lo stile inline vincerebbe sempre lui e il riquadro
+     taglierebbe l'immagine. */
+  telaBox.style.setProperty('--h', ALTEZZA_TELA + 'px');
 
   var c = document.createElement('canvas');
-  // L'anteprima è piccola per davvero: quello che si vede non deve costare memoria.
-  var latoMax = 132;
-  var scala = Math.min(latoMax / voce.w, latoMax / voce.h);
-  c.width = Math.max(1, Math.round(voce.w * scala));
-  c.height = Math.max(1, Math.round(voce.h * scala));
-  c.className = 'anteprima';
+  /* Le proporzioni devono essere ESATTE. Arrotondando larghezza e altezza
+     separatamente il rapporto si sposta di qualche millesimo e un post 4:5 non
+     è più 4:5: si riduce il formato ai minimi termini (1080×1350 → 4×5) e lo si
+     moltiplica per un intero. La larghezza sullo schermo la calcola il browser
+     dal rapporto del canvas (width:auto), così non si può sbagliare. */
+  var g = mcd(voce.w, voce.h), rw = voce.w / g, rh = voce.h / g;
+  var n = Math.max(1, Math.round(ALTEZZA_TELA * 2 / rh));   // ×2 per gli schermi fitti
+  c.width = rw * n; c.height = rh * n;
+  c.className = 'tela';
   c.setAttribute('role', 'img');
   c.setAttribute('tabindex', '0');
   c.setAttribute('aria-label', voce.piattaforma + ' ' + voce.etichetta +
-                 ': trascina o usa le frecce per spostare l\'inquadratura');
-  box.appendChild(c);
+                 ': trascina per spostare l\'inquadratura');
+  telaBox.appendChild(c);
+  box.appendChild(telaBox);
   voce.canvas = c;
 
-  var testo = document.createElement('div');
-  testo.className = 'formato-testo';
-  var t1 = document.createElement('div');
-  t1.className = 'formato-nome';
-  t1.textContent = voce.etichetta;
-  var t2 = document.createElement('div');
-  t2.className = 'formato-misura';
-  var t3 = document.createElement('div');
-  t3.className = 'formato-azioni';
+  var dx = document.createElement('div');
+  dx.className = 'dest-dx';
+
+  var testa = document.createElement('div');
+  testa.className = 'dest-testa';
+  var nome = document.createElement('div');
+  nome.className = 'dest-nome';
+  nome.textContent = voce.etichetta;
+  var mis = document.createElement('div');
+  mis.className = 'dest-misura';
+  testa.appendChild(nome);
+  testa.appendChild(mis);
+  if (voce.nota) {
+    var nt = document.createElement('span');
+    nt.className = 'dest-nota';
+    nt.textContent = voce.nota;
+    testa.appendChild(nt);
+  }
+  var sola = document.createElement('span');
+  sola.className = 'dest-sola';
+  sola.textContent = 'da sola';
+  sola.hidden = true;
+  testa.appendChild(sola);
+  dx.appendChild(testa);
+  voce.misuraEl = mis;
+  voce.solaEl = sola;
+
+  var st = statoDi(voce.chiave);
+
+  var mods = document.createElement('div');
+  mods.className = 'mods';
+
+  var seg = document.createElement('div');
+  seg.className = 'seg';
+  [['riempi', 'Riempi'], ['adatta', 'Adatta']].forEach(function (m) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'mini' + (st.modo === m[0] ? ' on' : '');
+    b.textContent = m[1];
+    b.title = m[0] === 'riempi' ? 'Taglia per riempire il formato'
+                                : 'Tiene tutta la foto e riempie il resto di colore';
+    b.addEventListener('click', function () { stacca(voce.chiave).modo = m[0]; rifaiRisultati(); });
+    seg.appendChild(b);
+  });
+  mods.appendChild(seg);
+
+  var sf = document.createElement('span');
+  sf.className = 'sfondi';
+  sf.hidden = st.modo !== 'adatta';
+  SFONDI.forEach(function (col) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pastiglia' + (st.sfondo === col[0] ? ' on' : '');
+    b.style.background = col[0];
+    b.setAttribute('aria-label', 'Sfondo ' + col[1]);
+    b.title = 'Sfondo ' + col[1];
+    b.addEventListener('click', function () { stacca(voce.chiave).sfondo = col[0]; rifaiRisultati(); });
+    sf.appendChild(b);
+  });
+  mods.appendChild(sf);
+
+  var rot = document.createElement('button');
+  rot.type = 'button';
+  rot.className = 'mini';
+  rot.textContent = 'Ruota';
+  rot.setAttribute('aria-label', 'Ruota la foto di 90 gradi');
+  rot.addEventListener('click', function () {
+    var s2 = stacca(voce.chiave);
+    s2.ruota = (s2.ruota + 90) % 360;
+    disegnaAnteprima(voce);
+    aggiornaEtichette();
+  });
+  mods.appendChild(rot);
+
+  var azz = document.createElement('button');
+  azz.type = 'button';
+  azz.className = 'mini';
+  azz.textContent = 'Azzera';
+  azz.setAttribute('aria-label', 'Rimetti questa destinazione insieme alle altre');
+  azz.addEventListener('click', function () { delete soli[voce.chiave]; rifaiRisultati(); });
+  mods.appendChild(azz);
 
   var scarica = document.createElement('button');
   scarica.type = 'button';
-  scarica.className = 'f-dl';
+  scarica.className = 'mini';
   scarica.textContent = 'Scarica';
   scarica.addEventListener('click', function () { scaricaUna(voce); });
+  mods.appendChild(scarica);
+  dx.appendChild(mods);
 
-  var stacca = document.createElement('button');
-  stacca.type = 'button';
-  stacca.className = 'link-piccolo';
-  t3.appendChild(scarica);
-  t3.appendChild(stacca);
-
-  testo.appendChild(t1);
-  if (voce.nota) {
-    var t0 = document.createElement('div');
-    t0.className = 'formato-nota';
-    t0.textContent = voce.nota;
-    testo.appendChild(t0);
-  }
-  testo.appendChild(t2);
-  testo.appendChild(t3);
-  box.appendChild(testo);
-
-  voce.misuraEl = t2;
-  voce.staccaEl = stacca;
-  stacca.addEventListener('click', function () {
-    if (staccati[voce.chiave]) { delete staccati[voce.chiave]; }
-    else { staccati[voce.chiave] = { x: fuoco.x, y: fuoco.y, zoom: zoom }; }
-    aggiornaEtichette();
+  var zr = document.createElement('div');
+  zr.className = 'zoomriga';
+  var lab = document.createElement('label');
+  lab.textContent = 'Zoom';
+  lab.setAttribute('for', 'zoom-' + voce.chiave.replace('/', '-'));
+  var rng = document.createElement('input');
+  rng.type = 'range'; rng.min = '100'; rng.max = '300'; rng.step = '1';
+  rng.id = 'zoom-' + voce.chiave.replace('/', '-');
+  rng.value = Math.round(st.zoom * 100);
+  var val = document.createElement('span');
+  val.className = 'zoomval';
+  val.textContent = Math.round(st.zoom * 100) + '%';
+  rng.addEventListener('input', function () {
+    stacca(voce.chiave).zoom = Number(rng.value) / 100;
+    val.textContent = rng.value + '%';
     disegnaAnteprima(voce);
+    aggiornaEtichette();
   });
+  zr.appendChild(lab); zr.appendChild(rng); zr.appendChild(val);
+  dx.appendChild(zr);
 
+  box.appendChild(dx);
   collegaTrascinamento(voce);
   return box;
 }
+
+function mcd(a, b) { return b ? mcd(b, a % b) : a; }
 
 function aggiornaEtichette() {
   voci.forEach(function (v) {
     var m = misuraUscita(v);
     var testo = m.w + '×' + m.h;
-    if (!m.piena) testo += ' · la tua foto non ha abbastanza pixel per ' + v.w + '×' + v.h +
-                           ': più grande di così verrebbe sgranata';
+    if (!m.piena) testo += m.adatta
+      ? ' · la tua foto è piccola: dentro questa cornice si vedrà sgranata'
+      : ' · la tua foto non ha abbastanza pixel per ' + v.w + '×' + v.h +
+        ': più grande di così verrebbe sgranata';
     v.misuraEl.textContent = testo;
     v.misuraEl.classList.toggle('scarsa', !m.piena);
-    var staccata = !!staccati[v.chiave];
-    v.staccaEl.textContent = staccata ? 'segui le altre' : 'solo questa';
-    v.canvas.classList.toggle('staccata', staccata);
+    v.solaEl.hidden = !soli[v.chiave];
   });
 }
 
@@ -277,14 +433,14 @@ function collegaTrascinamento(voce) {
     var ny = s.y - (dy / c.clientHeight) * (r.h / lavoro.height);
     nx = Math.max(0, Math.min(1, nx));
     ny = Math.max(0, Math.min(1, ny));
-    if (staccati[voce.chiave]) {
-      staccati[voce.chiave].x = nx;
-      staccati[voce.chiave].y = ny;
+    if (soli[voce.chiave]) {
+      soli[voce.chiave].x = nx;
+      soli[voce.chiave].y = ny;
       disegnaAnteprima(voce);
     } else {
       fuoco.x = nx; fuoco.y = ny;
       // Tutte insieme: è questo il punto: si dice una volta dov'è il soggetto.
-      voci.forEach(function (v) { if (!staccati[v.chiave]) disegnaAnteprima(v); });
+      voci.forEach(function (v) { if (!soli[v.chiave]) disegnaAnteprima(v); });
     }
     aggiornaEtichette();
   }
@@ -364,8 +520,17 @@ function nomeFile(voce, estensione) {
 
 async function generaBlob(voce) {
   var m = misuraUscita(voce);
+  var st = statoDi(voce.chiave);
   var tipo = tipoUscita();
-  var canvas = riduciAGradini(sorgente, m.ritaglio, m.w, m.h);
+  var canvas;
+  if (m.adatta) {
+    canvas = document.createElement('canvas');
+    canvas.width = m.w; canvas.height = m.h;
+    componi(canvas.getContext('2d'), m.w, m.h, sorgente, voce, st);
+  } else {
+    // il ritaglio è già calcolato sulla sorgente ruotata: qui si passa la stessa
+    canvas = riduciAGradini(ruotata(sorgente, st.ruota), m.ritaglio, m.w, m.h);
+  }
   var blob = await new Promise(function (r) {
     canvas.toBlob(function (b) { r(b); }, tipo[0], tipo[0] === 'image/png' ? undefined : 0.9);
   });
@@ -380,8 +545,14 @@ async function generaTutti(passo) {
   for (var i = 0; i < voci.length; i++) {
     var v = voci[i];
     var m = misuraUscita(v);
-    var chiave = m.w + 'x' + m.h + '|' + Math.round(m.ritaglio.x) + ',' + Math.round(m.ritaglio.y) +
-                 ',' + Math.round(m.ritaglio.w);
+    var st = statoDi(v.chiave);
+    /* Due voci danno lo stesso file solo se coincidono anche i modificatori:
+       senza questi pezzi nella chiave, una Story regolata a mano si ritroverebbe
+       il file di un'altra identica per misura ma non per contenuto. */
+    var chiave = m.w + 'x' + m.h + '|' + st.modo + '|' + st.ruota + '|' + st.sfondo + '|' +
+                 (m.ritaglio ? Math.round(m.ritaglio.x) + ',' + Math.round(m.ritaglio.y) +
+                               ',' + Math.round(m.ritaglio.w) : 'pieno') + '|' +
+                 Math.round(st.x * 1000) + ',' + Math.round(st.y * 1000) + ',' + Math.round(st.zoom * 100);
     if (!cache[chiave]) cache[chiave] = (await generaBlob(v)).blob;
     fatti.push({ blob: cache[chiave], nome: nomeFile(v, tipoUscita()[1]) });
     if (passo) passo(i + 1, voci.length);
@@ -510,10 +681,11 @@ function pulisci() {
   try { if (sorgente) sorgente.close(); } catch (e) {}
   try { if (lavoro && lavoro !== sorgente) lavoro.close(); } catch (e) {}
   sorgente = null; lavoro = null;
-  staccati = {};
+  soli = {};
   fuoco = { x: 0.5, y: 0.5 };
-  zoom = 1;
-  zoomInput.value = 100;
+  // Le copie ruotate appartengono alla foto di prima: tenerle sarebbe una perdita
+  // di memoria e, peggio, il rischio di disegnare la foto sbagliata.
+  scordaRotazioni();
 }
 
 async function apri(file) {
@@ -593,42 +765,40 @@ document.getElementById('cambiaBtn').addEventListener('click', function () { fil
 
 // --- Comandi ----------------------------------------------------------------
 
-function chip(p) {
+/* Una piattaforma alla volta. «Tutte» resta in testa per chi pubblica lo stesso
+   post su più social: senza, il caso più comune costerebbe due giri. */
+function chip(id, nome) {
   var b = document.createElement('button');
   b.type = 'button';
-  b.className = 'chip' + (attive.indexOf(p.id) > -1 ? ' on' : '');
-  b.textContent = p.nome;
-  b.setAttribute('aria-pressed', attive.indexOf(p.id) > -1 ? 'true' : 'false');
+  b.className = 'chip';
+  b.textContent = nome;
+  b.setAttribute('aria-pressed', attiva === id ? 'true' : 'false');
   b.addEventListener('click', function () {
-    var i = attive.indexOf(p.id);
-    if (i > -1) attive.splice(i, 1); else attive.push(p.id);
-    b.classList.toggle('on', i === -1);
-    b.setAttribute('aria-pressed', i === -1 ? 'true' : 'false');
+    attiva = id;
+    [].forEach.call(scelteBox.children, function (x) {
+      x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
+    });
     rifaiRisultati();
   });
   return b;
 }
 
-SOCIAL_FORMATI.forEach(function (p) { scelteBox.appendChild(chip(p)); });
+function costruisciChip() {
+  scelteBox.innerHTML = '';
+  scelteBox.appendChild(chip('tutte', 'Tutte'));
+  SOCIAL_FORMATI.forEach(function (p) { scelteBox.appendChild(chip(p.id, p.nome)); });
+}
+costruisciChip();
 
 document.getElementById('copertoCheck').addEventListener('change', function () {
   mostraCoperto = this.checked;
   disegnaTutte();
 });
 
-zoomInput.addEventListener('input', function () {
-  zoom = Number(zoomInput.value) / 100;
-  voci.forEach(function (v) { if (!staccati[v.chiave]) disegnaAnteprima(v); });
-  aggiornaEtichette();
-});
-
 document.getElementById('centraBtn').addEventListener('click', function () {
   fuoco = { x: 0.5, y: 0.5 };
-  zoom = 1;
-  zoomInput.value = 100;
-  staccati = {};
-  disegnaTutte();
-  aggiornaEtichette();
+  soli = {};
+  rifaiRisultati();
 });
 
 formatoSeg.addEventListener('click', function (e) {
