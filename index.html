@@ -135,6 +135,22 @@
       white-space:nowrap}
     .sub a:hover{color:#1a1a1a}
     .askline{margin-top:13px; font-size:13px; color:#9aa0a6}
+    /* Menu: una nota in cima, non una barra di navigazione. Stesso grigio
+       dell'occhiello TOOLS, nessuno sfondo — la pillola è la forma del pulsante
+       ChatGPT e non va prestata a nient'altro.
+       È «absolute» e non «fixed» apposta: su uno schermo basso scorre via col
+       contenuto invece di restare sopra il testo. */
+    .nav{position:absolute; top:18px; left:0; right:0; text-align:center;
+      font-size:13px; line-height:1; letter-spacing:.1px}
+    .nav a{color:#9aa0a6; text-decoration:none; transition:color .15s ease}
+    .nav a:hover{color:#1a1a1a}
+    .nav .sep{color:#dadce0; margin:0 8px}
+    /* StagePlot è l'unica voce che porta fuori dal sito: la freccia lo dice prima del clic. */
+    .nav .out{white-space:nowrap}
+    .nav .out svg{width:9px; height:9px; margin-left:3px}
+    /* Col banner del browser in-app aperto il menu finirebbe sotto: si sposta. */
+    body.has-escape .nav{top:76px}
+    @media (max-width:560px){ .nav{font-size:12.5px} .nav .sep{margin:0 6px} }
     .pills{margin-top:32px; display:flex; flex-wrap:wrap; gap:12px; justify-content:center}
     .pill{
       display:inline-flex; align-items:center; gap:9px;
@@ -183,6 +199,12 @@
     <span id="escape-hint"> (oppure menu ⋯ → «Apri nel browser»)</span>
   </div>
 
+  <!-- Le quattro pagine che dalla home non avevano una porta: /cv/ si raggiungeva
+       solo passando da /profilo/, e /en/profile/ aveva il solo hreflang. -->
+  <nav class="nav" id="nav" aria-label="Pagine del sito">
+    <a href="/profilo/">Profilo</a><span class="sep">·</span><a href="/cv/">CV</a><span class="sep">·</span><a href="/tools/">Tools</a><span class="sep">·</span><a class="out" href="https://stageplot.it/" target="_blank" rel="noopener">StagePlot<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></a><span class="sep">·</span><a href="/en/profile/" hreflang="en" lang="en">EN</a>
+  </nav>
+
   <!-- Il nome sta nell'<h1> statico: è quello che resta a chi non esegue JavaScript. -->
   <h1>Simone Castellan</h1>
   <p class="lead">Mi occupo di tecnologia applicata al suono — in studio e dal vivo.</p>
@@ -225,7 +247,7 @@
   <script>
     // Versione del profilo: URL STABILE (non cambia ogni giorno → indicizzabile).
     // Bumpare a mano SOLO quando cambia il contenuto di /profilo, per bustare la cache sui cambi reali.
-    var V = "5";
+    var V = "6";
 
     // UNA RIGA SOLA. Il visitatore se la vede comparire davanti agli occhi nella casella
     // dell'assistente: deve poterla leggere e capire in un secondo. Le istruzioni per l'AI
@@ -290,6 +312,7 @@
       escLink.textContent = IS_IOS ? "Apri questa pagina in Safari" : "Apri questa pagina in Chrome";
       escLink.addEventListener("click", function(){ track("click", "EscapeWebview"); });
       document.getElementById("escape").style.display = "block";
+      document.body.classList.add("has-escape");   // il menu scende sotto il banner
       track("inapp_webview");
     }
     // Mobile: SOLO ChatGPT — è l'unico il cui universal link apre l'app col prompt già scritto
@@ -327,6 +350,12 @@
     document.getElementById("tienimi").addEventListener("click", function(){ track("click", "TienimiPresente"); });
 
     document.getElementById("toolslink").addEventListener("click", function(){ track("click", "Tools"); });
+
+    // Quale voce del menu si usa davvero: senza questo non si saprebbe se serve.
+    document.getElementById("nav").addEventListener("click", function(e){
+      var a = e.target.closest && e.target.closest("a");
+      if (a) track("click", "Nav:" + a.textContent.trim());
+    });
 
     // Copia il prompt negli appunti: sync (execCommand, affidabile prima di navigare) + async best-effort.
     function copyText(text){

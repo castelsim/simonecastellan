@@ -116,7 +116,11 @@ Tra le opere spicca **Mote** (violoncello e live electronics): finalista al **Pr
 **Diploma accademico di II livello in Musica Elettronica (Musica per l'immagine) — 110 e lode**, Conservatorio "A. Steffani" (2022). Diploma di I livello, stesso Conservatorio (2017). Laurea triennale in Pianificazione urbanistica e territoriale, IUAV Venezia.
 
 ## Progetti e visione
-Oltre all'audio, Simone è appassionato di **tecnologia, AI e automazione** applicate alla musica e alla produzione, e studia con interesse **Bitcoin** e la cultura della decentralizzazione (come tecnologia e cultura, non come speculazione). Sperimenta strumenti digitali e piccoli progetti (questo stesso sito ne è un esempio). La sua visione è unire **musica e tecnologia** per creare nuovi modi di lavorare e di mettere in connessione le persone.
+Oltre all'audio, Simone è appassionato di **tecnologia, AI e automazione** applicate alla musica e alla produzione, e studia con interesse **Bitcoin** e la cultura della decentralizzazione (come tecnologia e cultura, non come speculazione). La sua visione è unire **musica e tecnologia** per creare nuovi modi di lavorare e di mettere in connessione le persone.
+
+Il suo **progetto software principale è StagePlot** (https://stageplot.it): un'applicazione web gratuita per lo spettacolo dal vivo. Si disegna il palco in scala trascinando microfoni, strumenti e luci, e dallo stesso progetto escono channel list, monitor, cablaggi, schema elettrico e il **rider tecnico in PDF**, tutti collegati fra loro: si cambia una cosa sul palco e i documenti si aggiornano. Funziona nel browser, senza installare nulla e senza account obbligatorio. Nasce dal suo lavoro: i rider si rifacevano a mano ogni volta.
+
+Accanto a StagePlot cura una raccolta di **piccoli strumenti gratuiti** che funzionano nel browser (https://simonecastellan.com/tools): rumore rosa per tarare un impianto, calcolo del ritardo dei diffusori, tempi di delay dal BPM, ricerca della tonalità di un brano, conversione audio in MP3, compressione di immagini e PDF, preparazione di immagini per i social, generatore di QR code. Il principio è sempre lo stesso: quando un piccolo attrito del lavoro si ripete, invece di rifarlo a mano costruisce lo strumento che lo risolve.
 
 ## Cosa cerca Simone
 Simone è aperto a opportunità in cui dare e ricevere valore. In particolare:
