@@ -3,6 +3,7 @@
    rifiutano i file oltre un certo peso. Tutto in locale, niente upload. */
 
 var targetKB = 1024;
+var modo = 'invisibile';    // «invisibile» = più leggera possibile, «peso» = sotto un limite
 var jobs = [];
 var busy = false;
 
@@ -70,6 +71,78 @@ function codifica(canvas, q) {
   return new Promise(function (risolvi) {
     canvas.toBlob(function (b) { risolvi(b); }, 'image/jpeg', q);
   });
+}
+
+/* --- Modo «più leggera possibile» -----------------------------------------
+
+   Qui non c'è un peso da rispettare: c'è da trovare il punto in cui la foto
+   pesa il meno possibile senza che la differenza si veda. «Non si vede» va
+   misurato, non deciso a occhio, quindi si confronta la versione compressa
+   con l'originale su una copia piccola e si guardano due cose: quanto in
+   media cambia ogni pixel, e quanti pixel cambiano abbastanza da accorgersene.
+   Si scende di qualità finché uno dei due supera la soglia. */
+
+var SOGLIA_MEDIA = 1.6;      // livelli di luminosità, su 255
+var SOGLIA_PIXEL = 0.02;     // quota di pixel che cambiano di oltre 6 livelli
+
+function luminanze(canvas) {
+  var g = canvas.getContext('2d');
+  var d = g.getImageData(0, 0, canvas.width, canvas.height).data;
+  var out = new Uint8Array(canvas.width * canvas.height);
+  for (var i = 0, j = 0; i < d.length; i += 4, j++) {
+    out[j] = (d[i] * 77 + d[i + 1] * 150 + d[i + 2] * 29) >> 8;
+  }
+  return out;
+}
+
+function riduciPer(img, lato) {
+  var scala = Math.min(1, lato / Math.max(img.width, img.height));
+  var c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(img.width * scala));
+  c.height = Math.max(1, Math.round(img.height * scala));
+  var g = c.getContext('2d');
+  g.fillStyle = '#ffffff';
+  g.fillRect(0, 0, c.width, c.height);
+  g.drawImage(img, 0, 0, c.width, c.height);
+  return c;
+}
+
+function differenza(a, b) {
+  var somma = 0, oltre = 0;
+  for (var i = 0; i < a.length; i++) {
+    var d = Math.abs(a[i] - b[i]);
+    somma += d;
+    if (d > 6) oltre++;
+  }
+  return { media: somma / a.length, quota: oltre / a.length };
+}
+
+async function piuLeggeraPossibile(img) {
+  var riferimento = riduciPer(img, 480);
+  var base = luminanze(riferimento);
+
+  // Dalla qualità alta si scende: la prima che sfora dice che la precedente
+  // era il limite. Sette prove al massimo, su immagini piccole: è veloce.
+  var scala = [0.92, 0.86, 0.8, 0.74, 0.68, 0.62, 0.56, 0.5];
+  var migliore = null;
+  var pieno = disegna(img, Math.max(img.width, img.height));
+
+  for (var i = 0; i < scala.length; i++) {
+    var blob = await codifica(pieno, scala[i]);
+    if (!blob) break;
+    var bmp = await createImageBitmap(blob);
+    var prova = luminanze(riduciPer(bmp, 480));
+    bmp.close && bmp.close();
+    var d = differenza(base, prova);
+    if (d.media > SOGLIA_MEDIA || d.quota > SOGLIA_PIXEL) break;
+    migliore = blob;
+  }
+
+  pieno.width = pieno.height = 0;
+  riferimento.width = riferimento.height = 0;
+  // Se perfino la qualità più alta si vede (succede con le grafiche piatte e
+  // il testo), si tiene quella: è il meglio che il JPEG sa fare qui.
+  return migliore || await codifica(disegna(img, Math.max(img.width, img.height)), 0.92);
 }
 
 /* Prova qualità e dimensioni finché non sta sotto il peso richiesto.
@@ -158,6 +231,7 @@ function coda() {
 
   var limite = targetKB * 1024;
   decode(prossimo.file).then(function (img) {
+    if (modo === 'invisibile') return piuLeggeraPossibile(img);
     // Già leggera e già JPEG: non la ricomprimo, la perderei di qualità per nulla.
     if (prossimo.file.size <= limite && /jpe?g/i.test(prossimo.file.type)) {
       return prossimo.file;
@@ -180,7 +254,10 @@ function fatta(job) {
   var prima = job.file.size, dopo = job.blob.size;
   var risparmio = Math.max(0, Math.round((1 - dopo / prima) * 100));
   var testo = pesa(prima) + ' → <b>' + pesa(dopo) + '</b>';
-  if (dopo > targetKB * 1024) testo += ' · più giù non scende';
+  if (modo === 'invisibile') {
+    testo += dopo >= prima ? ' · era già al minimo' : ' · −' + risparmio + '%, senza differenze visibili';
+  }
+  else if (dopo > targetKB * 1024) testo += ' · più giù non scende';
   else if (risparmio > 0) testo += ' · −' + risparmio + '%';
   else testo += ' · era già leggera';
   job.stateEl.innerHTML = testo;
@@ -272,6 +349,26 @@ dropZone.addEventListener('drop', function (e) {
 // Trascinare fuori dal riquadro non deve aprire l'immagine al posto della pagina.
 window.addEventListener('dragover', function (e) { e.preventDefault(); });
 window.addEventListener('drop', function (e) { e.preventDefault(); });
+
+document.getElementById('modoSeg').addEventListener('click', function (e) {
+  var b = e.target.closest('.seg-btn');
+  if (!b) return;
+  modo = b.dataset.modo;
+  [].forEach.call(this.querySelectorAll('.seg-btn'), function (x) { x.classList.toggle('active', x === b); });
+  targetSeg.classList.toggle('hidden', modo !== 'peso');
+  document.getElementById('modoNota').textContent = modo === 'peso'
+    ? 'Scendo fin sotto il peso che scegli, togliendo prima qualità e poi dimensioni.'
+    : 'Cerca il punto in cui la foto pesa il meno possibile senza che la differenza si veda.';
+  rifaiTutte();
+});
+
+function rifaiTutte() {
+  if (!jobs.length || busy) return;
+  jobs.forEach(function (j) { j.blob = null; j.failed = false; j.stateEl.textContent = 'in attesa…'; });
+  [].forEach.call(fileList.querySelectorAll('.f-dl'), function (b) { b.remove(); });
+  actionsBox.classList.add('hidden');
+  coda();
+}
 
 targetSeg.addEventListener('click', function (e) {
   var b = e.target.closest('.seg-btn');

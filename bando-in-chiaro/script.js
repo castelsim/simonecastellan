@@ -110,7 +110,11 @@ async function daPdf(file) {
   mostra(statusBox, false);
 
   var tutto = pezzi.join('\n\n');
-  if (tutto.replace(/\s/g, '').length < 200) {
+  /* La soglia va rapportata alle pagine, non fissa: un avviso di una pagina
+     sola ha poco testo ma ce l'ha, e con una soglia unica veniva scambiato
+     per una scansione — con un messaggio pure sbagliato. In una scansione
+     vera di testo non ce n'è quasi per niente. */
+  if (tutto.replace(/\s/g, '').length < 25 * doc.numPages) {
     erroreMsg.textContent = 'Dentro questo PDF non c\'è testo da estrarre: le pagine sono ' +
       'immagini, cioè una scansione. Servirebbe un riconoscimento del testo, che qui non faccio.';
     return mostra(erroreBox, true);

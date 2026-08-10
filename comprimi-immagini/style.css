@@ -173,3 +173,10 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
   h1 { font-size: 22px; }
   .seg-btn { padding: 7px 11px; font-size: 12.5px; }
 }
+
+/* Scelta del modo di comprimere */
+#modoSeg { margin-bottom: 10px; }
+.modo-nota {
+  font-size: 12px; color: var(--faint); line-height: 1.5;
+  margin: 0 auto 22px; max-width: 420px;
+}

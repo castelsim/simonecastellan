@@ -25,13 +25,22 @@
       <h1>Comprimi immagini</h1>
     </header>
 
-    <!-- Peso da rispettare -->
-    <div class="seg" id="targetSeg" role="group" aria-label="Peso massimo">
+    <!-- Due modi di ragionare: «deve stare sotto tot» oppure «fallo leggero
+         senza che si veda». Il secondo è quello che vuole quasi sempre chi
+         non ha un limite da rispettare. -->
+    <div class="seg" id="modoSeg" role="group" aria-label="Come comprimere">
+      <button type="button" class="seg-btn active" data-modo="invisibile">Più leggera possibile</button>
+      <button type="button" class="seg-btn" data-modo="peso">Sotto un peso</button>
+    </div>
+
+    <div class="seg hidden" id="targetSeg" role="group" aria-label="Peso massimo">
       <button type="button" class="seg-btn" data-kb="500">500 KB</button>
       <button type="button" class="seg-btn active" data-kb="1024">1 MB</button>
       <button type="button" class="seg-btn" data-kb="2048">2 MB</button>
       <button type="button" class="seg-btn" data-kb="5120">5 MB</button>
     </div>
+    <p class="modo-nota" id="modoNota">Cerca il punto in cui la foto pesa il meno possibile
+      senza che la differenza si veda.</p>
 
     <!-- Drop zone -->
     <section id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Carica o trascina una o più immagini">

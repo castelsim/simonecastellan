@@ -220,3 +220,12 @@ h1 { font-size: 27px; font-weight: 500; color: var(--ink); letter-spacing: -0.3p
   .formato-nome { font-size: 14px; }
   .chip { font-size: 13px; padding: 9px 14px; }
 }
+
+/* Interruttore della safe zone */
+.interruttore {
+  display: flex; align-items: center; gap: 9px;
+  margin-top: 18px; font-size: 13px; color: var(--muted); cursor: pointer;
+  text-align: left;
+}
+.interruttore input { width: 17px; height: 17px; accent-color: var(--ink); flex: 0 0 auto; }
+.interruttore:hover { color: var(--ink); }

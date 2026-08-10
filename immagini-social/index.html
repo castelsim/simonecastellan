@@ -68,6 +68,13 @@
         Per sistemarne una sola, usa «solo questa».
       </p>
 
+      <!-- La safe zone è un interruttore, non una pagina a parte: serve mentre
+           si guarda l'anteprima, non dopo aver ricaricato la foto altrove. -->
+      <label class="interruttore" id="rigaCoperto">
+        <input type="checkbox" id="copertoCheck" />
+        <span>Mostra dove la piattaforma copre l'immagine</span>
+      </label>
+
       <div class="riga-zoom">
         <label for="zoom">Inquadratura</label>
         <input type="range" id="zoom" class="range" min="100" max="250" step="1" value="100"
