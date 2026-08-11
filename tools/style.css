@@ -123,13 +123,28 @@ body.ha-testo .pulisci { display: flex; }
 .cella .n { font-size: 12px; color: var(--faint); }
 
 /* ── Movimento ────────────────────────────────────────────────────────
-   Le classi le mette il JavaScript dopo aver calcolato lo spostamento. */
-.cella.scorre { transition: transform .34s cubic-bezier(.2, .7, .3, 1); }
-.cella.entra  { animation: entra .3s cubic-bezier(.2, .7, .3, 1) both; }
+   Le classi le mette il JavaScript dopo aver calcolato lo spostamento.
+
+   Il riordino succede in due tempi, perché sono due cose diverse da capire:
+   prima le caselle escluse si dissolvono al loro posto, poi le rimaste
+   scivolano. Fino all'11/08/2026 le escluse sparivano di colpo, e passando
+   da diciassette a due sembrava che la pagina fosse saltata a un'altra
+   griglia: si vedeva solo il buco, non il movimento.
+
+   0,7s per lo scorrimento: a 0,34s si intuiva appena, a 0,5s si vedeva ma
+   restava sbrigativo. L'ingresso è più corto, così le due cose non finiscono
+   insieme.
+
+   USCITA nel JavaScript deve restare uguale a questa durata: sono due righe
+   da cambiare insieme. */
+.cella.esce   { transition: opacity .22s ease, transform .22s ease; opacity: 0; transform: scale(.965); }
+.cella.scorre { transition: transform .7s cubic-bezier(.2, .7, .3, 1); }
+.cella.entra  { animation: entra .55s cubic-bezier(.2, .7, .3, 1) both; }
 @keyframes entra { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   .cella.scorre { transition: none !important; }
   .cella.entra  { animation: none !important; }
+  .cella.esce   { transition: none !important; opacity: 1; transform: none; }
 }
 
 .vuoto { padding: 40px 0; color: var(--faint); font-size: 14.5px; line-height: 1.6; }
