@@ -12,6 +12,35 @@
   --pill-hover: #e6e8ea;
   --line: #c2c6cc;
   --line-soft: #dadce0;
+
+  /* Il tavolo di lavoro del ritaglio: valori di stageplot.it, lasciati
+     com'erano quando questa parte era lo strumento «Immagini social». */
+  /* pagina */
+  --bg: #ffffff;
+  --ink: #1a1a1a;
+  --text: #3c4043;
+  --muted: #5f6368;
+  --faint: #9aa0a6;
+  --hair: #eef0f2;
+  --line-soft: #dadce0;
+  --campo: #f6f7f8;
+
+  /* area di lavoro (i valori veri di stageplot.it) */
+  --lav: #101616;
+  --lav-2: #0d1313;
+  --lav-testo: #e9f1ef;
+  --lav-mut: #8ca39e;
+  --lav-debole: #6b807c;
+  --lav-riga: #1f2a29;
+  --lav-riga2: #2b3a38;
+
+  /* accento: teal scuro sul chiaro (contrasto), teal pieno sullo scuro */
+  --acc: #0d9488;
+  --acc-lav: #14b8a6;
+  --acc-testo: #ffffff;
+  --acc-lav-testo: #04211d;
+
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -141,6 +170,19 @@ h1 { font-size: 27px; font-weight: 500; color: var(--ink); letter-spacing: -0.3p
 .aggiusta:hover { background: #000; }
 .nota-finale { margin-top: 20px; font-size: 12.5px; line-height: 1.6; color: var(--faint); text-align: left; }
 
+/* L'elenco delle piattaforme, sopra il titolo: dice la copertura prima ancora
+   che si legga cosa fa lo strumento. */
+.occhiello {
+  font-size: 11px; letter-spacing: 1.4px; text-transform: uppercase;
+  color: var(--muted-2); text-align: center; margin-bottom: 10px;
+}
+
+/* Il passaggio dal responso alla cura. Non è un link a un'altra pagina: la
+   foto è già qui, e ricaricarla era proprio il fastidio da togliere. */
+.passa { margin-top: 26px; text-align: center; }
+.passa .btn-primary { width: 100%; }
+.passa-nota { margin-top: 10px; font-size: 12px; line-height: 1.55; color: var(--faint); }
+
 /* Risultati */
 .risultati { margin-top: 26px; text-align: left; }
 .gruppo + .gruppo { margin-top: 26px; }
@@ -256,4 +298,102 @@ h1 { font-size: 27px; font-weight: 500; color: var(--ink); letter-spacing: -0.3p
   .formato { gap: 12px; padding: 10px; }
   .formato-nome { font-size: 14px; }
   .chip { font-size: 13px; padding: 9px 14px; }
+}
+
+
+/* ---------------------------------------------------------------------------
+   Il tavolo di lavoro (ritaglio e formati).
+
+   Era il foglio di «Immagini social», una pagina a sé: pagina chiara e area di
+   lavoro scura, che non è gusto — su fondo scuro i colori di una foto si
+   giudicano meglio, perché il bianco intorno falsa la percezione.
+
+   Da quando le due metà vivono insieme, ogni regola qui sotto vale SOLO dentro
+   #lavoro.  Serve perché .btn e .chip esistono in tutte e due le metà e vogliono
+   dire cose diverse: pillola monocromatica sopra, pulsante squadrato con
+   l'accento qui.  Ognuna resta come era.
+   --------------------------------------------------------------------------- */
+#lavoro button:focus-visible, #lavoro input:focus-visible, #lavoro [tabindex]:focus-visible {
+  outline: 2px solid var(--acc); outline-offset: 3px; border-radius: 8px;
+}
+#lavoro .occhiello { font-family: var(--mono); font-size: 11.5px; letter-spacing: 1.6px;
+  text-transform: uppercase; color: var(--acc); text-align: center; }
+#lavoro .btn { font: 16px/1 inherit; border-radius: 10px; padding: 15px 26px; cursor: pointer;
+  border: 1px solid transparent; font-weight: 700; }
+#lavoro .btn-primary { background: var(--acc); color: var(--acc-testo); }
+#lavoro .btn-primary:hover { background: #0b7d73; }
+#lavoro .btn-secondary { background: var(--campo); color: var(--ink); }
+#lavoro .btn-secondary:hover { background: #eceef0; }
+#lavoro .btn-ghost { background: none; color: var(--muted); border-color: var(--line-soft); font-weight: 600; }
+#lavoro .riga-foto { display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-top: 24px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+#lavoro .nome-foto { max-width: 60vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#lavoro .domanda { margin-top: 30px; text-align: center; font-size: 14px; color: var(--muted); }
+#lavoro .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+#lavoro .chip { font: 13px/1 inherit; background: var(--campo); color: var(--muted);
+  border: 1px solid transparent; border-radius: 10px; padding: 10px 15px; cursor: pointer;
+  transition: background .12s ease, color .12s ease, border-color .12s ease; }
+#lavoro .chip:hover { border-color: var(--line-soft); }
+#lavoro .chip[aria-pressed="true"] { background: var(--acc); color: var(--acc-testo);
+  font-weight: 600; border-color: transparent; }
+#lavoro .lavoro { margin-top: 24px; }
+#lavoro .tavolo { background: var(--lav); border-radius: 16px; padding: 8px; }
+#lavoro .gruppo-nome { font-family: var(--mono); font-size: 11px; text-transform: uppercase;
+  letter-spacing: 1.2px; color: var(--lav-debole); padding: 16px 14px 8px; }
+#lavoro .dest { display: flex; gap: 18px; align-items: center; padding: 14px; border-radius: 12px; }
+#lavoro .dest + .dest { border-top: 1px solid var(--lav-riga); }
+#lavoro .gruppo-nome + .dest { border-top: 0; }
+#lavoro .telaBox { flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+  height: var(--h); background: var(--lav-2); border-radius: 9px; overflow: hidden; }
+#lavoro .tela { display: block; height: 100%; width: auto; cursor: grab; touch-action: none; }
+#lavoro .tela:active { cursor: grabbing; }
+#lavoro .dest-dx { flex: 1; min-width: 0; }
+#lavoro .dest-testa { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+#lavoro .dest-nome { font-size: 16px; font-weight: 700; color: var(--lav-testo); letter-spacing: -.2px; }
+#lavoro .dest-misura { font-family: var(--mono); font-size: 11.5px; color: var(--lav-debole); }
+#lavoro .dest-nota { font-family: var(--mono); font-size: 11px; color: var(--acc-lav); }
+#lavoro .dest-misura.scarsa { color: #fbbf6b; }
+#lavoro .dest-sola { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase;
+  letter-spacing: .8px; color: var(--acc-lav); border: 1px solid var(--lav-riga2);
+  border-radius: 6px; padding: 3px 7px; }
+#lavoro .mods { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+#lavoro .seg { display: inline-flex; background: var(--lav-2); border-radius: 9px; padding: 3px; gap: 3px; }
+#lavoro .mini { font: 12.5px/1 inherit; background: var(--lav-2); color: var(--lav-mut); border: 0;
+  border-radius: 8px; padding: 8px 11px; cursor: pointer; transition: background .12s, color .12s; }
+#lavoro .mini:hover { color: var(--lav-testo); }
+#lavoro .seg .mini { background: none; padding: 7px 12px; }
+#lavoro .seg .mini.on { background: var(--acc-lav); color: var(--acc-lav-testo); font-weight: 600; }
+#lavoro .sfondi { display: inline-flex; gap: 5px; align-items: center; }
+#lavoro .sfondi[hidden] { display: none; }
+#lavoro .pastiglia { width: 24px; height: 24px; border-radius: 7px; border: 1px solid var(--lav-riga2);
+  cursor: pointer; padding: 0; }
+#lavoro .pastiglia.on { outline: 2px solid var(--acc-lav); outline-offset: 1px; }
+#lavoro .zoomriga { display: flex; align-items: center; gap: 10px; margin-top: 12px; max-width: 420px; }
+#lavoro .zoomriga label { font-family: var(--mono); font-size: 11px; color: var(--lav-debole);
+  text-transform: uppercase; letter-spacing: .8px; }
+#lavoro .zoomriga input[type=range] { flex: 1; accent-color: var(--acc-lav); height: 20px; }
+#lavoro .zoomval { font-family: var(--mono); font-size: 11.5px; color: var(--lav-mut);
+  min-width: 40px; text-align: right; }
+#lavoro .interruttore { display: flex; align-items: center; justify-content: center; gap: 9px;
+  margin-top: 18px; font-size: 13.5px; color: var(--muted); cursor: pointer; }
+#lavoro .interruttore input { accent-color: var(--acc); width: 16px; height: 16px; }
+#lavoro .azioni { display: flex; gap: 10px; justify-content: center; margin-top: 28px; flex-wrap: wrap; }
+#lavoro .privacy { margin-top: 20px; text-align: center; font-family: var(--mono);
+  font-size: 11.5px; color: var(--faint); }
+#lavoro .avanzate { margin-top: 24px; text-align: center; }
+#lavoro .avanzate summary { font-family: var(--mono); font-size: 12px; color: var(--muted);
+  cursor: pointer; list-style: none; }
+#lavoro .avanzate summary::-webkit-details-marker { display: none; }
+#lavoro .avanzate summary:hover { color: var(--ink); }
+#lavoro .seg-out { display: inline-flex; background: var(--campo); border-radius: 10px;
+  padding: 3px; gap: 3px; margin-top: 12px; }
+#lavoro .seg-btn { font: 13px/1 inherit; background: none; color: var(--muted); border: 0;
+  border-radius: 8px; padding: 8px 13px; cursor: pointer; }
+#lavoro .seg-btn.active { background: var(--acc); color: var(--acc-testo); font-weight: 600; }
+#lavoro .avanzate-nota { margin-top: 10px; font-size: 12px; color: var(--faint); }
+@media (max-width: 720px) {
+  #lavoro .dest { flex-direction: column; align-items: stretch; gap: 12px; }
+  #lavoro .telaBox { width: 100%; height: auto; }
+  #lavoro .tela { width: 100%; height: auto; }
+  #lavoro .zoomriga { max-width: none; }
 }
