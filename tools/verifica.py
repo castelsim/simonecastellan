@@ -39,7 +39,7 @@ FRASI_DA_NON_METTERE_NEL_PROMPT = ("ignora l'errore", "non dire mai")
 # Gli strumenti, in un elenco solo: qui sotto servono tre volte (link in entrata,
 # sitemap, intestazioni) e tenerne tre copie significa dimenticarne una.
 TOOL = ["audio-mp3", "bpm", "tonalita", "qrcode", "posso-pubblicarlo", "fotogramma",
-        "metriche-social", "comprimi-immagini", "comprimi-pdf",
+        "metriche-social", "comprimi-immagini", "comprimi-pdf", "comprimi-video",
         "rumore-rosa", "ritardo-diffusori", "link-utm", "conta-caratteri", "link-whatsapp",
         "da-comunicato-a-post", "semplifica-testo", "alt-text"]
 

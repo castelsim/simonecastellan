@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#1a1a1a"/>
+  <!-- Un fotogramma che si stringe: due frecce che spingono verso il centro -->
+  <rect x="16" y="18" width="32" height="28" rx="4" fill="none" stroke="#ffffff" stroke-width="3"/>
+  <path d="M25 32h-6M22 28l-3 4 3 4M39 32h6M42 28l3 4-3 4" fill="none" stroke="#ffffff"
+        stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
