@@ -10,7 +10,9 @@ Esiste per impedire il ritorno di problemi già capitati davvero:
   3. /profilo che torna a essere una pagina senza un solo link in entrata;
   4. Perplexity riacceso: con questo meccanismo porta a una pagina di errore;
   5. sitemap che elenca pagine inesistenti o dimentica quelle pubblicate;
-  6. JSON-LD rotto o hreflang che non si rimandano fra loro.
+  6. JSON-LD rotto o hreflang che non si rimandano fra loro;
+  7. uno strumento che esce dalla voce comune: titolo che non dice cosa fa, sottotitolo
+     sparito, descrizione che Google taglia a metà, piede senza la via di ritorno.
 
 Esce con codice 1 se un controllo fallisce.
 """
@@ -33,6 +35,15 @@ MAX_PROMPT = 300
 # Frasi che, lette da un estraneo nel primo secondo, fanno sembrare il sito un trucco.
 # Il loro posto è /profilo, dove sono istruzioni dichiarate — non dentro l'URL.
 FRASI_DA_NON_METTERE_NEL_PROMPT = ("ignora l'errore", "non dire mai")
+
+# Gli strumenti, in un elenco solo: qui sotto servono tre volte (link in entrata,
+# sitemap, intestazioni) e tenerne tre copie significa dimenticarne una.
+TOOL = ["audio-mp3", "bpm", "tonalita", "qrcode", "posso-pubblicarlo", "fotogramma",
+        "immagini-social", "metriche-social", "comprimi-immagini", "comprimi-pdf",
+        "rumore-rosa", "ritardo-diffusori", "link-utm", "conta-caratteri", "link-whatsapp"]
+
+# Google mostra ~155-160 caratteri di descrizione: oltre, taglia a metà frase.
+MAX_DESCRIZIONE = 160
 
 
 def leggi(rel):
@@ -101,22 +112,9 @@ def controlla_collegamenti_interni():
         # Dal 09/08/2026 gli strumenti stanno tutti in /tools/ e la home ci arriva
         # con una parola sola: se salta quel link, sette pagine diventano fantasmi.
         "/tools/": ["index.html"],
-        "/audio-mp3/": ["tools/index.html"],
-        "/bpm/": ["tools/index.html"],
-        "/tonalita/": ["tools/index.html"],
-        "/qrcode/": ["tools/index.html"],
-        "/posso-pubblicarlo/": ["tools/index.html"],
-        "/fotogramma/": ["tools/index.html"],
-        "/immagini-social/": ["tools/index.html"],
-        "/metriche-social/": ["tools/index.html"],
-        "/comprimi-immagini/": ["tools/index.html"],
-        "/comprimi-pdf/": ["tools/index.html"],
-        "/rumore-rosa/": ["tools/index.html"],
-        "/ritardo-diffusori/": ["tools/index.html"],
-        "/link-utm/": ["tools/index.html"],
-        "/conta-caratteri/": ["tools/index.html"],
-        "/link-whatsapp/": ["tools/index.html"],
     }
+    for t in TOOL:
+        attese[f"/{t}/"] = ["tools/index.html"]
     for meta, sorgenti in attese.items():
         if not any(f'href="{meta}"' in leggi(s) for s in sorgenti):
             errore(f"nessuna pagina rimanda a {meta}")
@@ -148,6 +146,52 @@ def controlla_uscita_leggera():
         errore("track.js non espone più track.send: il modulo Tienimi presente non può inviare")
 
 
+def controlla_intestazioni_tool():
+    """L'11/08/2026 i quindici strumenti sono stati riportati a una voce sola: titolo
+    «Nome — cosa fa», sottotitolo minuscolo che finisce la frase, descrizione che sta
+    dentro il riquadro dei risultati di Google, piede che rimanda all'attrezzo accanto.
+    Quel giro ha lasciato indietro quattro descrizioni troppo lunghe, e me ne sono
+    accorto solo interrogando il dominio: da qui in poi se ne accorge lo script."""
+    lunghe = []
+    for t in TOOL:
+        pagina = leggi(f"{t}/index.html")
+
+        titolo = re.search(r"<title>(.*?)</title>", pagina, re.S)
+        if not titolo:
+            errore(f"{t}: manca il <title>")
+        elif "—" not in titolo.group(1):
+            errore(f"{t}: il titolo «{titolo.group(1).strip()}» non dice cosa fa lo strumento "
+                   f"(gli altri sono «Nome — cosa fa»)")
+
+        d = re.search(r'<meta name="description" content="(.*?)"', pagina, re.S)
+        if not d:
+            errore(f"{t}: manca la meta description")
+        elif len(d.group(1).strip()) > MAX_DESCRIZIONE:
+            n = len(d.group(1).strip())
+            errore(f"{t}: descrizione di {n} caratteri (massimo {MAX_DESCRIZIONE}): "
+                   f"Google la taglia a metà frase")
+        else:
+            lunghe.append(len(d.group(1).strip()))
+
+        sub = re.search(r'<p class="subtitle">(.*?)</p>', pagina, re.S)
+        if not sub:
+            errore(f"{t}: manca il sottotitolo sotto il nome")
+        else:
+            testo = re.sub(r"\s+", " ", sub.group(1)).strip()
+            # Frammento minuscolo che finisce la frase cominciata dal nome: niente
+            # maiuscola, niente punto.  Solo un avviso: un nome proprio o una sigla
+            # («PNG o SVG…») sarebbe un falso allarme.
+            if testo[:1].isupper() or testo.endswith("."):
+                AVVISI.append(f"{t}: il sottotitolo «{testo}» non è un frammento minuscolo")
+
+        if "simonecastellan.com/tools/" not in pagina.split("<footer", 1)[-1]:
+            errore(f"{t}: dal piede non si torna agli altri strumenti")
+
+    if lunghe:
+        print(f"  strumenti: {len(TOOL)} con titolo e sottotitolo, "
+              f"descrizioni fino a {max(lunghe)} caratteri")
+
+
 def controlla_sitemap():
     xml = leggi("sitemap.xml")
     urls = re.findall(r"<loc>https://simonecastellan\.com/(.*?)</loc>", xml)
@@ -156,10 +200,7 @@ def controlla_sitemap():
         if not os.path.exists(percorso):
             errore(f"la sitemap elenca /{u} ma il file non esiste")
     pubblicate = {"", "profilo/", "cv/", "en/profile/", "privacy/", "tienimi-presente/", "BDG2029/",
-                  "tools/", "audio-mp3/", "bpm/", "tonalita/", "qrcode/",
-                  "comprimi-immagini/", "comprimi-pdf/", "immagini-social/", "posso-pubblicarlo/", "metriche-social/", "fotogramma/",
-                  "rumore-rosa/", "ritardo-diffusori/",
-                  "link-utm/", "conta-caratteri/", "link-whatsapp/"}
+                  "tools/"} | {t + "/" for t in TOOL}
     mancanti = pubblicate - set(urls)
     if mancanti:
         errore("pagine pubblicate ma assenti dalla sitemap: " + ", ".join(sorted(mancanti)))
@@ -205,6 +246,7 @@ def main():
     controlla_collegamenti_interni()
     controlla_firma_contatto()
     controlla_uscita_leggera()
+    controlla_intestazioni_tool()
     controlla_sitemap()
     controlla_json_ld()
     controlla_hreflang()
