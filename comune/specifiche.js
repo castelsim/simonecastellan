@@ -200,6 +200,30 @@ var SOCIAL_FORMATI = [
   }
 ];
 
+/* I limiti del testo, che sono due cose diverse e vengono confuse sempre:
+   il «massimo» è dove la piattaforma taglia e non pubblica oltre; il «taglio»
+   è dove nel flusso compare «altro…» e la gente smette di leggere. Il secondo
+   conta molto di più del primo, e non è scritto da nessuna parte ufficiale:
+   viene dall'osservazione, perciò è marcato incerto.
+
+   Ha una data sua: i limiti di testo sono stati aggiunti dopo le misure, e
+   dire «controllato il 10» quando il controllo è dell'11 è il primo passo per
+   non fidarsi più di nessuna di queste date. */
+var SOCIAL_TESTO_AGGIORNATO = '11 agosto 2026';
+
+var SOCIAL_TESTO = [
+  { id: 'x-post',         piattaforma: 'X',         nome: 'Post',                massimo: 280,   taglio: null, nota: 'gli account a pagamento arrivano molto oltre' },
+  { id: 'instagram-cap',  piattaforma: 'Instagram', nome: 'Didascalia',          massimo: 2200,  taglio: 125,  taglioIncerto: true },
+  { id: 'instagram-bio',  piattaforma: 'Instagram', nome: 'Biografia',           massimo: 150,   taglio: null },
+  { id: 'tiktok-cap',     piattaforma: 'TikTok',    nome: 'Didascalia',          massimo: 2200,  taglio: 100,  taglioIncerto: true },
+  { id: 'linkedin-post',  piattaforma: 'LinkedIn',  nome: 'Post',                massimo: 3000,  taglio: 210,  taglioIncerto: true },
+  { id: 'linkedin-head',  piattaforma: 'LinkedIn',  nome: 'Sommario del profilo', massimo: 220,  taglio: null },
+  { id: 'facebook-post',  piattaforma: 'Facebook',  nome: 'Post',                massimo: 63206, taglio: 250,  taglioIncerto: true },
+  { id: 'youtube-titolo', piattaforma: 'YouTube',   nome: 'Titolo',              massimo: 100,   taglio: 70,   taglioIncerto: true },
+  { id: 'youtube-descr',  piattaforma: 'YouTube',   nome: 'Descrizione',         massimo: 5000,  taglio: 157,  taglioIncerto: true },
+  { id: 'email-oggetto',  piattaforma: 'Email',     nome: 'Oggetto',             massimo: null,  taglio: 45,   taglioIncerto: true, nota: 'sul telefono si legge fin lì' }
+];
+
 // Con quale si parte, dove serve una scelta iniziale.
 var PIATTAFORME_INIZIALI = ['instagram'];
 

@@ -295,6 +295,21 @@
       updateHint($("textInput").value.trim());
     });
 
+    /* Chi arriva da un altro strumento del sito (Link UTM, Link WhatsApp) trova
+       il suo indirizzo già scritto. Passa da sessionStorage e non dall'URL: un
+       link con dentro un numero di telefono resterebbe nella cronologia e nei
+       registri di mezzo mondo. Si legge una volta sola e si cancella subito,
+       così un ricaricamento non fa ricomparire una cosa già usata. */
+    try {
+      var arrivato = sessionStorage.getItem("qr:precompila");
+      if (arrivato) {
+        sessionStorage.removeItem("qr:precompila");
+        $("textInput").value = arrivato;
+        update();
+        updateHint(arrivato);
+      }
+    } catch (e) { /* navigazione privata: si scrive a mano, come sempre */ }
+
     // Condividi: menu di sistema col PNG già allegato (solo dove il browser
     // sa condividere file — tipicamente mobile e Safari/Chrome su Mac).
     try {

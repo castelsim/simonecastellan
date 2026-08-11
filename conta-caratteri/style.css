@@ -1,0 +1,233 @@
+/* Stile coerente con simonecastellan.com — minimale, monocromatico, luce. */
+:root {
+  --bg: #ffffff;
+  --text: #3c4043;
+  --ink: #1a1a1a;
+  --muted: #5f6368;
+  --muted-2: #80868b;
+  --faint: #9aa0a6;
+  --pill: #f1f3f4;
+  --pill-hover: #e6e8ea;
+  --line: #c2c6cc;
+  --line-soft: #dadce0;
+  --err: #c5221f;
+  --warn: #b06000;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+button, textarea { touch-action: manipulation; }
+button { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 44px 20px calc(72px + env(safe-area-inset-bottom));
+  text-align: center;
+}
+
+.card { width: 100%; max-width: 460px; }
+
+header { margin-bottom: 24px; }
+h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2px; }
+.subtitle { font-size: 15px; color: var(--muted); margin-top: 8px; }
+
+/* Il campo di scrittura */
+.area {
+  width: 100%;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 16px;          /* sotto i 16 px iOS ingrandisce al focus */
+  line-height: 1.6;
+  padding: 14px 15px;
+  resize: vertical;
+  -webkit-appearance: none;
+  transition: border-color .15s ease;
+}
+.area:focus { outline: none; border-color: var(--ink); }
+.area::placeholder { color: var(--faint); }
+
+/* Numeri grandi */
+.numeri { display: flex; gap: 8px; margin-top: 18px; }
+.n {
+  flex: 1 1 0;
+  background: #fafbfc;
+  border-radius: 12px;
+  padding: 12px 6px;
+}
+.n-val {
+  display: block;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.4px;
+  font-variant-numeric: tabular-nums;
+}
+.n-lbl {
+  display: block;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--muted-2);
+  margin-top: 3px;
+}
+.nota-emoji { margin-top: 10px; font-size: 11.5px; color: var(--faint); line-height: 1.5; }
+
+/* Anteprima del taglio */
+.anteprima { margin-top: 26px; text-align: left; }
+.chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+.chip {
+  appearance: none;
+  border: none;
+  background: var(--pill);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 7px 13px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.chip:hover { background: var(--pill-hover); color: var(--ink); }
+.chip.on { background: var(--ink); color: #fff; }
+
+.prev {
+  background: #fafbfc;
+  border: 1px solid #eef0f2;
+  border-radius: 12px;
+  padding: 14px 15px;
+  font-size: 14.5px;
+  line-height: 1.62;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+/* La parte che non si legge: c'è ma è spenta. */
+.prev .dopo { color: #c8ccd1; }
+.prev .altro {
+  color: var(--muted-2);
+  font-weight: 600;
+  background: var(--pill);
+  border-radius: 4px;
+  padding: 0 5px;
+  margin: 0 2px;
+  font-size: 13px;
+}
+.prev-nota { margin-top: 9px; font-size: 11.5px; color: var(--faint); line-height: 1.5; }
+
+/* Righe dei limiti */
+.limiti { margin-top: 26px; text-align: left; }
+.lbl {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--muted-2);
+  margin-bottom: 10px;
+}
+.riga { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+.riga-nm { flex: 1 1 auto; font-size: 13.5px; color: var(--text); min-width: 0; }
+.riga-nm i { font-style: normal; color: var(--faint); }
+.riga-n {
+  flex: 0 0 auto;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-2);
+}
+.riga.ok .riga-n { color: var(--muted-2); }
+.riga.giusto .riga-n { color: var(--warn); font-weight: 600; }
+.riga.fuori .riga-n { color: var(--err); font-weight: 600; }
+
+.barra {
+  flex: 0 0 84px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line-soft);
+  overflow: hidden;
+}
+.barra span { display: block; height: 100%; background: var(--ink); border-radius: 999px; transition: width .15s ease; }
+.riga.giusto .barra span { background: var(--warn); }
+.riga.fuori .barra span { background: var(--err); }
+
+/* Azioni */
+.azioni { display: flex; gap: 10px; margin-top: 24px; }
+.btn {
+  flex: 1 1 0;
+  appearance: none;
+  border: none;
+  background: var(--pill);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .15s ease, opacity .15s ease;
+}
+.btn:hover:not(:disabled) { background: var(--pill-hover); }
+.btn.primario { background: var(--ink); color: #fff; }
+.btn.primario:hover:not(:disabled) { background: #000; }
+.btn:disabled { opacity: .4; cursor: default; }
+
+.hint {
+  margin-top: 26px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--faint);
+  text-align: left;
+}
+.agg { margin-top: 10px; font-size: 11px; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(56px + env(safe-area-inset-bottom));
+  transform: translateX(-50%) translateY(8px);
+  background: var(--ink);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 9px 16px;
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+  z-index: 20;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.site-footer {
+  margin-top: 40px;
+  text-align: center;
+  font-size: 12px;
+  color: #6b7075;
+  letter-spacing: .2px;
+}
+.site-footer a { color: #6b7075; text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 1px; }
+.site-footer a:hover { color: var(--ink); }
+
+.hidden { display: none !important; }
+
+@media (max-width: 460px) {
+  body { padding-top: 34px; }
+  h1 { font-size: 22px; }
+  .subtitle { font-size: 14px; }
+  .n-val { font-size: 21px; }
+  .barra { flex-basis: 56px; }
+  /* Dieci formati sono dieci pillole: su schermo stretto occupano cinque righe
+     prima dell'anteprima, che è la cosa che si è venuti a vedere. Stringendole
+     un poco tornano quattro. */
+  .chips { gap: 6px; }
+  .chip { font-size: 12px; padding: 6px 11px; }
+}

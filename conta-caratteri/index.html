@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Conta caratteri — quanto testo entra davvero in un post</title>
+  <meta name="description" content="Conta i caratteri di una didascalia e mostra dove la piattaforma taglia con «altro…»: Instagram, TikTok, LinkedIn, Facebook, X, YouTube. Vedi subito quanto si legge prima del taglio, quanti hashtag hai messo e se sfori il limite. Funziona nel browser, il testo non esce da qui." />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="canonical" href="https://simonecastellan.com/conta-caratteri/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Conta caratteri" />
+  <meta property="og:description" content="Quanto testo entra in un post, e soprattutto quanto se ne legge prima di «altro…»." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:url" content="https://simonecastellan.com/conta-caratteri/" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>Conta caratteri</h1>
+      <p class="subtitle">quanto testo entra, e quanto se ne legge</p>
+    </header>
+
+    <textarea id="testo" class="area" rows="7" autocomplete="off"
+              placeholder="Incolla o scrivi qui la didascalia…"
+              aria-label="Il testo da contare"></textarea>
+
+    <!-- I numeri che si guardano per primi -->
+    <section class="numeri" aria-label="Conteggi">
+      <div class="n"><span class="n-val" id="nCar">0</span><span class="n-lbl">caratteri</span></div>
+      <div class="n"><span class="n-val" id="nPar">0</span><span class="n-lbl">parole</span></div>
+      <div class="n"><span class="n-val" id="nHash">0</span><span class="n-lbl">hashtag</span></div>
+    </section>
+    <p class="nota-emoji hidden" id="notaEmoji"></p>
+
+    <!-- Il taglio: la cosa che conta più del limite -->
+    <section class="anteprima hidden" id="anteprimaBox" aria-label="Dove si ferma la lettura">
+      <div class="chips" id="chips"></div>
+      <div class="prev" id="prev"></div>
+      <p class="prev-nota" id="prevNota"></p>
+    </section>
+
+    <!-- Tutte le piattaforme insieme -->
+    <section class="limiti" aria-label="Limiti delle piattaforme">
+      <span class="lbl">Limiti</span>
+      <div id="righe"></div>
+    </section>
+
+    <div class="azioni">
+      <button type="button" id="copia" class="btn primario" disabled>Copia il testo</button>
+      <button type="button" id="tagliaBtn" class="btn hidden">Taglia al limite</button>
+    </div>
+
+    <p class="hint">
+      Il limite quasi non si tocca mai: quello che conta è il taglio, cioè dove
+      compare «altro…» e la maggior parte delle persone smette di leggere. Le prime
+      righe devono reggere da sole. I punti di taglio vengono dall'osservazione e
+      cambiano spesso: sono un'indicazione, non una regola della piattaforma.
+      Il testo resta su questo dispositivo, non viene inviato da nessuna parte.
+    </p>
+    <p class="hint agg" id="agg"></p>
+  </main>
+
+  <footer class="site-footer">
+    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="/comune/specifiche.js"></script>
+  <script src="/track.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

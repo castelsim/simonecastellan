@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Strumenti gratuiti — tarare un impianto, alleggerire un file, trovare una tonalità</title>
-  <meta name="description" content="Strumenti gratuiti che funzionano nel browser, nati da problemi incontrati davvero in studio e dal vivo: tarare un impianto, allineare una torre di ritardo, trovare i tempi di delay, capire la tonalità di un brano, mandare un audio leggero, far stare una foto o un PDF sotto il limite, passare un link o una rete Wi-Fi. Niente da installare, niente che finisce online." />
+  <meta name="description" content="Strumenti gratuiti che funzionano nel browser, nati da problemi incontrati davvero in studio e dal vivo: tarare un impianto, allineare una torre di ritardo, trovare i tempi di delay, capire la tonalità di un brano, mandare un audio leggero, far stare una foto o un PDF sotto il limite, passare un link o una rete Wi-Fi, contare i caratteri di una didascalia, farsi scrivere su WhatsApp, sapere da dove arrivano i clic. Niente da installare, niente che finisce online." />
   <meta name="theme-color" content="#ffffff" />
   <link rel="canonical" href="https://simonecastellan.com/tools/" />
 
@@ -27,7 +27,7 @@
     "@type": "ItemList",
     "name": "Strumenti gratuiti di Simone Castellan",
     "itemListOrder": "https://schema.org/ItemListUnordered",
-    "numberOfItems": 12,
+    "numberOfItems": 15,
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "Tarare un impianto — Rumore rosa", "url": "https://simonecastellan.com/rumore-rosa/" },
       { "@type": "ListItem", "position": 2, "name": "Allineare una torre di ritardo — Ritardo diffusori", "url": "https://simonecastellan.com/ritardo-diffusori/" },
@@ -40,7 +40,10 @@
       { "@type": "ListItem", "position": 9, "name": "Prendere una foto dal video — Estrai un fotogramma", "url": "https://simonecastellan.com/fotogramma/" },
       { "@type": "ListItem", "position": 10, "name": "Far stare una foto sotto il limite — Comprimi immagini", "url": "https://simonecastellan.com/comprimi-immagini/" },
       { "@type": "ListItem", "position": 11, "name": "Far stare un PDF sotto il limite — Comprimi PDF", "url": "https://simonecastellan.com/comprimi-pdf/" },
-      { "@type": "ListItem", "position": 12, "name": "Passare un link o una rete Wi-Fi — QR Code", "url": "https://simonecastellan.com/qrcode/" }
+      { "@type": "ListItem", "position": 12, "name": "Passare un link o una rete Wi-Fi — QR Code", "url": "https://simonecastellan.com/qrcode/" },
+      { "@type": "ListItem", "position": 13, "name": "Sapere quanto testo si legge davvero — Conta caratteri", "url": "https://simonecastellan.com/conta-caratteri/" },
+      { "@type": "ListItem", "position": 14, "name": "Farsi scrivere senza farsi salvare in rubrica — Link WhatsApp", "url": "https://simonecastellan.com/link-whatsapp/" },
+      { "@type": "ListItem", "position": 15, "name": "Sapere da dove arrivano i clic — Link UTM", "url": "https://simonecastellan.com/link-utm/" }
     ]
   }
   </script>
@@ -60,7 +63,7 @@
     </header>
 
     <!-- Ricerca e filtri li accende il JavaScript: senza, resterebbero due comandi
-         che non fanno niente, e i dodici strumenti si vedono comunque tutti. -->
+         che non fanno niente, e i quindici strumenti si vedono comunque tutti. -->
     <div class="comandi" id="comandi" hidden>
       <div class="cerca">
         <svg class="lente" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
@@ -71,7 +74,7 @@
     </div>
     <p class="conta" id="conta" hidden aria-live="polite"></p>
 
-    <!-- I dodici link stanno nel markup, non li costruisce il JavaScript: è quello che
+    <!-- I quindici link stanno nel markup, non li costruisce il JavaScript: è quello che
          leggono i motori, le AI e chi ha gli script spenti. Il filtro nasconde, non crea.
          data-k = le parole di chi cerca, non i nomi degli strumenti: chi ha un file troppo
          grande scrive «pesante», non «comprimi». -->
@@ -100,6 +103,9 @@
       <a class="cella" href="/fotogramma/" data-g="social" data-k="video frame copertina miniatura thumbnail fotogramma istante screenshot">
         <img src="/fotogramma/favicon.svg" alt="" width="34" height="34" loading="lazy">
         <span class="p">Prendere una foto dal video</span><span class="n">Estrai un fotogramma</span></a>
+      <a class="cella" href="/conta-caratteri/" data-g="social" data-k="didascalia caption testo limite altro taglio hashtag instagram tiktok linkedin x twitter bio titolo lunghezza caratteri contare">
+        <img src="/conta-caratteri/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Sapere quanto testo si legge davvero</span><span class="n">Conta caratteri</span></a>
       <a class="cella" href="/metriche-social/" data-g="social" data-k="engagement rate cpc copertura interazioni campagna statistiche numeri risultati post andato">
         <img src="/metriche-social/favicon.svg" alt="" width="34" height="34" loading="lazy">
         <span class="p">Capire com'è andato un post</span><span class="n">Metriche social</span></a>
@@ -112,6 +118,12 @@
       <a class="cella" href="/qrcode/" data-g="mandare" data-k="wifi link stampa locandina condividere qr codice rete password passare indirizzo">
         <img src="/qrcode/favicon.svg" alt="" width="34" height="34" loading="lazy">
         <span class="p">Passare un link o una rete Wi-Fi</span><span class="n">QR Code</span></a>
+      <a class="cella" href="/link-whatsapp/" data-g="mandare" data-k="whatsapp numero rubrica messaggio chat scrivimi contatto pulsante wa.me telefono cellulare cliente">
+        <img src="/link-whatsapp/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Farsi scrivere senza farsi salvare</span><span class="n">Link WhatsApp</span></a>
+      <a class="cella" href="/link-utm/" data-g="mandare" data-k="utm campagna analytics tracciare provenienza sorgente clic visite da dove arrivano link statistiche newsletter volantino">
+        <img src="/link-utm/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Sapere da dove arrivano i clic</span><span class="n">Link UTM</span></a>
     </div>
     <p class="vuoto" id="vuoto" hidden></p>
 
@@ -140,7 +152,7 @@
       { id:"",        t:"Tutti" },
       { id:"sala",    t:"In sala" },
       { id:"musica",  t:"Con la musica" },
-      { id:"social",  t:"Foto e video" },
+      { id:"social",  t:"Per i social" },
       { id:"mandare", t:"Da mandare" }
     ];
     var celle  = [].slice.call(document.querySelectorAll('.cella'));

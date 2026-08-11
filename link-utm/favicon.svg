@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#1a1a1a"/>
+  <!-- Due anelli di catena: un link, e il punto d'incontro che si vuole contare -->
+  <g fill="none" stroke="#ffffff" stroke-width="3.4" stroke-linecap="round">
+    <path d="M28 22 L23 17 A9 9 0 0 0 17 32 L21 36"/>
+    <path d="M36 42 L41 47 A9 9 0 0 0 47 32 L43 28"/>
+    <path d="M25 39 L39 25" opacity="0.55"/>
+  </g>
+</svg>
