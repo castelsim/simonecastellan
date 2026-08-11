@@ -250,8 +250,15 @@ tagliaBtn.addEventListener('click', function () {
 
 // --- Avvio ------------------------------------------------------------------
 
-document.getElementById('agg').textContent = 'Limiti controllati ' + ilGiorno(SOCIAL_TESTO_AGGIORNATO) + '.';
 costruisciRighe();
 pillole();
 testoEl.addEventListener('input', aggiorna);
 aggiorna();
+
+/* La data va per ultima, ed è l'unica riga che si può permettere di mancare.
+   Subito dopo la pubblicazione un browser può trovarsi in mano lo script nuovo
+   e la copia vecchia di specifiche.js, ancora in cache: se `ilGiorno` non c'è e
+   la riga sta in cima, l'errore ferma tutto e lo strumento resta muto — niente
+   limiti, niente pillole — per una frase di servizio. */
+document.getElementById('agg').textContent = 'Limiti controllati ' +
+  (typeof ilGiorno === 'function' ? ilGiorno(SOCIAL_TESTO_AGGIORNATO) : 'il ' + SOCIAL_TESTO_AGGIORNATO) + '.';
