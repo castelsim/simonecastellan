@@ -79,58 +79,63 @@
     <!-- I link stanno tutti nel markup, non li costruisce il JavaScript: è quello che
          leggono i motori, le AI e chi ha gli script spenti. Il filtro nasconde, non crea.
          data-k = le parole di chi cerca, non i nomi degli strumenti: chi ha un file troppo
-         grande scrive «pesante», non «comprimi». -->
+         grande scrive «pesante», non «comprimi».
+
+         Le icone si caricano subito, senza «lazy»: sono diciassette SVG per 9 KB in tutto,
+         e il caricamento pigro non risparmiava niente. In cambio, filtrando su una
+         categoria le cui caselle stavano in fondo alla pagina, quelle risalivano in cima
+         senza icona per un istante — e da quando il riordino dura mezzo secondo, si vede. -->
     <div class="griglia" id="griglia">
       <a class="cella" href="/rumore-rosa/" data-g="sala" data-k="rosa bianco sweep sinusoide impianto taratura pa casse diffusori livello palco sala suono prova segnale tarare equalizzare">
-        <img src="/rumore-rosa/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <img src="/rumore-rosa/favicon.svg" alt="" width="34" height="34">
         <span class="p">Tarare un impianto</span><span class="n">Rumore rosa</span></a>
       <a class="cella" href="/ritardo-diffusori/" data-g="sala" data-k="delay tower metri millisecondi haas distanza temperatura palco sala torre ritardo allineare sincronizzare eco">
-        <img src="/ritardo-diffusori/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <img src="/ritardo-diffusori/favicon.svg" alt="" width="34" height="34">
         <span class="p">Allineare una torre di ritardo</span><span class="n">Ritardo diffusori</span></a>
       <a class="cella" href="/bpm/" data-g="musica" data-k="tempo battute millisecondi riverbero pre-delay mix studio metronomo brano">
-        <img src="/bpm/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <img src="/bpm/favicon.svg" alt="" width="34" height="34">
         <span class="p">Trovare i tempi di delay e riverbero</span><span class="n">BPM</span></a>
       <a class="cella" href="/tonalita/" data-g="musica" data-k="accordi note scala orecchio pianoforte key tonalita brano canzone cantare trasporre">
-        <img src="/tonalita/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <img src="/tonalita/favicon.svg" alt="" width="34" height="34">
         <span class="p">Capire la tonalità di un brano</span><span class="n">Tonalità</span></a>
       <a class="cella" href="/audio-mp3/" data-g="mandare" data-k="wav aiff leggero whatsapp provino mix pesante troppo grande audio mandare inviare convertire mp3">
-        <img src="/audio-mp3/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <img src="/audio-mp3/favicon.svg" alt="" width="34" height="34">
         <span class="p">Mandare un audio senza intasare la chat</span><span class="n">Converti in MP3</span></a>
       <a class="cella" href="/posso-pubblicarlo/" data-g="social" data-k="formato peso durata instagram tiktok reel story limiti facebook youtube pubblicare caricare va bene video foto ritaglio formati copertina safe zone immagine ridimensionare adattare post preparare">
-        <img src="/posso-pubblicarlo/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <img src="/posso-pubblicarlo/favicon.svg" alt="" width="34" height="34">
         <span class="p">Sapere se una foto va bene, e sistemarla</span><span class="n">Posso pubblicarlo?</span></a>
       <a class="cella" href="/fotogramma/" data-g="social" data-k="video frame copertina miniatura thumbnail fotogramma istante screenshot">
-        <img src="/fotogramma/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <img src="/fotogramma/favicon.svg" alt="" width="34" height="34">
         <span class="p">Prendere una foto dal video</span><span class="n">Estrai un fotogramma</span></a>
       <a class="cella" href="/conta-caratteri/" data-g="social" data-k="didascalia caption testo limite altro taglio hashtag instagram tiktok linkedin x twitter bio titolo lunghezza caratteri contare">
-        <img src="/conta-caratteri/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <img src="/conta-caratteri/favicon.svg" alt="" width="34" height="34">
         <span class="p">Sapere quanto testo si legge davvero</span><span class="n">Conta caratteri</span></a>
       <a class="cella" href="/metriche-social/" data-g="social" data-k="engagement rate cpc copertura interazioni campagna statistiche numeri risultati post andato">
-        <img src="/metriche-social/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <img src="/metriche-social/favicon.svg" alt="" width="34" height="34">
         <span class="p">Capire com'è andato un post</span><span class="n">Metriche social</span></a>
       <a class="cella" href="/comprimi-immagini/" data-g="mandare" data-k="peso megabyte jpeg heic ridurre pesante troppo grande limite allegato foto immagine alleggerire comprimere">
-        <img src="/comprimi-immagini/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <img src="/comprimi-immagini/favicon.svg" alt="" width="34" height="34">
         <span class="p">Far stare una foto sotto il limite</span><span class="n">Comprimi immagini</span></a>
       <a class="cella" href="/comprimi-pdf/" data-g="mandare" data-k="peso megabyte documento bando allegato pesante troppo grande limite pdf alleggerire comprimere mail">
-        <img src="/comprimi-pdf/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <img src="/comprimi-pdf/favicon.svg" alt="" width="34" height="34">
         <span class="p">Far stare un PDF sotto il limite</span><span class="n">Comprimi PDF</span></a>
       <a class="cella" href="/qrcode/" data-g="mandare" data-k="wifi link stampa locandina condividere qr codice rete password passare indirizzo">
-        <img src="/qrcode/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <img src="/qrcode/favicon.svg" alt="" width="34" height="34">
         <span class="p">Passare un link o una rete Wi-Fi</span><span class="n">QR Code</span></a>
       <a class="cella" href="/link-whatsapp/" data-g="mandare" data-k="whatsapp numero rubrica messaggio chat scrivimi contatto pulsante wa.me telefono cellulare cliente">
-        <img src="/link-whatsapp/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <img src="/link-whatsapp/favicon.svg" alt="" width="34" height="34">
         <span class="p">Farsi scrivere senza farsi salvare</span><span class="n">Link WhatsApp</span></a>
       <a class="cella" href="/link-utm/" data-g="mandare" data-k="utm campagna analytics tracciare provenienza sorgente clic visite da dove arrivano link statistiche newsletter volantino">
-        <img src="/link-utm/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <img src="/link-utm/favicon.svg" alt="" width="34" height="34">
         <span class="p">Sapere da dove arrivano i clic</span><span class="n">Link UTM</span></a>
       <a class="cella" href="/da-comunicato-a-post/" data-g="scrivere" data-k="comunicato stampa nota post social riscrivere adattare instagram linkedin evento concerto testo lungo didascalia chatgpt prompt annuncio">
-        <img src="/da-comunicato-a-post/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <img src="/da-comunicato-a-post/favicon.svg" alt="" width="34" height="34">
         <span class="p">Ricavare i post da un comunicato</span><span class="n">Da comunicato a post</span></a>
       <a class="cella" href="/semplifica-testo/" data-g="scrivere" data-k="semplice chiaro difficile leggibilita gulpease burocratese complicato riscrivere mail lettera capire parole difficili frasi lunghe contorto">
-        <img src="/semplifica-testo/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <img src="/semplifica-testo/favicon.svg" alt="" width="34" height="34">
         <span class="p">Farsi capire da chiunque</span><span class="n">Semplifica un testo</span></a>
       <a class="cella" href="/alt-text/" data-g="scrivere" data-k="alt testo alternativo accessibilita screen reader lettore schermo immagine descrizione cieco ipovedente wcag seo img sito">
-        <img src="/alt-text/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <img src="/alt-text/favicon.svg" alt="" width="34" height="34">
         <span class="p">Descrivere un'immagine a chi non la vede</span><span class="n">Alt text</span></a>
     </div>
     <p class="vuoto" id="vuoto" hidden></p>
