@@ -158,7 +158,7 @@ function aggiorna() {
 
 // --- Avvio ------------------------------------------------------------------
 
-document.getElementById('agg').textContent = 'Limiti controllati il ' + SOCIAL_TESTO_AGGIORNATO + '.';
+document.getElementById('agg').textContent = 'Limiti controllati ' + ilGiorno(SOCIAL_TESTO_AGGIORNATO) + '.';
 
 costruisciPillole();
 testoEl.addEventListener('input', aggiorna);

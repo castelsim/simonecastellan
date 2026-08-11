@@ -224,6 +224,13 @@ var SOCIAL_TESTO = [
   { id: 'email-oggetto',  piattaforma: 'Email',     nome: 'Oggetto',             massimo: null,  taglio: 45,   taglioIncerto: true, nota: 'sul telefono si legge fin lì' }
 ];
 
+/* «Controllati il 11 agosto» non si può leggere: davanti a 8 e a 11 l'articolo
+   si elide. Sta qui accanto alle date perché è la stessa materia, e perché la
+   riga con la data la scrivono due strumenti diversi. */
+function ilGiorno(data) {
+  return (/^(8|11)\s/.test(data) ? 'l\'' : 'il ') + data;
+}
+
 // Con quale si parte, dove serve una scelta iniziale.
 var PIATTAFORME_INIZIALI = ['instagram'];
 

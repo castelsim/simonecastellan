@@ -250,7 +250,7 @@ tagliaBtn.addEventListener('click', function () {
 
 // --- Avvio ------------------------------------------------------------------
 
-document.getElementById('agg').textContent = 'Limiti controllati il ' + SOCIAL_TESTO_AGGIORNATO + '.';
+document.getElementById('agg').textContent = 'Limiti controllati ' + ilGiorno(SOCIAL_TESTO_AGGIORNATO) + '.';
 costruisciRighe();
 pillole();
 testoEl.addEventListener('input', aggiorna);
