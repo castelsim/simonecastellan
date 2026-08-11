@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#1a1a1a"/>
+  <!-- Un imbuto: entra largo, esce stretto.  Le righe che si accorciano, provate
+       prima, a 34 px erano indistinguibili dall'icona di Conta caratteri. -->
+  <path d="M12 16 h40 l-16 20 v14 l-8 -5 v-9 z" fill="#ffffff"/>
+</svg>

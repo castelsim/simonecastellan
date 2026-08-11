@@ -40,7 +40,8 @@ FRASI_DA_NON_METTERE_NEL_PROMPT = ("ignora l'errore", "non dire mai")
 # sitemap, intestazioni) e tenerne tre copie significa dimenticarne una.
 TOOL = ["audio-mp3", "bpm", "tonalita", "qrcode", "posso-pubblicarlo", "fotogramma",
         "immagini-social", "metriche-social", "comprimi-immagini", "comprimi-pdf",
-        "rumore-rosa", "ritardo-diffusori", "link-utm", "conta-caratteri", "link-whatsapp"]
+        "rumore-rosa", "ritardo-diffusori", "link-utm", "conta-caratteri", "link-whatsapp",
+        "da-comunicato-a-post", "semplifica-testo", "alt-text"]
 
 # Google mostra ~155-160 caratteri di descrizione: oltre, taglia a metà frase.
 MAX_DESCRIZIONE = 160

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#1a1a1a"/>
+  <!-- Il riquadro di un'immagine, e sotto la riga che la racconta -->
+  <g fill="none" stroke="#ffffff" stroke-width="3">
+    <rect x="14" y="14" width="36" height="24" rx="4"/>
+  </g>
+  <path d="M20 33l7-8 6 7 4-4 7 5" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="14" y="46" width="36" height="4" rx="2" fill="#ffffff" opacity="0.45"/>
+</svg>

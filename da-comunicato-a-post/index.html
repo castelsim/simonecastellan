@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Da comunicato a post — un testo lungo, un post per social</title>
+  <meta name="description" content="Incolla un comunicato e prepara le istruzioni per farne un post per ogni piattaforma, con i limiti veri di Instagram, LinkedIn, X, Facebook e TikTok." />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="canonical" href="https://simonecastellan.com/da-comunicato-a-post/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Da comunicato a post" />
+  <meta property="og:description" content="Un testo lungo diventa un post per ogni social, con i limiti giusti e senza inventare niente." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:url" content="https://simonecastellan.com/da-comunicato-a-post/" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>Da comunicato a post</h1>
+      <p class="subtitle">un testo lungo, un post per social</p>
+    </header>
+
+    <textarea id="testo" class="area" rows="8" autocomplete="off"
+              placeholder="Incolla qui il comunicato, la nota, il programma della serata…"
+              aria-label="Il testo di partenza"></textarea>
+    <p class="misura" id="misura"></p>
+
+    <!-- Dove va pubblicato: da qui escono i limiti veri -->
+    <section class="gruppo">
+      <span class="lbl">Dove</span>
+      <div class="chips" id="dove"></div>
+    </section>
+
+    <section class="gruppo">
+      <span class="lbl">Come deve suonare</span>
+      <div class="chips" id="tono"></div>
+    </section>
+
+    <section class="gruppo">
+      <span class="lbl">Cosa metterci</span>
+      <div class="chips" id="extra"></div>
+    </section>
+
+    <!-- Il prompt si vede: chi lo usa deve poterlo leggere e correggere -->
+    <section class="gruppo">
+      <span class="lbl">Le istruzioni pronte</span>
+      <pre class="prompt" id="prompt"></pre>
+    </section>
+
+    <div class="azioni">
+      <button type="button" id="vai" class="btn primario" data-assistente="chatgpt">Copia e apri ChatGPT</button>
+      <button type="button" id="copia" class="btn">Copia</button>
+    </div>
+    <p class="alt">Va bene anche altrove: <button type="button" class="link" id="claude">apri Claude</button></p>
+
+    <p class="hint">
+      Il testo non esce da qui: il prompt lo porti tu dove vuoi, incollandolo.
+      Nelle istruzioni c'è scritto di non inventare niente che non sia nel testo di partenza.
+    </p>
+    <p class="hint agg" id="agg"></p>
+  </main>
+
+  <footer class="site-footer">
+    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="/comune/specifiche.js"></script>
+  <script src="/comune/prompt.js"></script>
+  <script src="/track.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
