@@ -49,6 +49,9 @@ h1 {
   letter-spacing: -0.2px;
   margin-bottom: 2px;
 }
+/* La riga sotto il titolo, come su tutti gli altri strumenti del sito:
+   un frammento minuscolo che finisce la frase cominciata dal nome. */
+.subtitle { font-size: 14px; color: var(--muted); margin-bottom: 14px; }
 
 /* Bottoni pillola */
 .btn {

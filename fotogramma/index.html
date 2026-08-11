@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Estrai un fotogramma — una foto dal tuo video</title>
-  <meta name="description" content="Carica un video, scorri fino all'istante giusto e salva quel fotogramma come immagine, alla risoluzione piena del video. Serve per la copertina di un Reel o di un video YouTube. Funziona nel browser: il video non viene caricato online." />
+  <meta name="description" content="Scorri il video fino all'istante giusto e salva quel fotogramma alla risoluzione piena. Per la copertina di un Reel o di un video. Niente viene caricato online." />
   <meta name="theme-color" content="#ffffff" />
   <link rel="canonical" href="https://simonecastellan.com/fotogramma/" />
 
@@ -25,7 +25,7 @@
   <main class="card">
     <header>
       <h1>Estrai un fotogramma</h1>
-      <p class="subtitle">Una foto presa dal tuo video, per farne una copertina.</p>
+      <p class="subtitle">una foto presa dal video</p>
     </header>
 
     <section id="dropZone" class="dropzone" role="button" tabindex="0"
@@ -40,7 +40,7 @@
 
     <section id="error" class="errore hidden" aria-live="assertive">
       <p class="errore-msg" id="erroreMsg"></p>
-      <button type="button" id="erroreBtn" class="btn btn-ghost">Prova con un altro video</button>
+      <button type="button" id="erroreBtn" class="btn btn-ghost">Un altro video</button>
     </section>
 
     <section id="lavoro" class="lavoro hidden">
@@ -69,7 +69,7 @@
       <div id="striscia" class="striscia"></div>
 
       <div class="azioni">
-        <button type="button" id="salvaBtn" class="btn btn-primary">Salva questo fotogramma</button>
+        <button type="button" id="salvaBtn" class="btn btn-primary">Salva</button>
         <button type="button" id="condividiBtn" class="btn btn-secondary hidden">Condividi</button>
       </div>
 
@@ -84,8 +84,9 @@
       </details>
     </section>
 
-    <p class="privacy">Il video non viene caricato online: tutto avviene sul tuo dispositivo.</p>
-
+    <!-- La stessa promessa stava scritta tre volte: qui, nella riga sotto il
+         pulsante e nelle domande qui sotto. Ne resta una sola, quella che si
+         legge prima di caricare — che è il momento in cui uno se lo chiede. -->
     <section class="spiega">
       <h2>A cosa serve</h2>
       <p>La copertina di un video la scegli tu, ma per averla devi tirarla fuori dal video: fare uno
