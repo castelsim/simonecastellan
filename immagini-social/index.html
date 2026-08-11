@@ -2,149 +2,44 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Immagini per i social — una foto, tutti i formati</title>
-  <meta name="description" content="Una foto, tutti i formati social nelle misure giuste: post 4:5, quadrato, Story 9:16, copertina 16:9. Il ritaglio si sposta a dito e l'immagine non si deforma." />
+  <!-- Dall'11 agosto 2026 questo strumento vive dentro «Posso pubblicarlo?».
+       Erano le due metà dello stesso gesto — il responso diceva che una foto
+       verrà tagliata, e la cura stava in un'altra pagina, dove bisognava
+       ricaricare lo stesso file a mano.
+
+       La pagina resta qui per i link e i segnalibri di prima: rimanda, dichiara
+       il canonical e lo dice anche a parole, per chi ha il rinvio automatico
+       disattivato. -->
+  <title>Immagini per i social — ora dentro «Posso pubblicarlo?»</title>
+  <meta name="robots" content="noindex, follow" />
+  <link rel="canonical" href="https://simonecastellan.com/posso-pubblicarlo/" />
+  <!-- Il rinvio è relativo: così vale anche in prova, sul server locale.  Il
+       canonical qui sopra resta assoluto, che è quello che vuole Google. -->
+  <meta http-equiv="refresh" content="0; url=/posso-pubblicarlo/" />
   <meta name="theme-color" content="#ffffff" />
-  <link rel="canonical" href="https://simonecastellan.com/immagini-social/" />
+  <link rel="icon" href="/posso-pubblicarlo/favicon.svg" type="image/svg+xml" />
 
-  <!-- Open Graph -->
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Immagini per i social — una foto, tutti i formati" />
-  <meta property="og:description" content="Una foto sola diventa post verticale, quadrato, Story e copertina, nelle misure giuste per Instagram, TikTok, Facebook, LinkedIn, X e YouTube. Nel browser, senza caricare niente online." />
-  <meta property="og:image" content="og-image.svg" />
-  <meta property="og:url" content="https://simonecastellan.com/immagini-social/" />
-  <meta property="og:locale" content="it_IT" />
-  <meta name="twitter:card" content="summary_large_image" />
-
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #fff; color: #3c4043; margin: 0;
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center; padding: 24px;
+    }
+    h1 { font-size: 22px; font-weight: 500; color: #1a1a1a; margin: 0 0 12px; }
+    p { font-size: 15px; line-height: 1.6; margin: 0 0 20px; max-width: 30em; }
+    a.vai {
+      display: inline-block; background: #1a1a1a; color: #fff; text-decoration: none;
+      font-size: 15px; font-weight: 600; padding: 12px 22px; border-radius: 999px;
+    }
+  </style>
 </head>
 <body>
-  <main class="card">
-    <header>
-      <p class="occhiello">Instagram · TikTok · Facebook · LinkedIn · X · YouTube</p>
-      <h1>Immagini per i social</h1>
-      <p class="subtitle">una foto, tutti i formati</p>
-    </header>
-
-    <!-- Il tool per primo: la spiegazione sta sotto, per chi la cerca. -->
-    <section id="dropZone" class="dropzone" role="button" tabindex="0"
-             aria-label="Carica o trascina una foto">
-      <p class="dz-title">Trascina qui una foto</p>
-      <p class="dz-or">oppure</p>
-      <button type="button" id="pickBtn" class="btn btn-secondary">Scegli una foto</button>
-      <input type="file" id="fileInput" accept="image/*" hidden />
-    </section>
-
-    <p class="claims">Elaborazione sul tuo dispositivo · nessun caricamento · gratis</p>
-
-    <!-- Lavorazione -->
-    <section id="status" class="status hidden" aria-live="polite">
-      <p id="statusText" class="status-text">Apro la foto…</p>
-    </section>
-
-    <!-- Errore -->
-    <section id="error" class="errore hidden" aria-live="assertive">
-      <p class="errore-msg" id="erroreMsg"></p>
-      <button type="button" id="erroreBtn" class="btn btn-ghost">Un’altra foto</button>
-    </section>
-
-    <!-- Tutto ciò che appare dopo il caricamento -->
-    <section id="lavoro" class="lavoro hidden">
-
-      <div class="riga-foto">
-        <span id="nomeFoto" class="nome-foto"></span>
-        <button type="button" id="cambiaBtn" class="link-piccolo">cambia foto</button>
-      </div>
-
-      <!-- Una piattaforma alla volta: sedici formati tutti insieme sono un muro.
-           «Tutte» resta in testa per chi pubblica lo stesso post su più social. -->
-      <p class="domanda">Per cosa ti serve?</p>
-      <div id="scelte" class="chips" role="group" aria-label="Piattaforme"></div>
-
-      <div class="lavoro">
-        <div id="risultati" class="tavolo" aria-live="polite"></div>
-      </div>
-
-      <!-- La safe zone è un interruttore, non una pagina a parte: serve mentre
-           si guarda l'anteprima, non dopo aver ricaricato la foto altrove. -->
-      <label class="interruttore" id="rigaCoperto">
-        <input type="checkbox" id="copertoCheck" />
-        <span>Mostra dove la piattaforma copre l'immagine</span>
-      </label>
-
-      <div class="azioni">
-        <button type="button" id="zipBtn" class="btn btn-primary">Scarica tutto</button>
-        <button type="button" id="condividiBtn" class="btn btn-secondary hidden">Condividi</button>
-        <button type="button" id="centraBtn" class="btn btn-ghost">Rimetti al centro</button>
-      </div>
-
-      <details class="avanzate">
-        <summary>Formato dei file</summary>
-        <div class="seg-out" id="formatoSeg" role="group" aria-label="Formato di uscita">
-          <button type="button" class="seg-btn active" data-fmt="auto">Automatico</button>
-          <button type="button" class="seg-btn" data-fmt="jpg">JPG</button>
-          <button type="button" class="seg-btn" data-fmt="png">PNG</button>
-          <button type="button" class="seg-btn" data-fmt="webp">WebP</button>
-        </div>
-        <p class="avanzate-nota">Automatico usa JPG, e passa a PNG se la tua immagine ha parti trasparenti.</p>
-      </details>
-    </section>
-
-    <!-- La promessa sta già nella riga sotto il pulsante, dove serve: prima di
-         scegliere la foto. Ripeterla qui non aggiungeva niente. -->
-
-    <!-- Spiegazione e domande: sotto il tool, per chi arriva da una ricerca -->
-    <section class="spiega">
-      <h2>Perché le misure contano</h2>
-      <p>Ogni social ritaglia da sé le immagini che non hanno le proporzioni che si aspetta, e lo fa
-        dal centro: teste tagliate, scritte a metà, loghi fuori dall'inquadratura. Dare al social
-        un'immagine già delle proporzioni giuste vuol dire decidere tu cosa si vede.</p>
-      <p>Questo strumento non deforma mai la foto. Di solito taglia, e sei tu a scegliere dove
-        trascinando l'anteprima; se preferisci non perdere niente, «Adatta» mette la foto intera
-        dentro il formato su uno sfondo a tinta unita. In nessuno dei due casi l'immagine viene
-        stirata.</p>
-
-      <h2>Domande</h2>
-      <h3>Le mie foto vengono caricate da qualche parte?</h3>
-      <p>No. Il ritaglio e il salvataggio avvengono dentro il browser, sul tuo telefono o computer.
-        La pagina non manda le immagini a nessun server, nemmeno al mio.</p>
-
-      <h3>Che dimensioni usa?</h3>
-      <p>Post verticale 1080×1350 (4:5), quadrato 1080×1080, Story e Reel 1080×1920 (9:16),
-        copertina YouTube 1280×720, post orizzontale X 1600×900, anteprima link 1200×630.
-        Sono le misure consigliate ad agosto 2026.</p>
-
-      <h3>E se la mia foto ha pochi pixel?</h3>
-      <p>Se manca poco, viene portata alla misura giusta: fino al doppio l'ingrandimento non si
-        vede, soprattutto dopo che il social ricomprime. Oltre il doppio si vedrebbe, e allora il
-        file esce più piccolo mantenendo le proporzioni corrette — con la misura vera scritta sotto
-        l'anteprima. Meglio un file un po' più piccolo che una foto sgranata.</p>
-
-      <h3>Posso sistemare un formato senza toccare gli altri?</h3>
-      <p>Sì. Trascinare un'anteprima sposta l'inquadratura di tutte insieme — è il modo veloce, e
-        serve a dire una volta sola dov'è il soggetto. Ma appena usi un comando su una destinazione
-        (zoom, Adatta, Ruota), quella diventa indipendente e da lì in poi la muovi da sola: te lo
-        segnala la scritta «da sola» accanto al nome. «Azzera» la rimette insieme al gruppo.</p>
-
-      <h3>Perché alcuni formati sono uguali fra social diversi?</h3>
-      <p>Perché lo sono davvero: la Story di Instagram, quella di Facebook e il video di TikTok
-        chiedono la stessa identica immagine. Il file viene calcolato una volta sola e salvato con
-        il nome di ciascuno.</p>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
-    · <a href="https://simonecastellan.com/tools/" target="_blank" rel="noopener">Altri strumenti</a>
-  </footer>
-
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
-
-  <!-- Le specifiche dei social stanno in un posto solo, condiviso con gli altri strumenti. -->
-  <script src="/comune/specifiche.js"></script>
-  <script src="script.js"></script>
+  <h1>Si è trasferito</h1>
+  <p>Preparare le immagini per i social ora si fa dentro <b>Posso pubblicarlo?</b>, insieme al
+    controllo: carichi la foto una volta sola, ti dice dove verrebbe tagliata e la ritagli lì.</p>
+  <p><a class="vai" href="/posso-pubblicarlo/">Vai allo strumento</a></p>
 </body>
 </html>

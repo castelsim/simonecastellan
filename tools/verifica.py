@@ -39,7 +39,7 @@ FRASI_DA_NON_METTERE_NEL_PROMPT = ("ignora l'errore", "non dire mai")
 # Gli strumenti, in un elenco solo: qui sotto servono tre volte (link in entrata,
 # sitemap, intestazioni) e tenerne tre copie significa dimenticarne una.
 TOOL = ["audio-mp3", "bpm", "tonalita", "qrcode", "posso-pubblicarlo", "fotogramma",
-        "immagini-social", "metriche-social", "comprimi-immagini", "comprimi-pdf",
+        "metriche-social", "comprimi-immagini", "comprimi-pdf",
         "rumore-rosa", "ritardo-diffusori", "link-utm", "conta-caratteri", "link-whatsapp",
         "da-comunicato-a-post", "semplifica-testo", "alt-text"]
 
@@ -193,6 +193,21 @@ def controlla_intestazioni_tool():
               f"descrizioni fino a {max(lunghe)} caratteri")
 
 
+def controlla_rimandi():
+    """Uno strumento che si trasferisce lascia una pagina che rimanda, non un 404:
+    i link e i segnalibri di prima devono continuare ad arrivare da qualche parte.
+    L'11/08/2026 «Immagini social» è entrato dentro «Posso pubblicarlo?»."""
+    rimandi = {"immagini-social": "/posso-pubblicarlo/"}
+    for vecchio, nuovo in rimandi.items():
+        pagina = leggi(f"{vecchio}/index.html")
+        if nuovo not in pagina:
+            errore(f"/{vecchio}/ non rimanda più a {nuovo}: i link vecchi finiscono nel vuoto")
+        if 'rel="canonical"' not in pagina or f'canonical" href="https://simonecastellan.com{nuovo}"' not in pagina:
+            errore(f"/{vecchio}/ non dichiara come canonical {nuovo}")
+        if "noindex" not in pagina:
+            errore(f"/{vecchio}/ non è noindex: due indirizzi per la stessa cosa si fanno concorrenza")
+
+
 def controlla_sitemap():
     xml = leggi("sitemap.xml")
     urls = re.findall(r"<loc>https://simonecastellan\.com/(.*?)</loc>", xml)
@@ -248,6 +263,7 @@ def main():
     controlla_firma_contatto()
     controlla_uscita_leggera()
     controlla_intestazioni_tool()
+    controlla_rimandi()
     controlla_sitemap()
     controlla_json_ld()
     controlla_hreflang()
