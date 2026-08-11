@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Alt text — descrivere un'immagine a chi non la vede</title>
+  <meta name="description" content="Scrivi il testo alternativo di un'immagine con i controlli giusti: quando lasciarlo vuoto, quanto lungo, cosa non scriverci mai. Codice pronto da copiare." />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="canonical" href="https://simonecastellan.com/alt-text/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Alt text" />
+  <meta property="og:description" content="Il testo alternativo di un'immagine, scritto bene: quando va lasciato vuoto e cosa non scriverci mai." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:url" content="https://simonecastellan.com/alt-text/" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>Alt text</h1>
+      <p class="subtitle">descrivere un'immagine a chi non la vede</p>
+    </header>
+
+    <!-- La domanda che viene prima di tutte: l'immagine dice qualcosa? -->
+    <section class="gruppo">
+      <span class="lbl">L'immagine cos'è</span>
+      <div class="chips" id="ruolo"></div>
+      <p class="spiega" id="spiegaRuolo"></p>
+    </section>
+
+    <!-- Immagine decorativa: la risposta è il campo vuoto, e finisce qui -->
+    <section class="vuoto-box hidden" id="vuotoBox">
+      <p class="vuoto-t">Il testo alternativo va lasciato vuoto.</p>
+      <p class="vuoto-m">Non «immagine decorativa», non uno spazio: proprio vuoto. Così chi usa
+        un lettore di schermo tira dritto invece di sentirsi leggere una cosa che non serve.
+        Toglierlo del tutto è diverso: senza l'attributo il lettore legge il nome del file.</p>
+      <pre class="codice" id="codiceVuoto">&lt;img src="…" alt=""&gt;</pre>
+      <button type="button" id="copiaVuoto" class="btn primario">Copia il codice</button>
+    </section>
+
+    <div id="pieno">
+      <section class="gruppo">
+        <span class="lbl">Cosa si vede</span>
+        <textarea id="descr" class="area" rows="3" autocomplete="off"
+                  placeholder="Un chitarrista di spalle davanti al mixer, sala vuota…"
+                  aria-label="Cosa si vede nell'immagine"></textarea>
+        <div class="conta">
+          <span id="nCar">0</span> / 125 caratteri
+        </div>
+        <ul class="avvisi" id="avvisi"></ul>
+      </section>
+
+      <section class="gruppo" id="testoBox">
+        <span class="lbl">Il testo scritto dentro l'immagine</span>
+        <input type="text" id="dentro" class="riga-in" autocomplete="off"
+               placeholder="Riportalo qui, parola per parola" aria-label="Il testo dentro l'immagine" />
+      </section>
+
+      <section class="gruppo">
+        <span class="lbl">Il codice pronto</span>
+        <pre class="codice" id="codice"></pre>
+      </section>
+
+      <div class="azioni">
+        <button type="button" id="copiaAlt" class="btn primario" disabled>Copia il codice</button>
+      </div>
+
+      <!-- Chi non sa cosa scrivere se lo fa scrivere, ma con le regole giuste -->
+      <section class="gruppo">
+        <span class="lbl">Oppure fattelo scrivere</span>
+        <pre class="prompt" id="prompt"></pre>
+      </section>
+
+      <div class="azioni">
+        <button type="button" id="vai" class="btn" data-assistente="chatgpt">Copia e apri ChatGPT</button>
+        <button type="button" id="copia" class="btn">Copia</button>
+      </div>
+      <p class="alt-riga">L'immagine trascinala tu nella conversazione: da qui non esce.
+        Va bene anche <button type="button" class="link" id="claude">Claude</button>.</p>
+    </div>
+
+    <p class="hint">
+      Il testo alternativo lo sente chi usa un lettore di schermo e lo legge chi ha la
+      connessione lenta. Serve anche a Google, ma è la ragione meno importante delle due.
+    </p>
+  </main>
+
+  <footer class="site-footer">
+    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="/comune/prompt.js"></script>
+  <script src="/track.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

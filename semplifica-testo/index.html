@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Semplifica un testo — quanto è difficile, e come renderlo chiaro</title>
+  <meta name="description" content="Misura la leggibilità di un testo italiano con l'indice Gulpease, ti mostra le frasi troppo lunghe e prepara le istruzioni per riscriverlo chiaro." />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="canonical" href="https://simonecastellan.com/semplifica-testo/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Semplifica un testo" />
+  <meta property="og:description" content="Quanto è difficile davvero il tuo testo, quali frasi lo appesantiscono e come farlo riscrivere chiaro." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:url" content="https://simonecastellan.com/semplifica-testo/" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>Semplifica un testo</h1>
+      <p class="subtitle">quanto è difficile, e come renderlo chiaro</p>
+    </header>
+
+    <textarea id="testo" class="area" rows="8" autocomplete="off"
+              placeholder="Incolla qui il testo: una mail, una pagina del sito, una lettera…"
+              aria-label="Il testo da misurare"></textarea>
+
+    <!-- La misura, prima di qualunque assistente -->
+    <section class="misura hidden" id="misuraBox" aria-live="polite">
+      <div class="voto">
+        <span class="voto-n" id="votoN">—</span>
+        <span class="voto-lbl">indice di leggibilità</span>
+      </div>
+      <p class="voto-dice" id="votoDice"></p>
+      <div class="barra"><span id="barraDentro"></span></div>
+      <div class="numeri">
+        <div class="n"><span class="n-val" id="nPar">0</span><span class="n-lbl">parole</span></div>
+        <div class="n"><span class="n-val" id="nFrasi">0</span><span class="n-lbl">frasi</span></div>
+        <div class="n"><span class="n-val" id="nMedia">0</span><span class="n-lbl">parole per frase</span></div>
+      </div>
+    </section>
+
+    <!-- Le frasi che pesano di più: si vedono, e finiscono nel prompt -->
+    <section class="gruppo hidden" id="lungheBox">
+      <span class="lbl">Le frasi più lunghe</span>
+      <ul class="lunghe" id="lunghe"></ul>
+    </section>
+
+    <section class="gruppo">
+      <span class="lbl">A chi parli</span>
+      <div class="chips" id="pubblico"></div>
+    </section>
+
+    <section class="gruppo">
+      <span class="lbl">Cosa non deve cambiare</span>
+      <div class="chips" id="vincoli"></div>
+    </section>
+
+    <section class="gruppo">
+      <span class="lbl">Le istruzioni pronte</span>
+      <pre class="prompt" id="prompt"></pre>
+    </section>
+
+    <div class="azioni">
+      <button type="button" id="vai" class="btn primario" data-assistente="chatgpt">Copia e apri ChatGPT</button>
+      <button type="button" id="copia" class="btn">Copia</button>
+    </div>
+    <p class="alt">Va bene anche altrove: <button type="button" class="link" id="claude">apri Claude</button></p>
+
+    <p class="hint">
+      L'indice Gulpease misura l'italiano su parole e frasi: sotto 40 è faticoso anche per chi
+      ha il diploma, sopra 60 lo legge chiunque. Non dice se il testo è bello, dice se si fa fatica.
+    </p>
+  </main>
+
+  <footer class="site-footer">
+    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="/comune/prompt.js"></script>
+  <script src="/track.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

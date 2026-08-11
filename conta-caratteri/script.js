@@ -113,7 +113,7 @@ function aggiornaRighe(quanti) {
 
     r.dentro.style.width = (quota * 100).toFixed(1) + '%';
     r.n.textContent = v.massimo
-      ? quanti + ' / ' + v.massimo.toLocaleString('it-IT')
+      ? quanti + ' / ' + v.massimo.toLocaleString('it-IT', { useGrouping: true })
       : quanti + ' / ~' + v.taglio;
 
     r.riga.classList.remove('ok', 'giusto', 'fuori');
@@ -151,7 +151,7 @@ function disegnaAnteprima(g) {
       ? 'Si legge tutto: sei sotto i ' + confine + ' caratteri oltre i quali ' +
         scelta.piattaforma + ' mette «altro…».'
       : 'Ci sta tutto: ' + scelta.piattaforma + ' accetta fino a ' +
-        confine.toLocaleString('it-IT') + ' caratteri.';
+        confine.toLocaleString('it-IT', { useGrouping: true }) + ' caratteri.';
     return;
   }
 

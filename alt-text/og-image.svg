@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#ffffff"/>
+  <g fill="none" stroke="#1a1a1a" stroke-width="10">
+    <rect x="490" y="140" width="220" height="150" rx="14"/>
+  </g>
+  <path d="M525 265l45-52 38 44 26-25 46 33" fill="none" stroke="#1a1a1a" stroke-width="10"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="490" y="315" width="220" height="12" rx="6" fill="#1a1a1a" opacity="0.25"/>
+  <text x="600" y="440" text-anchor="middle" font-family="-apple-system, Segoe UI, Roboto, Arial, sans-serif"
+        font-size="60" font-weight="500" fill="#1a1a1a">Alt text</text>
+  <text x="600" y="505" text-anchor="middle" font-family="-apple-system, Segoe UI, Roboto, Arial, sans-serif"
+        font-size="30" fill="#5f6368">descrivere un'immagine a chi non la vede</text>
+</svg>

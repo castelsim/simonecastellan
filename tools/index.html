@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Strumenti gratuiti — tarare un impianto, alleggerire un file, trovare una tonalità</title>
-  <meta name="description" content="Strumenti gratuiti che funzionano nel browser, nati da problemi incontrati davvero in studio e dal vivo: tarare un impianto, allineare una torre di ritardo, trovare i tempi di delay, capire la tonalità di un brano, mandare un audio leggero, far stare una foto o un PDF sotto il limite, passare un link o una rete Wi-Fi, contare i caratteri di una didascalia, farsi scrivere su WhatsApp, sapere da dove arrivano i clic. Niente da installare, niente che finisce online." />
+  <meta name="description" content="Diciotto strumenti gratuiti nati da problemi incontrati davvero, in studio e dal vivo: audio, file troppo pesanti, social, testi. Funzionano nel browser." />
   <meta name="theme-color" content="#ffffff" />
   <link rel="canonical" href="https://simonecastellan.com/tools/" />
 
@@ -27,7 +27,7 @@
     "@type": "ItemList",
     "name": "Strumenti gratuiti di Simone Castellan",
     "itemListOrder": "https://schema.org/ItemListUnordered",
-    "numberOfItems": 15,
+    "numberOfItems": 18,
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "Tarare un impianto — Rumore rosa", "url": "https://simonecastellan.com/rumore-rosa/" },
       { "@type": "ListItem", "position": 2, "name": "Allineare una torre di ritardo — Ritardo diffusori", "url": "https://simonecastellan.com/ritardo-diffusori/" },
@@ -43,7 +43,10 @@
       { "@type": "ListItem", "position": 12, "name": "Passare un link o una rete Wi-Fi — QR Code", "url": "https://simonecastellan.com/qrcode/" },
       { "@type": "ListItem", "position": 13, "name": "Sapere quanto testo si legge davvero — Conta caratteri", "url": "https://simonecastellan.com/conta-caratteri/" },
       { "@type": "ListItem", "position": 14, "name": "Farsi scrivere senza farsi salvare in rubrica — Link WhatsApp", "url": "https://simonecastellan.com/link-whatsapp/" },
-      { "@type": "ListItem", "position": 15, "name": "Sapere da dove arrivano i clic — Link UTM", "url": "https://simonecastellan.com/link-utm/" }
+      { "@type": "ListItem", "position": 15, "name": "Sapere da dove arrivano i clic — Link UTM", "url": "https://simonecastellan.com/link-utm/" },
+      { "@type": "ListItem", "position": 16, "name": "Ricavare i post da un comunicato — Da comunicato a post", "url": "https://simonecastellan.com/da-comunicato-a-post/" },
+      { "@type": "ListItem", "position": 17, "name": "Farsi capire da chiunque — Semplifica un testo", "url": "https://simonecastellan.com/semplifica-testo/" },
+      { "@type": "ListItem", "position": 18, "name": "Descrivere un'immagine a chi non la vede — Alt text", "url": "https://simonecastellan.com/alt-text/" }
     ]
   }
   </script>
@@ -63,7 +66,7 @@
     </header>
 
     <!-- Ricerca e filtri li accende il JavaScript: senza, resterebbero due comandi
-         che non fanno niente, e i quindici strumenti si vedono comunque tutti. -->
+         che non fanno niente, e gli strumenti si vedono comunque tutti. -->
     <div class="comandi" id="comandi" hidden>
       <div class="cerca">
         <svg class="lente" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
@@ -74,7 +77,7 @@
     </div>
     <p class="conta" id="conta" hidden aria-live="polite"></p>
 
-    <!-- I quindici link stanno nel markup, non li costruisce il JavaScript: è quello che
+    <!-- I link stanno tutti nel markup, non li costruisce il JavaScript: è quello che
          leggono i motori, le AI e chi ha gli script spenti. Il filtro nasconde, non crea.
          data-k = le parole di chi cerca, non i nomi degli strumenti: chi ha un file troppo
          grande scrive «pesante», non «comprimi». -->
@@ -124,6 +127,15 @@
       <a class="cella" href="/link-utm/" data-g="mandare" data-k="utm campagna analytics tracciare provenienza sorgente clic visite da dove arrivano link statistiche newsletter volantino">
         <img src="/link-utm/favicon.svg" alt="" width="34" height="34" loading="lazy">
         <span class="p">Sapere da dove arrivano i clic</span><span class="n">Link UTM</span></a>
+      <a class="cella" href="/da-comunicato-a-post/" data-g="scrivere" data-k="comunicato stampa nota post social riscrivere adattare instagram linkedin evento concerto testo lungo didascalia chatgpt prompt annuncio">
+        <img src="/da-comunicato-a-post/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Ricavare i post da un comunicato</span><span class="n">Da comunicato a post</span></a>
+      <a class="cella" href="/semplifica-testo/" data-g="scrivere" data-k="semplice chiaro difficile leggibilita gulpease burocratese complicato riscrivere mail lettera capire parole difficili frasi lunghe contorto">
+        <img src="/semplifica-testo/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Farsi capire da chiunque</span><span class="n">Semplifica un testo</span></a>
+      <a class="cella" href="/alt-text/" data-g="scrivere" data-k="alt testo alternativo accessibilita screen reader lettore schermo immagine descrizione cieco ipovedente wcag seo img sito">
+        <img src="/alt-text/favicon.svg" alt="" width="34" height="34" loading="lazy">
+        <span class="p">Descrivere un'immagine a chi non la vede</span><span class="n">Alt text</span></a>
     </div>
     <p class="vuoto" id="vuoto" hidden></p>
 
@@ -153,6 +165,7 @@
       { id:"sala",    t:"In sala" },
       { id:"musica",  t:"Con la musica" },
       { id:"social",  t:"Per i social" },
+      { id:"scrivere", t:"Da scrivere" },
       { id:"mandare", t:"Da mandare" }
     ];
     var celle  = [].slice.call(document.querySelectorAll('.cella'));
