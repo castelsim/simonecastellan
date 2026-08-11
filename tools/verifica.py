@@ -113,6 +113,9 @@ def controlla_collegamenti_interni():
         "/comprimi-pdf/": ["tools/index.html"],
         "/rumore-rosa/": ["tools/index.html"],
         "/ritardo-diffusori/": ["tools/index.html"],
+        "/link-utm/": ["tools/index.html"],
+        "/conta-caratteri/": ["tools/index.html"],
+        "/link-whatsapp/": ["tools/index.html"],
     }
     for meta, sorgenti in attese.items():
         if not any(f'href="{meta}"' in leggi(s) for s in sorgenti):
@@ -155,7 +158,8 @@ def controlla_sitemap():
     pubblicate = {"", "profilo/", "cv/", "en/profile/", "privacy/", "tienimi-presente/", "BDG2029/",
                   "tools/", "audio-mp3/", "bpm/", "tonalita/", "qrcode/",
                   "comprimi-immagini/", "comprimi-pdf/", "immagini-social/", "posso-pubblicarlo/", "metriche-social/", "fotogramma/",
-                  "rumore-rosa/", "ritardo-diffusori/"}
+                  "rumore-rosa/", "ritardo-diffusori/",
+                  "link-utm/", "conta-caratteri/", "link-whatsapp/"}
     mancanti = pubblicate - set(urls)
     if mancanti:
         errore("pagine pubblicate ma assenti dalla sitemap: " + ", ".join(sorted(mancanti)))
