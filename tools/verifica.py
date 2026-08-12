@@ -39,9 +39,15 @@ FRASI_DA_NON_METTERE_NEL_PROMPT = ("ignora l'errore", "non dire mai")
 # Gli strumenti, in un elenco solo: qui sotto servono tre volte (link in entrata,
 # sitemap, intestazioni) e tenerne tre copie significa dimenticarne una.
 TOOL = ["audio-mp3", "bpm", "tonalita", "qrcode", "posso-pubblicarlo", "fotogramma",
-        "metriche-social", "comprimi-immagini", "comprimi-pdf", "comprimi-video",
+        "comprimi-immagini", "comprimi-pdf", "comprimi-video",
         "rumore-rosa", "ritardo-diffusori", "link-utm", "conta-caratteri", "link-whatsapp",
         "da-comunicato-a-post", "semplifica-testo", "alt-text"]
+
+# Strumenti tolti dalla vetrina ma ancora vivi: la pagina funziona per chi ha il
+# link, non compare in /tools/ né nella sitemap né nelle ricerche.  Restano qui
+# perché la voce comune vale anche per loro — e perché se una cella tornasse in
+# vetrina per distrazione, qualcuno deve accorgersene.
+NASCOSTI = ["metriche-social"]
 
 # Google mostra ~155-160 caratteri di descrizione: oltre, taglia a metà frase.
 MAX_DESCRIZIONE = 160
@@ -154,7 +160,7 @@ def controlla_intestazioni_tool():
     Quel giro ha lasciato indietro quattro descrizioni troppo lunghe, e me ne sono
     accorto solo interrogando il dominio: da qui in poi se ne accorge lo script."""
     lunghe = []
-    for t in TOOL:
+    for t in TOOL + NASCOSTI:
         pagina = leggi(f"{t}/index.html")
 
         titolo = re.search(r"<title>(.*?)</title>", pagina, re.S)
@@ -189,8 +195,39 @@ def controlla_intestazioni_tool():
             errore(f"{t}: dal piede non si torna agli altri strumenti")
 
     if lunghe:
-        print(f"  strumenti: {len(TOOL)} con titolo e sottotitolo, "
-              f"descrizioni fino a {max(lunghe)} caratteri")
+        quanti = f"{len(NASCOSTI)} nascosto" if len(NASCOSTI) == 1 else f"{len(NASCOSTI)} nascosti"
+        print(f"  strumenti: {len(TOOL)} in vetrina + {quanti}, "
+              f"tutti con titolo e sottotitolo, descrizioni fino a {max(lunghe)} caratteri")
+
+
+def controlla_nascosti():
+    """Nascosto vuol dire tre cose insieme, e basta che ne salti una perché la
+    pagina torni a farsi trovare senza che nessuno l'abbia deciso: niente cella
+    in /tools/, niente riga in sitemap, noindex sulla pagina.  La pagina però
+    deve continuare a esistere e a rimandare agli altri strumenti: chi ci arriva
+    da un vecchio link non deve trovare un vicolo cieco."""
+    vetrina = leggi("tools/index.html")
+    xml = leggi("sitemap.xml")
+    for t in NASCOSTI:
+        if f'href="/{t}/"' in vetrina:
+            errore(f"/{t}/ è fra i nascosti ma ha ancora una cella in /tools/")
+        if f"/{t}/" in xml:
+            errore(f"/{t}/ è fra i nascosti ma è ancora nella sitemap: Google continuerebbe "
+                   f"a proporlo")
+        pagina = leggi(f"{t}/index.html")
+        # Si cerca il meta vero, non la parola: «noindex» compare anche nel commento
+        # che spiega come rimettere lo strumento in vetrina, e cercare la parola
+        # nuda faceva passare il controllo pure con il meta tolto (provato).
+        robots = re.search(r'<meta\s+name="robots"\s+content="([^"]*)"', pagina)
+        if not robots or "noindex" not in robots.group(1):
+            errore(f"/{t}/ è fra i nascosti ma non ha il meta robots noindex: resterebbe nei "
+                   f"risultati di ricerca senza più un link che ci porta")
+        if not os.path.exists(os.path.join(ROOT, t, "index.html")):
+            errore(f"/{t}/ è sparito: nascondere non è cancellare, i link vecchi devono "
+                   f"continuare ad arrivare da qualche parte")
+    if NASCOSTI:
+        print(f"  nascosti: {', '.join(NASCOSTI)} — fuori da vetrina, sitemap e ricerche, "
+              f"pagina ancora viva")
 
 
 def controlla_rimandi():
@@ -263,6 +300,7 @@ def main():
     controlla_firma_contatto()
     controlla_uscita_leggera()
     controlla_intestazioni_tool()
+    controlla_nascosti()
     controlla_rimandi()
     controlla_sitemap()
     controlla_json_ld()
