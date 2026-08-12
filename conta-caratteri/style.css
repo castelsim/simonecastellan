@@ -31,7 +31,7 @@ body {
   text-align: center;
 }
 
-.card { width: 100%; max-width: 460px; }
+.card { width: 100%; max-width: 560px; }   /* il titolo a due voci vuole respiro */
 
 header { margin-bottom: 24px; }
 h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2px; }
@@ -255,3 +255,8 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
   .chips { gap: 6px; }
   .chip { font-size: 12px; padding: 6px 11px; }
 }
+
+
+/* ————— La voce comune (12/08/2026) —————
+   L'intestazione va a sinistra: la seconda riga finisce la frase della prima. */
+header { text-align: left; margin-bottom: 30px; }

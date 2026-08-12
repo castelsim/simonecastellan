@@ -180,16 +180,28 @@ def controlla_intestazioni_tool():
         else:
             lunghe.append(len(d.group(1).strip()))
 
+        # Dal 12/08/2026 il nome può essere seguito in due modi, e vale lo stesso
+        # patto: subito sotto il nome deve esserci scritto cosa fa lo strumento.
+        #   forma vecchia — <p class="subtitle">frammento minuscolo</p>
+        #   voce comune   — <h1 class="titolone">Nome.<span class="eco">Frase.</span></h1>
+        # Nella voce comune l'eco è una frase intera (maiuscola e punto): è la
+        # figura di stageplot.it, dove la seconda riga completa la prima.
         sub = re.search(r'<p class="subtitle">(.*?)</p>', pagina, re.S)
-        if not sub:
-            errore(f"{t}: manca il sottotitolo sotto il nome")
-        else:
+        eco = re.search(r'<span class="eco">(.*?)</span>', pagina, re.S)
+        if not sub and not eco:
+            errore(f"{t}: sotto il nome non c'è scritto cosa fa "
+                   f"(né sottotitolo né seconda riga del titolo)")
+        elif sub:
             testo = re.sub(r"\s+", " ", sub.group(1)).strip()
             # Frammento minuscolo che finisce la frase cominciata dal nome: niente
             # maiuscola, niente punto.  Solo un avviso: un nome proprio o una sigla
             # («PNG o SVG…») sarebbe un falso allarme.
             if testo[:1].isupper() or testo.endswith("."):
                 AVVISI.append(f"{t}: il sottotitolo «{testo}» non è un frammento minuscolo")
+        else:
+            testo = re.sub(r"\s+", " ", eco.group(1)).strip()
+            if not testo.endswith("."):
+                AVVISI.append(f"{t}: la seconda riga del titolo «{testo}» non chiude la frase")
 
         if "simonecastellan.com/tools/" not in pagina.split("<footer", 1)[-1]:
             errore(f"{t}: dal piede non si torna agli altri strumenti")
