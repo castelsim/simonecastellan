@@ -1,0 +1,237 @@
+/* Stile coerente con simonecastellan.com — minimale, monocromatico, luce. */
+:root {
+  --bg: #ffffff;
+  --text: #3c4043;
+  --ink: #1a1a1a;
+  --muted: #5f6368;
+  --muted-2: #80868b;
+  --faint: #9aa0a6;
+  --pill: #f1f3f4;
+  --pill-hover: #e6e8ea;
+  --line: #c2c6cc;
+  --line-soft: #dadce0;
+  --radius: 16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+button, input { touch-action: manipulation; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px 20px calc(64px + env(safe-area-inset-bottom));
+  text-align: center;
+}
+
+.card { width: 100%; max-width: 440px; }
+
+header { margin-bottom: 20px; }
+h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2px; }
+
+/* Peso da rispettare */
+.seg {
+  display: inline-flex;
+  gap: 3px;
+  background: var(--pill);
+  border-radius: 999px;
+  padding: 4px;
+  margin-bottom: 22px;
+  max-width: 100%;
+}
+.seg-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 15px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s ease, color .15s ease;
+}
+.seg-btn.active { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+
+/* Drop zone */
+.dropzone {
+  border: 1.5px dashed var(--line-soft);
+  border-radius: 22px;
+  padding: 34px 20px;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+  background: #fafbfc;
+}
+.dropzone:hover { background: var(--pill); }
+.dropzone.dragover { background: var(--pill); border-color: var(--muted-2); }
+.dz-title { font-size: 16px; font-weight: 500; color: var(--ink); }
+.dz-or { color: var(--faint); margin: 6px 0 16px; font-size: 13px; }
+
+/* Bottoni */
+.btn {
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 22px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s ease, opacity .15s ease;
+}
+.btn-primary { background: var(--ink); color: #fff; width: 100%; }
+.btn-primary:hover { background: #000; }
+.btn-secondary { background: var(--pill); color: var(--ink); width: 100%; }
+.btn-secondary:hover { background: var(--pill-hover); }
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 13px;
+  margin-top: 14px;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  padding: 0 0 1px;
+}
+.btn-ghost:hover { color: var(--ink); }
+.dropzone .btn { width: auto; min-width: 160px; }
+
+/* Avviso: il documento ha testo vero e lo si sta per perdere */
+.warn {
+  margin-top: 20px;
+  text-align: left;
+  background: #fafbfc;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  padding: 16px 18px 18px;
+}
+.warn-title { font-size: 14.5px; font-weight: 600; color: var(--ink); }
+.warn-msg { font-size: 13px; line-height: 1.55; color: var(--muted); margin-top: 7px; }
+.warn-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.warn-actions .btn-ghost { margin-top: 2px; align-self: center; }
+
+/* Lavorazione */
+.status { padding: 18px 0 4px; }
+.status-text { color: var(--muted); font-size: 14.5px; margin-bottom: 14px; font-variant-numeric: tabular-nums; }
+.progress { width: 100%; height: 6px; background: var(--pill); border-radius: 999px; overflow: hidden; }
+.progress-bar { height: 100%; width: 0%; background: var(--ink); border-radius: 999px; transition: width .25s ease; }
+
+/* Risultato */
+.result { margin-top: 22px; }
+.filelist { list-style: none; text-align: left; margin-bottom: 18px; }
+.f-row {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 2px;
+  border-bottom: 1px solid var(--pill);
+  font-size: 14px;
+}
+.f-row:last-child { border-bottom: none; }
+.f-thumb {
+  width: 38px; height: 38px;
+  border-radius: 9px;
+  object-fit: cover;
+  background: var(--pill);
+  flex: 0 0 auto;
+}
+.f-txt { flex: 1; min-width: 0; }
+.f-name {
+  color: var(--ink); font-weight: 500;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.f-state {
+  color: var(--faint); font-size: 12.5px; margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.f-row.ko .f-state { color: #c5221f; }
+.f-hint { display: inline-block; margin-top: 3px; color: var(--faint); font-size: 12px; }
+.f-state b { color: var(--ink); font-weight: 600; }
+.f-dl {
+  appearance: none; border: none;
+  background: var(--pill); color: var(--ink);
+  border-radius: 999px; padding: 5px 14px;
+  font-size: 12.5px; font-weight: 600; font-family: inherit;
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: background .15s ease;
+}
+.f-dl:hover { background: var(--pill-hover); }
+
+.actions { display: flex; flex-direction: column; gap: 10px; }
+
+/* Privacy */
+.privacy {
+  margin-top: 26px;
+  font-size: 12px;
+  color: var(--faint);
+  letter-spacing: .1px;
+}
+
+/* Il piede sta in fondo al contenuto, non incollato alla finestra: questa
+   pagina scorre (spiegazione e domande), e da fissa la scritta si sedeva
+   sopra l'ultima riga. Verificato il 12/08/2026 guardando lo screenshot. */
+.site-footer {
+  margin-top: 40px;
+  text-align: center;
+  font-size: 12px;
+  color: #6b7075;
+  letter-spacing: .2px;
+}
+.site-footer a { color: #6b7075; text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 1px; }
+.site-footer a:hover { color: var(--ink); }
+
+.hidden { display: none !important; }
+
+@media (max-width: 460px) {
+  h1 { font-size: 22px; }
+  .seg-btn { padding: 7px 11px; font-size: 12.5px; }
+}
+
+/* ── Quello che questo strumento ha in più ─────────────────────────────
+   Il peso si sceglie prima del file, perché è la domanda che uno ha già in
+   testa quando arriva: «deve stare sotto 25». */
+.seg-btn i { display: block; font-style: normal; font-size: 10px; opacity: .6; margin-top: 2px; }
+
+.claims { margin-top: 16px; font-size: 12px; color: var(--faint); }
+
+/* La previsione: cosa succederà, prima di farlo succedere */
+.previsione { margin-top: 26px; text-align: left; }
+.scheda {
+  font-size: 12.5px; color: var(--muted); line-height: 1.5;
+  word-break: break-word;
+}
+.verdetto {
+  margin-top: 14px; padding: 14px 15px;
+  background: #fafbfc; border: 1px solid #eef0f2; border-radius: 12px;
+  font-size: 13.5px; line-height: 1.6; color: var(--ink);
+}
+.verdetto b { font-weight: 600; }
+.verdetto-nota { color: var(--faint); font-size: 12px; }
+.avviso { margin-top: 12px; font-size: 11.5px; color: var(--faint); line-height: 1.5; }
+
+.azioni { display: flex; gap: 10px; margin-top: 18px; }
+.azioni .btn { flex: 1 1 0; }
+
+.status-nota { margin-top: 10px; font-size: 11.5px; color: var(--faint); line-height: 1.5; }
+
+/* Il risultato: due numeri e un giudizio */
+.risultato { margin-top: 26px; text-align: left; }
+.esito { font-size: 15px; line-height: 1.7; color: var(--ink); }
+.esito .quota { font-size: 12.5px; color: var(--faint); font-weight: 400; }
+.esito .ok { font-size: 13px; color: var(--muted); }
+.esito .quasi { font-size: 13px; color: var(--warn, #b06000); }
+
+/* Spiegazione in fondo, per chi arriva da una ricerca */
+.spiega { margin-top: 44px; text-align: left; border-top: 1px solid #eef0f2; padding-top: 28px; }
+.spiega h2 { font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 10px; }
+.spiega h2 + p { margin-bottom: 18px; }
+.spiega h3 { font-size: 13.5px; font-weight: 600; color: var(--ink); margin: 18px 0 6px; }
+.spiega p { font-size: 13px; line-height: 1.65; color: var(--muted); }

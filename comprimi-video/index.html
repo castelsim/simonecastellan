@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Comprimi video — sotto il peso che ti chiedono</title>
+  <meta name="description" content="Porta un video sotto 25, 16 o 8 MB per mandarlo via mail o WhatsApp. Nel browser: il file non viene caricato online e ti dico prima come verrà." />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="canonical" href="https://simonecastellan.com/comprimi-video/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Comprimi video" />
+  <meta property="og:description" content="Porta un video sotto il peso richiesto da mail e chat, senza caricarlo da nessuna parte." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:url" content="https://simonecastellan.com/comprimi-video/" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Serve l'isolamento cross-origin (SharedArrayBuffer) perché il motore
+       lavori. Si attiva da solo, chi arriva non se ne accorge. -->
+  <script src="coi-serviceworker.min.js"></script>
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>Comprimi video</h1>
+      <p class="subtitle">sotto il peso che ti chiedono</p>
+    </header>
+
+    <!-- I pesi che chiedono davvero: la posta si ferma a 25, WhatsApp a 16. -->
+    <div class="seg" id="pesoSeg" role="group" aria-label="Peso massimo">
+      <button type="button" class="seg-btn active" data-mb="25">25 MB<i>mail</i></button>
+      <button type="button" class="seg-btn" data-mb="16">16 MB<i>WhatsApp</i></button>
+      <button type="button" class="seg-btn" data-mb="8">8 MB</button>
+    </div>
+
+    <section id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Carica o trascina un video">
+      <p class="dz-title">Trascina qui il video</p>
+      <p class="dz-or">oppure</p>
+      <button type="button" id="pickBtn" class="btn btn-secondary">Scegli un video</button>
+      <input type="file" id="fileInput" accept="video/*" hidden />
+    </section>
+
+    <p class="claims">Sul tuo dispositivo · nessun caricamento · gratis</p>
+
+    <!-- Cosa succederà, prima di farlo succedere -->
+    <section id="previsione" class="previsione hidden">
+      <p class="scheda" id="scheda"></p>
+      <p class="verdetto" id="verdetto"></p>
+      <div class="azioni">
+        <button type="button" id="viaBtn" class="btn btn-primary">Comprimi</button>
+        <button type="button" id="altroBtn" class="btn btn-ghost">Un altro video</button>
+      </div>
+      <p class="avviso" id="avvisoMotore"></p>
+    </section>
+
+    <!-- Lavorazione -->
+    <section id="status" class="status hidden" aria-live="polite">
+      <p id="statusText" class="status-text">Preparo il motore…</p>
+      <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
+      <p class="status-nota">Puoi lasciare questa scheda in primo piano e aspettare:
+        se passi a un'altra finestra il browser rallenta il lavoro.</p>
+    </section>
+
+    <!-- Risultato -->
+    <section id="risultato" class="risultato hidden">
+      <p class="esito" id="esito"></p>
+      <div class="azioni">
+        <button type="button" id="condividiBtn" class="btn btn-primary hidden">Condividi</button>
+        <button type="button" id="scaricaBtn" class="btn btn-secondary">Scarica</button>
+        <button type="button" id="ancoraBtn" class="btn btn-ghost">Un altro video</button>
+      </div>
+    </section>
+
+    <!-- Errore -->
+    <section id="errore" class="errore hidden" aria-live="assertive">
+      <p class="errore-msg" id="erroreMsg"></p>
+      <button type="button" id="erroreBtn" class="btn btn-ghost">Riprova</button>
+    </section>
+
+    <p class="privacy">Il video non viene caricato online: tutto avviene sul tuo dispositivo.</p>
+
+    <section class="spiega">
+      <h2>A cosa serve</h2>
+      <p>La posta si ferma a 25 MB, WhatsApp a 16, i moduli chiedono cifre loro: un video girato
+        col telefono li supera quasi sempre. Qui lo porti sotto il limite senza mandarlo a un
+        servizio online e senza installare niente.</p>
+
+      <h2>Domande</h2>
+      <h3>Il mio video viene caricato da qualche parte?</h3>
+      <p>No. Il motore che comprime gira dentro il browser, sul tuo dispositivo. Il file non esce
+        di lì, nemmeno verso di me.</p>
+
+      <h3>Perché la prima volta ci mette un po'?</h3>
+      <p>Perché scarica il motore di compressione, circa 24 MB, una volta sola. Dalla seconda
+        volta parte subito.</p>
+
+      <h3>Quanto ci mette?</h3>
+      <p>Più o meno un paio di secondi di attesa per ogni secondo di video: mezzo minuto di
+        filmato è questione di un minuto. Dipende anche dalla risoluzione e dal computer.
+        Tieni la scheda in primo piano: quando passi a un'altra finestra il browser rallenta
+        apposta il lavoro in secondo piano.</p>
+
+      <h3>Si vedrà peggio?</h3>
+      <p>Sì, un po': comprimere vuol dire buttare via dati. Quanto peggio dipende da quanto è
+        lungo il video rispetto al peso richiesto, e te lo dico prima di cominciare — se il conto
+        non torna, meglio saperlo che scoprirlo dopo.</p>
+
+      <h3>Le proporzioni cambiano?</h3>
+      <p>No. Il video esce delle stesse dimensioni: qui si tocca solo quanti dati al secondo
+        vengono usati, non l'inquadratura.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
+  </footer>
+
+  <!-- Il motore sta in /audio-mp3/vendor/: è lo stesso, e 24 MB non si tengono in
+       due copie. -->
+  <script src="/audio-mp3/vendor/ffmpeg/ffmpeg.min.js"></script>
+  <script src="/track.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
