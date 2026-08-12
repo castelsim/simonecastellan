@@ -7,6 +7,12 @@
    alla portata. Meglio uno strumento che fa una cosa in un tempo umano che due
    che fanno aspettare cinque minuti.
 
+   Sui tempi c'è una lezione pagata cara (12/08/2026): la prima versione
+   sembrava rotta, quattro minuti per sei secondi di video. Non era il
+   WebAssembly a essere inadatto, erano i thread — vedi il commento su
+   «-threads 1» più sotto. Prima di dare per persa una strada, isolare un
+   ingrediente alla volta.
+
    Il conto è quello: peso = bitrate × durata. Girato al contrario dà il
    bitrate da chiedere per stare sotto un peso, ed è tutto quello che serve —
    più l'onestà di dire prima come verrà, invece di far scoprire dopo che a
@@ -218,7 +224,17 @@ function comprimi() {
          costano di più e capitano quando meno serve. */
       return ff.run(
         '-i', dentro,
-        '-c:v', 'libx264', '-preset', 'veryfast',
+        /* «-threads 1» non è una rinuncia: è la differenza fra funzionare e
+           non funzionare. Provato il 12/08/2026: un secondo di video 720p
+           costa 4,5 secondi con un thread solo e oltre 120 con i thread
+           lasciati liberi — trenta volte peggio, non meglio. In WebAssembly
+           i thread di x264 non si dividono il lavoro, si ostacolano. */
+        '-threads', '1',
+        /* superfast invece di veryfast: a parità di peso perde poco più di
+           1 dB di PSNR e dimezza l'attesa. Su uno strumento dove si aspetta
+           guardando una barra, il secondo risparmiato vale più del decimo di
+           decibel. */
+        '-c:v', 'libx264', '-preset', 'superfast',
         '-b:v', kbps + 'k', '-maxrate', kbps + 'k', '-bufsize', (kbps * 2) + 'k',
         '-pix_fmt', 'yuv420p',
         '-c:a', 'aac', '-b:a', AUDIO_KBPS + 'k',
