@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Link UTM — sapere da dove arrivano i clic</title>
-  <meta name="description" content="Un link che dice da dove è arrivato il clic: Instagram, newsletter, volantino. Il nome della campagna resta sempre scritto allo stesso modo, ed è ciò che conta." />
+  <meta name="description" content="Un link che dice da dove è arrivato il clic. Instagram, newsletter o volantino: lo sai. E il nome resta sempre scritto uguale." />
   <meta name="theme-color" content="#ffffff" />
   <link rel="canonical" href="https://simonecastellan.com/link-utm/" />
 
@@ -28,6 +28,12 @@
       <p class="subtitle">sapere da dove arrivano i clic</p>
     </header>
 
+    <!-- «UTM» è il nome del mestiere e resta, ma va spiegato subito: chi arriva
+         qui vuole solo sapere da dove vengono i clic, non imparare una sigla. -->
+    <p class="intro">Metti lo stesso link su Instagram, nella newsletter e su un
+      volantino. Poi non sai più quale ha portato gente. Gli UTM sono poche parole
+      attaccate in fondo al link: chi clicca non le vede, il tuo Analytics sì.</p>
+
     <!-- Indirizzo di destinazione -->
     <section class="block">
       <label class="lbl" for="url">La pagina dove porta il link</label>
@@ -38,27 +44,32 @@
 
     <!-- Provenienza: la parte che si sbaglia sempre, qui è una scelta -->
     <section class="block">
-      <span class="lbl">Da dove arriva</span>
+      <span class="lbl">Dove metti il link</span>
       <div class="chips" id="chips"></div>
+      <p class="aiuto">Tocca il posto giusto. I due campi qui sotto si riempiono da soli.</p>
       <div class="due">
         <div>
-          <label class="lbl min" for="src">Sorgente</label>
+          <label class="lbl min" for="src">Chi manda <code class="par">utm_source</code></label>
           <input type="text" id="src" class="txt sm" autocomplete="off" autocorrect="off"
                  spellcheck="false" placeholder="instagram" />
         </div>
         <div>
-          <label class="lbl min" for="med">Mezzo</label>
+          <label class="lbl min" for="med">Come <code class="par">utm_medium</code></label>
           <input type="text" id="med" class="txt sm" autocomplete="off" autocorrect="off"
                  spellcheck="false" placeholder="social" />
         </div>
       </div>
+      <p class="aiuto">Chi manda è il nome del posto: instagram, newsletter, volantino.
+        Come dice in che modo ci arrivano: social, email, qrcode.</p>
     </section>
 
     <!-- Campagna: il campo che crea i doppioni -->
     <section class="block">
-      <label class="lbl" for="camp">Nome della campagna</label>
+      <label class="lbl" for="camp">Come si chiama l'iniziativa <code class="par">utm_campaign</code></label>
       <input type="text" id="camp" class="txt" autocomplete="off" autocorrect="off"
              spellcheck="false" placeholder="concerto-autunno" />
+      <p class="aiuto">Un concerto, un corso, i saldi. Scrivilo uguale su tutti i link
+        di quella iniziativa: è il nome che ritrovi nei rapporti.</p>
       <div class="recenti hidden" id="recenti">
         <span class="recenti-lbl">Già usati</span>
         <div class="chips" id="chipsCamp"></div>
@@ -67,21 +78,22 @@
 
     <!-- Il resto lo usa una persona su dieci: sta chiuso -->
     <details class="extra">
-      <summary>Distinguere due link nello stesso posto</summary>
+      <summary>Ho due link nello stesso posto</summary>
       <div class="due">
         <div>
-          <label class="lbl min" for="cont">Contenuto</label>
+          <label class="lbl min" for="cont">Quale dei due <code class="par">utm_content</code></label>
           <input type="text" id="cont" class="txt sm" autocomplete="off" autocorrect="off"
                  spellcheck="false" placeholder="prima-storia" />
         </div>
         <div>
-          <label class="lbl min" for="term">Parola chiave</label>
+          <label class="lbl min" for="term">Parola pagata <code class="par">utm_term</code></label>
           <input type="text" id="term" class="txt sm" autocomplete="off" autocorrect="off"
                  spellcheck="false" placeholder="solo per gli annunci" />
         </div>
       </div>
-      <p class="hint sm-hint">Il contenuto serve quando lo stesso link sta in due punti — la
-        biografia e la storia — e vuoi sapere quale dei due ha funzionato.</p>
+      <p class="hint sm-hint">Lo stesso link sta nella biografia e in una storia.
+        Scrivi «bio» in uno e «storia» nell'altro. Poi sai quale ha funzionato.
+        La parola pagata serve solo a chi compra annunci.</p>
     </details>
 
     <!-- Risultato -->
@@ -93,16 +105,22 @@
         <button type="button" id="copia" class="btn primario" disabled>Copia il link</button>
         <button type="button" id="qr" class="btn" disabled>Fanne un QR</button>
       </div>
+      <!-- Quello che manca al link si dice qui, in nero: prima il codice se ne
+           accorgeva (r.mancano) e non lo diceva a nessuno. -->
+      <p class="nota hidden" id="nota"></p>
+      <p class="aiuto">In grassetto c'è la parte aggiunta. Il resto è il tuo indirizzo,
+        intatto: il link porta dove portava prima.</p>
     </section>
 
     <p class="hint">
-      Maiuscole e spazi diventano minuscole e trattini: per Analytics «Estate 2026»
-      ed «estate-2026» sono due campagne, ed è così che i numeri si spezzano.
+      Maiuscole e spazi diventano minuscole e trattini. Per Analytics «Estate 2026»
+      ed «estate-2026» sono due iniziative diverse. Così i numeri si spezzano in due,
+      e non dicono più niente. Il link si compone qui: non viene mandato da nessuna parte.
     </p>
   </main>
 
   <footer class="site-footer">
-    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
     · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
   </footer>
 

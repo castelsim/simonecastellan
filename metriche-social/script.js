@@ -24,6 +24,7 @@ var METRICHE = [
   {
     id: 'engagement',
     nome: 'Engagement rate',
+    esteso: 'quanti reagiscono fra quelli che lo vedono',
     serve: function (d) {
       return interazioni(d) !== null && (d.copertura > 0 || d.follower > 0);
     },
@@ -33,9 +34,9 @@ var METRICHE = [
     },
     formato: 'percento',
     spiega: function (d, v) {
-      var suCosa = d.copertura > 0 ? 'chi ha visto il contenuto' : 'chi ti segue';
-      return 'su 100 persone fra ' + suCosa + ', circa ' + arrotonda(v, 0) +
-             ' hanno fatto qualcosa (like, commenti, condivisioni, salvataggi)';
+      var suCosa = d.copertura > 0 ? 'che lo hanno visto' : 'che ti seguono';
+      return 'su 100 persone ' + suCosa + ', circa ' + arrotonda(v, 0) +
+             ' hanno fatto qualcosa: like, commento, condivisione o salvataggio';
     }
   },
   {
@@ -46,13 +47,13 @@ var METRICHE = [
     calcola: function (d) { return d.clic / d.impression * 100; },
     formato: 'percento',
     spiega: function (d, v) {
-      return 'ogni 100 volte che è stato mostrato, ' + arrotonda(v, 1) + ' hanno portato a un clic';
+      return 'ogni 100 volte che è stato mostrato, ' + arrotonda(v, 1) + ' sono finite in un clic';
     }
   },
   {
     id: 'cpc',
     nome: 'Costo per clic',
-    esteso: 'CPC',
+    esteso: 'CPC',        // la sigla che si legge nei pannelli pubblicitari
     serve: function (d) { return d.spesa > 0 && d.clic > 0; },
     calcola: function (d) { return d.spesa / d.clic; },
     formato: 'euro',
@@ -122,8 +123,11 @@ function interazioni(d) {
 function arrotonda(v, dec) {
   return v.toFixed(dec).replace('.', ',');
 }
+/* Tre decimali servono solo sotto l'euro: un costo per clic di 0,038 € è
+   normale e con due decimali sparirebbe. Sopra l'euro erano una trappola:
+   «5,000 €» in italiano si legge cinquemila euro, non cinque. */
 function euro(v) {
-  return (v >= 10 ? v.toFixed(2) : v.toFixed(3)).replace('.', ',') + ' €';
+  return (v >= 1 ? v.toFixed(2) : v.toFixed(3)).replace('.', ',') + ' €';
 }
 function scrivi(v, formato) {
   if (formato === 'percento') return arrotonda(v, v >= 10 ? 1 : 2) + '%';
@@ -207,6 +211,17 @@ function aggiorna() {
     var nome = document.createElement('span');
     nome.className = 'metrica-nome';
     nome.textContent = m.nome;
+    /* Il nome esteso era scritto nell'elenco ma non arrivava mai sullo schermo:
+       chi legge «CPC» sul pannello di Meta non riconosceva «Costo per clic», e
+       chi non è del mestiere non riconosceva la sigla. Adesso si vedono
+       entrambi. */
+    if (m.esteso) {
+      var alt = document.createElement('span');
+      alt.className = 'metrica-esteso';
+      alt.textContent = m.esteso;
+      nome.appendChild(document.createTextNode(' '));
+      nome.appendChild(alt);
+    }
     var val = document.createElement('span');
     val.className = 'metrica-valore';
     val.textContent = scrivi(v, m.formato);
@@ -222,8 +237,8 @@ function aggiorna() {
   });
 
   vuoto.textContent = uscite.length ? '' :
-    (quanti === 0 ? 'Compila anche solo due campi: le metriche compaiono da sole.'
-                  : 'Con questi numeri non si calcola ancora niente: aggiungine un altro, per esempio le impression o la spesa.');
+    (quanti === 0 ? 'Scrivi due numeri qualsiasi: i conti compaiono da soli.'
+                  : 'Con questi numeri non esce ancora niente. Aggiungine un altro: le impression, oppure la spesa.');
   vuoto.classList.toggle('hidden', !!uscite.length);
   copiaBtn.classList.toggle('hidden', !uscite.length);
   puliciBtn.classList.toggle('hidden', quanti === 0);

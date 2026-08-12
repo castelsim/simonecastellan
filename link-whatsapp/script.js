@@ -59,25 +59,53 @@ function pulisci(grezzo, paese) {
   return cifre;
 }
 
+/* Se uno incolla «+41 79…» con l'Italia scelta nel menu, il prefisso svizzero
+   non viene tolto e finisce appiccicato dopo il 39: wa.me/3941791234567, un
+   numero che non esiste. Lunghezza 11, dentro l'intervallo italiano, nessun
+   avviso. Qui il paese dichiarato col «+» vince sul menu, e il menu lo segue. */
+function paeseDichiarato(grezzo) {
+  if (!/^\s*(\+|00)/.test(grezzo)) return null;
+  var cifre = grezzo.replace(/\D/g, '').replace(/^00/, '');
+  var trovato = null;
+  [].forEach.call(paeseEl.options, function (o) {
+    if (cifre.indexOf(o.value) === 0 && (!trovato || o.value.length > trovato.length)) {
+      trovato = o.value;                 // il più lungo vince: 351 prima di 3
+    }
+  });
+  return trovato;
+}
+
 function costruisci() {
-  var paese = paeseEl.value;
   var grezzo = numEl.value;
   numErr.classList.add('hidden');
 
   if (!grezzo.trim()) return null;
 
+  // Il «+» dichiarato dall'utente comanda: il menu si sposta da solo, così non
+  // si vede più un paese e se ne manda un altro.
+  var dichiarato = paeseDichiarato(grezzo);
+  if (dichiarato && dichiarato !== paeseEl.value) paeseEl.value = dichiarato;
+  var paese = paeseEl.value;
+
   var cifre = pulisci(grezzo, paese);
   if (cifre.length < 6) return avviso('Questo numero sembra troppo corto.', null);
+
+  // Un «+» che non è di nessun paese dell'elenco: il prefisso resterebbe
+  // attaccato dopo quello scelto e il link porterebbe da nessuno.
+  if (/^\s*(\+|00)/.test(grezzo) && !dichiarato) {
+    avviso('Il prefisso che hai scritto non è nell\'elenco. Scegli il paese qui '
+      + 'accanto e scrivi il numero senza prefisso.', null);
+  }
 
   var att = ATTESE[paese];
   if (att && (cifre.length < att[0] || cifre.length > att[1])) {
     avviso('Di solito qui il numero ha ' +
       (att[0] === att[1] ? att[0] : att[0] + '–' + att[1]) +
-      ' cifre e a te ne risultano ' + cifre.length + ': controlla il prefisso.', null);
+      ' cifre e a te ne risultano ' + cifre.length + '. Controlla il prefisso.', null);
   }
   // In Italia WhatsApp sta sui cellulari, che cominciano per 3.
   if (paese === '39' && cifre.charAt(0) !== '3') {
-    avviso('I numeri fissi non hanno WhatsApp: serve un cellulare.', null);
+    avviso('I numeri fissi non hanno WhatsApp. Serve un cellulare, che comincia per 3.', null);
   }
 
   var url = 'https://wa.me/' + paese + cifre;

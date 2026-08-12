@@ -194,6 +194,12 @@ def controlla_intestazioni_tool():
         if "simonecastellan.com/tools/" not in pagina.split("<footer", 1)[-1]:
             errore(f"{t}: dal piede non si torna agli altri strumenti")
 
+        # Il piede diceva «Designed and built by» su diciotto pagine italiane:
+        # una firma in inglese sotto uno strumento scritto in italiano.
+        if "Designed and built" in pagina:
+            errore(f"{t}: il piede è in inglese («Designed and built by»); "
+                   f"le pagine italiane dicono «Fatto da»")
+
     if lunghe:
         quanti = f"{len(NASCOSTI)} nascosto" if len(NASCOSTI) == 1 else f"{len(NASCOSTI)} nascosti"
         print(f"  strumenti: {len(TOOL)} in vetrina + {quanti}, "

@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <title>BPM — tempi di delay e riverbero dal BPM</title>
-  <meta name="description" content="Dal BPM ai millisecondi di delay, pre-delay e coda del riverbero: note dritte, puntate e terzine, anche in Hz. Nel browser, niente da installare." />
+  <title>BPM — i millisecondi da dare al delay e al riverbero</title>
+  <meta name="description" content="Scrivi la velocità del brano e leggi i millisecondi da dare al delay o al riverbero. Note dritte, puntate e terzine, anche in hertz." />
   <meta name="theme-color" content="#ffffff" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="BPM" />
-  <meta property="og:description" content="Dal BPM ai tempi di delay e riverbero in millisecondi: dritte, puntate e terzine. Anche in Hz. Funziona nel browser." />
+  <meta property="og:description" content="Dalla velocità del brano ai millisecondi del delay e del riverbero: dritte, puntate e terzine. Anche in hertz." />
   <meta property="og:image" content="og-image.svg" />
   <meta property="og:locale" content="it_IT" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -23,7 +23,7 @@
   <main class="card">
     <header>
       <h1>BPM</h1>
-      <p class="subtitle">i tempi di delay e riverbero</p>
+      <p class="subtitle">i millisecondi da dare al delay e al riverbero</p>
     </header>
 
     <!-- Controllo BPM -->
@@ -36,36 +36,41 @@
       </div>
       <button type="button" id="plusBtn" class="step" aria-label="Aumenta BPM">+</button>
     </section>
+    <p class="bpm-note">battiti al minuto: la velocità del brano</p>
 
-    <button type="button" id="tapBtn" class="btn btn-secondary tap">TAP</button>
-    <p id="tapHint" class="tap-hint">Tocca a ritmo per ricavare il BPM.</p>
+    <button type="button" id="tapBtn" class="btn btn-secondary tap compact">TAP</button>
+    <p id="tapHint" class="tap-hint">Non sai la velocità? Batti il tempo qui col dito.</p>
 
-    <button type="button" id="advBtn" class="btn-ghost adv-btn">Avanzate</button>
+    <!-- I tempi sono il motivo per cui si apre questa pagina: stanno aperti.
+         Il pulsante serve a chiuderli, non a scoprirli. -->
+    <button type="button" id="advBtn" class="btn-ghost adv-btn">Nascondi i tempi</button>
 
-    <!-- Sezione avanzata (nascosta di default) -->
-    <div id="advanced" class="advanced">
+    <div id="advanced" class="advanced open">
+      <p class="grid-intro">Tocca un tempo e te lo copio. Poi scrivilo nel delay, o nel pre-delay del riverbero.</p>
+
       <!-- Tabella tempi -->
       <section class="grid" aria-label="Tempi di delay">
         <div class="grid-head">
-          <span class="col-note"></span>
+          <span class="col-note">Nota</span>
           <span>Dritto</span>
           <span>Puntato</span>
           <span>Terzina</span>
         </div>
         <div id="rows"></div>
       </section>
+      <p class="grid-note">Il puntato dura una volta e mezza. La terzina dura due terzi.</p>
 
       <!-- Selettore unità -->
       <div class="unit-toggle" role="group" aria-label="Unità di misura">
         <button type="button" class="unit active" data-unit="ms">ms</button>
         <button type="button" class="unit" data-unit="hz">Hz</button>
       </div>
-
+      <p class="unit-note">I millisecondi vanno nel delay. Gli hertz servono per tremolo e filtri a tempo.</p>
     </div>
   </main>
 
   <footer class="site-footer">
-    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
     · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
   </footer>
 

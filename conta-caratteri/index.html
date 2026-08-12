@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Conta caratteri — quanto testo entra davvero in un post</title>
-  <meta name="description" content="Conta i caratteri di una didascalia e mostra dove la piattaforma taglia con «altro…»: Instagram, TikTok, LinkedIn, Facebook, X. Il testo non esce da qui." />
+  <meta name="description" content="Conta i caratteri di una didascalia. E ti mostra dove compare «altro…» su Instagram, TikTok, LinkedIn, Facebook e X. Il testo resta nel tuo browser." />
   <meta name="theme-color" content="#ffffff" />
   <link rel="canonical" href="https://simonecastellan.com/conta-caratteri/" />
 
@@ -28,6 +28,11 @@
       <p class="subtitle">quanto testo entra, e quanto se ne legge</p>
     </header>
 
+    <!-- Due parole che quasi tutti confondono. Senza questa riga i numeri qui
+         sotto non dicono niente a chi non fa questo mestiere. -->
+    <p class="intro">Il <b>limite</b> è dove il social ti ferma. Il <b>taglio</b> è dove compare
+      «altro…»: da lì in poi legge solo chi tocca. Il taglio conta di più.</p>
+
     <textarea id="testo" class="area" rows="7" autocomplete="off"
               placeholder="Incolla o scrivi qui la didascalia…"
               aria-label="Il testo da contare"></textarea>
@@ -39,6 +44,9 @@
       <div class="n"><span class="n-val" id="nHash">0</span><span class="n-lbl">hashtag</span></div>
     </section>
     <p class="nota-emoji hidden" id="notaEmoji"></p>
+    <!-- I caratteri invisibili arrivano incollando da Word: non si vedono, ma
+         il social li conta. Chi non lo sa vede un numero che non torna. -->
+    <p class="nota-emoji hidden" id="notaInvisibili"></p>
 
     <!-- Il taglio: la cosa che conta più del limite -->
     <section class="anteprima hidden" id="anteprimaBox" aria-label="Dove si ferma la lettura">
@@ -59,14 +67,15 @@
     </div>
 
     <p class="hint">
-      Conta il taglio, non il limite: le prime righe devono reggere da sole.
-      I punti di taglio sono osservati, non dichiarati dalle piattaforme.
+      Le prime righe devono reggere da sole. Quasi nessuno tocca «altro…».
+      Dove cade il taglio le piattaforme non lo dicono: il numero viene da post veri,
+      quindi è vicino, non esatto. Il testo resta nel tuo browser.
     </p>
     <p class="hint agg" id="agg"></p>
   </main>
 
   <footer class="site-footer">
-    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
     · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
   </footer>
 

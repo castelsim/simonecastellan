@@ -146,14 +146,17 @@ function aggiorna() {
     ? parole.toLocaleString('it-IT') + ' parole da spremere'
     : '';
 
-  var quali = elencoScelti();
   var p = costruisciPrompt();
   promptEl.textContent = p || 'Scegli almeno una destinazione.';
   promptEl.classList.toggle('vuoto', !p);
 
-  var pronto = !!p;
+  /* Le istruzioni si vedono anche senza testo — servono a farsi un'idea prima
+     di incollare — ma i pulsanti no: portare in ChatGPT un prompt con dentro
+     «[incolla qui il testo]» vuol dire farsi rispondere sul nulla. */
+  var pronto = !!p && !!testo;
   document.getElementById('vai').disabled = !pronto;
   document.getElementById('copia').disabled = !pronto;
+  document.getElementById('manca').classList.toggle('hidden', pronto || !p);
 }
 
 // --- Avvio ------------------------------------------------------------------

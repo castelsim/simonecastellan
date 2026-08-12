@@ -15,6 +15,7 @@ var nCar     = document.getElementById('nCar');
 var nPar     = document.getElementById('nPar');
 var nHash    = document.getElementById('nHash');
 var notaEmoji = document.getElementById('notaEmoji');
+var notaInvisibili = document.getElementById('notaInvisibili');
 var anteprimaBox = document.getElementById('anteprimaBox');
 var chipsEl  = document.getElementById('chips');
 var prevEl   = document.getElementById('prev');
@@ -72,6 +73,32 @@ function contaHashtag(t) {
   var m = t.match(/(^|\s)#[\p{L}\p{N}_]+/gu);
   return m ? m.length : 0;
 }
+
+/* Caratteri che non si vedono ma si contano: arrivano incollando da Word o da
+   una pagina web, e il social li conta come tutti gli altri. Chi non lo sa vede
+   un numero che non torna e non capisce perché.
+   Lo ZWJ (U+200D) resta fuori apposta: è quello che tiene insieme le emoji
+   composte, e segnalarlo sarebbe un falso allarme su «👨‍👩‍👧‍👦». */
+var INVISIBILI = /[\u00AD\u200B\u200C\u2060\uFEFF]/g;
+
+function contaInvisibili(t) {
+  var m = t.match(INVISIBILI);
+  return m ? m.length : 0;
+}
+
+/* Il pulsante che li toglie vive dentro la nota, non nella pagina: quando non
+   c'è niente di invisibile non ha niente da fare, e una riga in meno da leggere
+   è una riga guadagnata. */
+var puliscibtn = document.createElement('button');
+puliscibtn.type = 'button';
+puliscibtn.className = 'link';
+puliscibtn.textContent = 'Toglili';
+puliscibtn.addEventListener('click', function () {
+  testoEl.value = testoEl.value.replace(INVISIBILI, '');
+  aggiorna();
+  avvisa('Caratteri invisibili tolti');
+  if (window.track) track('click', 'Caratteri:invisibili');
+});
 
 // --- Righe dei limiti -------------------------------------------------------
 
@@ -195,6 +222,16 @@ function aggiorna() {
     notaEmoji.classList.remove('hidden');
   } else {
     notaEmoji.classList.add('hidden');
+  }
+
+  var invisibili = contaInvisibili(t);
+  if (invisibili) {
+    notaInvisibili.textContent = 'Ci sono ' + invisibili + ' caratteri che non si vedono, ' +
+      'arrivati da un copia e incolla. Occupano posto lo stesso. ';
+    notaInvisibili.appendChild(puliscibtn);
+    notaInvisibili.classList.remove('hidden');
+  } else {
+    notaInvisibili.classList.add('hidden');
   }
 
   aggiornaRighe(quanti);

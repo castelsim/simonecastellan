@@ -37,6 +37,7 @@ var campEl  = document.getElementById('camp');
 var contEl  = document.getElementById('cont');
 var termEl  = document.getElementById('term');
 var linkEl  = document.getElementById('link');
+var notaEl  = document.getElementById('nota');
 var copiaBtn = document.getElementById('copia');
 var qrBtn   = document.getElementById('qr');
 var chipsEl = document.getElementById('chips');
@@ -121,6 +122,11 @@ function mostraErrore(t) {
   return null;
 }
 
+function nota(t) {
+  notaEl.textContent = t || '';
+  notaEl.classList.toggle('hidden', !t);
+}
+
 function aggiorna() {
   var r = costruisci();
 
@@ -129,6 +135,7 @@ function aggiorna() {
     linkEl.textContent = urlEl.value.trim() ? 'controlla l\'indirizzo' : 'il link comparirà qui';
     linkEl.classList.add('vuoto');
     copiaBtn.disabled = qrBtn.disabled = true;
+    nota('');
     return;
   }
 

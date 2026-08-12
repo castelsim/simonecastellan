@@ -37,7 +37,7 @@
       <input type="file" id="fileInput" accept="image/*,video/*" hidden />
     </section>
 
-    <p class="claims">Controllo sul tuo dispositivo · nessun caricamento · gratis</p>
+    <p class="claims">Tutto sul tuo dispositivo · niente va online · gratis</p>
 
     <section id="status" class="status hidden" aria-live="polite">
       <p class="status-text" id="statusText">Guardo il file…</p>
@@ -78,7 +78,7 @@
            si guarda l'anteprima, non dopo aver ricaricato la foto altrove. -->
       <label class="interruttore" id="rigaCoperto">
         <input type="checkbox" id="copertoCheck" />
-        <span>Mostra dove la piattaforma copre l'immagine</span>
+        <span>Mostra dove il social copre la foto</span>
       </label>
 
       <div class="azioni">
@@ -95,72 +95,59 @@
           <button type="button" class="seg-btn" data-fmt="png">PNG</button>
           <button type="button" class="seg-btn" data-fmt="webp">WebP</button>
         </div>
-        <p class="avanzate-nota">Automatico usa JPG, e passa a PNG se la tua immagine ha parti trasparenti.</p>
+        <p class="avanzate-nota">Automatico usa JPG. Passa a PNG se la foto ha parti trasparenti.</p>
       </details>
     </section>
 
-    <!-- La promessa sta già nella riga sotto il pulsante, dove serve: prima di
-         scegliere il file. Ripeterla qui non aggiungeva niente. -->
+    <!-- L'unione dei due strumenti aveva lasciato la stessa cosa detta due volte
+         («A cosa serve» e «Perché le misure contano» raccontavano lo stesso
+         taglio) e due vocabolari per la stessa idea (piattaforma/social,
+         destinazione/formato, immagine/foto). Qui si dice una volta sola, con
+         una parola sola. Sono sparite tre domande: la privacy, che sta già nella
+         riga sopra; l'elenco delle misure, che si legge sotto ogni anteprima
+         mentre lavori; e il perché due social chiedono lo stesso file, che non
+         cambia niente a chi deve pubblicare. -->
     <section class="spiega">
       <h2>A cosa serve</h2>
-      <p>Ogni piattaforma ha le sue regole su peso, proporzioni e durata, e quando non le rispetti
-        non te lo dice quasi mai: taglia da sola, comprime, o rifiuta il caricamento dopo che hai
-        aspettato. Qui lo sai prima — e se è una foto, la sistemi subito senza ricaricarla.</p>
+      <p>Ogni social ha le sue regole su peso, proporzioni e durata. Quasi mai te le dice prima.
+        Taglia da solo, comprime, o rifiuta il file dopo l'attesa. Qui lo sai prima. E se è una
+        foto, la sistemi qui sotto: non serve ricaricarla.</p>
 
-      <h2>Perché le misure contano</h2>
-      <p>Ogni social ritaglia da sé le immagini che non hanno le proporzioni che si aspetta, e lo fa
-        dal centro: teste tagliate, scritte a metà, loghi fuori dall'inquadratura. Dare al social
-        un'immagine già delle proporzioni giuste vuol dire decidere tu cosa si vede.</p>
-      <p>Il ritaglio non deforma mai la foto. Di solito taglia, e sei tu a scegliere dove
-        trascinando l'anteprima; se preferisci non perdere niente, «Adatta» mette la foto intera
-        dentro il formato su uno sfondo a tinta unita. In nessuno dei due casi l'immagine viene
-        stirata.</p>
+      <h2>Perché le proporzioni contano</h2>
+      <p>Il social ritaglia da sé le foto che non hanno la forma che si aspetta. E taglia dal
+        centro: teste mozzate, scritte a metà, logo fuori dal bordo. Se gli dai una foto già della
+        forma giusta, decidi tu cosa si vede.</p>
+      <p>Qui la foto non viene mai stirata. «Riempi» taglia, e scegli tu dove: basta trascinare
+        l'anteprima. «Adatta» tiene tutta la foto e riempie il resto con un colore.</p>
 
       <h2>Domande</h2>
-      <h3>Il mio file viene caricato da qualche parte?</h3>
-      <p>No. Peso, dimensioni, proporzioni e durata si leggono dentro il browser, sul tuo
-        dispositivo, e anche il ritaglio avviene lì. Niente viene mandato a un server, nemmeno al mio.</p>
+      <h3>Cosa controlli?</h3>
+      <p>Il peso massimo. Le proporzioni che il social mostra senza tagliare. I pixel che servono
+        per non uscire sgranati. Per i video anche la durata. Le regole stanno in un elenco solo,
+        con la data del controllo.</p>
 
-      <h3>Cosa controlla esattamente?</h3>
-      <p>Il peso massimo accettato, le proporzioni che la piattaforma mostra senza tagliare, quanti
-        pixel servono perché non esca sgranata e, per i video, la durata. Le regole stanno tutte in
-        un unico elenco aggiornabile, con la data dell'ultimo controllo.</p>
-
-      <h3>Perché su alcune cose dice «probabilmente»?</h3>
-      <p>Perché non tutti i limiti sono dichiarati chiaramente dalle piattaforme, e cambiano spesso.
-        Quando una regola non è confermata da una fonte solida la uso per darti un consiglio, mai
-        per bocciare il tuo file.</p>
+      <h3>Perché a volte scrivi «dovrebbe»?</h3>
+      <p>Perché non tutti i limiti sono dichiarati, e cambiano spesso. Un numero non sicuro te lo
+        do come consiglio. Non boccio mai un file per un numero incerto.</p>
 
       <h3>E i video?</h3>
-      <p>Per ora il responso vale anche per loro — peso, proporzioni, durata — ma il ritaglio è solo
-        per le foto. Chi deve rimettere in piedi un video orizzontale, per adesso, deve farlo altrove.</p>
+      <p>Il responso vale anche per loro: peso, proporzioni, durata. Il ritaglio no, quello è solo
+        per le foto. Un video orizzontale va rimesso in piedi altrove.</p>
 
-      <h3>Che dimensioni usa il ritaglio?</h3>
-      <p>Post verticale 1080×1350 (4:5), quadrato 1080×1080, Story e Reel 1080×1920 (9:16),
-        copertina YouTube 1280×720, post orizzontale X 1600×900, anteprima link 1200×630.
-        Sono le misure consigliate ad agosto 2026.</p>
+      <h3>E se la foto ha pochi pixel?</h3>
+      <p>La ingrandisco fino alla misura giusta, ma non oltre il doppio. Più in là si vedrebbe.
+        Allora il file esce più piccolo, con le proporzioni giuste. La misura vera è scritta sotto
+        l'anteprima. Meglio piccolo che sgranato.</p>
 
-      <h3>E se la mia foto ha pochi pixel?</h3>
-      <p>Se manca poco, viene portata alla misura giusta: fino al doppio l'ingrandimento non si
-        vede, soprattutto dopo che il social ricomprime. Oltre il doppio si vedrebbe, e allora il
-        file esce più piccolo mantenendo le proporzioni corrette — con la misura vera scritta sotto
-        l'anteprima. Meglio un file un po' più piccolo che una foto sgranata.</p>
-
-      <h3>Posso sistemare un formato senza toccare gli altri?</h3>
-      <p>Sì. Trascinare un'anteprima sposta l'inquadratura di tutte insieme — è il modo veloce, e
-        serve a dire una volta sola dov'è il soggetto. Ma appena usi un comando su una destinazione
-        (zoom, Adatta, Ruota), quella diventa indipendente e da lì in poi la muovi da sola: te lo
-        segnala la scritta «da sola» accanto al nome. «Azzera» la rimette insieme al gruppo.</p>
-
-      <h3>Perché alcuni formati sono uguali fra social diversi?</h3>
-      <p>Perché lo sono davvero: la Story di Instagram, quella di Facebook e il video di TikTok
-        chiedono la stessa identica immagine. Il file viene calcolato una volta sola e salvato con
-        il nome di ciascuno.</p>
+      <h3>Posso sistemare un formato solo?</h3>
+      <p>Sì. Se trascini un'anteprima le sposti tutte insieme: dici una volta sola dov'è il
+        soggetto. Ma se tocchi un comando (zoom, Adatta, Ruota), quel formato va per conto suo.
+        Lo dice la scritta «da sola» vicino al nome. «Azzera» lo rimette nel gruppo.</p>
     </section>
   </main>
 
   <footer class="site-footer">
-    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
     · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
   </footer>
 

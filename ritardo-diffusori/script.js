@@ -42,8 +42,10 @@ function render(fromMs) {
   subOut.textContent = fmt(dist * 3.28084, 1) + ' ft · ' +
                        Math.round(ms * SR_KHZ) + ' campioni a 48 kHz';
   tempVal.textContent = temp + ' °C · ' + fmt(v, 1) + ' m/s';
-  haasTxt.innerHTML = 'con +' + HAAS_MS + ' ms perché resti sul palco → <b>' +
-                      fmt(ms + HAAS_MS, 1) + ' ms</b>';
+  // Il pulsante dice il verbo e il numero che finisce negli appunti; il perché
+  // sta scritto sotto, che dentro una pillola non ci sta e non si legge.
+  haasTxt.innerHTML = 'Copia <b>' + fmt(ms + HAAS_MS, 1) + ' ms</b>, con ' +
+                      HAAS_MS + ' ms in più';
 }
 
 function setDist(d) {
@@ -68,7 +70,7 @@ tempInp.addEventListener('input', function () {
 
 function copia(testo, el) {
   function ok() {
-    toast.textContent = testo + ' copiato';
+    toast.textContent = 'Copiato: ' + testo + ' ms';
     toast.classList.add('show');
     setTimeout(function () { toast.classList.remove('show'); }, 1100);
     if (el) {

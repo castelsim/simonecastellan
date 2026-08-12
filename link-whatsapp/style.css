@@ -47,6 +47,17 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
   margin-bottom: 8px;
 }
 .opz { text-transform: none; letter-spacing: 0; color: var(--faint); font-size: 10.5px; }
+.lbl.min { font-size: 10px; margin: 14px 0 0; color: var(--faint); }
+
+/* Le tre righe che dicono a cosa serve: si leggono prima dei campi, quindi
+   stanno sopra e non in fondo in grigio chiaro. */
+.intro {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--muted);
+  text-align: left;
+  margin: -12px 0 26px;
+}
 
 .num-row { display: flex; align-items: center; gap: 12px; }
 
@@ -184,6 +195,15 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
 .btn.primario:hover:not(:disabled) { background: #000; }
 .btn:disabled { opacity: .4; cursor: default; }
 .btn.largo { width: 100%; flex: none; margin-top: 12px; }
+
+/* «Provalo» fa paura finché non si sa che non manda niente. */
+.sotto-azioni {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--faint);
+  text-align: left;
+}
 
 /* Blocco per chi ha un sito */
 .extra { text-align: left; margin-top: 26px; }

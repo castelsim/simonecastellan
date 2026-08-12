@@ -25,9 +25,16 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;   /* «safe»: con la pagina più alta della
+                                    finestra il titolo finirebbe sopra il
+                                    bordo, irraggiungibile (12/08/2026) */
   min-height: 100vh;
-  padding: 24px 20px calc(64px + env(safe-area-inset-bottom));
+  /* «safe»: con la spiegazione in fondo la pagina è più alta della finestra, e
+     un center secco spinge l'inizio fuori dallo schermo, dove non lo si
+     raggiunge più. Chi non capisce «safe» ignora la riga e allinea in alto:
+     brutto, ma leggibile. */
+  justify-content: safe center;
+  padding: 24px 20px calc(40px + env(safe-area-inset-bottom));
   text-align: center;
 }
 
@@ -177,7 +184,7 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
 
 /* Il piede sta in fondo al contenuto, non incollato alla finestra: questa
    pagina scorre (spiegazione e domande), e da fissa la scritta si sedeva
-   sopra l'ultima riga. Verificato il 12/08/2026 guardando lo screenshot. */
+   sopra l'ultima riga. */
 .site-footer {
   margin-top: 40px;
   text-align: center;
@@ -196,11 +203,9 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
 }
 
 /* ── Quello che questo strumento ha in più ─────────────────────────────
-   Il peso si sceglie prima del file, perché è la domanda che uno ha già in
-   testa quando arriva: «deve stare sotto 25». */
-.seg-btn i { display: block; font-style: normal; font-size: 10px; opacity: .6; margin-top: 2px; }
-
-.claims { margin-top: 16px; font-size: 12px; color: var(--faint); }
+   Comprimere un video costa minuti, non decimi di secondo: qui prima si dice
+   come verrà, poi si parte. Gli altri due partono da soli perché il lavoro
+   dura un attimo. */
 
 /* La previsione: cosa succederà, prima di farlo succedere */
 .previsione { margin-top: 26px; text-align: left; }
@@ -228,6 +233,36 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
 .esito .quota { font-size: 12.5px; color: var(--faint); font-weight: 400; }
 .esito .ok { font-size: 13px; color: var(--muted); }
 .esito .quasi { font-size: 13px; color: var(--warn, #b06000); }
+
+/* ── La voce comune dei tre compressori ─────────────────────────────────────
+   Comprimi immagini, Comprimi PDF e Comprimi video fanno la stessa promessa a
+   tre tipi di file diversi: devono anche somigliarsi. Da qui in giù le regole
+   sono identiche nei tre fogli di stile — se ne cambi una, cambiala in tutti e
+   tre, altrimenti i gemelli ricominciano a divergere. */
+
+.subtitle { font-size: 15px; color: var(--muted); margin-top: 8px; }
+
+/* I due passaggi, nell'ordine in cui la domanda arriva a chi ha davanti un
+   modulo che dice «massimo 1 MB»: prima il peso, poi il file. */
+.passo {
+  font-size: 11.5px; font-weight: 600; letter-spacing: .4px;
+  text-transform: uppercase; color: var(--faint);
+  margin-bottom: 9px;
+}
+
+/* Sotto la cifra, a cosa serve quel peso: «25 MB» da solo non dice niente a chi
+   non fa questo mestiere. */
+.seg-btn i { display: block; font-style: normal; font-size: 10px; opacity: .6; margin-top: 2px; }
+
+/* La riga che spiega i limiti a parole */
+.modo-nota {
+  font-size: 12px; color: var(--faint); line-height: 1.5;
+  margin: 0 auto 22px; max-width: 420px;
+}
+
+/* Quando il file non va: un rosso, non un silenzio */
+.errore { margin-top: 18px; }
+.errore-msg { font-size: 13.5px; line-height: 1.6; color: #c5221f; }
 
 /* Spiegazione in fondo, per chi arriva da una ricerca */
 .spiega { margin-top: 44px; text-align: left; border-top: 1px solid #eef0f2; padding-top: 28px; }

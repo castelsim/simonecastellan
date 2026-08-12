@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Da comunicato a post — un testo lungo, un post per social</title>
-  <meta name="description" content="Incolla un comunicato e prepara le istruzioni per farne un post per ogni piattaforma, con i limiti veri di Instagram, LinkedIn, X, Facebook e TikTok." />
+  <meta name="description" content="Incolla un testo lungo. La pagina prepara le istruzioni per ChatGPT, con i limiti veri di Instagram, LinkedIn, X, Facebook e TikTok. Le leggi prima." />
   <meta name="theme-color" content="#ffffff" />
   <link rel="canonical" href="https://simonecastellan.com/da-comunicato-a-post/" />
 
@@ -27,6 +27,16 @@
       <h1>Da comunicato a post</h1>
       <p class="subtitle">un testo lungo, un post per social</p>
     </header>
+
+    <!-- Il meccanismo va capito in tre secondi, prima di scrivere: chi fa il
+         lavoro, cosa gli viene chiesto, e chi preme il pulsante. Senza questo
+         blocco la pagina sembrava mandare il testo da qualche parte. -->
+    <ol class="passi">
+      <li>Incolli qui il testo lungo.</li>
+      <li>La pagina scrive le istruzioni. Le vedi più giù e le leggi.</li>
+      <li>Premi il pulsante: si apre ChatGPT e il lavoro lo fa lui.</li>
+    </ol>
+    <p class="passi-nota">Il testo resta in questa pagina. Parte solo quando lo incolli tu.</p>
 
     <textarea id="testo" class="area" rows="8" autocomplete="off"
               placeholder="Incolla qui il comunicato, la nota, il programma della serata…"
@@ -52,6 +62,7 @@
     <!-- Il prompt si vede: chi lo usa deve poterlo leggere e correggere -->
     <section class="gruppo">
       <span class="lbl">Le istruzioni pronte</span>
+      <p class="spiega">Sono le istruzioni che leggerà ChatGPT. Cambiano mentre scegli qui sopra.</p>
       <pre class="prompt" id="prompt"></pre>
     </section>
 
@@ -59,17 +70,20 @@
       <button type="button" id="vai" class="btn primario" data-assistente="chatgpt">Copia e apri ChatGPT</button>
       <button type="button" id="copia" class="btn">Copia</button>
     </div>
+    <!-- Perché i pulsanti sono spenti: dirlo è meglio che lasciarlo indovinare -->
+    <p class="manca hidden" id="manca">Manca il testo di partenza: incollalo qui sopra.</p>
     <p class="alt">Va bene anche altrove: <button type="button" class="link" id="claude">apri Claude</button></p>
 
     <p class="hint">
-      Il testo non esce da qui: il prompt lo porti tu dove vuoi, incollandolo.
-      Nelle istruzioni c'è scritto di non inventare niente che non sia nel testo di partenza.
+      Il pulsante copia le istruzioni e apre ChatGPT in un'altra scheda. Poi incolli tu.
+      Va bene anche un altro assistente: le istruzioni sono le stesse.
+      Dentro c'è scritto di non aggiungere niente che nel tuo testo non ci sia.
     </p>
     <p class="hint agg" id="agg"></p>
   </main>
 
   <footer class="site-footer">
-    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
     · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
   </footer>
 

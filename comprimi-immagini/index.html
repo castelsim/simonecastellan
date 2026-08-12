@@ -4,15 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <title>Comprimi immagini — sotto il peso che ti serve</title>
-  <meta name="description" content="Porta una o più foto sotto il peso richiesto: 500 KB, 1, 2 o 5 MB. Per allegati, moduli e domande con il limite. Nel browser, senza caricare niente online." />
+  <title>Comprimi immagini — sotto il peso che ti chiedono</title>
+  <meta name="description" content="Porta le immagini sotto il peso richiesto: 500 KB, 1, 2 o 5 MB. Per email, moduli e domande. Nel browser: le foto restano sul tuo dispositivo." />
   <meta name="theme-color" content="#ffffff" />
+  <link rel="canonical" href="https://simonecastellan.com/comprimi-immagini/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Comprimi immagini" />
-  <meta property="og:description" content="Porta una o più foto sotto il peso che ti serve, per email e moduli con il limite di dimensione. Funziona nel browser, niente upload." />
+  <meta property="og:description" content="Porta le immagini sotto il peso che ti chiedono email, moduli e domande. Nel browser: le foto restano sul tuo dispositivo." />
   <meta property="og:image" content="og-image.svg" />
+  <meta property="og:url" content="https://simonecastellan.com/comprimi-immagini/" />
   <meta property="og:locale" content="it_IT" />
   <meta name="twitter:card" content="summary_large_image" />
 
@@ -23,33 +25,50 @@
   <main class="card">
     <header>
       <h1>Comprimi immagini</h1>
-      <p class="subtitle">sotto il peso che ti serve</p>
+      <p class="subtitle">sotto il peso che ti chiedono</p>
     </header>
+
+    <!-- I tre strumenti che comprimono hanno lo stesso ordine: prima il peso,
+         poi il file. È l'ordine in cui la domanda arriva a chi ha davanti un
+         modulo che dice «massimo 1 MB». -->
+    <p class="passo">1 · Quanto deve pesare</p>
 
     <!-- Due modi di ragionare: «deve stare sotto tot» oppure «fallo leggero
          senza che si veda». Il secondo è quello che vuole quasi sempre chi
          non ha un limite da rispettare. -->
     <div class="seg" id="modoSeg" role="group" aria-label="Come comprimere">
-      <button type="button" class="seg-btn active" data-modo="invisibile">Più leggera possibile</button>
+      <button type="button" class="seg-btn active" data-modo="invisibile">Il meno possibile</button>
       <button type="button" class="seg-btn" data-modo="peso">Sotto un peso</button>
     </div>
 
+    <!-- Sotto la cifra c'è scritto a cosa serve: «1 MB» da solo non dice niente
+         a chi non fa questo mestiere. -->
     <div class="seg hidden" id="targetSeg" role="group" aria-label="Peso massimo">
-      <button type="button" class="seg-btn" data-kb="500">500 KB</button>
-      <button type="button" class="seg-btn active" data-kb="1024">1 MB</button>
-      <button type="button" class="seg-btn" data-kb="2048">2 MB</button>
-      <button type="button" class="seg-btn" data-kb="5120">5 MB</button>
+      <button type="button" class="seg-btn" data-kb="500">500 KB<i>moduli</i></button>
+      <button type="button" class="seg-btn active" data-kb="1024">1 MB<i>domande</i></button>
+      <button type="button" class="seg-btn" data-kb="2048">2 MB<i>email</i></button>
+      <button type="button" class="seg-btn" data-kb="5120">5 MB<i>stampa</i></button>
     </div>
-    <p class="modo-nota" id="modoNota">Cerca il punto in cui la foto pesa il meno possibile
-      senza che la differenza si veda.</p>
+    <p class="modo-nota" id="modoNota">Cerco il punto in cui l'immagine pesa il meno
+      possibile. La differenza non si deve vedere.</p>
+
+    <p class="passo">2 · Le immagini</p>
 
     <!-- Drop zone -->
-    <section id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Carica o trascina una o più immagini">
+    <section id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Scegli o trascina una o più immagini">
       <p class="dz-title">Trascina qui le immagini</p>
-      <p class="dz-or">anche più di una insieme — oppure</p>
-      <button type="button" id="pickBtn" class="btn btn-secondary">Carica immagini</button>
+      <p class="dz-or">anche più d'una — oppure</p>
+      <button type="button" id="pickBtn" class="btn btn-secondary">Scegli le immagini</button>
       <input type="file" id="fileInput" multiple accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.heic,.heif" hidden />
     </section>
+
+    <!-- La promessa si fa una volta sola, qui: prima che il file venga scelto.
+         Ripeterla in fondo la fa somigliare a una scusa. -->
+    <p class="privacy">Le immagini non vengono caricate online: restano sul tuo dispositivo.</p>
+
+    <!-- Un file che non è un'immagine finiva nel nulla: nessuna riga, nessun
+         messaggio. Ora lo dice. -->
+    <p class="errore errore-msg hidden" id="avvisoFile"></p>
 
     <!-- Risultato: una riga per ogni immagine -->
     <section id="result" class="result hidden">
@@ -62,11 +81,43 @@
       </div>
     </section>
 
-    <p class="privacy">Le immagini non vengono caricate online: tutto avviene sul tuo dispositivo.</p>
+    <section class="spiega">
+      <h2>A cosa serve</h2>
+      <p>Moduli, domande di concorso e caselle di posta hanno un limite di peso.
+        Le foto del telefono lo superano quasi sempre: pesano 4 o 5 MB l'una.
+        Qui le porti sotto il limite. Non le mandi a nessun sito e non installi niente.</p>
+
+      <h2>Domande</h2>
+
+      <h3>Le immagini vengono caricate online?</h3>
+      <p>No. Il lavoro avviene dentro il browser, sul tuo dispositivo. Le immagini
+        non escono di lì, nemmeno verso di me.</p>
+
+      <h3>Quale peso devo scegliere?</h3>
+      <p>Quello che ti chiedono. Di solito è scritto accanto al pulsante per allegare.
+        Se nessuno te lo dice, lascia «il meno possibile».</p>
+
+      <h3>Si vedranno peggio?</h3>
+      <p>Con «il meno possibile» no. Provo varie qualità e mi fermo prima che la
+        differenza si veda. Sotto un peso preciso invece dipende dal limite:
+        se è molto stretto, l'immagine si ammorbidisce.</p>
+
+      <h3>E se pesa già poco?</h3>
+      <p>Non la tocco. Comprimere due volte un'immagine leggera non serve a niente.
+        A volte la fa perfino crescere.</p>
+
+      <h3>Che formato esce?</h3>
+      <p>JPEG, il formato che accettano tutti. È anche quello che pesa meno,
+        a parità di immagine.</p>
+
+      <h3>Posso metterne più d'una?</h3>
+      <p>Sì. Trascinale tutte insieme. Le lavoro una alla volta e poi le scarichi
+        in un colpo solo.</p>
+    </section>
   </main>
 
   <footer class="site-footer">
-    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
     · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
   </footer>
 

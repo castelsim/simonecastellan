@@ -15,12 +15,24 @@ var route = 'stereo';              // stereo | left | right
 
 var SWEEP_SEC = 8;                 // durata di una spazzata 20 Hz → 20 kHz
 var sweepAt = 0, sweepTimer = null, sweepStart = 0, sweepUi = null;
+// Ripartenza dopo un cambio di segnale: va tenuta per nome, altrimenti premendo
+// PLAY dentro quei 170 ms partono DUE sorgenti e la seconda non si spegne più.
+var restartTimer = null;
 var wakeLock = null;
 
 var NAMES = { pink: 'Rumore rosa', white: 'Rumore bianco', sine: 'Sinusoide', sweep: 'Sweep 20 Hz → 20 kHz' };
 
+// A che serve ognuno: il nome del segnale non lo dice a chi non fa il mestiere.
+var USI = {
+  pink:  'Tiene dentro tutte le frequenze insieme. È il suono con cui si tara un impianto.',
+  white: 'Come il rosa, ma più acuto e sibilante. Va bene per una prova veloce.',
+  sine:  'Una frequenza sola, pulita. Serve a trovare il fischio o a provare i bassi.',
+  sweep: 'Sale piano dal grave all’acuto. Se qualcosa vibra o sparisce, lo senti passare.'
+};
+
 var playBtn  = document.getElementById('playBtn');
 var readout  = document.getElementById('readout');
+var useHint  = document.getElementById('useHint');
 var kindSeg  = document.getElementById('kindSeg');
 var routeSeg = document.getElementById('routeSeg');
 var freqBox  = document.getElementById('freqBox');
@@ -145,6 +157,8 @@ function fmtHz(f) {
 // --- Avvio e arresto -------------------------------------------------------
 
 function start() {
+  if (restartTimer) { clearTimeout(restartTimer); restartTimer = null; }
+  if (playing) return;              // già in riproduzione: niente seconda sorgente
   ensureCtx();
   if (kind === 'pink' || kind === 'white') {
     source = ctx.createBufferSource();

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Link WhatsApp — far scrivere senza salvare il numero</title>
-  <meta name="description" content="Un link che apre WhatsApp col messaggio già scritto: chi lo tocca ti scrive senza salvarti in rubrica. Il numero si incolla com'è, spazi e zeri compresi." />
+  <meta name="description" content="Un link che apre WhatsApp col messaggio già scritto. Chi lo tocca ti scrive subito. Non deve salvarti in rubrica. Il numero si incolla com'è." />
   <meta name="theme-color" content="#ffffff" />
   <link rel="canonical" href="https://simonecastellan.com/link-whatsapp/" />
 
@@ -28,9 +28,14 @@
       <p class="subtitle">far scrivere senza salvare il numero</p>
     </header>
 
+    <!-- La cosa che deve capirsi in un secondo: nessuno deve salvare niente.
+         È il motivo per cui lo strumento esiste, e stava solo nel <title>. -->
+    <p class="intro">Chi tocca il link apre la chat e ti scrive.
+      Non deve salvare il numero in rubrica. Il numero sta dentro il link.</p>
+
     <!-- Numero -->
     <section class="block">
-      <label class="lbl" for="num">Il numero che riceve</label>
+      <label class="lbl" for="num">Chi riceve i messaggi</label>
       <div class="num-row">
         <!-- La freccia è disegnata dal CSS del contenitore: con appearance:none
              il menu perde quella di sistema e sembra testo che non si tocca. -->
@@ -61,6 +66,7 @@
       <label class="lbl" for="msg">Il messaggio già scritto <span class="opz">facoltativo</span></label>
       <textarea id="msg" class="area" rows="3" autocomplete="off"
                 placeholder="Ciao! Vorrei informazioni su…"></textarea>
+      <span class="lbl min">Oppure tocca una frase pronta</span>
       <div class="chips" id="chips"></div>
     </section>
 
@@ -72,8 +78,10 @@
       <div class="azioni">
         <button type="button" id="copia" class="btn primario" disabled>Copia il link</button>
         <button type="button" id="prova" class="btn" disabled>Provalo</button>
-        <button type="button" id="qr" class="btn" disabled>QR</button>
+        <button type="button" id="qr" class="btn" disabled>Fanne un QR</button>
       </div>
+      <p class="sotto-azioni">«Provalo» apre WhatsApp con il messaggio già dentro.
+        Non manda niente: lo vedi e basta.</p>
     </section>
 
     <!-- Il pezzo che serve a chi ha un sito -->
@@ -88,13 +96,14 @@
     </details>
 
     <p class="hint">
-      Scrivi il numero come sta in rubrica: spazi, trattini e zero li tolgo io.
-      Il messaggio viaggia dentro il link: niente di riservato.
+      Scrivi il numero come sta in rubrica. Spazi, trattini e zero li tolgo io.
+      Il messaggio viaggia scritto dentro il link. Non metterci cose riservate.
+      Il link si compone qui dentro. Il numero non viene mandato da nessuna parte.
     </p>
   </main>
 
   <footer class="site-footer">
-    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
     · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
   </footer>
 

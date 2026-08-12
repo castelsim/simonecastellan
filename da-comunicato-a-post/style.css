@@ -35,6 +35,30 @@ header { margin-bottom: 24px; }
 h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2px; }
 .subtitle { font-size: 15px; color: var(--muted); margin-top: 8px; }
 
+/* I tre passi, sopra il campo: il meccanismo va capito prima di scrivere, e
+   dopo il campo non li leggerebbe più nessuno. Il rientro è esplicito perché
+   il reset qui sopra azzera il padding di ol. */
+.passi {
+  margin-bottom: 10px;
+  padding-left: 20px;
+  text-align: left;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+.passi li { margin-bottom: 2px; }
+.passi li::marker { color: var(--muted-2); }
+.passi-nota {
+  margin-bottom: 18px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--faint);
+  text-align: left;
+}
+
+/* La riga che spiega un gruppo, sotto la sua etichetta */
+.spiega { margin: -4px 0 10px; font-size: 12px; line-height: 1.55; color: var(--faint); }
+
 /* Il campo di scrittura */
 .area {
   width: 100%;
