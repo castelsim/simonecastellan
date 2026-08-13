@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Tara un impianto — misura com'è e cosa correggere</title>
+  <meta name="description" content="Manda il rumore rosa, ascolta col microfono e ti dice cosa correggere sull'equalizzatore. Anche il ritardo delle torri. Nel browser, gratis." />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="canonical" href="https://simonecastellan.com/tara-impianto/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Tara un impianto" />
+  <meta property="og:description" content="Misura la risposta dell'impianto col microfono e dice cosa correggere sull'equalizzatore. Nel browser, senza installare niente." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:url" content="https://simonecastellan.com/tara-impianto/" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <!-- La voce comune viene prima del foglio locale: porta i colori e tre classi. -->
+  <link rel="stylesheet" href="/comune/voce.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header>
+      <p class="occhiello">Sala · Impianto · Equalizzatore</p>
+      <h1 class="titolone">Tara un impianto.<br><span class="eco">Misura, e dice cosa fare.</span></h1>
+      <p class="apertura">Manda il rumore rosa nelle casse, ascolta col microfono e ti dice
+        <b>dove l'impianto esagera e dove manca</b> — e quanto ritardare le torri.</p>
+    </header>
+
+    <!-- Il consiglio che cambia la misura più di qualunque impostazione: sta
+         PRIMA del pulsante, perché dopo è tardi. -->
+    <p class="dove">Metti il telefono <b>dove sta il pubblico</b>, all'altezza della testa.
+      Non vicino alle casse e non contro un muro.</p>
+
+    <button type="button" id="vai" class="btn btn-primario">Misura</button>
+
+    <p class="riga-mono"><b>Gratis</b> · nel browser · niente caricamenti</p>
+
+    <p class="avviso-ingresso" id="avvisoIngresso" hidden><span id="avvisoIngressoTxt"></span></p>
+
+    <section class="errore" id="erroreBox" hidden>
+      <p class="errore-msg" id="erroreTxt"></p>
+    </section>
+
+    <!-- Mentre misura: le barre fanno vedere che il microfono sente davvero -->
+    <section class="in-corso" id="inCorso" hidden>
+      <p class="stato" id="statoTxt">Ascolto…</p>
+      <div class="progress"><div class="progress-bar" id="barra"></div></div>
+    </section>
+
+    <!-- Una tela sola: prima le barre vive, poi la curva -->
+    <canvas id="tela" class="tela" aria-label="La risposta dell'impianto"></canvas>
+
+    <section class="esito" id="esito" hidden>
+      <p class="affid" id="affidTxt"></p>
+
+      <div class="ritardo">
+        <span class="ritardo-lbl">Ritardo fra le casse e il microfono</span>
+        <span class="ritardo-val" id="ritardoTxt">—</span>
+        <span class="ritardo-nota" id="ritardoNota"></span>
+      </div>
+
+      <h2 class="titolo-mosse">Cosa fare</h2>
+      <div id="mosse"></div>
+
+      <div class="azioni" id="azioniEsito" hidden>
+        <button type="button" id="congela" class="btn btn-secondario">Tieni questa come «prima»</button>
+        <button type="button" id="scongela" class="btn btn-ghost" hidden>Togli il confronto</button>
+      </div>
+      <p class="congela-txt" id="congelaTxt"></p>
+    </section>
+
+    <section class="spiega">
+      <h2>A cosa serve</h2>
+      <p>Un impianto in una sala non suona come suonerebbe all'aperto: la stanza
+        aggiunge rimbombi e ne toglie altre parti. Qui mandi un rumore che contiene
+        tutte le frequenze, il microfono ascolta cosa torna, e la differenza fra le
+        due cose è quello che stanza e impianto stanno facendo al suono.</p>
+
+      <h2>Domande</h2>
+
+      <h3>Serve un microfono da misura?</h3>
+      <p>No, si può cominciare con quello del telefono. Vedrai bene i rimbombi e i
+        buchi, e vedrai benissimo se una correzione ha migliorato le cose. Quello
+        che non puoi avere è un livello assoluto in decibel: per quello serve un
+        fonometro tarato.</p>
+
+      <h3>Perché la curva a tratti sbiadisce?</h3>
+      <p>Perché lì la misura non è affidabile: il microfono sta sentendo più rumore
+        della sala che segnale. Invece di disegnare una linea inventata, la pagina
+        te lo dice. Se sbiadisce quasi tutto, alza il volume e fai silenzio.</p>
+
+      <h3>Devo mettere l'equalizzatore a specchio della curva?</h3>
+      <p>No, ed è l'errore più comune. Si tolgono i rimbombi larghi, si lasciano
+        stare i buchi stretti — quelli sono cancellazioni, e alzando il cursore
+        mandi solo più energia dentro un punto dove il suono si annulla. Si sposta
+        una cassa, non si alza un cursore.</p>
+
+      <h3>Cos'è il ritardo che mi dice?</h3>
+      <p>Il tempo che il suono impiega dalle casse al microfono. Serve per le torri
+        di ritardo: se una cassa è più lontana del palco, la ritardi di quella
+        differenza e i due suoni tornano insieme. Nel numero c'è dentro anche il
+        ritardo della scheda audio, che non è distanza.</p>
+
+      <h3>I dati vengono caricati da qualche parte?</h3>
+      <p>No. Il microfono resta nel browser: nessuna registrazione esce dal tuo
+        dispositivo, nemmeno verso di me.</p>
+
+      <h3>Che differenza c'è con «Rumore rosa»?</h3>
+      <p><a href="/rumore-rosa/">Rumore rosa</a> manda solo il segnale, e serve quando
+        vuoi ascoltare tu. Qui il segnale viene mandato <i>e</i> misurato.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
+  </footer>
+
+  <script src="/comune/dsp.js"></script>
+  <script src="/comune/segnali.js"></script>
+  <script src="misura.js"></script>
+  <script src="consigli.js"></script>
+  <script src="grafico.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
