@@ -248,3 +248,68 @@ header { text-align: left; margin-bottom: 26px; }
   font: inherit; color: var(--teal); cursor: pointer;
   padding: 0; border-bottom: 1px solid #b8ded9;
 }
+
+/* ————— Il valore sotto il dito ————— */
+.lettura {
+  margin-top: 8px;
+  font: 400 12.5px var(--mono, ui-monospace, Menlo, monospace);
+  color: var(--muted);
+  text-align: center;
+  min-height: 17px;
+}
+
+/* ————— Le tre viste ————— */
+.viste {
+  display: inline-flex;
+  gap: 3px;
+  background: var(--pill);
+  border-radius: 999px;
+  padding: 4px;
+  margin-top: 12px;
+}
+.vista-btn {
+  appearance: none; border: none; background: transparent;
+  color: var(--muted); font-family: inherit; font-size: 13px; font-weight: 600;
+  padding: 7px 16px; border-radius: 999px; cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.vista-btn.on { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.vista-nota {
+  margin-top: 10px;
+  font-size: 12.5px; line-height: 1.6; color: var(--faint);
+  text-align: left;
+}
+
+/* ————— Il bersaglio ————— */
+.bersaglio { margin: 18px 0 6px; }
+.bersaglio-lbl {
+  display: block; font-size: 12px; color: var(--faint);
+  text-transform: uppercase; letter-spacing: .08em; margin-bottom: 7px;
+}
+.seg {
+  display: inline-flex; gap: 3px;
+  background: var(--pill); border-radius: 999px; padding: 4px;
+  max-width: 100%;
+}
+.seg-btn {
+  appearance: none; border: none; background: transparent;
+  color: var(--muted); font-family: inherit; font-size: 13px; font-weight: 600;
+  padding: 7px 15px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+}
+.seg-btn.active { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+/* La riga tratteggiata sul grafico è ocra: il bersaglio si distingue dalla
+   misura senza rubarle l'occhio. */
+.bersaglio-spiega {
+  margin-top: 8px; font-size: 12.5px; line-height: 1.6; color: var(--faint);
+}
+
+/* ————— Le posizioni ————— */
+.posizioni {
+  margin: 18px 0 6px;
+  padding: 14px 15px;
+  background: #f7faf9;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+}
+.posizioni-stato { font-size: 13.5px; line-height: 1.6; color: var(--ink); margin-bottom: 11px; }
+.posizioni .btn-ghost { margin-top: 9px; display: block; }

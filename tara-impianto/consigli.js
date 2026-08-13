@@ -23,6 +23,22 @@ var CONSIGLI = (function () {
   var SOGLIA_DB = 3;          // sotto i 3 dB non vale la pena toccare niente
   var STRETTO = 0.4;          // in ottave: sotto, è un'interferenza
 
+  /* ── La banda in cui ha senso correggere ──────────────────────────────
+     Fuori da qui i consigli non solo sono inutili: fanno danno.
+
+     Sotto i 40 Hz un PA non arriva, e la misura è quasi solo rumore. Sopra i
+     16 kHz siamo al bordo della banda del microfono e dell'udito, e un taglio
+     lì non si sente.
+
+     E soprattutto: SOTTO GLI 80 Hz NON SI ALZA MAI. Alzare i bassi profondi
+     manda potenza dove i diffusori non riescono a produrre suono — la
+     dissipano in calore ed escursione, e i woofer si rompono. È il modo più
+     comune di distruggere un impianto credendo di migliorarlo. La prima
+     versione di questo file consigliava «alza di 3,5 dB a 23 Hz»: l'ha
+     scoperto l'autoprova, non io. */
+  var BANDA_MIN = 40, BANDA_MAX = 16000;
+  var NIENTE_ALZATE_SOTTO = 80;
+
   /* Da larghezza in ottave a Q, la formula che sta dietro ai filtri a campana. */
   function qDaOttave(ott) {
     var r = Math.pow(2, ott);
@@ -43,6 +59,7 @@ var CONSIGLI = (function () {
     for (var i = 0; i < curva.length; i++) {
       var p = curva[i];
       var dentro = p.coerenza >= COERENZA_MINIMA &&
+                   p.f >= BANDA_MIN && p.f <= BANDA_MAX &&
                    segno * p.db >= SOGLIA_DB;
       if (dentro) {
         if (!corrente) corrente = { da: p.f, a: p.f, punti: [] };
@@ -97,6 +114,19 @@ var CONSIGLI = (function () {
                  Math.abs(Math.round(z.db)) + ' dB). Non riempirlo: è una ' +
                  'cancellazione, e alzando il cursore mandi più energia dove il ' +
                  'suono si annulla. Si cura spostando una cassa, non con l\'EQ.'
+        });
+      } else if (z.picco < NIENTE_ALZATE_SOTTO) {
+        /* Un avvallamento largo nei bassi profondi NON si corregge alzando:
+           lì il diffusore ha finito la corsa, e più segnale vuol dire solo
+           più calore e più escursione. Si risolve con un sub, o accettando
+           che quell'ottava non c'è. */
+        note.push({
+          tipo: 'non-alzare-bassi',
+          hz: arrotonda(z.picco),
+          testo: 'Sotto gli ' + NIENTE_ALZATE_SOTTO + ' Hz manca ' +
+                 Math.abs(Math.round(z.db)) + ' dB, ma non alzarli: lì i diffusori ' +
+                 'hanno finito la corsa e il segnale in più diventa calore ed ' +
+                 'escursione, non suono. Se servono quei bassi, serve un sub.'
         });
       } else {
         mosse.push({
