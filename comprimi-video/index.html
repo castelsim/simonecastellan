@@ -19,6 +19,8 @@
   <meta name="twitter:card" content="summary_large_image" />
 
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <!-- La voce comune viene prima del foglio locale: porta i colori e tre classi. -->
+  <link rel="stylesheet" href="/comune/voce.css" />
   <link rel="stylesheet" href="style.css" />
 
   <!-- Serve l'isolamento cross-origin (SharedArrayBuffer) perché il motore
@@ -28,8 +30,10 @@
 <body>
   <main class="card">
     <header>
-      <h1>Comprimi video</h1>
-      <p class="subtitle">sotto il peso che ti chiedono</p>
+      <p class="occhiello">Peso · Email · WhatsApp</p>
+      <h1 class="titolone">Comprimi video.<br><span class="eco">Sotto il peso che ti chiedono.</span></h1>
+      <p class="apertura">La posta si ferma a 25 MB, WhatsApp a 16. Qui il video scende sotto
+        il limite <b>senza uscire dal browser</b>: nessun caricamento, nessuna attesa in coda.</p>
     </header>
 
     <!-- Stesso ordine degli altri due compressori: prima il peso, poi il file. -->

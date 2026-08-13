@@ -33,7 +33,7 @@ body {
 
 .card {
   width: 100%;
-  max-width: 440px;
+  max-width: 560px   /* il titolo a due voci vuole respiro: a 440px andava a capo */;
 }
 
 /* Intestazione */
@@ -204,3 +204,18 @@ h1 {
   h1 { font-size: 22px; }
   .subtitle { font-size: 15px; }
 }
+
+
+/* ————— La voce comune (12/08/2026) —————
+   L'intestazione va a sinistra: la seconda riga del titolo finisce la frase
+   della prima, e quella figura centrata si legge peggio. Il resto della
+   pagina resta com'era. */
+header { text-align: left; margin-bottom: 30px; }
+
+/* Il pulsante che porta dentro il file è il gesto principale della pagina:
+   prende il verde acqua anche se nel codice si chiama «secondario». Il testo
+   sopra è scuro, non bianco: su questo verde il bianco non basta. */
+.dropzone .btn-secondary { background: var(--teal-l); color: var(--teal-scuro); }
+.dropzone .btn-secondary:hover { background: var(--teal); }
+.btn-primary { background: var(--teal-l); color: var(--teal-scuro); }
+.btn-primary:hover { background: var(--teal); }

@@ -29,7 +29,7 @@ body {
   text-align: center;
 }
 
-.card { width: 100%; max-width: 460px; }
+.card { width: 100%; max-width: 560px   /* il titolo a due voci vuole respiro: a 460px andava a capo */; }
 
 header { margin-bottom: 24px; }
 h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2px; }
@@ -213,3 +213,17 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
   .chip { font-size: 12px; padding: 6px 11px; }
   .prompt { font-size: 11.5px; max-height: 240px; }
 }
+
+
+/* ————— La voce comune (12/08/2026) —————
+   L'intestazione va a sinistra: la seconda riga del titolo finisce la frase
+   della prima, e quella figura centrata si legge peggio. Il resto della
+   pagina resta com'era. */
+header { text-align: left; margin-bottom: 30px; }
+
+/* Il pulsante che apre ChatGPT è l'unico gesto che porta fuori dalla pagina:
+   è giusto che sia l'unica cosa colorata. */
+/* «.btn.primario» e non «.primario»: la regola di sopra ha due classi e
+   vincerebbe, lasciando il pulsante nero. Provato — restava nero. */
+.btn.primario { background: var(--teal-l); color: var(--teal-scuro); }
+.btn.primario:hover:not(:disabled) { background: var(--teal); }

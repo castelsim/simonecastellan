@@ -17,6 +17,8 @@
   <meta name="twitter:card" content="summary_large_image" />
 
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <!-- La voce comune viene prima del foglio locale: porta i colori e tre classi. -->
+  <link rel="stylesheet" href="/comune/voce.css" />
   <link rel="stylesheet" href="style.css" />
 
   <!-- Abilita l'isolamento cross-origin (SharedArrayBuffer) necessario a ffmpeg.wasm
@@ -26,16 +28,11 @@
 <body>
   <main class="card">
     <header>
-      <h1>Converti in MP3</h1>
-      <p class="subtitle">leggero, pronto da mandare</p>
+      <p class="occhiello">Mail · WhatsApp · Provini</p>
+      <h1 class="titolone">Converti in MP3.<br><span class="eco">Leggero, pronto da mandare.</span></h1>
+      <p class="apertura">Un MP3 pesa fino a dieci volte meno dell'originale: così il file
+        entra in una mail o in WhatsApp. <b>Non sale in rete</b>, il lavoro avviene qui.</p>
     </header>
-
-    <!-- La promessa sta QUI, prima di scegliere il file: dopo non serve più a
-         nessuno, perché la scelta è già stata fatta. -->
-    <p class="intro">
-      Un MP3 pesa fino a dieci volte meno dell'originale. Così il file entra in una mail o in WhatsApp.
-      I file non salgono in rete: il lavoro avviene qui, sul tuo dispositivo.
-    </p>
 
     <!-- Drop zone -->
     <section id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Scegli o trascina uno o più file audio">

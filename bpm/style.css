@@ -38,7 +38,7 @@ body {
 
 .card {
   width: 100%;
-  max-width: 440px;
+  max-width: 560px   /* il titolo a due voci vuole respiro: a 440px andava a capo */;
 }
 
 /* Intestazione */
@@ -311,11 +311,12 @@ h1 {
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* Footer fisso, come il credit del sito */
+/* Il piede sta in fondo al contenuto, non incollato alla finestra: queste
+   pagine scorrono, e da fisso il piede si sedeva sopra l'ultima riga.
+   Misurato il 12/08/2026 scorrendo fino in fondo e nascondendolo per vedere
+   cosa copriva. */
 .site-footer {
-  position: fixed;
-  left: 0; right: 0;
-  bottom: 16px;
+  margin-top: 40px;
   text-align: center;
   font-size: 12px;
   color: #6b7075;
@@ -333,3 +334,14 @@ h1 {
   .cell { font-size: 14px; padding: 13px 2px; }
   .grid-row .note { font-size: 14px; }
 }
+
+
+/* ————— La voce comune (12/08/2026) —————
+   L'intestazione va a sinistra: la seconda riga del titolo finisce la frase
+   della prima, e quella figura centrata si legge peggio. Il resto della
+   pagina resta com'era. */
+header { text-align: left; margin-bottom: 30px; }
+
+/* Il numero dei battiti è il perno: da lì discende tutto il resto della
+   pagina. È l'unico posto che prende il verde. */
+.bpm-input { color: var(--teal); }

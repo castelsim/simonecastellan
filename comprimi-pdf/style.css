@@ -38,7 +38,7 @@ body {
   text-align: center;
 }
 
-.card { width: 100%; max-width: 440px; }
+.card { width: 100%; max-width: 560px   /* il titolo a due voci vuole respiro: a 440px andava a capo */; }
 
 header { margin-bottom: 20px; }
 h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2px; }
@@ -238,3 +238,18 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
 .spiega h2 + p { margin-bottom: 18px; }
 .spiega h3 { font-size: 13.5px; font-weight: 600; color: var(--ink); margin: 18px 0 6px; }
 .spiega p { font-size: 13px; line-height: 1.65; color: var(--muted); }
+
+
+/* ————— La voce comune (12/08/2026) —————
+   L'intestazione va a sinistra: la seconda riga del titolo finisce la frase
+   della prima, e quella figura centrata si legge peggio. Il resto della
+   pagina resta com'era. */
+header { text-align: left; margin-bottom: 30px; }
+
+/* Gli stessi tocchi degli altri due compressori: i tre si somigliano apposta. */
+.btn-primary { background: var(--teal-l); color: var(--teal-scuro); }
+.btn-primary:hover { background: var(--teal); }
+.passo { color: var(--mut); text-align: left; }
+.passo::first-letter { color: var(--teal); font-weight: 700; }
+.dropzone .btn-secondary { background: var(--teal-l); color: var(--teal-scuro); }
+.dropzone .btn-secondary:hover { background: var(--teal); }

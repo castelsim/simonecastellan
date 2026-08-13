@@ -397,3 +397,25 @@ h1 { font-size: 27px; font-weight: 500; color: var(--ink); letter-spacing: -0.3p
   #lavoro .tela { width: 100%; height: auto; }
   #lavoro .zoomriga { max-width: none; }
 }
+
+
+/* ————— La voce comune (12/08/2026) —————
+   L'intestazione va a sinistra: la seconda riga del titolo finisce la frase
+   della prima, e quella figura centrata si legge peggio. Il resto della
+   pagina resta com'era. */
+header { text-align: left; margin-bottom: 30px; }
+
+/* Il pulsante che porta dentro il file è il gesto principale. */
+.dropzone .btn-secondary { background: var(--teal-l); color: var(--teal-scuro); }
+.dropzone .btn-secondary:hover { background: var(--teal); }
+
+/* Questo strumento aveva un occhiello suo — grigio e centrato — scritto prima
+   che esistesse la voce comune. Ora prende quello di tutti. Il tavolo di
+   ritaglio (#lavoro) resta escluso: lì l'occhiello è bianco su fondo scuro. */
+main > header .occhiello {
+  font: 500 12px var(--mono, ui-monospace, Menlo, monospace);
+  letter-spacing: .16em;
+  color: var(--teal);
+  text-align: left;
+  margin: 0 0 14px;
+}

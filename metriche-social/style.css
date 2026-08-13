@@ -305,3 +305,15 @@ h1 { font-size: 27px; font-weight: 500; color: var(--ink); letter-spacing: -0.3p
   .campo { padding: 9px 10px 7px; }
   .campo-input { font-size: 17px; }
 }
+
+
+/* ————— La voce comune (12/08/2026) —————
+   L'intestazione va a sinistra: la seconda riga del titolo finisce la frase
+   della prima, e quella figura centrata si legge peggio. Il resto della
+   pagina resta com'era. */
+header { text-align: left; margin-bottom: 30px; }
+
+/* Fuori dalla vetrina dal 12/08/2026, ma la pagina vive: se qualcuno ci arriva
+   da un vecchio link deve trovare lo stesso sito degli altri strumenti. */
+.btn-secondary { background: var(--teal-l); color: var(--teal-scuro); }
+.btn-secondary:hover { background: var(--teal); }

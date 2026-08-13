@@ -298,3 +298,16 @@ h1 { font-size: 27px; font-weight: 500; color: var(--ink); letter-spacing: -0.3p
   .video { max-height: 38vh; }
   .step { width: 40px; height: 40px; }
 }
+
+
+/* ————— La voce comune (12/08/2026) —————
+   L'intestazione va a sinistra: la seconda riga del titolo finisce la frase
+   della prima, e quella figura centrata si legge peggio. Il resto della
+   pagina resta com'era. */
+header { text-align: left; margin-bottom: 30px; }
+
+/* Il pulsante che porta dentro il video è il gesto principale. */
+.dropzone .btn-secondary { background: var(--teal-l); color: var(--teal-scuro); }
+.dropzone .btn-secondary:hover { background: var(--teal); }
+.btn-primary { background: var(--teal-l); color: var(--teal-scuro); }
+.btn-primary:hover { background: var(--teal); }
