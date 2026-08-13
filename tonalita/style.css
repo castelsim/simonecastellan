@@ -37,7 +37,7 @@ body {
 
 .card {
   width: 100%;
-  max-width: 460px;
+  max-width: 560px   /* il titolo a due voci vuole respiro: a 460px andava a capo */;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -280,11 +280,12 @@ h1 {
 }
 .reset-link:hover { color: var(--muted); }
 
-/* Footer */
+/* Il piede sta in fondo al contenuto, non incollato alla finestra: queste
+   pagine scorrono, e da fisso il piede si sedeva sopra l'ultima riga.
+   Misurato il 12/08/2026 scorrendo fino in fondo e nascondendolo per vedere
+   cosa copriva. */
 .site-footer {
-  position: fixed;
-  left: 0; right: 0;
-  bottom: 14px;
+  margin-top: 40px;
   text-align: center;
   font-size: 12px;
   color: #6b7075;
@@ -302,3 +303,21 @@ h1 {
   .seg-btn { padding: 6px 11px; }
   .btn { padding: 8px 13px; }
 }
+
+
+/* ————— La voce comune (12/08/2026) —————
+   L'intestazione va a sinistra: la seconda riga del titolo finisce la frase
+   della prima, e quella figura centrata si legge peggio. Il resto della
+   pagina resta com'era. */
+header { text-align: left; margin-bottom: 30px; }
+
+/* La card allinea al centro i figli: senza «stretch» l'intestazione si
+   stringerebbe attorno al testo e l'allineamento a sinistra non si vedrebbe. */
+header { align-self: stretch; }
+
+/* La tonalità trovata è il risultato di tutta la pagina. */
+.key-guess { color: var(--teal); }
+
+/* Il pulsante che porta dentro il brano è il gesto principale. */
+.upload-btn { background: var(--teal-l); color: var(--teal-scuro); }
+.upload-btn:hover { background: var(--teal); }

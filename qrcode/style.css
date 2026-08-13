@@ -35,7 +35,7 @@ body {
 
 .card {
   width: 100%;
-  max-width: 440px;
+  max-width: 560px   /* il titolo a due voci vuole respiro: a 440px andava a capo */;
 }
 
 h1 {
@@ -254,3 +254,18 @@ textarea::placeholder { color: var(--faint); }
   .subtitle { font-size: 15px; }
   .preview { width: 200px; height: 200px; }
 }
+
+
+/* ————— La voce comune (12/08/2026) —————
+   L'intestazione va a sinistra: la seconda riga del titolo finisce la frase
+   della prima, e quella figura centrata si legge peggio. Il resto della
+   pagina resta com'era. */
+header { text-align: left; margin-bottom: 30px; }
+
+/* Scaricare il codice è il gesto per cui si è aperta la pagina. */
+.btn-primary { background: var(--teal-l); color: var(--teal-scuro); }
+.btn-primary:hover { background: var(--teal); }
+
+/* Il modo scelto — link oppure Wi-Fi — va visto a colpo d'occhio: è la
+   scelta che decide cosa si vede sotto. */
+.scelta-btn.on { background: var(--teal-l); color: var(--teal-scuro); }

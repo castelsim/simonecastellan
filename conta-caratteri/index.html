@@ -19,19 +19,18 @@
   <meta name="twitter:card" content="summary_large_image" />
 
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <!-- La voce comune viene prima del foglio locale: porta i colori e tre classi. -->
+  <link rel="stylesheet" href="/comune/voce.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <main class="card">
     <header>
-      <h1>Conta caratteri</h1>
-      <p class="subtitle">quanto testo entra, e quanto se ne legge</p>
+      <p class="occhiello">Didascalie · Post · Limiti</p>
+      <h1 class="titolone">Conta caratteri.<br><span class="eco">Quanto testo si legge davvero.</span></h1>
+      <p class="apertura">Il <b>limite</b> è dove il social ti ferma. Il <b>taglio</b> è dove
+        compare «altro…»: da lì in poi legge solo chi tocca. Il taglio conta di più.</p>
     </header>
-
-    <!-- Due parole che quasi tutti confondono. Senza questa riga i numeri qui
-         sotto non dicono niente a chi non fa questo mestiere. -->
-    <p class="intro">Il <b>limite</b> è dove il social ti ferma. Il <b>taglio</b> è dove compare
-      «altro…»: da lì in poi legge solo chi tocca. Il taglio conta di più.</p>
 
     <textarea id="testo" class="area" rows="7" autocomplete="off"
               placeholder="Incolla o scrivi qui la didascalia…"

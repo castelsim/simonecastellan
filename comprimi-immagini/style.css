@@ -38,7 +38,8 @@ body {
   text-align: center;
 }
 
-.card { width: 100%; max-width: 440px; }
+.card { width: 100%; max-width: 560px; }   /* il titolo a due voci vuole respiro:
+                                              a 440px andava a tre righe */
 
 header { margin-bottom: 20px; }
 h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2px; }
@@ -221,3 +222,25 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
 .spiega h2 + p { margin-bottom: 18px; }
 .spiega h3 { font-size: 13.5px; font-weight: 600; color: var(--ink); margin: 18px 0 6px; }
 .spiega p { font-size: 13px; line-height: 1.65; color: var(--muted); }
+
+/* ————— La voce comune (12/08/2026) —————
+   L'intestazione va a sinistra: un titolo grosso su due righe, centrato, si
+   legge peggio e non è la figura di stageplot.it, dove la seconda riga
+   completa la prima come una frase. Il resto della pagina resta com'era. */
+header { text-align: left; margin-bottom: 30px; }
+
+/* Il pulsante principale prende il verde acqua. Il testo sopra è scuro, non
+   bianco: su questo verde il bianco non ha abbastanza contrasto. */
+.btn-primary { background: var(--teal-l); color: var(--teal-scuro); }
+.btn-primary:hover { background: var(--teal); }
+
+/* I passi seguono l'intestazione: tutto a sinistra, o l'occhio non trova una
+   colonna sola da seguire. Il verde sta solo nel numero: colorare tutta la
+   riga la farebbe sembrare un link. */
+.passo { color: var(--mut); text-align: left; }
+.passo::first-letter { color: var(--teal); font-weight: 700; }
+
+/* Il pulsante che porta dentro il file è il gesto principale della pagina:
+   prende il verde anche se nel codice è «secondario». */
+.dropzone .btn-secondary { background: var(--teal-l); color: var(--teal-scuro); }
+.dropzone .btn-secondary:hover { background: var(--teal); }

@@ -32,7 +32,7 @@ body {
   text-align: center;
 }
 
-.card { width: 100%; max-width: 460px; }
+.card { width: 100%; max-width: 560px   /* il titolo a due voci vuole respiro: a 460px andava a capo */; }
 
 header { margin-bottom: 24px; }
 h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2px; }
@@ -277,3 +277,17 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
 .spiega h2:first-child { margin-top: 0; }
 .spiega h3 { font-size: 15px; font-weight: 600; margin: 20px 0 5px; }
 .spiega p { font-size: 14.5px; line-height: 1.6; color: var(--mut, #5f6368); margin: 0 0 10px; }
+
+
+/* ————— La voce comune (12/08/2026) —————
+   L'intestazione va a sinistra: la seconda riga del titolo finisce la frase
+   della prima, e quella figura centrata si legge peggio. Il resto della
+   pagina resta com'era. */
+header { text-align: left; margin-bottom: 30px; }
+
+/* Il voto NON prende il verde: lì il colore dice quanto è difficile il testo,
+   e sovrascriverlo cancellerebbe l'unica informazione della pagina. */
+/* «.btn.primario» e non «.primario»: la regola di sopra ha due classi e
+   vincerebbe, lasciando il pulsante nero. Provato — restava nero. */
+.btn.primario { background: var(--teal-l); color: var(--teal-scuro); }
+.btn.primario:hover:not(:disabled) { background: var(--teal); }
