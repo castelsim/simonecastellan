@@ -25,7 +25,9 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;   /* «safe»: con la pagina più alta della
+                                    finestra il titolo finirebbe sopra il
+                                    bordo, irraggiungibile (12/08/2026) */
   min-height: 100vh;
   padding: 24px 20px calc(64px + env(safe-area-inset-bottom));
   text-align: center;
@@ -196,11 +198,47 @@ textarea {
 textarea:focus { outline: none; border-color: var(--ink); }
 textarea::placeholder { color: var(--faint); }
 
-/* Footer fisso */
+/* I due pulsanti che dicono cosa mettere nel quadrato. Stanno in cima perché
+   la scelta viene prima della scrittura: il modulo Wi-Fi, prima, si apriva
+   solo indovinando una parola. */
+.scelta { display: flex; gap: 6px; justify-content: center; margin: 0 0 20px; }
+.scelta-btn {
+  border: 1px solid var(--line);
+  background: #fff;
+  font: 600 14px inherit;
+  color: #5f6368;
+  padding: 9px 16px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+.scelta-btn.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+.campo-etichetta {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #5f6368;
+  margin: 0 0 6px;
+}
+.campo-aiuto {
+  font-size: 13px;
+  color: #8b9096;
+  line-height: 1.5;
+  margin: 8px 0 0;
+}
+
+/* La spiegazione sta in fondo: chi sa già cosa fare non la incontra mai. */
+.spiega { text-align: left; margin-top: 44px; border-top: 1px solid var(--line); padding-top: 26px; }
+.spiega h2 { font-size: 17px; font-weight: 650; margin: 26px 0 10px; }
+.spiega h2:first-child { margin-top: 0; }
+.spiega h3 { font-size: 15px; font-weight: 600; margin: 20px 0 5px; }
+.spiega p { font-size: 14.5px; line-height: 1.6; color: #5f6368; margin: 0 0 10px; }
+
+/* Il piede sta in fondo al contenuto, non incollato alla finestra: da quando
+   c'è la spiegazione questa pagina scorre, e da fissa la scritta si sedeva
+   sopra l'ultima riga. */
 .site-footer {
-  position: fixed;
-  left: 0; right: 0;
-  bottom: 16px;
+  margin-top: 40px;
   text-align: center;
   font-size: 12px;
   color: #6b7075;

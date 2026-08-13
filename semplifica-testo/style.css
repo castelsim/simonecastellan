@@ -259,3 +259,21 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
   .chip { font-size: 12px; padding: 6px 11px; }
   .prompt { font-size: 11.5px; max-height: 240px; }
 }
+
+/* Il patto, subito sotto il titolo: chi arriva deve sapere prima di scrivere
+   che il testo lo riscrive un assistente, che le istruzioni sono leggibili e
+   che niente parte senza un suo gesto. */
+.patto {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--mut, #5f6368);
+  margin: 12px 0 0;
+}
+.patto b { color: var(--ink, #1a1a1a); font-weight: 600; }
+
+/* La spiegazione in fondo: chi sa già cosa fare non la incontra mai. */
+.spiega { margin-top: 44px; border-top: 1px solid var(--line, #e6e8ea); padding-top: 26px; }
+.spiega h2 { font-size: 17px; font-weight: 650; margin: 26px 0 10px; }
+.spiega h2:first-child { margin-top: 0; }
+.spiega h3 { font-size: 15px; font-weight: 600; margin: 20px 0 5px; }
+.spiega p { font-size: 14.5px; line-height: 1.6; color: var(--mut, #5f6368); margin: 0 0 10px; }

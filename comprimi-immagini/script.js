@@ -17,6 +17,7 @@ var shareBtn   = document.getElementById('shareBtn');
 var downloadBtn= document.getElementById('downloadBtn');
 var resetBtn   = document.getElementById('resetBtn');
 var targetSeg  = document.getElementById('targetSeg');
+var avvisoFile = document.getElementById('avvisoFile');
 
 // Scale provate in ordine: prima si abbassa la qualità, poi le dimensioni.
 // Una foto da telefono è quasi sempre più grande di quanto serva a chi la guarda.
@@ -27,6 +28,19 @@ function pesa(b) {
   if (b < 1024) return b + ' B';
   if (b < 1024 * 1024) return Math.round(b / 1024) + ' KB';
   return (Math.round(b / 1024 / 102.4) / 10).toString().replace('.', ',') + ' MB';
+}
+
+/* «Da X a Y, tanto in meno»: la stessa frase, con le stesse parole, nei tre
+   compressori. Chi passa dalle immagini al PDF deve riconoscere il risultato
+   senza rileggerlo. */
+function daA(prima, dopo) {
+  var meno = Math.max(0, Math.round((1 - dopo / prima) * 100));
+  return pesa(prima) + ' → <b>' + pesa(dopo) + '</b> · ' + meno + '% in meno';
+}
+
+function avvisa(testo) {
+  avvisoFile.textContent = testo || '';
+  avvisoFile.classList.toggle('hidden', !testo);
 }
 
 // --- Decodifica ------------------------------------------------------------
@@ -118,6 +132,14 @@ function differenza(a, b) {
 }
 
 async function piuLeggeraPossibile(img) {
+  /* Il confronto ha bisogno di rileggere il JPEG appena scritto, e per farlo
+     serve createImageBitmap. Dove non c'è (browser vecchi) non si può misurare
+     niente: si tiene una qualità alta e si va avanti. Prima questo caso faceva
+     fallire ogni immagine con «non leggibile», e questo è il modo predefinito. */
+  if (!window.createImageBitmap) {
+    return codifica(disegna(img, Math.max(img.width, img.height)), 0.82);
+  }
+
   var riferimento = riduciPer(img, 480);
   var base = luminanze(riferimento);
 
@@ -170,11 +192,21 @@ function comprimi(img, limite) {
 
 // --- Coda ------------------------------------------------------------------
 
+/* Il nome deve restare riconoscibile: chi scarica dieci foto non sa più quale
+   è quale se diventano tutte «immagine.jpg». Si tiene il nome di partenza e si
+   aggiunge «(leggera)», come fanno gli altri due con «(leggero)» — serve anche
+   a non far litigare l'originale e la copia nella cartella dei download.
+   Un nome senza estensione o pieno di punti passa di qui senza problemi; se
+   dell'originale non resta niente (un file chiamato «.jpg») si ripiega su un
+   nome qualsiasi, perché un file che si chiama solo « (leggera).jpg» è peggio. */
 function nomeJpg(base) {
-  var senza = base.replace(/\.[^.]+$/, '');
-  var nome = senza + '.jpg';
+  var senza = base.replace(/\.[^.]+$/, '').trim() || 'immagine';
+  var nome = senza + ' (leggera).jpg';
   var n = 2;
-  while (jobs.some(function (j) { return j.name === nome; })) { nome = senza + ' (' + n + ').jpg'; n++; }
+  while (jobs.some(function (j) { return j.name === nome; })) {
+    nome = senza + ' (leggera ' + n + ').jpg';
+    n++;
+  }
   return nome;
 }
 
@@ -208,15 +240,28 @@ function bottoneScarica(job) {
 }
 
 function handleFiles(list) {
-  var files = [].slice.call(list).filter(function (f) {
+  var tutti = [].slice.call(list);
+  var files = tutti.filter(function (f) {
     return /^image\//.test(f.type) || /\.(jpe?g|png|webp|gif|bmp|heic|heif|avif)$/i.test(f.name);
   });
-  if (!files.length) return;
+
+  /* Prima un file che non era un'immagine spariva senza una parola: nessuna
+     riga, nessun messaggio, la pagina identica a un secondo prima. Chi trascina
+     un PDF qui dentro deve sapere perché non succede niente. */
+  if (!files.length) {
+    avvisa(tutti.length === 1
+      ? "Questo non è un'immagine. Vanno bene JPG, PNG, WEBP, GIF e HEIC."
+      : 'Qui dentro non ci sono immagini. Vanno bene JPG, PNG, WEBP, GIF e HEIC.');
+    return;
+  }
+  avvisa(files.length < tutti.length
+    ? 'Ho lasciato fuori ' + (tutti.length - files.length) + ' file: non sono immagini.'
+    : '');
 
   result.classList.remove('hidden');
   actionsBox.classList.add('hidden');
   files.forEach(function (f) {
-    var job = { file: f, name: nomeJpg(f.name), blob: null, failed: false };
+    var job = { file: f, name: nomeJpg(f.name), blob: null, failed: false, intatta: false };
     jobs.push(job);
     riga(job);
   });
@@ -230,23 +275,52 @@ function coda() {
   prossimo.stateEl.textContent = 'compressione…';
 
   var limite = targetKB * 1024;
+
+  /* Un file da zero byte non è un'immagine rotta, è un file vuoto: dirlo con
+     parole sue evita di far cercare colpe al browser. */
+  if (prossimo.file.size === 0) {
+    prossimo.failed = true;
+    prossimo.li.classList.add('ko');
+    prossimo.stateEl.textContent = 'il file è vuoto (0 byte)';
+    return setTimeout(coda, 0);
+  }
+
+  /* Già sotto il peso richiesto: non si tocca. Ricomprimere un JPEG sopra un
+     JPEG toglie qualità e certe volte fa perfino crescere il file — è successo
+     davvero, ed è la ragione per cui questo controllo esiste in tutti e tre gli
+     strumenti. Vale per qualunque formato: se il peso va già bene, l'unica cosa
+     da fare è niente. */
+  if (modo === 'peso' && prossimo.file.size <= limite) {
+    prossimo.blob = prossimo.file;
+    prossimo.intatta = true;
+    fatta(prossimo);
+    return setTimeout(coda, 0);
+  }
+
   decode(prossimo.file).then(function (img) {
     if (modo === 'invisibile') return piuLeggeraPossibile(img);
-    // Già leggera e già JPEG: non la ricomprimo, la perderei di qualità per nulla.
-    if (prossimo.file.size <= limite && /jpe?g/i.test(prossimo.file.type)) {
-      return prossimo.file;
-    }
     return comprimi(img, limite);
   }).then(function (blob) {
     if (!blob) throw new Error('vuoto');
-    prossimo.blob = blob;
+    /* Se il risultato non pesa meno dell'originale non c'è niente da
+       consegnare: si tiene il file di partenza, con il suo nome. Prima si
+       scriveva «era già al minimo» e intanto si scaricava la copia più
+       pesante. */
+    if (blob.size >= prossimo.file.size) {
+      prossimo.blob = prossimo.file;
+      prossimo.intatta = true;
+    } else {
+      prossimo.blob = blob;
+    }
     fatta(prossimo);
   }).catch(function (e) {
     prossimo.failed = true;
     prossimo.li.classList.add('ko');
     prossimo.stateEl.textContent = /heic|heif/i.test(prossimo.file.name)
       ? 'formato HEIC: questo browser non lo apre'
-      : 'immagine non leggibile';
+      : (prossimo.file.size > 60 * 1024 * 1024
+          ? 'immagine troppo grande per questo browser'
+          : 'immagine non leggibile');
   }).then(function () { setTimeout(coda, 0); });
 }
 

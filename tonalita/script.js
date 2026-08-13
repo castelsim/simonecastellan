@@ -135,6 +135,13 @@ function bindKey(el, idx) {
     audio();
     toggleNote(idx);
   });
+  // Da tastiera (Invio o barra) pointerdown non scatta mai e il tasto restava
+  // muto.  I click veri hanno e.detail > 0: così col dito non suona due volte.
+  el.addEventListener('click', function (e) {
+    if (e.detail !== 0) return;
+    audio();
+    toggleNote(idx);
+  });
 }
 
 // Clic su una nota: la accende (sostenuta) oppure la spegne se è già attiva.
@@ -196,10 +203,9 @@ function estimateKey() {
       cands.push({ t: t, mode: m, r: pearson(counts, prof) });
     });
   }
+  // Ordinate per somiglianza (r): conta chi vince e di quanto, e il «di quanto»
+  // si legge sul distacco fra le prime due, non su una percentuale.
   cands.sort(function (a, b) { return b.r - a.r; });
-  var temp = 0.18, maxr = cands[0].r, sum = 0;
-  cands.forEach(function (c) { c.conf = Math.exp((c.r - maxr) / temp); sum += c.conf; });
-  cands.forEach(function (c) { c.conf /= sum; });
   return cands;
 }
 
@@ -221,24 +227,33 @@ function markScale(cand) {
 
 var resultEl = document.getElementById('result');
 var keyGuessEl = document.getElementById('keyGuess');
+var resultNoteEl = document.getElementById('resultNote');
 function updateKeyGuess() {
   var total = 0, distinct = 0;
   counts.forEach(function (c) { total += c; if (c > 0) distinct++; });
-  if (total < 3 || distinct < 2) { resultEl.classList.add('hidden'); markScale(null); return; }
+  if (total < 3 || distinct < 2) {
+    resultEl.classList.add('hidden');
+    resultNoteEl.classList.add('hidden');
+    markScale(null);
+    return;
+  }
   var cands = estimateKey();
   var top = cands[0], second = cands[1];
-  var pct = Math.round(top.conf * 100);
-  var label = top.conf >= 0.55 ? 'netta' : (top.conf >= 0.35 ? 'probabile' : 'incerta');
-  var conf = '<span class="conf">' + label + ' · ' + pct + '%</span>';
-  var ratio = top.r > 0 ? second.r / top.r : 0;
-  if (ratio > 0.92) {
-    keyGuessEl.innerHTML = 'Tonalità probabile: <b>' + keyName(top) + '</b> o <b>' + keyName(second) + '</b>' + conf;
+  // Quanto la prima stacca la seconda, non la percentuale: la percentuale si
+  // spartisce fra 24 tonalità, e la scala nuda di Do maggiore — risposta esatta —
+  // usciva al 26%, cioè etichettata «incerta» (misurato).
+  var scarto = top.r - second.r;
+  if (scarto < 0.05) {
+    keyGuessEl.innerHTML = 'Può essere <b>' + keyName(top) + '</b> o <b>' + keyName(second) + '</b>' +
+      '<span class="alt">si somigliano: decidi a orecchio</span>';
   } else {
-    keyGuessEl.innerHTML = 'Tonalità probabile: <b>' + keyName(top) + '</b>' + conf +
-      '<span class="alt">oppure ' + keyName(second) + '</span>';
+    keyGuessEl.innerHTML = (scarto >= 0.15 ? 'Quasi di sicuro ' : 'Probabile ') +
+      '<b>' + keyName(top) + '</b>' +
+      '<span class="alt">altrimenti ' + keyName(second) + '</span>';
   }
   markScale(top);
   resultEl.classList.remove('hidden');
+  resultNoteEl.classList.remove('hidden');
 }
 
 function resetGuess() {
@@ -246,6 +261,7 @@ function resetGuess() {
   var now = performance.now();
   Object.keys(notes).forEach(function (midi) { notes[midi].start = now; });
   resultEl.classList.add('hidden');
+  resultNoteEl.classList.add('hidden');
   keyGuessEl.innerHTML = '';
   markScale(null);
 }
@@ -292,6 +308,8 @@ function fmtTime(s) {
   return m + ':' + (ss < 10 ? '0' : '') + ss;
 }
 
+var fileMsg = document.getElementById('fileMsg');
+
 var objUrl = null;
 fileIn.addEventListener('change', function () {
   var f = fileIn.files && fileIn.files[0];
@@ -302,8 +320,18 @@ fileIn.addEventListener('change', function () {
   au.playbackRate = 1;
   au.load();
   fileName.textContent = f.name;
+  fileMsg.classList.add('hidden');
   player.classList.remove('hidden');
   resetGuess();
+});
+
+// Un formato che questo browser non legge (un FLAC su iPhone, per dire) lasciava
+// il lettore fermo a 0:00 senza dire niente: sembrava rotto lo strumento.
+au.addEventListener('error', function () {
+  if (!au.src) return;
+  player.classList.add('hidden');
+  fileMsg.textContent = 'Questo file non si apre qui. Prova con un MP3 o con un WAV.';
+  fileMsg.classList.remove('hidden');
 });
 
 playBtn.addEventListener('click', function () {

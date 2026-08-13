@@ -27,7 +27,9 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;   /* «safe»: con la pagina più alta della
+                                    finestra il titolo finirebbe sopra il
+                                    bordo, irraggiungibile (12/08/2026) */
   min-height: 100vh;
   padding: 20px 18px calc(48px + env(safe-area-inset-bottom));
   text-align: center;
@@ -51,7 +53,25 @@ h1 {
 }
 /* La riga sotto il titolo, come su tutti gli altri strumenti del sito:
    un frammento minuscolo che finisce la frase cominciata dal nome. */
-.subtitle { font-size: 14px; color: var(--muted); margin-bottom: 14px; }
+.subtitle { font-size: 14px; color: var(--muted); margin-bottom: 6px; }
+
+/* Riga d'apertura: cos'è una tonalità, e dove resta il brano. */
+.intro {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+/* Istruzione sotto la tastiera e legenda dei pallini: senza, i tasti e i
+   pallini restano un enigma per chi non suona. */
+.kb-hint, .result-note {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--faint);
+}
+.result-note { max-width: 380px; }
+/* Messaggio sul file scelto (formato che il browser non legge). */
+.file-msg { font-size: 12px; line-height: 1.6; color: #c5221f; }
 
 /* Bottoni pillola */
 .btn {
@@ -246,7 +266,6 @@ h1 {
 }
 .key-guess { font-size: 14px; color: var(--muted); }
 .key-guess b { color: var(--ink); font-weight: 600; }
-.key-guess .conf { color: var(--faint); font-size: 12px; margin-left: 6px; }
 .key-guess .alt { display: block; color: var(--faint); font-size: 11px; margin-top: 2px; }
 .reset-link {
   appearance: none;

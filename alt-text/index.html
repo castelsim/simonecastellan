@@ -26,6 +26,9 @@
     <header>
       <h1>Alt text</h1>
       <p class="subtitle">descrivere un'immagine a chi non la vede</p>
+      <p class="patto">Rispondi a due domande e ti esce il codice da incollare nel sito.
+        Se non sai cosa scrivere, ti preparo le istruzioni per farlo scrivere a ChatGPT:
+        <b>l'immagine però la porti tu</b>, da qui non esce niente.</p>
     </header>
 
     <!-- La domanda che viene prima di tutte: l'immagine dice qualcosa? -->
@@ -90,10 +93,37 @@
       Il testo alternativo lo sente chi usa un lettore di schermo e lo legge chi ha la
       connessione lenta. Serve anche a Google, ma è la ragione meno importante delle due.
     </p>
+
+    <section class="guida">
+      <h2>A cosa serve</h2>
+      <p>Ogni immagine di un sito porta con sé una riga di testo nascosta. Chi non vede
+        l'immagine sente quella riga al suo posto.</p>
+      <p>Scriverla bene costa trenta secondi. Scriverla male, o non scriverla, taglia fuori
+        chi usa un lettore di schermo.</p>
+
+      <h2>Domande</h2>
+
+      <h3>Quanto deve essere lungo?</h3>
+      <p>Una frase, al massimo due. Il limite pratico è 125 caratteri: molti lettori di
+        schermo si fermano lì.</p>
+
+      <h3>Devo scrivere «immagine di…»?</h3>
+      <p>No. Il lettore di schermo annuncia già che è un'immagine. Aggiungerlo fa sentire
+        la stessa parola due volte.</p>
+
+      <h3>E se l'immagine è solo un abbellimento?</h3>
+      <p>Allora il testo va lasciato vuoto: <code>alt=""</code>. Così viene saltata.
+        Attenzione: vuoto è diverso da assente. Se togli l'attributo, il lettore legge
+        il nome del file.</p>
+
+      <h3>Se nell'immagine c'è scritto qualcosa?</h3>
+      <p>Va riportato parola per parola. Un volantino con sopra data e luogo è
+        inaccessibile finché quella scritta non finisce nel testo alternativo.</p>
+    </section>
   </main>
 
   <footer class="site-footer">
-    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
     · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
   </footer>
 

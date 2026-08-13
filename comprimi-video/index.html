@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Comprimi video — sotto il peso che ti chiedono</title>
-  <meta name="description" content="Porta un video sotto 25, 16 o 8 MB per mandarlo via mail o WhatsApp. Nel browser: il file non viene caricato online e ti dico prima come verrà." />
+  <meta name="description" content="Porta un video sotto 25, 16 o 8 MB, per email e WhatsApp. Nel browser: il file resta sul tuo dispositivo e ti dico prima come verrà." />
   <meta name="theme-color" content="#ffffff" />
   <link rel="canonical" href="https://simonecastellan.com/comprimi-video/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Comprimi video" />
-  <meta property="og:description" content="Porta un video sotto il peso richiesto da mail e chat, senza caricarlo da nessuna parte." />
+  <meta property="og:description" content="Porta un video sotto il peso che chiedono email e chat. Nel browser: il file resta sul tuo dispositivo." />
   <meta property="og:image" content="og-image.svg" />
   <meta property="og:url" content="https://simonecastellan.com/comprimi-video/" />
   <meta property="og:locale" content="it_IT" />
@@ -32,21 +32,30 @@
       <p class="subtitle">sotto il peso che ti chiedono</p>
     </header>
 
-    <!-- I pesi che chiedono davvero: la posta si ferma a 25, WhatsApp a 16. -->
-    <div class="seg" id="pesoSeg" role="group" aria-label="Peso massimo">
-      <button type="button" class="seg-btn active" data-mb="25">25 MB<i>mail</i></button>
-      <button type="button" class="seg-btn" data-mb="16">16 MB<i>WhatsApp</i></button>
-      <button type="button" class="seg-btn" data-mb="8">8 MB</button>
-    </div>
+    <!-- Stesso ordine degli altri due compressori: prima il peso, poi il file. -->
+    <p class="passo">1 · Quanto deve pesare</p>
 
-    <section id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Carica o trascina un video">
+    <!-- Sotto la cifra c'è scritto a cosa serve: la posta si ferma a 25,
+         WhatsApp a 16. La cifra nuda non dice niente a nessuno. -->
+    <div class="seg" id="pesoSeg" role="group" aria-label="Peso massimo">
+      <button type="button" class="seg-btn active" data-mb="25">25 MB<i>email</i></button>
+      <button type="button" class="seg-btn" data-mb="16">16 MB<i>WhatsApp</i></button>
+      <button type="button" class="seg-btn" data-mb="8">8 MB<i>moduli</i></button>
+    </div>
+    <p class="modo-nota">La posta di solito si ferma a 25 MB, WhatsApp a 16.
+      I moduli chiedono cifre loro.</p>
+
+    <p class="passo">2 · Il video</p>
+
+    <section id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Scegli o trascina un video">
       <p class="dz-title">Trascina qui il video</p>
       <p class="dz-or">oppure</p>
-      <button type="button" id="pickBtn" class="btn btn-secondary">Scegli un video</button>
+      <button type="button" id="pickBtn" class="btn btn-secondary">Scegli il video</button>
       <input type="file" id="fileInput" accept="video/*" hidden />
     </section>
 
-    <p class="claims">Sul tuo dispositivo · nessun caricamento · gratis</p>
+    <!-- La promessa si fa una volta sola, qui: prima che il file venga scelto. -->
+    <p class="privacy">Il video non viene caricato online: resta sul tuo dispositivo.</p>
 
     <!-- Cosa succederà, prima di farlo succedere -->
     <section id="previsione" class="previsione hidden">
@@ -63,8 +72,8 @@
     <section id="status" class="status hidden" aria-live="polite">
       <p id="statusText" class="status-text">Preparo il motore…</p>
       <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
-      <p class="status-nota">Puoi lasciare questa scheda in primo piano e aspettare:
-        se passi a un'altra finestra il browser rallenta il lavoro.</p>
+      <p class="status-nota">Lascia questa scheda in primo piano. Se passi a un'altra
+        finestra, il browser rallenta il lavoro.</p>
     </section>
 
     <!-- Risultato -->
@@ -83,42 +92,45 @@
       <button type="button" id="erroreBtn" class="btn btn-ghost">Riprova</button>
     </section>
 
-    <p class="privacy">Il video non viene caricato online: tutto avviene sul tuo dispositivo.</p>
-
     <section class="spiega">
       <h2>A cosa serve</h2>
-      <p>La posta si ferma a 25 MB, WhatsApp a 16, i moduli chiedono cifre loro: un video girato
-        col telefono li supera quasi sempre. Qui lo porti sotto il limite senza mandarlo a un
-        servizio online e senza installare niente.</p>
+      <p>La posta si ferma a 25 MB, WhatsApp a 16, i moduli chiedono cifre loro.
+        Un video girato col telefono li supera quasi sempre. Qui lo porti sotto
+        il limite. Non lo mandi a nessun sito e non installi niente.</p>
 
       <h2>Domande</h2>
-      <h3>Il mio video viene caricato da qualche parte?</h3>
-      <p>No. Il motore che comprime gira dentro il browser, sul tuo dispositivo. Il file non esce
-        di lì, nemmeno verso di me.</p>
+
+      <h3>Il video viene caricato online?</h3>
+      <p>No. Il motore che comprime gira dentro il browser, sul tuo dispositivo.
+        Il file non esce di lì, nemmeno verso di me.</p>
 
       <h3>Perché la prima volta ci mette un po'?</h3>
-      <p>Perché scarica il motore di compressione, circa 24 MB, una volta sola. Dalla seconda
-        volta parte subito.</p>
+      <p>Perché scarica il motore, circa 24 MB. Succede una volta sola.
+        Dalla seconda volta parte subito.</p>
 
       <h3>Quanto ci mette?</h3>
-      <p>Più o meno un paio di secondi di attesa per ogni secondo di video: mezzo minuto di
-        filmato è questione di un minuto. Dipende anche dalla risoluzione e dal computer.
-        Tieni la scheda in primo piano: quando passi a un'altra finestra il browser rallenta
-        apposta il lavoro in secondo piano.</p>
+      <p>Più o meno un paio di secondi di attesa per ogni secondo di video.
+        Mezzo minuto di filmato è questione di un minuto. Dipende anche dalla
+        risoluzione e dal computer. Tieni la scheda in primo piano: in secondo
+        piano il browser rallenta il lavoro apposta.</p>
 
       <h3>Si vedrà peggio?</h3>
-      <p>Sì, un po': comprimere vuol dire buttare via dati. Quanto peggio dipende da quanto è
-        lungo il video rispetto al peso richiesto, e te lo dico prima di cominciare — se il conto
-        non torna, meglio saperlo che scoprirlo dopo.</p>
+      <p>Sì, un po': comprimere vuol dire buttare via dati. Quanto peggio dipende
+        da quanto è lungo il video rispetto al peso richiesto. Te lo dico prima di
+        cominciare. Se il conto non torna, meglio saperlo subito.</p>
+
+      <h3>E se pesa già poco?</h3>
+      <p>Non lo tocco. Comprimere due volte un video leggero non serve a niente.
+        A volte lo fa perfino crescere.</p>
 
       <h3>Le proporzioni cambiano?</h3>
-      <p>No. Il video esce delle stesse dimensioni: qui si tocca solo quanti dati al secondo
-        vengono usati, non l'inquadratura.</p>
+      <p>No. Il video esce delle stesse dimensioni. Qui si tocca solo quanti dati
+        al secondo vengono usati, non l'inquadratura.</p>
     </section>
   </main>
 
   <footer class="site-footer">
-    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
     · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
   </footer>
 

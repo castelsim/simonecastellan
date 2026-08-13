@@ -5,14 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Comprimi PDF — sotto il peso che ti chiedono</title>
-  <meta name="description" content="Porta un PDF sotto 1, 2, 5 o 10 MB senza trasformarlo in immagini: si ricomprimono solo le foto dentro, il testo resta selezionabile e ricercabile." />
+  <meta name="description" content="Porta un PDF sotto 1, 2, 5 o 10 MB. Il testo resta testo: alleggerisco solo le immagini dentro. Nel browser: il file resta sul tuo dispositivo." />
   <meta name="theme-color" content="#ffffff" />
+  <link rel="canonical" href="https://simonecastellan.com/comprimi-pdf/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Comprimi PDF" />
-  <meta property="og:description" content="Porta un PDF sotto il peso richiesto da moduli, PEC e portali. Funziona nel browser: il documento non esce dal tuo dispositivo." />
+  <meta property="og:description" content="Porta un PDF sotto il peso che chiedono moduli, PEC e portali. Nel browser: il documento resta sul tuo dispositivo." />
   <meta property="og:image" content="og-image.svg" />
+  <meta property="og:url" content="https://simonecastellan.com/comprimi-pdf/" />
   <meta property="og:locale" content="it_IT" />
   <meta name="twitter:card" content="summary_large_image" />
 
@@ -23,30 +25,43 @@
   <main class="card">
     <header>
       <h1>Comprimi PDF</h1>
-      <p class="subtitle">senza trasformarlo in immagini</p>
+      <p class="subtitle">sotto il peso che ti chiedono</p>
     </header>
 
-    <!-- Peso da rispettare: i limiti che chiedono davvero i portali -->
-    <div class="seg" id="targetSeg" role="group" aria-label="Peso massimo">
-      <button type="button" class="seg-btn" data-kb="1024">1 MB</button>
-      <button type="button" class="seg-btn" data-kb="2048">2 MB</button>
-      <button type="button" class="seg-btn active" data-kb="5120">5 MB</button>
-      <button type="button" class="seg-btn" data-kb="10240">10 MB</button>
-    </div>
+    <!-- Stesso ordine degli altri due compressori: prima il peso, poi il file. -->
+    <p class="passo">1 · Quanto deve pesare</p>
 
-    <section id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Carica o trascina un PDF">
+    <!-- Sotto la cifra c'è scritto a cosa serve: la cifra nuda non dice niente
+         a chi non fa questo mestiere. -->
+    <div class="seg" id="targetSeg" role="group" aria-label="Peso massimo">
+      <button type="button" class="seg-btn" data-kb="1024">1 MB<i>moduli</i></button>
+      <button type="button" class="seg-btn" data-kb="2048">2 MB<i>domande</i></button>
+      <button type="button" class="seg-btn active" data-kb="5120">5 MB<i>portali</i></button>
+      <button type="button" class="seg-btn" data-kb="10240">10 MB<i>email</i></button>
+    </div>
+    <p class="modo-nota">I moduli online chiedono spesso 1 o 2 MB. La posta si ferma più in alto.</p>
+
+    <p class="passo">2 · Il documento</p>
+
+    <section id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Scegli o trascina un PDF">
       <p class="dz-title">Trascina qui il PDF</p>
       <p class="dz-or">oppure</p>
-      <button type="button" id="pickBtn" class="btn btn-secondary">Carica un PDF</button>
+      <button type="button" id="pickBtn" class="btn btn-secondary">Scegli il PDF</button>
       <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden />
     </section>
+
+    <!-- La promessa si fa una volta sola, qui: prima che il file venga scelto. -->
+    <p class="privacy">Il PDF non viene caricato online: resta sul tuo dispositivo.</p>
+
+    <!-- Un file che non è un PDF finiva nel nulla: nessun messaggio, niente. -->
+    <p class="errore errore-msg hidden" id="avvisoFile"></p>
 
     <!-- Avviso: si sta per rinunciare al testo. Compare solo se lo si chiede. -->
     <section id="warnBox" class="warn hidden">
       <p class="warn-title">Così ogni pagina diventa una fotografia</p>
-      <p class="warn-msg">Il documento resterà identico da vedere e da stampare, ma il testo
-        smetterà di essere testo: non si potrà più selezionare, cercare o copiare. Su un
-        documento già scansionato non cambia nulla.</p>
+      <p class="warn-msg">Il documento resta identico da vedere e da stampare. Ma il testo
+        smette di essere testo: non si potrà più selezionare, cercare o copiare.
+        Su un documento già scansionato non cambia nulla.</p>
       <div class="warn-actions">
         <button type="button" id="goAnyway" class="btn btn-primary">Procedi</button>
         <button type="button" id="cancelBtn" class="btn btn-ghost">Annulla</button>
@@ -70,17 +85,48 @@
       <div class="actions" id="actionsBox">
         <button type="button" id="shareBtn" class="btn btn-primary hidden">Condividi</button>
         <button type="button" id="downloadBtn" class="btn btn-secondary">Scarica</button>
-        <button type="button" id="forceBtn" class="btn btn-secondary hidden">Riducilo comunque</button>
+        <button type="button" id="forceBtn" class="btn btn-secondary hidden">Comprimilo lo stesso</button>
         <button type="button" id="rasterBtn" class="btn btn-secondary hidden">Stringi ancora</button>
         <button type="button" id="resetBtn" class="btn btn-ghost">Un altro PDF</button>
       </div>
     </section>
 
-    <p class="privacy">Il documento non viene caricato online: tutto avviene sul tuo dispositivo.</p>
+    <section class="spiega">
+      <h2>A cosa serve</h2>
+      <p>Portali, PEC e moduli online rifiutano i PDF troppo pesanti.
+        Il peso di solito viene dalle scansioni e dalle foto dentro il documento.
+        Qui le alleggerisco e lascio il testo com'è. Non mandi il file a nessun sito
+        e non installi niente.</p>
+
+      <h2>Domande</h2>
+
+      <h3>Il documento viene caricato online?</h3>
+      <p>No. Il lavoro avviene dentro il browser, sul tuo dispositivo. Il file non esce
+        di lì, nemmeno verso di me.</p>
+
+      <h3>Il testo resta testo?</h3>
+      <p>Sì. Tocco solo le immagini che stanno dentro il PDF. Il testo si può ancora
+        selezionare, copiare e cercare. Anche la stampa resta nitida.</p>
+
+      <h3>E se non basta?</h3>
+      <p>Compare il pulsante «Stringi ancora». Trasforma ogni pagina in una fotografia:
+        il file pesa molto meno, ma il testo smette di essere testo. Te lo chiedo prima.</p>
+
+      <h3>E se pesa già poco?</h3>
+      <p>Non lo tocco. Comprimere due volte un file leggero non serve a niente.
+        A volte lo fa perfino crescere.</p>
+
+      <h3>Ho un PDF firmato digitalmente</h3>
+      <p>Non comprimerlo. Toccare il file rompe la firma. Prima alleggerisci il
+        documento, poi lo firmi.</p>
+
+      <h3>Quanto ci mette?</h3>
+      <p>Dipende da quante immagini ci sono dentro. La barra dice a che punto sono.</p>
+    </section>
   </main>
 
   <footer class="site-footer">
-    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
     · <a href="https://simonecastellan.com/tools/" target="_blank" rel="noopener">Altri strumenti</a>
   </footer>
 

@@ -27,7 +27,9 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;   /* «safe»: con la pagina più alta della
+                                    finestra il titolo finirebbe sopra il
+                                    bordo, irraggiungibile (12/08/2026) */
   min-height: 100vh;
   padding: 24px 20px calc(64px + env(safe-area-inset-bottom));
   text-align: center;
@@ -38,6 +40,33 @@ body {
 header { margin-bottom: 20px; }
 h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2px; }
 .subtitle { font-size: 15px; color: var(--muted); margin-top: 8px; }
+
+/* Riga d'apertura: a cosa servono questi suoni, per chi non li ha mai sentiti
+   nominare.  Sta sopra i pulsanti, non sotto: si legge prima di scegliere. */
+.intro {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: -4px 0 18px;
+}
+/* Cosa fa il segnale scelto (cambia con il segnale). */
+.use-hint {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--faint);
+  margin-top: 12px;
+  min-height: 2.4em;
+}
+/* Spiegazione sotto un comando: dBFS, Solo L / Solo R. */
+.note {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--faint);
+  margin-top: 10px;
+  text-align: left;
+}
+.route { margin-top: 26px; }
+.route .seg.small { margin-top: 0; }
 
 /* Segmented */
 .seg {

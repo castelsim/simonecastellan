@@ -23,7 +23,9 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;   /* «safe»: con la pagina più alta della
+                                    finestra il titolo finirebbe sopra il
+                                    bordo, irraggiungibile (12/08/2026) */
   min-height: 100vh;
   padding: 24px 20px calc(64px + env(safe-area-inset-bottom));
   text-align: center;
@@ -167,19 +169,27 @@ h1 {
 .error-title { font-weight: 600; color: var(--ink); margin-bottom: 8px; }
 .error-msg { color: var(--muted); font-size: 14px; line-height: 1.5; margin-bottom: 16px; }
 
-/* Privacy */
-.privacy {
-  margin-top: 26px;
-  font-size: 12px;
-  color: var(--faint);
-  letter-spacing: .1px;
+/* Riga d'apertura: a cosa serve l'MP3 e dove finiscono i file.  Sta sopra la
+   zona di trascinamento perché chi legge deve saperlo PRIMA di scegliere. */
+.intro {
+  margin: -8px 0 20px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
 }
 
 /* Footer fisso, come il credit del sito */
+/* La spiegazione in fondo: chi sa già cosa fare non la incontra mai. */
+.spiega { text-align: left; margin-top: 44px; border-top: 1px solid var(--line, #e6e8ea); padding-top: 26px; }
+.spiega h2 { font-size: 17px; font-weight: 650; margin: 26px 0 10px; }
+.spiega h2:first-child { margin-top: 0; }
+.spiega h3 { font-size: 15px; font-weight: 600; margin: 20px 0 5px; }
+.spiega p { font-size: 14.5px; line-height: 1.6; color: var(--muted, #5f6368); margin: 0 0 10px; }
+
+/* Il piede sta in fondo al contenuto: da quando c'è la spiegazione questa
+   pagina scorre, e da fisso si sedeva sopra l'ultima riga. */
 .site-footer {
-  position: fixed;
-  left: 0; right: 0;
-  bottom: 16px;
+  margin-top: 40px;
   text-align: center;
   font-size: 12px;
   color: #6b7075;

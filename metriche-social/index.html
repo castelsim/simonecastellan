@@ -35,6 +35,10 @@
       <p class="subtitle">metti i numeri che hai</p>
     </header>
 
+    <!-- La promessa sta prima dei campi: è lì che uno si chiede dove finiscono
+         i suoi numeri, non in fondo alla pagina dopo averli già scritti. -->
+    <p class="claims">Tutto resta nel tuo browser · nessun invio · gratis</p>
+
     <form id="modulo" class="campi" autocomplete="off">
       <!-- I campi li costruisce lo script leggendo l'elenco delle metriche:
            così aggiungerne uno non vuol dire toccare l'interfaccia. -->
@@ -42,40 +46,41 @@
 
     <section id="risultati" class="risultati" aria-live="polite"></section>
 
-    <p id="vuoto" class="vuoto">Compila anche solo due campi: le metriche compaiono da sole.</p>
+    <p id="vuoto" class="vuoto">Scrivi due numeri qualsiasi: i conti compaiono da soli.</p>
 
     <div class="azioni">
       <button type="button" id="copiaBtn" class="btn btn-secondary hidden">Copia</button>
       <button type="button" id="puliciBtn" class="btn btn-ghost hidden">Svuota</button>
     </div>
 
-    <p class="privacy">Nessun account, nessun invio: i numeri restano nel tuo browser.</p>
-
+    <!-- La domanda «i miei dati vengono salvati?» stava qui sotto e ripeteva la
+         riga in cima: la promessa si dice una volta sola, prima dei campi. -->
     <section class="spiega">
       <h2>Come funziona</h2>
-      <p>Non c'è nessun campo obbligatorio e non serve sapere quali dati servono a quale formula:
-        scrivi i numeri che hai sotto mano — quelli che ti dà il pannello statistiche del social o
-        della campagna — e sotto compaiono solo le metriche che con quei numeri si possono
-        davvero calcolare, ognuna con una riga che dice cosa significa.</p>
+      <p>Nessun campo è obbligatorio. Non devi sapere quali numeri servono a quale formula. Scrivi
+        quelli che hai sotto mano. Li trovi nel pannello statistiche del social o della campagna.
+        Sotto compare solo quello che con quei numeri si può calcolare. Ogni risultato ha una riga
+        che dice cosa vuol dire.</p>
 
       <h2>Domande</h2>
-      <h3>Su cosa calcola l'engagement rate?</h3>
-      <p>Se hai la copertura (le persone che hanno visto il contenuto) lo calcola su quella, che è
-        il modo più onesto. Se hai solo i follower lo calcola sui follower, che è il modo più
-        diffuso. Te lo scrive accanto al risultato, così sai sempre quale dei due stai guardando.</p>
+      <h3>Su cosa calcoli l'engagement rate?</h3>
+      <p>Sulla copertura, cioè sulle persone che hanno visto il post. È il modo più onesto. Se hai
+        solo i follower lo calcolo su quelli, come fanno quasi tutti. Accanto al risultato c'è
+        scritto quale dei due sto usando.</p>
 
-      <h3>Perché alcune metriche non compaiono?</h3>
-      <p>Perché mancano i numeri per calcolarle. Il CPC ha bisogno di spesa e clic, il CPM di
-        spesa e impression: appena aggiungi il numero che manca, la metrica appare.</p>
+      <h3>Perché una metrica non compare?</h3>
+      <p>Perché mancano i numeri per calcolarla. Il costo per clic vuole spesa e clic. Il costo per
+        mille vuole spesa e impression. Appena aggiungi il numero che manca, la metrica appare.</p>
 
-      <h3>I miei dati vengono salvati?</h3>
-      <p>No. Nessun invio, nessun account, nessun cookie: i numeri restano nella pagina e
-        spariscono quando la chiudi.</p>
+      <h3>Impression o copertura?</h3>
+      <p>La copertura conta le persone. Le impression contano le volte in cui il post è stato
+        mostrato. La stessa persona può vederlo cinque volte: una di copertura, cinque di
+        impression.</p>
     </section>
   </main>
 
   <footer class="site-footer">
-    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
     · <a href="https://simonecastellan.com/tools/" target="_blank" rel="noopener">Altri strumenti</a>
   </footer>
 

@@ -11,14 +11,15 @@
 var MIN_BPM = 20;
 var MAX_BPM = 300;
 
-// Righe della tabella: etichetta, nome esteso, denominatore (rispetto al 4/4).
+// Righe della tabella: sigla, denominatore (rispetto al 4/4) e la stessa cosa
+// detta in battiti — «1/8» è chiaro solo a chi legge la musica.
 var NOTES = [
-  { label: '1/1',  denom: 1  },
-  { label: '1/2',  denom: 2  },
-  { label: '1/4',  denom: 4  },
-  { label: '1/8',  denom: 8  },
-  { label: '1/16', denom: 16 },
-  { label: '1/32', denom: 32 }
+  { label: '1/1',  denom: 1,  plain: 'una battuta' },
+  { label: '1/2',  denom: 2,  plain: 'mezza battuta' },
+  { label: '1/4',  denom: 4,  plain: 'un battito' },
+  { label: '1/8',  denom: 8,  plain: 'mezzo battito' },
+  { label: '1/16', denom: 16, plain: 'un quarto di battito' },
+  { label: '1/32', denom: 32, plain: 'un ottavo di battito' }
 ];
 
 // --- Riferimenti DOM ---
@@ -36,10 +37,14 @@ var toastEl   = document.getElementById('toast');
 var unit = 'ms';   // 'ms' | 'hz'
 
 // --- Stato BPM ---
+// Il valore per il CALCOLO è sempre dentro i limiti: mentre si scrive, il campo
+// passa per «0» e per il vuoto, e senza questa rete la tabella mostrava
+// «Infinity ms» (provato: 0 → 60000/0).  Il campo però non si tocca finché si
+// scrive, altrimenti il numero salta sotto le dita.
 function getBpm() {
   var v = parseFloat(bpmInput.value);
   if (!isFinite(v)) v = 120;
-  return v;
+  return clamp(v);
 }
 
 function clamp(v) {
@@ -81,6 +86,9 @@ function buildRows() {
     var note = document.createElement('span');
     note.className = 'note';
     note.textContent = n.label;
+    var plain = document.createElement('small');
+    plain.textContent = n.plain;
+    note.appendChild(plain);
     row.appendChild(note);
 
     ['straight', 'dot', 'trip'].forEach(function (kind) {
@@ -170,7 +178,7 @@ function onTap() {
 
   clearTimeout(tapReset);
   tapReset = setTimeout(function () {
-    tapHint.textContent = 'Tocca a ritmo per ricavare il BPM.';
+    tapHint.textContent = 'Non sai la velocità? Batti il tempo qui col dito.';
     taps = [];
   }, 2500);
 }
@@ -212,11 +220,11 @@ unitBtns.forEach(function (btn) {
   });
 });
 
-// --- Toggle Avanzate (animato) ---
+// --- Mostra / nascondi i tempi (animato) ---
 advBtn.addEventListener('click', function () {
   var open = advPanel.classList.toggle('open');
   tapBtn.classList.toggle('compact', open);
-  advBtn.textContent = open ? 'Chiudi' : 'Avanzate';
+  advBtn.textContent = open ? 'Nascondi i tempi' : 'Mostra i tempi';
 });
 
 // --- Avvio ---

@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Converti in MP3 — leggero e pronto da mandare</title>
-  <meta name="description" content="Trasforma WAV, AIFF, M4A e AAC in MP3 leggeri, pronti per WhatsApp o email. Nel browser: i file non vengono caricati online." />
+  <meta name="description" content="Trasforma WAV, AIFF, M4A e AAC in MP3. Il file pesa molto meno e va via da WhatsApp o dalla mail. Resta tutto sul tuo dispositivo." />
   <meta name="theme-color" content="#ffffff" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Converti Audio in MP3" />
-  <meta property="og:description" content="Carica uno o più file audio e ottieni MP3 leggeri pronti da inviare. Funziona nel browser, niente upload." />
+  <meta property="og:description" content="Scegli uno o più file audio e ottieni MP3 leggeri, pronti da mandare. Il lavoro avviene nel browser." />
   <meta property="og:image" content="og-image.svg" />
   <meta property="og:locale" content="it_IT" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -30,11 +30,18 @@
       <p class="subtitle">leggero, pronto da mandare</p>
     </header>
 
+    <!-- La promessa sta QUI, prima di scegliere il file: dopo non serve più a
+         nessuno, perché la scelta è già stata fatta. -->
+    <p class="intro">
+      Un MP3 pesa fino a dieci volte meno dell'originale. Così il file entra in una mail o in WhatsApp.
+      I file non salgono in rete: il lavoro avviene qui, sul tuo dispositivo.
+    </p>
+
     <!-- Drop zone -->
-    <section id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Carica o trascina uno o più file audio">
+    <section id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Scegli o trascina uno o più file audio">
       <p class="dz-title">Trascina qui i file audio</p>
       <p class="dz-or">anche più di uno insieme — oppure</p>
-      <button type="button" id="pickBtn" class="btn btn-secondary">Carica file</button>
+      <button type="button" id="pickBtn" class="btn btn-secondary">Scegli i file</button>
       <input type="file" id="fileInput" multiple accept="audio/*,video/*,.wav,.aiff,.aif,.aifc,.flac,.ogg,.oga,.opus,.m4a,.mp4,.aac,.mp3,.wma,.amr,.ac3,.alac,.caf,.mka,.weba,.3gp" hidden />
     </section>
 
@@ -51,25 +58,47 @@
       <ul id="fileList" class="filelist" aria-live="polite"></ul>
 
       <div class="actions hidden" id="actionsBox">
-        <button type="button" id="sendBtn" class="btn btn-primary">Condividi</button>
-        <button type="button" id="downloadBtn" class="btn btn-secondary">Scarica MP3</button>
+        <button type="button" id="sendBtn" class="btn btn-primary hidden">Manda l'MP3</button>
+        <button type="button" id="downloadBtn" class="btn btn-secondary">Scarica l'MP3</button>
         <p id="sendHint" class="send-hint hidden"></p>
-        <button type="button" id="resetBtn" class="btn btn-ghost">Un altro file</button>
+        <button type="button" id="resetBtn" class="btn btn-ghost">Converti altri file</button>
       </div>
     </section>
 
     <!-- Errore -->
     <section id="error" class="error hidden" aria-live="assertive">
-      <p class="error-title">Qualcosa è andato storto</p>
-      <p class="error-msg">Impossibile convertire questo file.</p>
+      <p class="error-title">Non ci sono riuscito</p>
+      <p class="error-msg">Questo file non si converte.</p>
       <button type="button" class="btn btn-ghost" onclick="location.reload()">Riprova</button>
     </section>
+    <section class="spiega">
+      <h2>A cosa serve</h2>
+      <p>Un provino registrato dal telefono o un file esportato dal programma di montaggio
+        pesa troppo per una mail. In MP3 pesa fino a dieci volte meno.</p>
+      <p>Serve per mandare un ascolto, non per archiviare: per quello tieni l'originale.</p>
 
-    <p class="privacy">I tuoi file non vengono caricati online: tutto avviene sul tuo dispositivo.</p>
+      <h2>Domande</h2>
+
+      <h3>Si sente peggio?</h3>
+      <p>Un po', ma su un ascolto in cuffia o al telefono non te ne accorgi. Se devi mandare
+        il file al mastering, manda l'originale.</p>
+
+      <h3>Quali file accetta?</h3>
+      <p>WAV, AIFF, M4A, FLAC, OGG e anche la traccia audio di un video. Se il tuo browser
+        sa aprirlo, qui si converte.</p>
+
+      <h3>Posso convertirne più di uno?</h3>
+      <p>Sì, trascinali tutti insieme. Vanno in fila e alla fine li scarichi uno per uno
+        o tutti in un colpo. Se uno non si converte, gli altri proseguono.</p>
+
+      <h3>I file salgono da qualche parte?</h3>
+      <p>No. Il motore che converte gira dentro il browser, sul tuo dispositivo. I file non
+        escono di lì, nemmeno verso di me.</p>
+    </section>
   </main>
 
   <footer class="site-footer">
-    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
     · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
   </footer>
 

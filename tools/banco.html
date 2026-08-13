@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="it">
+<head><meta charset="UTF-8"><title>Banco di prova</title>
+<meta name="robots" content="noindex, nofollow">
+<!-- Strumento di manutenzione, non una pagina del sito: sta in tools/ accanto
+     a verifica.py. Si apre da un server locale dopo un giro di modifiche e dice
+     quali strumenti hanno errori JavaScript. Ha dentro un nome sbagliato apposta:
+     se quello NON risulta rotto, il banco non sta guardando niente. -->
+<body>
+<!-- File di prova, non va pubblicato: carica ogni strumento in un riquadro e
+     registra gli errori del suo JavaScript. Serve dopo un giro di modifiche,
+     per sapere se una pagina si è rotta senza aprirle tutte a mano. -->
+<pre id="out">in corso…</pre>
+<script>
+var TOOL = ["audio-mp3","bpm","tonalita","qrcode","posso-pubblicarlo","fotogramma",
+            "comprimi-immagini","comprimi-pdf","comprimi-video","rumore-rosa",
+            "ridardo-diffusori-SBAGLIATO",   // controllo: deve risultare rotto
+            "ritardo-diffusori","link-utm","conta-caratteri","link-whatsapp",
+            "da-comunicato-a-post","semplifica-testo","alt-text","metriche-social"];
+
+var esiti = [];
+
+/* Prima di aprire il riquadro si chiede al server se la pagina esiste davvero.
+   Senza questo controllo una pagina inesistente passava per buona: il 404 del
+   server è comunque una paginetta HTML con dentro un <h1>, e l'iframe la
+   carica senza lamentarsi. Diciannove verdi di cui uno falso. */
+async function prova(nome) {
+  try {
+    var r = await fetch('/' + nome + '/', { method: 'GET' });
+    if (!r.ok) { esiti.push({ nome: nome, errori: [], extra: 'HTTP ' + r.status }); return; }
+    var testo = await r.text();
+    if (!/<h1[^>]*>/i.test(testo)) { esiti.push({ nome: nome, errori: [], extra: 'senza <h1>' }); return; }
+  } catch (e) {
+    esiti.push({ nome: nome, errori: [], extra: 'irraggiungibile' });
+    return;
+  }
+  return apri(nome);
+}
+
+function apri(nome) {
+  return new Promise(function (risolvi) {
+    var f = document.createElement('iframe');
+    f.style.cssText = 'width:420px;height:800px;border:0;position:absolute;left:-9999px';
+    var errori = [];
+    var scaduto = setTimeout(function () { chiudi('non ha finito di caricare'); }, 9000);
+
+    function chiudi(extra) {
+      clearTimeout(scaduto);
+      if (f.__chiuso) return;
+      f.__chiuso = true;
+      var d = null;
+      try { d = f.contentDocument; } catch (e) {}
+      var info = { nome: nome, errori: errori.slice(), extra: extra || '' };
+      if (d) {
+        info.titolo = (d.title || '').slice(0, 40);
+        info.h1 = !!d.querySelector('h1');
+        info.piede = !!d.querySelector('.site-footer');
+        // i comandi principali: quanti pulsanti e campi ci sono
+        info.pulsanti = d.querySelectorAll('button').length;
+        info.campi = d.querySelectorAll('input, textarea').length;
+        info.inglese = /Designed and built/.test(d.body.innerHTML);
+      }
+      esiti.push(info);
+      f.remove();
+      risolvi();
+    }
+
+    f.src = '/' + nome + '/?banco=1';
+    f.onload = function () {
+      // gli errori dell'iframe si catturano dal padre: stessa origine
+      try {
+        f.contentWindow.addEventListener('error', function (e) {
+          errori.push((e.message || 'errore') + ' @ ' + (e.filename || '').split('/').pop() + ':' + e.lineno);
+        });
+        f.contentWindow.addEventListener('unhandledrejection', function (e) {
+          errori.push('promessa rifiutata: ' + e.reason);
+        });
+      } catch (e) { errori.push('non accessibile: ' + e.message); }
+      // un attimo perché gli script partano e aggancino i comandi
+      setTimeout(function () { chiudi(); }, 1200);
+    };
+    f.onerror = function () { chiudi('la pagina non si apre'); };
+    document.body.appendChild(f);
+  });
+}
+
+(async function () {
+  for (var i = 0; i < TOOL.length; i++) await prova(TOOL[i]);
+  window.__ESITI = esiti;
+  document.getElementById('out').textContent = 'fatto: ' + esiti.length;
+})();
+</script>
+</body>
+</html>

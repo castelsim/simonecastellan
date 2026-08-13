@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Rumore rosa e toni di test — per tarare un impianto</title>
-  <meta name="description" content="Rumore rosa, bianco, sinusoidi e sweep dal browser, con livello e uscita su Solo L o Solo R. Per tarare un impianto, cercare i fischi, capire quale cassa suona." />
+  <meta name="description" content="Rumore rosa, bianco, sinusoide e sweep dal browser. Servono a tarare l'impianto, a scovare i fischi e a capire quale cassa suona." />
   <meta name="theme-color" content="#ffffff" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Rumore rosa e toni di test" />
-  <meta property="og:description" content="Rosa, bianco, sinusoide e sweep dal browser: livello in dBFS e uscita Solo L / Solo R. Per tarare un impianto senza generatore." />
+  <meta property="og:description" content="Rosa, bianco, sinusoide e sweep dal browser, con livello e uscita a scelta. Per tarare un impianto senza portarsi il generatore." />
   <meta property="og:image" content="og-image.svg" />
   <meta property="og:locale" content="it_IT" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -26,6 +26,10 @@
       <p class="subtitle">toni di test per tarare un impianto</p>
     </header>
 
+    <p class="intro">
+      Sono i suoni di prova da mandare nelle casse. Servono a regolare l'impianto prima che arrivi il pubblico.
+    </p>
+
     <!-- Sorgente -->
     <div class="seg" id="kindSeg" role="group" aria-label="Segnale">
       <button type="button" class="seg-btn active" data-kind="pink">Rosa</button>
@@ -33,6 +37,9 @@
       <button type="button" class="seg-btn" data-kind="sine">Sinusoide</button>
       <button type="button" class="seg-btn" data-kind="sweep">Sweep</button>
     </div>
+    <!-- A che serve il segnale scelto: quattro parole in croce che nessuno
+         indovina dal nome.  Il testo lo cambia lo script a ogni scelta. -->
+    <p id="useHint" class="use-hint">Tiene dentro tutte le frequenze insieme. È il suono con cui si tara un impianto.</p>
 
     <!-- Play / Stop -->
     <button type="button" id="playBtn" class="play-big" aria-pressed="false">PLAY</button>
@@ -65,23 +72,28 @@
       </div>
       <input type="range" id="level" class="range" min="-60" max="-12" step="1" value="-20"
              aria-label="Livello in dBFS" />
+      <p class="note">Quanto forte esce il segnale. Zero dBFS è il massimo, e −20 è il punto da cui si parte.</p>
     </section>
 
     <!-- Uscita -->
-    <div class="seg small" id="routeSeg" role="group" aria-label="Uscita">
-      <button type="button" class="seg-btn active" data-route="stereo">Stereo</button>
-      <button type="button" class="seg-btn" data-route="left">Solo L</button>
-      <button type="button" class="seg-btn" data-route="right">Solo R</button>
-    </div>
+    <section class="route" aria-label="Uscita">
+      <div class="level-head"><span>Uscita</span></div>
+      <div class="seg small" id="routeSeg" role="group" aria-label="Da quali casse esce">
+        <button type="button" class="seg-btn active" data-route="stereo">Stereo</button>
+        <button type="button" class="seg-btn" data-route="left">Solo L</button>
+        <button type="button" class="seg-btn" data-route="right">Solo R</button>
+      </div>
+      <p class="note">Solo L manda il suono a sinistra, Solo R a destra. Così si capisce quale cassa suona.</p>
+    </section>
 
     <p class="hint">
-      Alza dal mixer, non dal telefono: qui il livello è quello del segnale.
-      Su iPhone togli la modalità silenziosa, altrimenti non esce nulla.
+      Il volume si alza dal mixer, non dal telefono. Parti piano: sinusoide e sweep, se sono forti, bruciano gli acuti.
+      Su iPhone togli la modalità silenziosa, altrimenti non esce niente.
     </p>
   </main>
 
   <footer class="site-footer">
-    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
     · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
   </footer>
 

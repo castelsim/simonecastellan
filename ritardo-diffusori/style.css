@@ -27,7 +27,9 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;   /* «safe»: con la pagina più alta della
+                                    finestra il titolo finirebbe sopra il
+                                    bordo, irraggiungibile (12/08/2026) */
   min-height: 100vh;
   padding: 24px 20px calc(64px + env(safe-area-inset-bottom));
   text-align: center;
@@ -35,9 +37,17 @@ body {
 
 .card { width: 100%; max-width: 440px; }
 
-header { margin-bottom: 26px; }
+header { margin-bottom: 18px; }
 h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2px; }
 .subtitle { font-size: 15px; color: var(--muted); margin-top: 8px; }
+
+/* Le due righe di spiegazione: leggibili, non un'etichetta grigia sbiadita. */
+.intro {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--muted);
+  margin-bottom: 26px;
+}
 
 /* Campo distanza */
 .field-label {
@@ -122,6 +132,14 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
 .haas.copied { background: var(--ink); color: #fff; }
 .haas.copied b { color: #fff; }
 
+/* Il perché di quei millisecondi in più: sta sotto il pulsante, non dentro. */
+.haas-nota {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--faint);
+  margin-top: 10px;
+}
+
 /* Temperatura */
 .temp { margin-top: 28px; }
 .temp-head {
@@ -163,6 +181,15 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
   border: none; border-radius: 50%;
   background: var(--ink);
   cursor: pointer;
+}
+
+/* Perché esiste il cursore della temperatura: senza, sembra un vezzo. */
+.temp-nota {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--faint);
+  margin-top: 12px;
+  text-align: left;
 }
 
 .hint {

@@ -48,6 +48,47 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
 }
 .lbl.min { font-size: 10px; margin-bottom: 6px; }
 
+/* Il nome vero del parametro accanto all'etichetta in italiano: chi cerca
+   «utm_source» lo trova, chi non l'ha mai sentito legge l'etichetta.
+   text-transform: none perché .lbl è tutto maiuscolo e i parametri no. */
+.par {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 9.5px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--faint);
+  white-space: nowrap;
+}
+.lbl .par { margin-left: 4px; }
+
+/* Quello che manca perché il link serva a qualcosa: non è un errore, quindi
+   non è rosso, ma nemmeno grigio chiaro come gli aiuti — va letto. */
+.nota {
+  margin-top: 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+  text-align: left;
+}
+
+/* Le righe che spiegano il campo appena sopra. */
+.aiuto {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--faint);
+  text-align: left;
+}
+
+/* Le tre righe che dicono a cosa serve tutto questo. */
+.intro {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--muted);
+  text-align: left;
+  margin: -14px 0 26px;
+}
+
 .txt {
   width: 100%;
   border: none;

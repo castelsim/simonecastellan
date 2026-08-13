@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <title>Tonalità — trovare la tonalità di un brano a orecchio</title>
-  <meta name="description" content="Carica un brano, suona note sopra l'audio e trova la tonalità a orecchio. La stima automatica ti dà il punto di partenza. Nel browser, senza upload." />
+  <title>Tonalità — capire in che tonalità è un brano</title>
+  <meta name="description" content="Scegli un brano, prova le note sopra l'audio e senti quali stanno bene. A ogni nota ti dico la tonalità più probabile. Il brano resta sul tuo dispositivo." />
   <meta name="theme-color" content="#ffffff" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Tonalità" />
-  <meta property="og:description" content="Prova note, accordi e scale sopra il tuo brano per trovare a orecchio la tonalità. Funziona nel browser." />
+  <meta property="og:description" content="Prova le note sopra il tuo brano e senti quali stanno bene: così si trova la tonalità. Funziona nel browser." />
   <meta property="og:image" content="og-image.svg" />
   <meta property="og:locale" content="it_IT" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -24,13 +24,21 @@
     <h1>Tonalità</h1>
     <p class="subtitle">trovarla suonandoci sopra</p>
 
+    <!-- La promessa sul file sta qui, prima del pulsante che lo sceglie. -->
+    <p class="intro">
+      La tonalità dice quali note stanno bene su un brano. Serve per suonarci sopra, per cantarlo o per cambiargli altezza.
+      Il brano non sale in rete: resta sul tuo dispositivo.
+    </p>
+
     <!-- Carica audio -->
     <div class="upload">
       <input type="file" id="fileInput" class="file-input"
              accept="audio/*,.mp3,.wav,.aiff,.aif,.flac,.m4a,.ogg" />
-      <label for="fileInput" class="btn btn-secondary upload-btn" id="uploadBtn">Carica audio</label>
+      <label for="fileInput" class="btn btn-secondary upload-btn" id="uploadBtn">Scegli il brano</label>
       <span id="fileName" class="file-name"></span>
     </div>
+    <!-- Un file che il browser non sa leggere lasciava il lettore a 0:00 e muto. -->
+    <p id="fileMsg" class="file-msg hidden" role="status"></p>
 
     <!-- Player: play/pausa + avanzamento + volume -->
     <div id="player" class="player hidden">
@@ -49,6 +57,7 @@
 
     <!-- Tastiera -->
     <div id="keyboard" class="keyboard"></div>
+    <p class="kb-hint">Fai partire il brano e premi i tasti. Le note della tonalità non stonano.</p>
 
     <!-- Ottava (solo − / +) -->
     <div class="ctrl-row">
@@ -61,18 +70,22 @@
 
     <!-- Stop (chiude tutte le note) -->
     <div class="ctrl-row">
-      <button type="button" id="stopBtn" class="btn btn-secondary pair">STOP</button>
+      <button type="button" id="stopBtn" class="btn btn-secondary pair">Ferma le note</button>
     </div>
 
     <!-- Tonalità stimata dalle note suonate -->
     <div id="result" class="result hidden">
       <span id="keyGuess" class="key-guess"></span>
-      <button type="button" id="resetGuess" class="reset-link">azzera</button>
+      <button type="button" id="resetGuess" class="reset-link">ricomincia</button>
     </div>
+    <!-- I pallini comparivano sui tasti senza che nessuno dicesse cosa sono. -->
+    <p id="resultNote" class="result-note hidden">
+      I pallini segnano le note di questa tonalità. Provale sul brano: se stanno bene, è quella giusta.
+    </p>
   </main>
 
   <footer class="site-footer">
-    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
     · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
   </footer>
 

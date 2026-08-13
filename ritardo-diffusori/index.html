@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Ritardo diffusori — dalla distanza ai millisecondi</title>
-  <meta name="description" content="Quanti millisecondi mettere sul delay di una torre: scrivi i metri e leggi il ritardo, corretto con la temperatura. Funziona anche al contrario." />
+  <meta name="description" content="Un diffusore lontano suona in ritardo. Scrivi i metri e leggi i millisecondi. Conta anche la temperatura. Vale pure al contrario." />
   <meta name="theme-color" content="#ffffff" />
+  <link rel="canonical" href="https://simonecastellan.com/ritardo-diffusori/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Ritardo diffusori" />
-  <meta property="og:description" content="Dalla distanza ai millisecondi per allineare torri e riempimenti, con la correzione in temperatura. Anche al contrario." />
+  <meta property="og:description" content="Scrivi i metri e leggi i millisecondi da mettere sul diffusore lontano. Conta anche la temperatura." />
   <meta property="og:image" content="og-image.svg" />
   <meta property="og:locale" content="it_IT" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -26,9 +27,14 @@
       <p class="subtitle">dalla distanza ai millisecondi</p>
     </header>
 
+    <!-- Due righe per chi non fa questo mestiere: senza, il numero grande non
+         dice a cosa serve.  Frasi corte apposta: si leggono in un secondo. -->
+    <p class="intro">Il suono viaggia piano. Un diffusore lontano dal palco
+      arriva dopo. Ritardalo, e i due suoni tornano insieme.</p>
+
     <!-- Distanza -->
     <section class="field" aria-label="Distanza dal palco">
-      <span class="field-label">Distanza dal palco</span>
+      <span class="field-label">Quanti metri dal palco</span>
       <div class="field-row">
         <button type="button" id="dDown" class="step" aria-label="Meno un metro">−</button>
         <div class="field-num">
@@ -44,8 +50,11 @@
 
     <!-- Risultato -->
     <section class="out" aria-label="Ritardo">
+      <span class="field-label">Ritardo da mettere</span>
       <div class="field-num big">
-        <input type="text" id="ms" class="num num-big" value="58,3"
+        <!-- Il valore di partenza è quello dei 20 metri a 20 °C: 58,2 ms.
+             Prima diceva 58,3 e per un istante la pagina si smentiva da sola. -->
+        <input type="text" id="ms" class="num num-big" value="58,2"
                inputmode="decimal" autocomplete="off" aria-label="Ritardo in millisecondi" />
         <span class="unit unit-big">ms</span>
       </div>
@@ -53,26 +62,30 @@
       <button type="button" id="haas" class="haas">
         <span id="haasText"></span>
       </button>
+      <p class="haas-nota">L'orecchio segue il suono che arriva per primo.
+        Con qualche millisecondo in più la voce sembra venire dal palco.</p>
     </section>
 
     <!-- Temperatura -->
     <section class="temp" aria-label="Temperatura dell'aria">
       <div class="temp-head">
-        <span>Temperatura</span>
+        <span>Che caldo fa</span>
         <span id="tempVal" class="temp-val">20 °C · 343,4 m/s</span>
       </div>
       <input type="range" id="temp" class="range" min="-5" max="45" step="1" value="20"
              aria-label="Temperatura dell'aria in gradi" />
+      <p class="temp-nota">Più fa caldo, più il suono corre. Su 40 metri il ritardo
+        cambia di 6 ms fra una sera fredda e un pomeriggio d'estate.</p>
     </section>
 
     <p class="hint">
-      Aggiungi 5–15 ms: l'orecchio segue chi arriva per primo e la voce resta sul palco.
-      Funziona anche al contrario, scrivendo i millisecondi.
+      Vale anche al contrario. Scrivi i millisecondi e leggi i metri.
+      Il conto avviene qui: niente viene caricato online.
     </p>
   </main>
 
   <footer class="site-footer">
-    Designed and built by <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
     · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
   </footer>
 

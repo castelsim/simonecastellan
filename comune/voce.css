@@ -1,0 +1,97 @@
+/* La voce comune degli strumenti — 12/08/2026.
+
+   Nasce da una scelta: gli strumenti devono sembrare fatti dalla stessa mano
+   che ha fatto stageplot.it, senza diventarne una copia. Da lì arrivano tre
+   cose e tre soltanto — l'occhiello monospaziato, il titolo grosso a due
+   voci, il verde acqua — mentre il fondo resta bianco.
+
+   Il fondo bianco non è timidezza: qui dentro passano foto e PDF, e un fondo
+   scuro mente sui loro colori. (Nel tavolo di ritaglio di «Posso pubblicarlo?»
+   vale il contrario, ed è scuro apposta: lì si giudica una foto, non si legge
+   una pagina.) E il resto del dominio — home, profilo, CV — è bianco: fare
+   scuri solo gli strumenti spaccherebbe il sito in due.
+
+   Questo foglio porta i TOKEN e poche classi nuove. Non ridefinisce .btn né
+   le altre classi che ogni strumento ha già con significati suoi: si aggancia
+   PRIMA del foglio locale, che resta libero di vincere. */
+
+:root {
+  /* Inchiostri. Il nero non è nero: tira appena al verde, come su StagePlot,
+     e accanto al verde acqua non stona. */
+  --ink:    #0f1614;
+  --mut:    #5a6b67;
+  --faint:  #8b9793;
+  --line:   #e3e8e6;
+  --line-forte: #ccd6d3;
+
+  --bg:     #ffffff;
+  --panel:  #f7faf9;
+
+  /* Il verde acqua è quello di stageplot.it, preso dal suo foglio di stile.
+     --teal-l sui fondi (è più chiaro, regge il testo scuro sopra),
+     --teal sul testo (il chiaro su bianco non avrebbe contrasto). */
+  --teal:       #0d9488;
+  --teal-l:     #14b8a6;
+  --teal-scuro: #04211d;
+
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --raggio:   10px;
+  --raggio-l: 14px;
+}
+
+/* L'occhiello: tre parole in monospaziato che dicono di cosa si parla, prima
+   ancora del nome dello strumento. Servono a chi arriva da una ricerca e non
+   sa dove è capitato. */
+.occhiello {
+  font: 500 12px var(--mono);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin: 0 0 14px;
+}
+
+/* Il titolo a due voci: la prima riga dice il nome, la seconda finisce la
+   frase in grigio. È la stessa figura del «Disegna il palco. / Il rider si
+   costruisce da solo.» */
+.titolone {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -1.4px;
+  line-height: 1.08;
+  margin: 0;
+}
+.titolone .eco { color: var(--faint); }
+
+.apertura {
+  color: var(--mut);
+  font-size: 17px;
+  line-height: 1.5;
+  max-width: 460px;
+  margin: 16px 0 30px;
+}
+.apertura b { color: var(--ink); font-weight: 650; }
+
+/* La riga in fondo al pannello: dice le tre cose che tolgono il dubbio prima
+   che venga. Monospaziata perché sembri un'etichetta, non una promessa. */
+.riga-mono {
+  font: 400 12.5px var(--mono);
+  color: var(--faint);
+  text-align: center;
+  margin-top: 22px;
+}
+.riga-mono b { color: var(--teal); font-weight: 500; }
+
+/* Sui telefoni il titolone non può restare da 42px: andrebbe a capo dove
+   capita e mangerebbe mezza schermata prima che si veda cosa fa lo strumento. */
+@media (max-width: 520px) {
+  .titolone { font-size: 30px; letter-spacing: -.9px; }
+  .apertura { font-size: 16px; margin-bottom: 24px; }
+  .occhiello { font-size: 11px; }
+}
+
+/* Chi ha chiesto meno movimento non deve vedere comparse e scorrimenti. */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

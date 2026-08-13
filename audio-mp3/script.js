@@ -33,9 +33,6 @@ var resetBtn   = document.getElementById('resetBtn');
 var jobs = [];
 var queueRunning = false;
 
-// Email di Simone, usata come ripiego quando manca la condivisione di file.
-var MAIL_TO = 'castellansimone@gmail.com';
-
 // --- Utility ---
 function show(el)  { el.classList.remove('hidden'); }
 function hide(el)  { el.classList.add('hidden'); }
@@ -142,7 +139,7 @@ function getFfmpeg() {
     // Il service worker non ha ancora attivato l'isolamento: serve un ricaricamento.
     return Promise.reject(new Error('needs-reload'));
   }
-  setStatus('Preparazione del convertitore… (solo la prima volta)');
+  setStatus('Preparo il convertitore… succede solo la prima volta.');
   // corePath ASSOLUTO: ffmpeg.min.js ha un publicPath sbagliato hardcoded,
   // un URL assoluto evita che venga anteposto un percorso inesistente.
   var base = location.href.substring(0, location.href.lastIndexOf('/') + 1);
@@ -227,7 +224,7 @@ function addRow(job) {
   job.nameEl = nm;
   var st = document.createElement('span');
   st.className = 'f-state';
-  st.textContent = 'in coda';
+  st.textContent = 'in attesa';
   li.appendChild(nm); li.appendChild(st);
   fileListEl.appendChild(li);
   job.li = li; job.stateEl = st;
@@ -281,8 +278,8 @@ function runQueue() {
   setProgress(0);
   setStatus(jobs.length > 1
     ? 'File ' + pos + ' di ' + jobs.length + ' — ' + next.file.name
-    : 'Conversione in corso…');
-  next.stateEl.textContent = 'conversione…';
+    : 'Sto convertendo…');
+  next.stateEl.textContent = 'in lavorazione…';
   convertFile(next.file).then(
     function (blob) {
       next.blob = blob;
@@ -306,7 +303,7 @@ function scheduleReloadIfNeeded(err) {
   // al reload normale il SW si attiva. I file vanno riscelti, come prima.
   if (name !== 'needs-reload' || sessionStorage.getItem('a2m_reloaded')) return false;
   sessionStorage.setItem('a2m_reloaded', '1');
-  setStatus('Attivazione del convertitore… ricarico la pagina.');
+  setStatus('Accendo il convertitore. Ricarico la pagina, poi riscegli i file.');
   setTimeout(function () { location.reload(); }, 600);
   return true;
 }
@@ -314,9 +311,9 @@ function scheduleReloadIfNeeded(err) {
 function shortErrorFor(err) {
   var name = String((err && (err.message || err.name)) || err);
   if (name === 'needs-reload' || name === 'engine-missing') {
-    return 'non convertibile in questo browser';
+    return 'questo browser non ce la fa';
   }
-  return 'non convertito';
+  return 'non riuscito';
 }
 
 function finishBatch() {
@@ -327,12 +324,15 @@ function finishBatch() {
     fileListEl.innerHTML = '';
     jobs = [];
     errorBox.querySelector('.error-msg').textContent =
-      'Impossibile convertire. Assicurati che siano file audio validi ' +
-      '(WAV, MP3, M4A, AAC e AIFF funzionano sempre).';
+      'Controlla che siano file audio o video. WAV, MP3, M4A, AAC e AIFF riescono sempre.';
     show(errorBox);
     return;
   }
-  downloadBtn.textContent = ok.length > 1 ? 'Scarica tutti (' + ok.length + ')' : 'Scarica MP3';
+  downloadBtn.textContent = ok.length > 1 ? 'Scarica tutti (' + ok.length + ')' : 'Scarica l’MP3';
+  // «Manda» compare solo dove il sistema sa davvero allegare i file (di norma il
+  // telefono).  Altrove il pulsante prometteva un invio che non poteva fare.
+  sendBtn.textContent = ok.length > 1 ? 'Manda gli MP3' : 'Manda l’MP3';
+  if (shareableFiles()) show(sendBtn); else hide(sendBtn);
   show(actionsBox);
 }
 
@@ -357,13 +357,11 @@ function downloadAll() {
   });
 }
 
-// --- Invio a Simone (default) ---
-// Obiettivo del tool: far arrivare i file a Simone, di norma via WhatsApp.
-// I link wa.me NON possono allegare file, quindi:
-//  - se il dispositivo supporta la condivisione di file (tipico mobile),
-//    uso la Web Share API con TUTTI gli MP3 riusciti insieme;
-//  - altrimenti (desktop) scarico gli MP3 e apro la chat email di Simone
-//    gia' pronta, con l'istruzione di allegare i file appena scaricati.
+// --- Mandare i file a qualcuno ---
+// Un link wa.me non puo' allegare niente: l'unico modo, dal browser, e' il menu
+// di condivisione del sistema (Web Share). Dove non c'e' — quasi tutti i computer
+// — il pulsante resta nascosto: prima apriva una mail gia' indirizzata all'autore
+// del sito, cosa che nessuno si aspetta da un pulsante che dice «Condividi».
 function shareableFiles() {
   try {
     var fs = jobs.filter(function (j) { return j.blob; }).map(function (j) {
@@ -376,29 +374,21 @@ function shareableFiles() {
 
 sendBtn.addEventListener('click', function () {
   var fs = shareableFiles();
-  if (fs) {
-    // Menu di condivisione di sistema: scegliendo Mail (Mac/iPhone) i file sono
-    // GIA' allegati. Unico modo per allegare file via browser.
-    navigator.share({
-      files: fs,
-      title: fs.length > 1 ? fs.length + ' file audio' : fs[0].name,
-      text: fs.length > 1 ? 'File audio convertiti.' : 'File audio convertito.'
-    }).catch(function () { /* annullato dall'utente: ignoro */ });
-  } else {
-    // Ripiego (browser senza condivisione di file): scarico e apro una mail
-    // gia' indirizzata a Simone; gli allegati li aggiunge l'utente a mano.
+  if (!fs) {
+    // Il menu di condivisione è sparito fra la fine della coda e il clic: meglio
+    // scaricare che lasciare il pulsante muto.
     downloadAll();
-    var ok = jobs.filter(function (j) { return j.blob; });
-    var what = ok.length > 1 ? ok.length + ' file audio' : ('File audio: ' + ok[0].name);
-    var subject = encodeURIComponent(what);
-    var body = encodeURIComponent('Ciao Simone, ti allego ' +
-      (ok.length > 1 ? 'i file audio convertiti.' : 'il file audio (' + ok[0].name + ').'));
-    window.location.href = 'mailto:' + MAIL_TO + '?subject=' + subject + '&body=' + body;
-    sendHint.textContent = ok.length > 1
-      ? 'File scaricati. Allegali all’email che si è aperta.'
-      : 'File scaricato. Allega il file appena scaricato all’email che si è aperta.';
+    sendHint.textContent = 'Qui non si può condividere: ho scaricato i file.';
     show(sendHint);
+    return;
   }
+  // Menu di condivisione di sistema: scegliendo Mail o WhatsApp i file sono
+  // GIA' allegati. Unico modo per allegare file dal browser.
+  navigator.share({
+    files: fs,
+    title: fs.length > 1 ? fs.length + ' file audio' : fs[0].name,
+    text: fs.length > 1 ? 'File audio convertiti.' : 'File audio convertito.'
+  }).catch(function () { /* annullato dall'utente: ignoro */ });
 });
 
 // --- Eventi UI ---

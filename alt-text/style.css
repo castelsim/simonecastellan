@@ -254,3 +254,23 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
   .chip { font-size: 12px; padding: 6px 11px; }
   .prompt { font-size: 11.5px; max-height: 240px; }
 }
+
+/* Il patto, subito sotto il titolo: chi arriva deve sapere prima di cominciare
+   che l'immagine non parte da qui. */
+.patto {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--mut, #5f6368);
+  margin: 12px 0 0;
+}
+.patto b { color: var(--ink, #1a1a1a); font-weight: 600; }
+
+/* La guida in fondo. Si chiama così e non «spiega» perché in questa pagina
+   .spiega è già presa: è la riga che commenta la scelta del tipo di immagine. */
+.guida { margin-top: 44px; border-top: 1px solid var(--line, #e6e8ea); padding-top: 26px; }
+.guida h2 { font-size: 17px; font-weight: 650; margin: 26px 0 10px; }
+.guida h2:first-child { margin-top: 0; }
+.guida h3 { font-size: 15px; font-weight: 600; margin: 20px 0 5px; }
+.guida p { font-size: 14.5px; line-height: 1.6; color: var(--mut, #5f6368); margin: 0 0 10px; }
+.guida code { font: 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+              background: #f4f6f7; padding: 1px 5px; border-radius: 4px; }
