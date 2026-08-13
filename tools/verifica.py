@@ -52,6 +52,12 @@ NASCOSTI = ["metriche-social"]
 # Google mostra ~155-160 caratteri di descrizione: oltre, taglia a metà frase.
 MAX_DESCRIZIONE = 160
 
+# E ~60 di titolo. Questo controllo mancava, e il 13/08/2026 due strumenti erano
+# già oltre da giorni: «Posso pubblicarlo?» a 63 e «Semplifica un testo» a 64.
+# Il titolo si tronca DALLA FINE, cioè proprio dove è scritto cosa fa lo
+# strumento — resta il nome, che da solo non convince nessuno a entrare.
+MAX_TITOLO = 60
+
 
 def leggi(rel):
     with open(os.path.join(ROOT, rel), encoding="utf-8") as f:
@@ -169,6 +175,10 @@ def controlla_intestazioni_tool():
         elif "—" not in titolo.group(1):
             errore(f"{t}: il titolo «{titolo.group(1).strip()}» non dice cosa fa lo strumento "
                    f"(gli altri sono «Nome — cosa fa»)")
+        elif len(titolo.group(1).strip()) > MAX_TITOLO:
+            n = len(titolo.group(1).strip())
+            errore(f"{t}: titolo di {n} caratteri (massimo {MAX_TITOLO}): Google lo tronca "
+                   f"con i puntini, e a sparire è proprio la parte che dice cosa fa")
 
         d = re.search(r'<meta name="description" content="(.*?)"', pagina, re.S)
         if not d:
