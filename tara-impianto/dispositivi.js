@@ -82,6 +82,17 @@ var DISPOSITIVI = (function () {
     scelto.ingresso = ricordato(CHIAVE_IN);
     scelto.uscita = ricordato(CHIAVE_OUT);
 
+    /* Alla prima chiamata Chrome può rispondere con un elenco vuoto: il
+       sottosistema audio non è ancora sveglio. Non è un errore e non c'è un
+       evento che lo annunci — si riprova, una volta, dopo un attimo. Se
+       nemmeno allora c'è niente, l'elenco è vuoto per davvero. */
+    function riprovaSeVuoto() {
+      if (ingressi.length || uscite.length) return;
+      setTimeout(function () {
+        elenca().then(function () { if (alCambio) alCambio(); });
+      }, 600);
+    }
+
     if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
       /* Chi collega l'interfaccia a pagina aperta deve trovarla nell'elenco
          senza ricaricare: è il gesto normale di chi arriva, monta e misura. */
@@ -89,7 +100,7 @@ var DISPOSITIVI = (function () {
         elenca().then(function () { if (alCambio) alCambio(); });
       });
     }
-    return elenca();
+    return elenca().then(riprovaSeVuoto);
   }
 
   return {
