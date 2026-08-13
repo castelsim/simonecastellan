@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#1a1a1a"/>
+  <!-- Una curva di risposta con un rimbombo e un buco: è quello che si viene a
+       cercare qui, e si distingue dalle barre del generatore. -->
+  <path d="M10 40 C 16 40, 18 24, 24 24 S 32 40, 38 40 S 42 30, 46 30 L 54 30"
+        fill="none" stroke="#14b8a6" stroke-width="4"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="10" y1="34" x2="54" y2="34" stroke="#ffffff" stroke-width="1.5"
+        opacity="0.35" stroke-dasharray="3 3"/>
+</svg>

@@ -1,0 +1,193 @@
+/* Stile coerente con simonecastellan.com — minimale, monocromatico, luce.
+   Il verde acqua sta in due posti soli: il pulsante che fa partire la misura e
+   la curva. Sono le due cose da guardare. */
+:root {
+  --bg: #ffffff;
+  --text: #3c4043;
+  --ink: #0f1614;
+  --muted: #5a6b67;
+  --faint: #8b9793;
+  --pill: #f1f3f4;
+  --pill-hover: #e6e8ea;
+  --line: #c2c6cc;
+  --line-soft: #e3e8e6;
+  --radius: 16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+button, input { touch-action: manipulation; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* «safe»: con la spiegazione in fondo la pagina è più alta della finestra, e
+     un center secco spinge l'inizio fuori dallo schermo. */
+  justify-content: safe center;
+  min-height: 100vh;
+  padding: 24px 20px calc(40px + env(safe-area-inset-bottom));
+  text-align: center;
+}
+
+.card { width: 100%; max-width: 560px; }
+
+/* ————— La voce comune ————— */
+header { text-align: left; margin-bottom: 26px; }
+
+/* Il consiglio sul dove mettere il telefono: sta prima del pulsante perché
+   dopo non serve più a niente. Riquadrato, o si legge come una didascalia. */
+.dove {
+  text-align: left;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+  background: #f7faf9;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  padding: 13px 15px;
+  margin-bottom: 18px;
+}
+.dove b { color: var(--ink); font-weight: 650; }
+
+/* ————— Pulsanti ————— */
+.btn {
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s ease, opacity .15s ease;
+}
+.btn-primario {
+  background: var(--teal-l);
+  color: var(--teal-scuro);
+  width: 100%;
+}
+.btn-primario:hover:not(:disabled) { background: var(--teal); }
+.btn-primario:disabled { opacity: .45; cursor: default; }
+.btn-secondario { background: var(--pill); color: var(--ink); width: 100%; font-size: 15px; }
+.btn-secondario:hover { background: var(--pill-hover); }
+.btn-ghost {
+  background: transparent; color: var(--muted);
+  font-weight: 500; font-size: 13px; padding: 6px 0 1px;
+  border-radius: 0; border-bottom: 1px solid var(--line);
+}
+.btn-ghost:hover { color: var(--ink); }
+
+/* ————— Quando il dispositivo non obbedisce ————— */
+.avviso-ingresso {
+  margin-top: 16px;
+  text-align: left;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #8a5a00;
+  background: #fff8ed;
+  border: 1px solid #f0dfc0;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.errore { margin-top: 18px; text-align: left; }
+.errore-msg { font-size: 13.5px; line-height: 1.6; color: #c5221f; }
+
+/* ————— Mentre misura ————— */
+.in-corso { margin-top: 22px; }
+.stato {
+  font-size: 14.5px; color: var(--muted); margin-bottom: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.progress { width: 100%; height: 6px; background: var(--pill); border-radius: 999px; overflow: hidden; }
+.progress-bar { height: 100%; width: 0%; background: var(--teal-l); border-radius: 999px; transition: width .2s linear; }
+
+/* ————— La tela ————— */
+.tela {
+  width: 100%;
+  height: 260px;
+  margin-top: 20px;
+  display: block;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  background: #fcfdfd;
+}
+
+/* ————— L'esito ————— */
+.esito { margin-top: 18px; text-align: left; }
+
+.affid {
+  font: 400 12px var(--mono, ui-monospace, Menlo, monospace);
+  color: var(--faint);
+  letter-spacing: .04em;
+}
+
+.ritardo {
+  display: flex; flex-direction: column; gap: 3px;
+  margin: 18px 0 6px;
+  padding: 14px 15px;
+  background: #f7faf9;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+}
+.ritardo-lbl { font-size: 12px; color: var(--faint); text-transform: uppercase; letter-spacing: .08em; }
+.ritardo-val { font-size: 22px; font-weight: 700; color: var(--teal); font-variant-numeric: tabular-nums; }
+/* La riserva sul numero sta sotto e piccola: è vera e va detta, ma non è
+   quello che si viene a leggere. */
+.ritardo-nota { font-size: 12px; line-height: 1.5; color: var(--faint); margin-top: 4px; }
+
+.titolo-mosse { font-size: 16px; font-weight: 650; color: var(--ink); margin: 24px 0 10px; }
+
+/* Ogni mossa è una riga sola: si legge in piedi, davanti al mixer, con una
+   mano occupata. */
+.mossa {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--ink);
+  padding: 11px 14px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  border-left: 3px solid var(--teal-l);
+  background: #f7faf9;
+}
+.mossa-alza { border-left-color: #9ccfc9; }
+/* Le note non sono azioni: dicono di NON fare qualcosa, e devono distinguersi
+   a colpo d'occhio da ciò che invece va fatto. */
+.mossa-nota {
+  border-left-color: #e0c98a;
+  background: #fffdf7;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+.mossa-ok { border-left-color: #b8d9d4; color: var(--muted); }
+
+.azioni { display: flex; flex-direction: column; gap: 9px; margin-top: 20px; }
+.congela-txt { font-size: 12.5px; color: var(--faint); line-height: 1.55; margin-top: 9px; }
+
+/* ————— Spiegazione in fondo, per chi arriva da una ricerca ————— */
+.spiega { margin-top: 44px; text-align: left; border-top: 1px solid var(--line-soft); padding-top: 28px; }
+.spiega h2 { font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 10px; }
+.spiega h2 + p { margin-bottom: 18px; }
+.spiega h3 { font-size: 13.5px; font-weight: 600; color: var(--ink); margin: 18px 0 6px; }
+.spiega p { font-size: 13px; line-height: 1.65; color: var(--muted); }
+.spiega a { color: var(--teal); text-decoration: none; border-bottom: 1px solid #b8ded9; }
+
+/* Il piede sta in fondo al contenuto, non incollato alla finestra: questa
+   pagina scorre, e da fisso si siederebbe sopra l'ultima riga. */
+.site-footer {
+  margin-top: 40px;
+  text-align: center;
+  font-size: 12px;
+  color: #6b7075;
+  letter-spacing: .2px;
+}
+.site-footer a { color: #6b7075; text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 1px; }
+.site-footer a:hover { color: var(--ink); }
+
+@media (max-width: 460px) {
+  .tela { height: 210px; }
+  .mossa { font-size: 14px; }
+}

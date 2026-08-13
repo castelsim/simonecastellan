@@ -267,3 +267,19 @@ header { text-align: left; margin-bottom: 30px; }
    Resta tondo e grande com'era, cambia solo il colore. */
 .play-big { background: var(--teal-l); color: var(--teal-scuro); }
 .play-big:hover { background: var(--teal); }
+
+/* Il rimando a «Tara un impianto»: questa pagina manda il segnale, l'altra lo
+   misura. Chi cerca «tarare un impianto» arriva spesso qui e vuole l'altra. */
+.rimando {
+  margin-top: 28px;
+  padding: 14px 16px;
+  background: #f7faf9;
+  border: 1px solid var(--line-soft, #e3e8e6);
+  border-radius: 12px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  text-align: left;
+}
+.rimando b { color: var(--ink); font-weight: 650; }
+.rimando a { color: var(--teal); text-decoration: none; border-bottom: 1px solid #b8ded9; font-weight: 600; }

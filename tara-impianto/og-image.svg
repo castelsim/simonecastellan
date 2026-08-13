@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#ffffff"/>
+
+  <!-- la riga dello zero, e sopra la curva con un rimbombo e un buco -->
+  <line x1="200" y1="300" x2="1000" y2="300" stroke="#dbe3e1" stroke-width="3" stroke-dasharray="10 10"/>
+  <path d="M200 300 C 280 300, 300 190, 380 190 S 500 300, 560 300
+           S 620 300, 660 380 S 700 300, 740 300 L 1000 300"
+        fill="none" stroke="#0d9488" stroke-width="10"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <text x="600" y="470" text-anchor="middle"
+        font-family="-apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif"
+        font-size="58" font-weight="700" fill="#0f1614">Tara un impianto</text>
+  <text x="600" y="524" text-anchor="middle"
+        font-family="-apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif"
+        font-size="28" fill="#5a6b67">misura, e dice cosa correggere</text>
+</svg>
