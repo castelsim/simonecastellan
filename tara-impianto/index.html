@@ -90,8 +90,36 @@
     <!-- Una tela sola: prima le barre vive, poi la curva -->
     <canvas id="tela" class="tela" aria-label="La risposta dell'impianto"></canvas>
 
+    <!-- Il valore sotto il dito: i consigli dicono le cose grosse, qui si
+         controlla un punto preciso mentre si muove un cursore sull'EQ. -->
+    <p class="lettura" id="lettura" hidden></p>
+
+    <div class="viste" id="viste" role="group" aria-label="Cosa guardare" hidden>
+      <button type="button" class="vista-btn on" data-vista="curva">Curva</button>
+      <button type="button" class="vista-btn" data-vista="impulso">Impulso</button>
+      <button type="button" class="vista-btn" data-vista="fase">Fase</button>
+    </div>
+    <p class="vista-nota" id="vistaNota" hidden></p>
+
     <section class="esito" id="esito" hidden>
       <p class="affid" id="affidTxt"></p>
+
+      <!-- Il bersaglio. Un impianto in sala NON deve essere piatto: senza
+           dirlo, i consigli punterebbero al piatto, che per un PA è il
+           bersaglio sbagliato e fa venire fuori un impianto stancante. -->
+      <div class="bersaglio">
+        <span class="bersaglio-lbl">A cosa punti</span>
+        <div class="seg" id="segObiettivo" role="group" aria-label="Curva obiettivo"></div>
+        <p class="bersaglio-spiega" id="obiettivoSpiega"></p>
+      </div>
+
+      <!-- Più posizioni. Una misura sola descrive un punto, non una sala:
+           le cancellazioni si spostano di metro in metro. -->
+      <div class="posizioni">
+        <p class="posizioni-stato" id="posizioniTxt">Una posizione misurata.</p>
+        <button type="button" id="aggiungi" class="btn btn-secondario">Misura un altro punto della sala</button>
+        <button type="button" id="azzeraPos" class="btn btn-ghost" hidden>Ricomincia da capo</button>
+      </div>
 
       <div class="ritardo">
         <span class="ritardo-lbl">Ritardo fra le casse e il microfono</span>
@@ -160,6 +188,7 @@
   <script src="/comune/segnali.js"></script>
   <script src="dispositivi.js"></script>
   <script src="misura.js"></script>
+  <script src="obiettivo.js"></script>
   <script src="consigli.js"></script>
   <script src="grafico.js"></script>
   <script src="script.js"></script>

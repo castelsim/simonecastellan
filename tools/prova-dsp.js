@@ -13,6 +13,7 @@
 var DSP = require('../comune/dsp.js');
 var MISURA = require('../tara-impianto/misura.js');
 var CONSIGLI = require('../tara-impianto/consigli.js');
+var OBIETTIVO = require('../tara-impianto/obiettivo.js');
 
 var passate = 0, fallite = 0;
 
@@ -282,6 +283,138 @@ prova('CONTROPROVA: la stessa gobba, con coerenza buona, viene consigliata', fun
 prova('una curva già piatta non fa dire niente', function () {
   var c = CONSIGLI.dai(curvaFinta(function () { return 0; }));
   if (c.mosse.length) throw new Error('inventa correzioni su una curva piatta');
+});
+
+
+console.log('\nCurva obiettivo e media fra posizioni\n');
+
+/* Una misura finta con una campana nota, per le prove sulla media. */
+function finta(fs, n, f0, db) {
+  var rif = rumore(n, 5 + Math.abs(Math.round(f0 + db)));
+  var mic = campana(rif, fs, f0, db, 1.0);
+  var m = MISURA.crea({ fs: fs, dimensione: 8192 });
+  m.aggiungi(rif, mic);
+  return m.risultato();
+}
+
+prova('la curva «live» alza i bassi e scende in alto', function () {
+  var b = OBIETTIVO.a('live', 50), m = OBIETTIVO.a('live', 1000), a = OBIETTIVO.a('live', 10000);
+  if (!(b > m)) throw new Error('i bassi non stanno sopra i medi: ' + b + ' vs ' + m);
+  if (!(a < m)) throw new Error('gli acuti non scendono: ' + a + ' vs ' + m);
+  vicino(m, 0, 0.01, 'i medi devono essere il riferimento');
+});
+
+prova('la curva «piatta» è piatta davvero', function () {
+  [20, 100, 1000, 10000, 20000].forEach(function (f) {
+    vicino(OBIETTIVO.a('piatta', f), 0, 0.001, 'a ' + f + ' Hz');
+  });
+});
+
+prova('l\'interpolazione va in ottave, non in hertz', function () {
+  /* Va provata dove la curva PENDE: fra 300 e 1000 Hz è piatta e qualunque
+     interpolazione darebbe lo stesso numero — il primo tentativo cadeva lì e
+     falliva per colpa della prova, non del codice.
+
+     Fra 4000 (−2,5 dB) e 10000 (−5 dB) il mezzo percettivo è la media
+     geometrica, 6325 Hz, e lì il valore deve essere esattamente a metà:
+     −3,75 dB. Interpolando in hertz uscirebbe −3,47. */
+  vicino(OBIETTIVO.a('live', Math.sqrt(4000 * 10000)), -3.75, 0.05,
+         'il valore a metà ottava fra 4 e 10 kHz');
+});
+
+prova('contro il piatto, un avvallamento resta un avvallamento', function () {
+  var s = OBIETTIVO.scarto('piatta', curvaFinta(function (f) { return campanaDb(f, 4000, -6, 1.2); }));
+  var p = s.filter(function (x) { return x.f > 3500 && x.f < 4500; })[0];
+  if (p.db > -3) throw new Error('lo scarto dal piatto non vede l\'avvallamento: ' + p.db);
+});
+
+prova('LA COSA CHE CAMBIA TUTTO: contro «live» quell\'avvallamento non c\'è', function () {
+  /* Un impianto che scende in alto è GIUSTO per il live. Contro il piatto
+     sembra da correggere; contro il bersaglio vero non lo è. Senza curva
+     obiettivo i consigli direbbero di alzare gli acuti — l'errore che rende
+     un impianto stancante. */
+  var curva = curvaFinta(function (f) { return OBIETTIVO.a('live', f); });
+  OBIETTIVO.scarto('live', curva).forEach(function (p) {
+    if (Math.abs(p.db) > 0.5) {
+      throw new Error('a ' + Math.round(p.f) + ' Hz lo scarto è ' + p.db.toFixed(1) +
+                      ': una curva uguale al bersaglio non deve avere scarti');
+    }
+  });
+});
+
+prova('la media fra due posizioni sta in mezzo', function () {
+  var fs = 48000, n = 1 << 16;
+  var m = MISURA.media([finta(fs, n, 1000, 6), finta(fs, n, 1000, -6)]);
+  vicino(m.dbA(1000), 0, 2.5, 'la media fra +6 e −6 dB');
+  if (m.posizioni !== 2) throw new Error('non conta le posizioni');
+});
+
+prova('SI MEDIANO LE POTENZE: un buco in UNA posizione non affossa la media', function () {
+  /* La trappola di questo conto. Un buco profondissimo in un punto solo, in
+     media di decibel, tirerebbe giù il risultato di una decina di dB, e uno
+     correggerebbe un problema che a due metri non esiste. In potenza pesa per
+     quello che è: quasi niente. Se questa prova fallisce con un numero molto
+     negativo, sta mediando i logaritmi. */
+  var fs = 48000, n = 1 << 16;
+  var m = MISURA.media([finta(fs, n, 1000, 0), finta(fs, n, 1000, 0), finta(fs, n, 1000, -30)]);
+  var r = m.dbA(1000);
+  if (r < -6) {
+    throw new Error('media a ' + r.toFixed(1) + ' dB: sta mediando i decibel, non le ' +
+                    'potenze — un buco in un punto solo affossa tutta la sala');
+  }
+});
+
+prova('la risposta all\'impulso ha il picco dove arriva il suono', function () {
+  var fs = 48000, n = 1 << 16, ritardo = 96;   // 2 ms
+  var rif = rumore(n, 21);
+  var mic = new Float32Array(n);
+  for (var i = ritardo; i < n; i++) mic[i] = rif[i - ritardo];
+  var m = MISURA.crea({ fs: fs, dimensione: 8192 });
+  m.aggiungi(rif, mic);
+  var ir = m.risultato().impulso(4096);
+  var piu = 0;
+  for (i = 1; i < ir.campioni.length; i++) {
+    if (Math.abs(ir.campioni[i]) > Math.abs(ir.campioni[piu])) piu = i;
+  }
+  vicino(piu, ritardo, 2, 'il picco della risposta all\'impulso');
+});
+
+
+prova('MAI alzare i bassi profondi: si rompono i woofer', function () {
+  /* Il difetto che ha trovato l'autoprova, non io: consigliava «alza di 3,5 dB
+     a 23 Hz». Sotto gli 80 Hz il diffusore ha finito la corsa e il segnale in
+     più diventa calore ed escursione. È il modo più comune di distruggere un
+     impianto credendo di migliorarlo. */
+  var c = CONSIGLI.dai(curvaFinta(function (f) { return campanaDb(f, 35, -8, 1.5); }));
+  var alza = c.mosse.filter(function (m) { return m.tipo === 'alza'; });
+  if (alza.length) {
+    throw new Error('consiglia di alzare a ' + alza[0].hz + ' Hz: si rompono i woofer');
+  }
+  if (!c.note.filter(function (n) { return n.tipo === 'non-alzare-bassi'; }).length) {
+    throw new Error('non spiega perché quei bassi non si alzano');
+  }
+});
+
+prova('niente consigli fuori dalla banda utile', function () {
+  /* A 20 kHz e a 25 Hz un consiglio non serve a nessuno: sotto un PA non
+     arriva, sopra siamo al bordo del microfono e dell'udito. */
+  var c = CONSIGLI.dai(curvaFinta(function (f) {
+    return campanaDb(f, 19000, 8, 0.8) + campanaDb(f, 25, 8, 0.8);
+  }));
+  c.mosse.forEach(function (m) {
+    if (m.hz > 16000 || m.hz < 40) {
+      throw new Error('consiglia a ' + m.hz + ' Hz, fuori dalla banda in cui ha senso');
+    }
+  });
+});
+
+prova('CONTROPROVA: dentro la banda gli stessi difetti si consigliano', function () {
+  /* Senza questa, il filtro di banda potrebbe zittire tutto e sembrerebbe che
+     funzioni. */
+  var c = CONSIGLI.dai(curvaFinta(function (f) { return campanaDb(f, 500, 8, 0.8); }));
+  if (!c.mosse.filter(function (m) { return m.tipo === 'togli'; }).length) {
+    throw new Error('non consiglia niente nemmeno a 500 Hz: il filtro di banda taglia troppo');
+  }
 });
 
 console.log('\n' + passate + ' passate, ' + fallite + ' fallite\n');

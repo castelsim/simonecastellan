@@ -121,6 +121,41 @@ var MISURA = (function (DSP) {
           return Math.atan2(SxyI[i], SxyR[i]) * 180 / Math.PI;
         },
 
+        /* La risposta all'impulso: cosa fa l'impianto a un colpo secco.
+           È la stessa informazione della curva, vista nel tempo invece che in
+           frequenza — e nel tempo si leggono cose che in frequenza non si
+           vedono: quanto tardi arriva la prima riflessione, e quanto è forte
+           rispetto al suono diretto.
+
+           Si ottiene riportando indietro H(f). Le righe dove non c'è segnale
+           si azzerano: normalizzando il rumore di fondo si otterrebbe una coda
+           di erba che nasconde le riflessioni vere. */
+        impulso: function (quanti) {
+          var n = righe * 2;
+          var re = new Float64Array(n), im = new Float64Array(n);
+          var soglia = 0;
+          for (var i = 1; i < righe; i++) soglia = Math.max(soglia, Sxx[i]);
+          soglia *= 1e-8;
+
+          for (i = 1; i < righe; i++) {
+            if (Sxx[i] < soglia) continue;
+            var hr = SxyR[i] / Sxx[i], hi = SxyI[i] / Sxx[i];
+            re[i] = hr; im[i] = hi;
+            re[n - i] = hr; im[n - i] = -hi;      // simmetria: esce un segnale reale
+          }
+          DSP.fft(re, im, true);
+
+          var quantiPunti = Math.min(quanti || 2048, n);
+          var out = new Float64Array(quantiPunti);
+          var max = 0;
+          for (i = 0; i < quantiPunti; i++) {
+            out[i] = re[i];
+            if (Math.abs(out[i]) > max) max = Math.abs(out[i]);
+          }
+          if (max > 0) for (i = 0; i < quantiPunti; i++) out[i] /= max;
+          return { campioni: out, fs: fs };
+        },
+
         /* La curva pronta per il grafico: frequenza, decibel, coerenza.
            I decibel sono relativi alla media fra 200 Hz e 2 kHz, la zona che
            in una sala è la più affidabile: quello che interessa è la FORMA
@@ -153,7 +188,73 @@ var MISURA = (function (DSP) {
              get blocchi() { return blocchi; } };
   }
 
-  return { crea: crea };
+  /* ── La media fra più posizioni ──────────────────────────────────────────
+     Un punto solo non descrive una sala: le cancellazioni si spostano di metro
+     in metro, e quello che a un posto è un buco di 12 dB, due metri più in là
+     non c'è. Si misura in tre o cinque punti e si media.
+
+     SI MEDIANO LE POTENZE, NON I DECIBEL. È la trappola di questo conto: i
+     decibel sono logaritmi, e la loro media aritmetica pesa i buchi profondi
+     molto più di quanto meritino. Un buco di −30 dB in una sola posizione, su
+     tre posizioni, tira giù la media di 10 dB in media logaritmica — e uno
+     finirebbe per correggere un problema che esiste in un punto solo della
+     sala. In potenza quel buco pesa per quello che è: quasi niente.
+
+     Le fasi invece NON si mediano fra posizioni diverse: a un metro di
+     distanza sono già scorrelate, e la loro media tende a zero senza
+     significato. Si tiene la fase della prima misura, che è l'unica ancorata
+     a un punto vero. */
+  function media(risultati) {
+    var buoni = (risultati || []).filter(Boolean);
+    if (!buoni.length) return null;
+    if (buoni.length === 1) return buoni[0];
+
+    var curve = buoni.map(function (r) { return r.curva(6); });
+    var quante = curve.length;
+    var lunghezza = curve[0].length;
+
+    var fuori = [];
+    for (var i = 0; i < lunghezza; i++) {
+      var pot = 0, coe = 0, quanti = 0;
+      for (var k = 0; k < quante; k++) {
+        var p = curve[k][i];
+        if (!p) continue;
+        pot += Math.pow(10, p.db / 10);      // dai dB alla potenza
+        coe += p.coerenza;
+        quanti++;
+      }
+      if (!quanti) continue;
+      fuori.push({
+        f: curve[0][i].f,
+        db: 10 * Math.log10(pot / quanti),   // e ritorno ai dB
+        /* La coerenza media è quella giusta: se in una posizione su tre la
+           misura non valeva niente, il risultato è meno affidabile e si deve
+           vedere. */
+        coerenza: coe / quanti
+      });
+    }
+
+    return {
+      posizioni: quante,
+      blocchi: buoni.reduce(function (s, r) { return s + r.blocchi; }, 0),
+      curva: function () { return fuori; },
+      dbA: function (f) { return leggi(fuori, f, 'db'); },
+      coerenzaA: function (f) { return leggi(fuori, f, 'coerenza'); },
+      faseA: function (f) { return buoni[0].faseA(f); },
+      impulso: function () { return buoni[0].impulso(); }
+    };
+  }
+
+  function leggi(curva, f, campo) {
+    var piu = curva[0], dist = Infinity;
+    for (var i = 0; i < curva.length; i++) {
+      var d = Math.abs(Math.log(curva[i].f / f));
+      if (d < dist) { dist = d; piu = curva[i]; }
+    }
+    return piu ? piu[campo] : 0;
+  }
+
+  return { crea: crea, media: media };
 
 })(typeof require !== 'undefined' ? require('../comune/dsp.js') : DSP);
 

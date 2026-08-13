@@ -20,6 +20,15 @@
   var bande = null, grafico = null;
   var congelata = null, ultima = null;
   var inCorso = false;
+
+  /* Le posizioni misurate finora. Una sola descrive un punto, non una sala:
+     le cancellazioni si spostano di metro in metro, e quello che qui è un buco
+     di 12 dB due metri più in là non c'è. */
+  var posizioni = [];
+  var mediata = null;
+  var bersaglio = 'live';
+  var vista = 'curva';
+  var ultimoRisultato = null;
   var ultimiScritti = 0;      // quanti campioni ha raccolto il worklet finora
 
   var autoprova = /[?&]autoprova=1/.test(location.search);
@@ -242,18 +251,43 @@
     m.aggiungi(rif.subarray(0, utili), mic.subarray(ritardo, ritardo + utili));
 
     var r = m.risultato();
-    ultima = r.curva(6);
-    var c = CONSIGLI.dai(ultima);
+    posizioni.push(r);
+    ultimoRisultato = r;
 
     mostra('inCorso', false);
     mostra('esito', true);
+    mostra('viste', true);
     $('vai').disabled = false;
     $('vai').textContent = 'Misura di nuovo';
     mostra('azioniEsito', true);
 
-    grafico.disegna(ultima, congelata);
     scriviRitardo(ritardo, fs);
-    scriviConsigli(c, r);
+    ricalcola();
+  }
+
+  /* Rifà i conti senza rimisurare: succede quando si cambia bersaglio o si
+     aggiunge una posizione. La misura è già in mano, non serve risuonare. */
+  function ricalcola() {
+    mediata = MISURA.media(posizioni);
+    ultima = mediata.curva(6);
+
+    // i consigli si danno sullo SCARTO dal bersaglio, non sulla curva nuda
+    var scarto = OBIETTIVO.scarto(bersaglio, ultima);
+    var c = CONSIGLI.dai(scarto);
+
+    scriviPosizioni();
+    disegnaVista();
+    scriviConsigli(c);
+  }
+
+  function scriviPosizioni() {
+    var n = posizioni.length;
+    testo('posizioniTxt', n === 1
+      ? 'Una posizione misurata. Una sola descrive un punto, non una sala: ' +
+        'misurane almeno tre, in posti diversi.'
+      : n + ' posizioni, mediate. Le cancellazioni che esistono in un punto solo ' +
+        'sono state ridimensionate.');
+    mostra('azzeraPos', n > 1);
   }
 
   function scriviRitardo(campioni, fs) {
@@ -267,7 +301,39 @@
                          'che non è distanza: i metri sono una stima per eccesso.');
   }
 
-  function scriviConsigli(c, r) {
+  /* ── Le tre viste ──────────────────────────────────────────────────────── */
+
+  var NOTE_VISTA = {
+    curva: 'La riga tratteggiata è il bersaglio. Dove la curva sbiadisce, la ' +
+           'misura non è affidabile. Tocca il grafico per leggere un punto.',
+    impulso: 'Il picco è il suono diretto. I baffi dopo sono le riflessioni: ' +
+             'più sono lontane dal picco, più viene da lontano la superficie ' +
+             'che le rimanda. Una riflessione forte entro i primi millisecondi ' +
+             'è una parete o un soffitto vicini.',
+    fase: 'A punti, non a linea: fra due punti la fase può fare un giro intero, ' +
+          'e unirli disegnerebbe pendenze che non esistono. I salti verticali ' +
+          'non sono guasti, sono il giro che ricomincia.'
+  };
+
+  function disegnaVista() {
+    mostra('vistaNota', true);
+    testo('vistaNota', NOTE_VISTA[vista]);
+    mostra('lettura', vista === 'curva');
+
+    if (vista === 'curva') {
+      var obiettivo = OBIETTIVO.curva(bersaglio, ultima.map(function (p) { return p.f; }));
+      grafico.disegna(ultima, congelata, obiettivo);
+    } else if (vista === 'impulso') {
+      grafico.impulso(ultimoRisultato.impulso(4096), 50);
+    } else {
+      var punti = ultima.map(function (p) {
+        return { f: p.f, gradi: ultimoRisultato.faseA(p.f), coerenza: p.coerenza };
+      });
+      grafico.fase(punti);
+    }
+  }
+
+  function scriviConsigli(c) {
     var box = $('mosse');
     box.innerHTML = '';
 
@@ -313,16 +379,39 @@
   function congela() {
     if (!ultima) return;
     congelata = ultima;
-    grafico.disegna(ultima, congelata);
+    disegnaVista();
     mostra('scongela', true);
     testo('congelaTxt', 'Curva di prima messa da parte. Correggi l\'equalizzatore e rimisura: la vedrai tratteggiata sotto la nuova.');
   }
 
   function scongela() {
     congelata = null;
-    grafico.disegna(ultima, null);
+    disegnaVista();
     mostra('scongela', false);
     testo('congelaTxt', '');
+  }
+
+  /* ── Il bersaglio ─────────────────────────────────────────────────────── */
+
+  function costruisciBersaglio() {
+    var box = $('segObiettivo');
+    box.innerHTML = '';
+    OBIETTIVO.elenco().forEach(function (c) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'seg-btn' + (c.chiave === bersaglio ? ' active' : '');
+      b.textContent = c.nome;
+      b.addEventListener('click', function () {
+        bersaglio = c.chiave;
+        [].forEach.call(box.children, function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+        testo('obiettivoSpiega', OBIETTIVO.spiega(bersaglio));
+        // niente da rimisurare: i conti si rifanno sulla misura già in mano
+        if (posizioni.length) ricalcola();
+      });
+      box.appendChild(b);
+    });
+    testo('obiettivoSpiega', OBIETTIVO.spiega(bersaglio));
   }
 
   /* ── La scelta dei dispositivi ────────────────────────────────────────── */
@@ -401,7 +490,45 @@
     $('congela').addEventListener('click', congela);
     $('scongela').addEventListener('click', scongela);
     window.addEventListener('resize', function () {
-      if (ultima) grafico.disegna(ultima, congelata);
+      if (ultima) disegnaVista();
+    });
+
+    costruisciBersaglio();
+
+    $('aggiungi').addEventListener('click', function () {
+      /* Non azzera niente: la misura nuova si somma alle altre. Il consiglio
+         di spostarsi sta qui, dove serve, non in fondo alla pagina. */
+      testo('statoTxt', 'Spostati di qualche metro, poi ascolto…');
+      misura();
+    });
+
+    $('azzeraPos').addEventListener('click', function () {
+      posizioni = [];
+      mediata = null;
+      mostra('esito', false);
+      mostra('viste', false);
+      mostra('vistaNota', false);
+      $('vai').textContent = 'Misura';
+      scriviPosizioni();
+    });
+
+    [].forEach.call(document.querySelectorAll('.vista-btn'), function (b) {
+      b.addEventListener('click', function () {
+        vista = b.getAttribute('data-vista');
+        [].forEach.call(document.querySelectorAll('.vista-btn'), function (x) {
+          x.classList.toggle('on', x === b);
+        });
+        disegnaVista();
+      });
+    });
+
+    grafico.allaLettura(function (p) {
+      if (!p) { testo('lettura', 'Tocca il grafico per leggere un punto.'); return; }
+      var hz = p.f >= 1000 ? (p.f / 1000).toFixed(2).replace('.', ',') + ' kHz'
+                           : Math.round(p.f) + ' Hz';
+      var db = (p.db >= 0 ? '+' : '−') + Math.abs(p.db).toFixed(1).replace('.', ',');
+      testo('lettura', hz + ' · ' + db + ' dB · affidabilità ' +
+                       Math.round(p.coerenza * 100) + '%');
     });
     if (!window.AudioWorkletNode) {
       mostra('erroreBox', true);

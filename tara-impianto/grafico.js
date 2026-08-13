@@ -31,7 +31,10 @@ var GRAFICO = (function () {
       return h / 2 - (db / ampiezza) * (h / 2);
     }
 
-    function disegna(curva, congelata) {
+    var ultimaCongelata = null, ultimoObiettivo = null;
+
+    function disegna(curva, congelata, obiettivo) {
+      ultimaCurva = curva; ultimaCongelata = congelata; ultimoObiettivo = obiettivo;
       var dpr = window.devicePixelRatio || 1;
       var w = canvas.clientWidth, h = canvas.clientHeight;
       canvas.width = w * dpr; canvas.height = h * dpr;
@@ -61,8 +64,62 @@ var GRAFICO = (function () {
         c.fillText(t, Math.min(w - lw, Math.max(0, xx - lw / 2)), h - 2);
       });
 
+      /* Il bersaglio si disegna PRIMA e più sottile: è un riferimento, non una
+         misura, e non deve competere con la curva vera. */
+      if (obiettivo && obiettivo.length) {
+        c.setLineDash([6, 5]);
+        c.strokeStyle = '#c9a227';
+        c.lineWidth = 1.5;
+        c.beginPath();
+        obiettivo.forEach(function (p, i) {
+          var xx = x(p.f, w), yy = y(Math.max(-ampiezza, Math.min(ampiezza, p.db)), h);
+          if (i) c.lineTo(xx, yy); else c.moveTo(xx, yy);
+        });
+        c.stroke();
+        c.setLineDash([]);
+      }
+
       if (congelata && congelata.length) traccia(c, congelata, w, h, '#c2c6cc', 1.5, true);
       if (curva && curva.length) traccia(c, curva, w, h, '#0d9488', 2.5, false);
+
+      if (segnaposto && curva && curva.length) disegnaSegnaposto(c, w, h);
+    }
+
+    /* ── Il cursore ────────────────────────────────────────────────────────
+       Toccare la curva e leggere il numero esatto. I consigli dicono le cose
+       grosse; qui si controlla un punto preciso, che è quello che si fa
+       quando si sta già muovendo un cursore sull'equalizzatore. */
+    var segnaposto = null, ultimaCurva = null, quandoLegge = null;
+
+    function disegnaSegnaposto(c, w, h) {
+      var p = segnaposto;
+      var xx = x(p.f, w), yy = y(Math.max(-ampiezza, Math.min(ampiezza, p.db)), h);
+      c.strokeStyle = '#0f1614';
+      c.lineWidth = 1;
+      c.setLineDash([2, 3]);
+      c.beginPath(); c.moveTo(xx, 0); c.lineTo(xx, h - 14); c.stroke();
+      c.setLineDash([]);
+      c.fillStyle = '#0d9488';
+      c.beginPath(); c.arc(xx, yy, 4, 0, 6.2832); c.fill();
+      c.strokeStyle = '#fff'; c.lineWidth = 1.5; c.stroke();
+    }
+
+    function frequenzaDa(px, w) {
+      return minF * Math.pow(maxF / minF, Math.max(0, Math.min(1, px / w)));
+    }
+
+    function leggi(clientX) {
+      if (!ultimaCurva || !ultimaCurva.length) return;
+      var r = canvas.getBoundingClientRect();
+      var f = frequenzaDa(clientX - r.left, r.width);
+      var piu = ultimaCurva[0], dist = Infinity;
+      ultimaCurva.forEach(function (p) {
+        var d = Math.abs(Math.log(p.f / f));
+        if (d < dist) { dist = d; piu = p; }
+      });
+      segnaposto = piu;
+      disegna(ultimaCurva, ultimaCongelata, ultimoObiettivo);
+      if (quandoLegge) quandoLegge(piu);
     }
 
     /* La curva si disegna a pezzi: ogni tratto prende la sua trasparenza dalla
@@ -124,7 +181,104 @@ var GRAFICO = (function () {
       });
     }
 
-    return { disegna: disegna, barre: barre };
+    /* ── La risposta all'impulso ───────────────────────────────────────────
+       Cosa fa l'impianto a un colpo secco. Qui il tempo è lineare, non
+       logaritmico: si guarda QUANDO arrivano le cose. Il picco è il suono
+       diretto; i baffi dopo sono le riflessioni della sala, e la loro
+       distanza dal picco dice da quanto lontano tornano. */
+    function impulso(ir, msVisibili) {
+      var dpr = window.devicePixelRatio || 1;
+      var w = canvas.clientWidth, h = canvas.clientHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      var c = canvas.getContext('2d');
+      c.setTransform(dpr, 0, 0, dpr, 0, 0);
+      c.clearRect(0, 0, w, h);
+      if (!ir || !ir.campioni || !ir.campioni.length) return;
+
+      var ms = msVisibili || 50;
+      var quanti = Math.min(ir.campioni.length, Math.round(ir.fs * ms / 1000));
+      var mezzo = h / 2;
+
+      c.strokeStyle = '#eef2f1'; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(0, mezzo + 0.5); c.lineTo(w, mezzo + 0.5); c.stroke();
+
+      c.fillStyle = '#8b9793';
+      c.font = '11px ui-monospace, Menlo, monospace';
+      for (var t = 0; t <= ms; t += (ms > 40 ? 10 : 5)) {
+        var xx = Math.round(t / ms * w) + 0.5;
+        c.strokeStyle = '#f2f6f5';
+        c.beginPath(); c.moveTo(xx, 0); c.lineTo(xx, h - 14); c.stroke();
+        c.fillText(t + ' ms', Math.min(w - 34, xx + 3), h - 3);
+      }
+
+      c.strokeStyle = '#0d9488'; c.lineWidth = 1.5;
+      c.beginPath();
+      for (var i = 0; i < quanti; i++) {
+        var px = i / quanti * w;
+        var py = mezzo - ir.campioni[i] * (mezzo - 16);
+        if (i) c.lineTo(px, py); else c.moveTo(px, py);
+      }
+      c.stroke();
+    }
+
+    /* ── La fase ───────────────────────────────────────────────────────────
+       Si disegna «avvolta» fra −180° e +180°, come fanno tutti: srotolarla
+       farebbe una scala che esce dal foglio. I salti verticali non sono
+       guasti, sono il giro che ricomincia. */
+    function fase(punti) {
+      var dpr = window.devicePixelRatio || 1;
+      var w = canvas.clientWidth, h = canvas.clientHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      var c = canvas.getContext('2d');
+      c.setTransform(dpr, 0, 0, dpr, 0, 0);
+      c.clearRect(0, 0, w, h);
+
+      c.font = '11px ui-monospace, Menlo, monospace';
+      [-180, -90, 0, 90, 180].forEach(function (g) {
+        var yy = Math.round(h / 2 - (g / 200) * (h / 2)) + 0.5;
+        c.strokeStyle = (g === 0) ? '#ccd6d3' : '#eef2f1';
+        c.beginPath(); c.moveTo(0, yy); c.lineTo(w, yy); c.stroke();
+        if (g !== 0) { c.fillStyle = '#8b9793'; c.fillText(g + '°', 2, yy - 3); }
+      });
+      TACCHE.forEach(function (f) {
+        var xx = Math.round(x(f, w)) + 0.5;
+        c.strokeStyle = '#f2f6f5';
+        c.beginPath(); c.moveTo(xx, 0); c.lineTo(xx, h - 14); c.stroke();
+        c.fillStyle = '#8b9793';
+        var t = etichetta(f), lw = c.measureText(t).width;
+        c.fillText(t, Math.min(w - lw, Math.max(0, xx - lw / 2)), h - 2);
+      });
+
+      /* A punti e non a linea: fra un punto e l'altro la fase può fare un
+         salto di 360°, e unirli con una riga disegnerebbe pendenze che non
+         esistono. */
+      punti.forEach(function (p) {
+        if (p.f < 20 || p.f > 20000) return;
+        var op = Math.max(0.08, Math.min(1, (p.coerenza - 0.3) / 0.5));
+        c.globalAlpha = op;
+        c.fillStyle = '#0d9488';
+        c.fillRect(x(p.f, w) - 1, h / 2 - (p.gradi / 200) * (h / 2) - 1, 2, 2);
+      });
+      c.globalAlpha = 1;
+    }
+
+    /* Il dito e il mouse leggono la curva. «passive» perché non si annulla
+       niente: la pagina deve poter scorrere anche partendo dal grafico. */
+    canvas.addEventListener('pointermove', function (e) { leggi(e.clientX); });
+    canvas.addEventListener('pointerdown', function (e) { leggi(e.clientX); });
+    canvas.addEventListener('pointerleave', function () {
+      segnaposto = null;
+      if (ultimaCurva) disegna(ultimaCurva, ultimaCongelata, ultimoObiettivo);
+      if (quandoLegge) quandoLegge(null);
+    });
+
+    return {
+      disegna: disegna,
+      barre: barre,
+      impulso: impulso,
+      fase: fase,
+      allaLettura: function (fn) { quandoLegge = fn; }
+    };
   }
 
   return { crea: crea };
