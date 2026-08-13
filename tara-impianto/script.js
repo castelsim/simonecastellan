@@ -20,6 +20,7 @@
   var bande = null, grafico = null;
   var congelata = null, ultima = null;
   var inCorso = false;
+  var ultimiScritti = 0;      // quanti campioni ha raccolto il worklet finora
 
   var autoprova = /[?&]autoprova=1/.test(location.search);
 
@@ -80,6 +81,8 @@
     mostra('inCorso', true);
     testo('statoTxt', 'Chiedo il microfono…');
     $('vai').disabled = true;
+    ultimiScritti = 0;
+    $('barra').style.width = '0%';
 
     var CtxA = window.AudioContext || window.webkitAudioContext;
     ctx = new CtxA();
@@ -170,6 +173,7 @@
     var campioni = Math.floor(fs * DURATA);
     worklet.port.onmessage = function (e) {
       if (e.data.tipo === 'avanzamento') {
+        ultimiScritti = e.data.scritti;
         var p = Math.min(1, e.data.scritti / campioni);
         $('barra').style.width = Math.round(p * 100) + '%';
         testo('statoTxt', 'Ascolto… ' + Math.ceil(DURATA * (1 - p)) + ' s');
@@ -185,6 +189,28 @@
 
     testo('statoTxt', 'Ascolto…');
     rtaVivo();
+    reteDiSicurezza();
+  }
+
+  /* Se l'audio resta bloccato, il worklet non gira e non arriva mai niente:
+     la pagina resterebbe su «Ascolto…» per sempre, muta. Capita quando il
+     browser non considera il tocco un gesto valido, o su iPhone con la
+     levetta del silenzioso. Trovato il 13/08/2026 provando la pagina in
+     produzione: restava lì e non lo diceva a nessuno. */
+  function reteDiSicurezza() {
+    setTimeout(function () {
+      if (!inCorso) return;              // finita per la sua strada: tutto bene
+      if (ultimiScritti > 0) return;     // sta lavorando, solo più lenta
+      fermaTutto();
+      mostra('inCorso', false);
+      $('vai').disabled = false;
+      mostra('erroreBox', true);
+      testo('erroreTxt', ctx && ctx.state !== 'running'
+        ? 'Il browser ha tenuto l\'audio bloccato, quindi non è uscito niente dalle casse. ' +
+          'Tocca di nuovo «Misura». Su iPhone controlla la levetta del silenzioso.'
+        : 'Non è arrivato nessun campione dal microfono. Controlla che sia quello giusto ' +
+          'e che qualche altra applicazione non lo stia occupando.');
+    }, 4000);
   }
 
   function rtaVivo() {
