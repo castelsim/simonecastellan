@@ -36,14 +36,8 @@
      ogni misura. Il guadagno automatico da solo appiattisce la curva
      mentre la misuri: vedresti un impianto perfetto sempre. */
   function chiediMicrofono() {
-    return navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: false,
-        noiseSuppression: false,
-        autoGainControl: false,
-        channelCount: 1
-      }
-    });
+    // i vincoli li costruisce DISPOSITIVI: dentro c'è anche il microfono scelto
+    return navigator.mediaDevices.getUserMedia(DISPOSITIVI.vincoliIngresso());
   }
 
   /* Chiedere non è ottenere: alcuni dispositivi accettano il vincolo e fanno
@@ -101,7 +95,15 @@
             'non è quella dell\'impianto. Meglio ripetere da un computer.');
         }
       }
+      /* Ora che il permesso c'è, i nomi dei dispositivi sono leggibili: si
+         rilegge l'elenco, così la riga sotto il pulsante smette di dire
+         «microfono di sistema» e dice come si chiama davvero. */
+      DISPOSITIVI.aggiorna().then(disegnaDispositivi);
       return ctx.audioWorklet.addModule('cattura.worklet.js');
+    }).then(function () {
+      // l'uscita scelta va applicata PRIMA di far partire il suono, o il primo
+      // pezzo di rumore rosa esce dalla cassa sbagliata
+      return DISPOSITIVI.applicaUscita(ctx);
     }).then(function () {
       avvia();
     }).catch(function (e) {
@@ -323,11 +325,72 @@
     testo('congelaTxt', '');
   }
 
+  /* ── La scelta dei dispositivi ────────────────────────────────────────── */
+
+  function riempi(sel, lista, scelto, etichettaPre) {
+    sel.innerHTML = '';
+    var pre = document.createElement('option');
+    pre.value = '';
+    pre.textContent = etichettaPre;
+    sel.appendChild(pre);
+    lista.forEach(function (d, i) {
+      if (d.deviceId === 'default' || d.deviceId === 'communications') return;
+      var o = document.createElement('option');
+      o.value = d.deviceId;
+      o.textContent = d.label || ('Dispositivo ' + (i + 1));
+      sel.appendChild(o);
+    });
+    sel.value = scelto || '';
+  }
+
+  function disegnaDispositivi() {
+    testo('riassuntoDisp', DISPOSITIVI.riassunto());
+    riempi($('selIngresso'), DISPOSITIVI.ingressi(), DISPOSITIVI.ingresso(),
+           'Quello di sistema');
+    mostra('nomiNascosti', !DISPOSITIVI.nomiVisibili());
+
+    var scegliibili = DISPOSITIVI.usciteScegliibili();
+    $('rigaUscita').hidden = !scegliibili;
+    mostra('usciteNo', !scegliibili);
+    if (scegliibili) {
+      riempi($('selUscita'), DISPOSITIVI.uscite(), DISPOSITIVI.uscita(),
+             'Quella di sistema');
+    }
+  }
+
+  /* Per far comparire i nomi serve un permesso, e per il permesso serve una
+     richiesta vera: si apre e si chiude subito, senza registrare niente. */
+  function svelaNomi() {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (s) {
+      s.getTracks().forEach(function (t) { t.stop(); });
+      return DISPOSITIVI.aggiorna();
+    }).then(disegnaDispositivi).catch(function () {
+      testo('riassuntoDisp', 'Senza permesso non posso mostrare i nomi');
+    });
+  }
+
   /* ── Avvio ────────────────────────────────────────────────────────────── */
 
   function pronto() {
     grafico = GRAFICO.crea($('tela'));
     $('vai').addEventListener('click', misura);
+
+    DISPOSITIVI.avvia(disegnaDispositivi).then(disegnaDispositivi);
+    $('apriDisp').addEventListener('click', function () {
+      var p = $('pannelloDisp');
+      p.hidden = !p.hidden;
+      $('apriDisp').setAttribute('aria-expanded', String(!p.hidden));
+      $('apriDisp').classList.toggle('aperto', !p.hidden);
+    });
+    $('mostraNomi').addEventListener('click', svelaNomi);
+    $('selIngresso').addEventListener('change', function () {
+      DISPOSITIVI.scegliIngresso(this.value);
+      testo('riassuntoDisp', DISPOSITIVI.riassunto());
+    });
+    $('selUscita').addEventListener('change', function () {
+      DISPOSITIVI.scegliUscita(this.value);
+      testo('riassuntoDisp', DISPOSITIVI.riassunto());
+    });
     $('congela').addEventListener('click', congela);
     $('scongela').addEventListener('click', scongela);
     window.addEventListener('resize', function () {

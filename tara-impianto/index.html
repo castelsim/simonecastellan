@@ -39,6 +39,40 @@
 
     <button type="button" id="vai" class="btn btn-primario">Misura</button>
 
+    <!-- Chi misura col telefono non deve scegliere niente. Chi ha
+         un'interfaccia collegata deve poterlo fare subito: una riga sola, che
+         dice cosa userà, e si apre solo se la tocchi. -->
+    <button type="button" class="riga-disp" id="apriDisp" aria-expanded="false" aria-controls="pannelloDisp">
+      <span id="riassuntoDisp">Ingresso: microfono di sistema</span>
+      <span class="freccia" aria-hidden="true">▾</span>
+    </button>
+
+    <section class="pannello-disp" id="pannelloDisp" hidden>
+      <!-- I nomi dei dispositivi il browser li nasconde finché il microfono non
+           è stato concesso almeno una volta: è una difesa contro il
+           riconoscimento. Meglio spiegarlo che mostrare una tendina vuota. -->
+      <p class="disp-nota" id="nomiNascosti" hidden>
+        I nomi compaiono dopo che avrai dato il permesso al microfono.
+        <button type="button" class="link-piccolo" id="mostraNomi">Mostra i nomi</button>
+      </p>
+
+      <label class="disp-riga">
+        <span class="disp-lbl">Microfono</span>
+        <select id="selIngresso"></select>
+      </label>
+
+      <label class="disp-riga" id="rigaUscita">
+        <span class="disp-lbl">Da quali casse</span>
+        <select id="selUscita"></select>
+      </label>
+
+      <p class="disp-nota" id="usciteNo" hidden>
+        Questo browser non lascia scegliere da dove esce l'audio: succede su
+        Safari e su iPhone. Il segnale va dove punta il sistema — scegli lì
+        l'interfaccia, oppure collegala e falla diventare l'uscita predefinita.
+      </p>
+    </section>
+
     <p class="riga-mono"><b>Gratis</b> · nel browser · niente caricamenti</p>
 
     <p class="avviso-ingresso" id="avvisoIngresso" hidden><span id="avvisoIngressoTxt"></span></p>
@@ -124,6 +158,7 @@
 
   <script src="/comune/dsp.js"></script>
   <script src="/comune/segnali.js"></script>
+  <script src="dispositivi.js"></script>
   <script src="misura.js"></script>
   <script src="consigli.js"></script>
   <script src="grafico.js"></script>
