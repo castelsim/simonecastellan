@@ -381,6 +381,13 @@
       p.hidden = !p.hidden;
       $('apriDisp').setAttribute('aria-expanded', String(!p.hidden));
       $('apriDisp').classList.toggle('aperto', !p.hidden);
+      /* Si rienumera qui, ogni volta che il pannello si apre. Al caricamento
+         della pagina Chrome può rispondere con un elenco VUOTO — succede
+         finché il sottosistema audio non è sveglio, e in produzione capitava:
+         le tendine restavano senza voci mentre `enumerateDevices` chiamata a
+         mano un secondo dopo ne trovava diciannove. Questo è anche il momento
+         giusto: se hai appena collegato l'interfaccia, la trovi. */
+      if (!p.hidden) DISPOSITIVI.aggiorna().then(disegnaDispositivi);
     });
     $('mostraNomi').addEventListener('click', svelaNomi);
     $('selIngresso').addEventListener('change', function () {
