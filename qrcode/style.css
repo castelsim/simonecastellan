@@ -3,8 +3,8 @@
   --text: #3c4043;
   --ink: #1a1a1a;
   --muted: #5f6368;
-  --muted-2: #80868b;
-  --faint: #9aa0a6;
+  --muted-2: #68716d;
+  --faint: #68716d;
   --pill: #f1f3f4;
   --pill-hover: #e6e8ea;
   --line: #c2c6cc;
@@ -222,7 +222,7 @@ textarea::placeholder { color: var(--faint); }
 }
 .campo-aiuto {
   font-size: 13px;
-  color: #8b9096;
+  color: #68716d;
   line-height: 1.5;
   margin: 8px 0 0;
 }
