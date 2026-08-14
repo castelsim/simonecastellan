@@ -12,7 +12,7 @@
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Comprimi PDF" />
-  <meta property="og:description" content="Porta un PDF sotto il peso che chiedono moduli, PEC e portali. Nel browser: il documento resta sul tuo dispositivo." />
+  <meta property="og:description" content="Porta un PDF sotto il peso che chiedono moduli, PEC e portali. Nel browser: il PDF resta sul tuo dispositivo." />
   <meta property="og:image" content="og-image.svg" />
   <meta property="og:url" content="https://simonecastellan.com/comprimi-pdf/" />
   <meta property="og:locale" content="it_IT" />
@@ -45,7 +45,7 @@
     </div>
     <p class="modo-nota">I moduli online chiedono spesso 1 o 2 MB. La posta si ferma più in alto.</p>
 
-    <p class="passo">2 · Il documento</p>
+    <p class="passo">2 · Il PDF</p>
 
     <section id="dropZone" class="dropzone" role="button" tabindex="0" aria-label="Scegli o trascina un PDF">
       <p class="dz-title">Trascina qui il PDF</p>
@@ -63,9 +63,9 @@
     <!-- Avviso: si sta per rinunciare al testo. Compare solo se lo si chiede. -->
     <section id="warnBox" class="warn hidden">
       <p class="warn-title">Così ogni pagina diventa una fotografia</p>
-      <p class="warn-msg">Il documento resta identico da vedere e da stampare. Ma il testo
+      <p class="warn-msg">Il PDF resta identico da vedere e da stampare. Ma il testo
         smette di essere testo: non si potrà più selezionare, cercare o copiare.
-        Su un documento già scansionato non cambia nulla.</p>
+        Su un PDF già scansionato non cambia nulla.</p>
       <div class="warn-actions">
         <button type="button" id="goAnyway" class="btn btn-primary">Procedi</button>
         <button type="button" id="cancelBtn" class="btn btn-ghost">Annulla</button>
@@ -74,7 +74,7 @@
 
     <!-- Lavorazione -->
     <section id="status" class="status hidden" aria-live="polite">
-      <p id="statusText" class="status-text">Apro il documento…</p>
+      <p id="statusText" class="status-text">Apro il PDF…</p>
       <div class="progress"><div id="progressBar" class="progress-bar"></div></div>
     </section>
 
@@ -98,13 +98,13 @@
     <section class="spiega">
       <h2>A cosa serve</h2>
       <p>Portali, PEC e moduli online rifiutano i PDF troppo pesanti.
-        Il peso di solito viene dalle scansioni e dalle foto dentro il documento.
+        Il peso di solito viene dalle scansioni e dalle foto dentro il PDF.
         Qui le alleggerisco e lascio il testo com'è. Non mandi il file a nessun sito
         e non installi niente.</p>
 
       <h2>Domande</h2>
 
-      <h3>Il documento viene caricato online?</h3>
+      <h3>Il PDF viene caricato online?</h3>
       <p>No. Il lavoro avviene dentro il browser, sul tuo dispositivo. Il file non esce
         di lì, nemmeno verso di me.</p>
 
@@ -118,11 +118,12 @@
 
       <h3>E se pesa già poco?</h3>
       <p>Non lo tocco. Comprimere due volte un file leggero non serve a niente.
-        A volte lo fa perfino crescere.</p>
+        A volte lo fa perfino crescere. Se vuoi provarci lo stesso, c'è il pulsante
+        «Comprimilo lo stesso».</p>
 
       <h3>Ho un PDF firmato digitalmente</h3>
       <p>Non comprimerlo. Toccare il file rompe la firma. Prima alleggerisci il
-        documento, poi lo firmi.</p>
+        PDF, poi lo firmi.</p>
 
       <h3>Quanto ci mette?</h3>
       <p>Dipende da quante immagini ci sono dentro. La barra dice a che punto sono.</p>
