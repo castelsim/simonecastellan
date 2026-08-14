@@ -187,9 +187,35 @@ function aggiornaPrevisione() {
 // --- Il motore ---------------------------------------------------------------
 
 var motore = null;
+var caricatore = null;      // la promessa di ffmpeg.min.js, una volta sola
+
+/* Il caricatore di ffmpeg arriva quando si preme «comprimi», non all'apertura.
+   Qui il motore serve sempre — a differenza di /audio-mp3/, dove è solo un
+   ripiego — quindi il guadagno è piccolo: 22 KB e una richiesta in meno per
+   chi apre la pagina e poi cambia idea. Il service worker invece resta
+   all'apertura, perché senza isolamento il motore non parte affatto. */
+function preparaCaricatore() {
+  if (window.FFmpeg && window.FFmpeg.createFFmpeg) return Promise.resolve();
+  if (caricatore) return caricatore;
+  caricatore = new Promise(function (ok, no) {
+    var s = document.createElement('script');
+    s.src = '/audio-mp3/vendor/ffmpeg/ffmpeg.min.js';
+    s.onload = ok;
+    s.onerror = function () { no(new Error('niente-motore')); };
+    document.head.appendChild(s);
+  }).catch(function (e) {
+    caricatore = null;      // se la rete cade, il prossimo tentativo riprova
+    throw e;
+  });
+  return caricatore;
+}
 
 function prendiMotore() {
   if (motore) return Promise.resolve(motore);
+  return preparaCaricatore().then(accendiMotore);
+}
+
+function accendiMotore() {
   if (!window.FFmpeg || !window.FFmpeg.createFFmpeg) {
     return Promise.reject(new Error('niente-motore'));
   }

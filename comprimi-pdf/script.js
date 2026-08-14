@@ -12,8 +12,48 @@
       fotografia. Comprime di più ma il testo smette di essere testo. Resta
       dietro un pulsante, con l'avviso davanti. */
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdf.worker.min.js';
-var L = PDFLib;
+/* ── Le librerie arrivano quando servono, non prima ────────────────────────
+   pdf.js e pdf-lib pesano 297 KB compressi, ed erano scaricati aprendo la
+   pagina: il 97% del peso, pagato anche da chi passava di qui solo per capire
+   cosa fa lo strumento. Ora la pagina si apre con 9 KB e le librerie arrivano
+   quando scegli un file — che è l'unico momento in cui servono.
+
+   Restano due file separati e non uno solo: pdf-lib fa il lavoro vero
+   (sostituire le immagini dentro al PDF), pdf.js serve solo per la
+   rasterizzazione, l'ultima spiaggia. Tenerli distinti permetterà, un giorno,
+   di caricare il secondo solo a chi preme quel pulsante. */
+
+var LIBRERIE = ['vendor/pdf-lib.min.js', 'vendor/pdf.min.js'];
+var L = null;                    // PDFLib, assegnata dopo il caricamento
+var libreriePronte = null;       // la promessa, così si carica una volta sola
+
+function caricaScript(src) {
+  return new Promise(function (ok, no) {
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = ok;
+    s.onerror = function () { no(new Error(src)); };
+    document.head.appendChild(s);
+  });
+}
+
+function preparaLibrerie() {
+  if (libreriePronte) return libreriePronte;
+  libreriePronte = Promise.all(LIBRERIE.map(caricaScript)).then(function () {
+    if (typeof PDFLib === 'undefined' || typeof pdfjsLib === 'undefined') {
+      throw new Error('librerie caricate ma non disponibili');
+    }
+    L = PDFLib;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdf.worker.min.js';
+  }).catch(function (e) {
+    /* Se la rete cade a metà, il prossimo tentativo deve poter riprovare:
+       senza questo, la promessa fallita resterebbe in cache per sempre e lo
+       strumento sarebbe rotto fino al ricaricamento della pagina. */
+    libreriePronte = null;
+    throw e;
+  });
+  return libreriePronte;
+}
 
 var targetKB = 5120;
 var fileScelto = null;
@@ -285,9 +325,23 @@ async function apri(file) {
   mostra(warnBox, false);
   mostra(result, false);
   mostra(statusBox, true);
-  avanzamento('Apro il documento…', 0.03);
 
   try {
+    /* Le librerie arrivano adesso, non all'apertura della pagina. La prima
+       volta costa qualche decimo di secondo (297 KB), poi sono in cache e la
+       riga sparisce prima che si legga. Va detto, però: su una rete lenta
+       un'attesa muta sembra uno strumento rotto. */
+    if (!L) avanzamento('Preparo gli strumenti…', 0.01);
+    try {
+      await preparaLibrerie();
+    } catch (e) {
+      mostra(statusBox, false);
+      avvisa('Non sono riuscito a scaricare gli strumenti che servono a leggere i PDF. ' +
+             'Controlla la connessione e riprova: il file non si è mosso.');
+      return;
+    }
+
+    avanzamento('Apro il documento…', 0.03);
     bytesOriginali = new Uint8Array(await file.arrayBuffer());
     docTesto = await pdfjsLib.getDocument({ data: bytesOriginali.slice(0) }).promise;
     await lavora();

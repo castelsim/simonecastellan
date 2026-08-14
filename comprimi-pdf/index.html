@@ -135,8 +135,10 @@
     · <a href="https://simonecastellan.com/tools/" target="_blank" rel="noopener">Altri strumenti</a>
   </footer>
 
-  <script src="vendor/pdf.min.js"></script>
-  <script src="vendor/pdf-lib.min.js"></script>
+  <!-- pdf.js e pdf-lib NON stanno più qui: pesavano 297 KB compressi scaricati
+       all'apertura, cioè il 97% della pagina, pagati anche da chi passava solo
+       per capire cosa fa lo strumento. Ora li carica script.js quando scegli un
+       file — vedi «preparaLibrerie». -->
   <script src="script.js"></script>
 </body>
 </html>
