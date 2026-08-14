@@ -310,16 +310,52 @@ function fmtTime(s) {
 
 var fileMsg = document.getElementById('fileMsg');
 
+function mostraMsg(testo) {
+  player.classList.add('hidden');
+  fileMsg.textContent = testo;
+  fileMsg.classList.remove('hidden');
+}
+
+/* La guardia: se dopo quindici secondi il brano non è né partito né fallito, il
+   lettore resterebbe lì a 0:00 per sempre, senza una parola. Meglio dire che non
+   ce l'ho fatta che lasciare una pagina che finge di lavorare. */
+var guardia = null;
+function fermaGuardia() { if (guardia) { clearTimeout(guardia); guardia = null; } }
+
 var objUrl = null;
+/* Qui il campo prende un file solo (niente «multiple», niente trascinamento):
+   più file insieme non possono arrivare, e infatti non c'è niente da dire. */
 fileIn.addEventListener('change', function () {
   var f = fileIn.files && fileIn.files[0];
+  // Riscegliere lo stesso file dopo un errore non faceva scattare niente,
+  // perché il valore del campo non cambiava: la pagina restava muta.
+  fileIn.value = '';
   if (!f) return;
+  fileName.textContent = f.name;
+
+  /* Tre cose si sanno prima ancora di provare a suonarlo. Prima finivano tutte
+     e tre su «questo file non si apre qui», e solo dopo qualche secondo. */
+  if (f.size === 0) {
+    return mostraMsg('Questo file è vuoto: dentro non c\'è nessun brano. Se te l\'hanno mandato, fattelo rimandare.');
+  }
+  var pareAudio = /^(audio|video)\//.test(f.type) ||
+                  /\.(mp3|wav|aiff?|flac|m4a|aac|ogg|oga|opus|wma|mp4|mov|webm|caf|amr)$/i.test(f.name);
+  if (!pareAudio) {
+    return mostraMsg('Questo non sembra un brano: qui vanno i file audio (MP3, WAV, M4A, FLAC).');
+  }
+
   if (objUrl) URL.revokeObjectURL(objUrl);
   objUrl = URL.createObjectURL(f);
   au.src = objUrl;
   au.playbackRate = 1;
   au.load();
-  fileName.textContent = f.name;
+  fermaGuardia();
+  guardia = setTimeout(function () {
+    if (!au.duration || !isFinite(au.duration)) {
+      mostraMsg('Non riesco ad aprire questo brano: il browser non risponde. ' +
+                'Prova con un MP3 o con un WAV.');
+    }
+  }, 15000);
   fileMsg.classList.add('hidden');
   player.classList.remove('hidden');
   resetGuess();
@@ -329,9 +365,9 @@ fileIn.addEventListener('change', function () {
 // il lettore fermo a 0:00 senza dire niente: sembrava rotto lo strumento.
 au.addEventListener('error', function () {
   if (!au.src) return;
-  player.classList.add('hidden');
-  fileMsg.textContent = 'Questo file non si apre qui. Prova con un MP3 o con un WAV.';
-  fileMsg.classList.remove('hidden');
+  fermaGuardia();
+  mostraMsg('Questo file non si apre qui: dentro non c\'è musica, oppure è in un formato ' +
+            'che il browser non legge. Prova con un MP3 o con un WAV.');
 });
 
 playBtn.addEventListener('click', function () {
@@ -341,7 +377,10 @@ au.addEventListener('play',  function () { playBtn.textContent = '❚❚'; });
 au.addEventListener('pause', function () { playBtn.textContent = '▶'; });
 au.addEventListener('ended', function () { playBtn.textContent = '▶'; });
 
-au.addEventListener('loadedmetadata', function () { durEl.textContent = fmtTime(au.duration); });
+au.addEventListener('loadedmetadata', function () {
+  fermaGuardia();
+  durEl.textContent = fmtTime(au.duration);
+});
 // Mentre il dito trascina il cursore, timeupdate NON deve riposizionarlo:
 // altrimenti la maniglia salta via da sotto il dito a ogni aggiornamento.
 var seeking = false;

@@ -11,6 +11,17 @@
 
 var TARGET_RATE = 48000;
 
+/* Oltre questo peso non si prova nemmeno. Il file va decodificato tutto in
+   memoria e poi ricampionato: da qui in su il browser resta senza, e se ne
+   accorge a metà lavoro. Un'ora di WAV a 44,1 kHz sta comodamente sotto. */
+var PESO_MAX = 250 * 1024 * 1024;
+
+function pesa(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1024 * 1024) return Math.round(b / 1024) + ' KB';
+  return (Math.round(b / 1024 / 102.4) / 10).toString().replace('.', ',') + ' MB';
+}
+
 // --- Riferimenti DOM ---
 var dropZone   = document.getElementById('dropZone');
 var fileInput  = document.getElementById('fileInput');
@@ -180,6 +191,12 @@ function convertWithFfmpeg(file) {
 
 // --- Conversione di UN file: prima la via veloce, poi ffmpeg ---
 function convertFile(file) {
+  /* Due casi si vedono dal file, senza aprirlo, e vanno fermati qui: un file
+     vuoto e uno troppo pesante. Prima finivano tutti e due nel convertitore di
+     riserva — 24 MB di motore da caricare — per uscirne con «non riuscito». */
+  if (file.size === 0) return Promise.reject(new Error('vuoto'));
+  if (file.size > PESO_MAX) return Promise.reject(new Error('troppo-grande'));
+
   return file.arrayBuffer()
     .then(function (ab) {
       setProgress(0.15);
@@ -290,7 +307,7 @@ function runQueue() {
       next.failed = true;
       if (scheduleReloadIfNeeded(err)) return;   // la pagina sta per ricaricarsi
       console.error(err);
-      rowError(next, shortErrorFor(err));
+      rowError(next, shortErrorFor(err, next.file));
       runQueue();
     }
   );
@@ -308,24 +325,35 @@ function scheduleReloadIfNeeded(err) {
   return true;
 }
 
-function shortErrorFor(err) {
+/* «Non riuscito» diceva che qualcosa non andava e basta: chi legge resta con
+   il file in mano e nessuna idea di cosa fare. Ogni caso ha la sua frase. */
+function shortErrorFor(err, file) {
   var name = String((err && (err.message || err.name)) || err);
-  if (name === 'needs-reload' || name === 'engine-missing') {
-    return 'questo browser non ce la fa';
+  if (name === 'vuoto') return 'è vuoto (0 byte): dentro non c\'è nessun suono';
+  if (name === 'troppo-grande') {
+    return 'pesa ' + pesa(file.size) + ': troppo per il browser (il limite è ' +
+           pesa(PESO_MAX) + '). Dividilo in parti più corte';
   }
-  return 'non riuscito';
+  if (name === 'needs-reload' || name === 'engine-missing') {
+    return 'questo browser non ce la fa: prova con Chrome, Edge o Safari aggiornato';
+  }
+  return 'non riesco ad aprirlo: dentro non c\'è audio, o il file è rovinato';
 }
 
 function finishBatch() {
   hide(statusBox);
   var ok = jobs.filter(function (j) { return j.blob; });
   if (!ok.length) {
-    hide(resultBox);
-    fileListEl.innerHTML = '';
-    jobs = [];
-    errorBox.querySelector('.error-msg').textContent =
-      'Controlla che siano file audio o video. WAV, MP3, M4A, AAC e AIFF riescono sempre.';
+    /* Le righe restano dove sono: su ognuna c'è scritto perché quel file non è
+       andato. Prima venivano cancellate tutte e al loro posto compariva un
+       consiglio generico — così il motivo, che era già stato scritto, spariva
+       proprio quando serviva. */
+    errorBox.querySelector('.error-msg').textContent = jobs.length > 1
+      ? 'Nessuno di questi file è diventato un MP3: qui sopra c\'è il motivo, uno per uno. ' +
+        'WAV, MP3, M4A, AAC e AIFF riescono sempre.'
+      : 'Qui sopra c\'è il motivo. WAV, MP3, M4A, AAC e AIFF riescono sempre.';
     show(errorBox);
+    show(dropZone);          // per sceglierne un altro senza ricaricare la pagina
     return;
   }
   downloadBtn.textContent = ok.length > 1 ? 'Scarica tutti (' + ok.length + ')' : 'Scarica l’MP3';

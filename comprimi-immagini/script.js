@@ -24,6 +24,11 @@ var avvisoFile = document.getElementById('avvisoFile');
 var LATI = [4000, 3000, 2400, 2000, 1600, 1280, 1024, 800];
 var QUALITA = [0.85, 0.75, 0.65, 0.55, 0.45, 0.35];
 
+/* Sopra questo peso non si prova nemmeno ad aprirla. Con un file da 300 MB il
+   browser ci mette cinque secondi solo per arrendersi, e nel frattempo la riga
+   dice «compressione…» come se stesse lavorando. Dirlo prima costa niente. */
+var PESO_MAX = 100 * 1024 * 1024;
+
 function pesa(b) {
   if (b < 1024) return b + ' B';
   if (b < 1024 * 1024) return Math.round(b / 1024) + ' KB';
@@ -240,7 +245,12 @@ function bottoneScarica(job) {
 }
 
 function handleFiles(list) {
-  var tutti = [].slice.call(list);
+  var tutti = [].slice.call(list || []);
+  /* Dialogo aperto e chiuso senza scegliere niente: prima si beccava «Qui
+     dentro non ci sono immagini», un rimprovero per una cosa che non è
+     successa. Niente file, niente da dire. */
+  if (!tutti.length) return;
+
   var files = tutti.filter(function (f) {
     return /^image\//.test(f.type) || /\.(jpe?g|png|webp|gif|bmp|heic|heif|avif)$/i.test(f.name);
   });
@@ -281,7 +291,17 @@ function coda() {
   if (prossimo.file.size === 0) {
     prossimo.failed = true;
     prossimo.li.classList.add('ko');
-    prossimo.stateEl.textContent = 'il file è vuoto (0 byte)';
+    prossimo.stateEl.textContent = 'il file è vuoto (0 byte): non c\'è nessuna foto dentro';
+    return setTimeout(coda, 0);
+  }
+
+  /* Troppo pesante per essere aperta: si dice subito, invece di far vedere
+     «compressione…» per cinque secondi e finire lo stesso male. */
+  if (prossimo.file.size > PESO_MAX) {
+    prossimo.failed = true;
+    prossimo.li.classList.add('ko');
+    prossimo.stateEl.textContent = 'pesa ' + pesa(prossimo.file.size) +
+      ': troppo perché il browser la apra (il limite è ' + pesa(PESO_MAX) + ')';
     return setTimeout(coda, 0);
   }
 
@@ -316,11 +336,14 @@ function coda() {
   }).catch(function (e) {
     prossimo.failed = true;
     prossimo.li.classList.add('ko');
+    /* «Immagine non leggibile» diceva solo che qualcosa non va, non cosa fare:
+       chi ci arriva quasi sempre ha rinominato un file, o ha una foto rovinata.
+       Ogni caso adesso finisce con un consiglio. */
     prossimo.stateEl.textContent = /heic|heif/i.test(prossimo.file.name)
-      ? 'formato HEIC: questo browser non lo apre'
+      ? 'formato HEIC: questo browser non lo apre. Esportala in JPEG dal telefono e riprova'
       : (prossimo.file.size > 60 * 1024 * 1024
-          ? 'immagine troppo grande per questo browser'
-          : 'immagine non leggibile');
+          ? 'troppo grande da aprire per questo browser: prova con una foto più piccola'
+          : 'non riesco ad aprirla: dentro non c\'è una foto, o è rovinata');
   }).then(function () { setTimeout(coda, 0); });
 }
 
