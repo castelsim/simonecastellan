@@ -140,7 +140,9 @@
 
   <!-- Il motore sta in /audio-mp3/vendor/: è lo stesso, e 24 MB non si tengono in
        due copie. -->
-  <script src="/audio-mp3/vendor/ffmpeg/ffmpeg.min.js"></script>
+  <!-- ffmpeg.min.js lo carica script.js quando si preme «comprimi» (vedi
+       «preparaCaricatore»). Il service worker invece resta nel <head>: senza
+       isolamento il motore non parte affatto, e qui serve sempre. -->
   <script src="/track.js"></script>
   <script src="script.js"></script>
 </body>

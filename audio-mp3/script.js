@@ -140,9 +140,34 @@ function encode(left, right) {
 // Decodifica QUALSIASI formato che la Web Audio API non gestisce
 // (FLAC/OGG/OPUS su iPhone, WMA, AMR, AC3, video-con-audio, ecc.).
 var ffmpegInstance = null;
+var ffmpegScript = null;      // la promessa del caricamento, una volta sola
+
+/* ffmpeg.min.js arriva adesso, non all'apertura della pagina: chi converte un
+   MP3 non lo tocca mai, e prima lo scaricava lo stesso. */
+function preparaFfmpeg() {
+  if (window.FFmpeg && window.FFmpeg.createFFmpeg) return Promise.resolve();
+  if (ffmpegScript) return ffmpegScript;
+  ffmpegScript = new Promise(function (ok, no) {
+    var s = document.createElement('script');
+    s.src = 'vendor/ffmpeg/ffmpeg.min.js';
+    s.onload = ok;
+    s.onerror = function () { no(new Error('engine-missing')); };
+    document.head.appendChild(s);
+  }).then(function () {
+    if (!window.FFmpeg || !window.FFmpeg.createFFmpeg) throw new Error('engine-missing');
+  }).catch(function (e) {
+    ffmpegScript = null;      // caduta la rete, il prossimo tentativo riprova
+    throw e;
+  });
+  return ffmpegScript;
+}
 
 function getFfmpeg() {
   if (ffmpegInstance) return Promise.resolve(ffmpegInstance);
+  return preparaFfmpeg().then(caricaMotore);
+}
+
+function caricaMotore() {
   if (!window.FFmpeg || !window.FFmpeg.createFFmpeg) {
     return Promise.reject(new Error('engine-missing'));
   }
@@ -320,8 +345,12 @@ function scheduleReloadIfNeeded(err) {
   // al reload normale il SW si attiva. I file vanno riscelti, come prima.
   if (name !== 'needs-reload' || sessionStorage.getItem('a2m_reloaded')) return false;
   sessionStorage.setItem('a2m_reloaded', '1');
-  setStatus('Accendo il convertitore. Ricarico la pagina, poi riscegli i file.');
-  setTimeout(function () { location.reload(); }, 600);
+  /* Questo è anche il momento in cui si dice al service worker che stavolta
+     serve davvero: alla ricarica si registrerà e accenderà l'isolamento. Prima
+     lo faceva per tutti, anche per chi convertiva un MP3. */
+  try { sessionStorage.setItem('a2m_serve_ffmpeg', '1'); } catch (e) {}
+  setStatus('Questo formato ha bisogno di un motore in più. Preparo la pagina, poi riscegli i file.');
+  setTimeout(function () { location.reload(); }, 900);
   return true;
 }
 
