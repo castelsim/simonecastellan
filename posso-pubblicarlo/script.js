@@ -30,6 +30,14 @@ var passaNota = document.getElementById('passaNota');
 // Il file che si sta guardando: serve per passarlo ai formati senza richiederlo.
 var fileCorrente = null;
 
+// Quanti file sono stati lasciati fuori quando ne arrivano più d'uno.
+var scartati = 0;
+
+/* Oltre questo peso una foto non si apre nemmeno per misurarla: il browser ci
+   prova per qualche secondo e poi si arrende. I video no: di quelli si leggono
+   solo le misure, senza tirarli dentro tutti. */
+var FOTO_MAX = 100 * 1024 * 1024;
+
 function mostra(el, si) { if (el) el.classList.toggle('hidden', !si); }
 
 function pesa(b) {
@@ -163,7 +171,12 @@ var SEGNI = { ok: '✓', attenzione: '!', no: '✗' };
 function mostraEsito(dati) {
   scheda.textContent = dati.nome + ' · ' + dati.w + '×' + dati.h + ' · ' +
     nomeRapporto(dati.w / dati.h) + ' · ' + pesa(dati.peso) +
-    (dati.durata ? ' · ' + durataUmana(dati.durata) : '');
+    (dati.durata ? ' · ' + durataUmana(dati.durata) : '') +
+    // Se ne erano stati scelti tanti, qui se ne guarda uno: prima gli altri
+    // sparivano senza che nessuno lo dicesse.
+    (scartati > 0
+      ? ' · un file alla volta: ' + (scartati === 1 ? 'l\'altro lo' : 'gli altri ' + scartati + ' li') + ' puoi controllare dopo'
+      : '');
 
   elenco.innerHTML = '';
   var quanteOk = 0, quanteNo = 0, daTagliare = 0;
@@ -281,18 +294,48 @@ async function apri(file) {
 
   var immagine = /^image\//.test(file.type) || /\.(jpe?g|png|webp|gif|bmp|avif|heic|heif)$/i.test(file.name);
   var video = /^video\//.test(file.type) || /\.(mp4|mov|m4v|webm|avi|mkv|3gp)$/i.test(file.name);
-  if (!immagine && !video) return errore('Questo non sembra né una foto né un video.');
+  if (!immagine && !video) {
+    return errore('Questo non sembra né una foto né un video: qui si controllano le immagini ' +
+                  '(JPG, PNG, WEBP) e i filmati (MP4, MOV, WEBM). Un PDF o un documento non si pubblicano così.');
+  }
+
+  /* Due cose si sanno guardando il file, prima di aprirlo: se è vuoto e se è
+     troppo pesante. Prima finivano tutte e due su «potrebbe essere
+     danneggiata», che è una diagnosi sbagliata in tutti e due i casi. */
+  if (file.size === 0) {
+    return errore('Questo file è vuoto: dentro non c\'è niente. ' +
+                  'Se te l\'hanno mandato, fattelo rimandare.');
+  }
+  if (immagine && file.size > FOTO_MAX) {
+    return errore('Questa foto pesa ' + pesa(file.size) + ': troppo perché il browser la apra ' +
+                  '(il limite è ' + pesa(FOTO_MAX) + '). Per i social è comunque da alleggerire.');
+  }
+
+  /* Con un video che il browser non conosce l'attesa arriva a dodici secondi e
+     la scritta resta ferma su «Guardo il file…»: sembra bloccato. A metà strada
+     si dice che sta durando più del previsto. */
+  var statusText = document.getElementById('statusText');
+  var testoIniziale = statusText ? statusText.textContent : '';
+  var lenta = setTimeout(function () {
+    if (statusText) statusText.textContent = 'Ci sto mettendo più del solito: forse è un formato che il browser non conosce…';
+  }, 4000);
 
   try {
     var dati = immagine ? await leggiImmagine(file) : await leggiVideo(file);
+    clearTimeout(lenta);
+    if (statusText) statusText.textContent = testoIniziale;
     if (!dati.w || !dati.h) throw new Error('senza misure');
     mostraEsito(dati);
   } catch (e) {
+    clearTimeout(lenta);
+    if (statusText) statusText.textContent = testoIniziale;
     errore(immagine
       ? (/heic|heif/i.test(file.name)
           ? 'Questo browser non sa aprire i file HEIC: esporta la foto in JPEG e riprova.'
-          : 'Non riesco ad aprire questa immagine: potrebbe essere danneggiata.')
-      : 'Questo browser non sa aprire questo video: prova con un MP4.');
+          : 'Non riesco ad aprire questa immagine: dentro non c\'è una foto, oppure è rovinata. Riesportala e riprova.')
+      : (e && e.message === 'scaduto'
+          ? 'Ci ho messo troppo ad aprire questo video: probabilmente è in un formato che il browser non conosce. Prova con un MP4.'
+          : 'Non riesco ad aprire questo video: dentro non c\'è un filmato, oppure è rovinato. Prova con un MP4.'));
   }
 }
 
@@ -309,8 +352,17 @@ dropZone.addEventListener('click', function () { fileInput.click(); });
 dropZone.addEventListener('keydown', function (e) {
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
 });
+/* Un file alla volta, e il dialogo chiuso senza scegliere non deve muovere
+   niente: prima con più file gli altri sparivano in silenzio. */
+function accetta(list) {
+  var tutti = [].slice.call(list || []);
+  if (!tutti.length) return;
+  scartati = tutti.length - 1;
+  apri(tutti[0]);
+}
+
 fileInput.addEventListener('change', function () {
-  if (fileInput.files[0]) apri(fileInput.files[0]);
+  accetta(fileInput.files);
   fileInput.value = '';
 });
 
@@ -321,7 +373,7 @@ fileInput.addEventListener('change', function () {
   dropZone.addEventListener(ev, function (e) { e.preventDefault(); dropZone.classList.remove('dragover'); });
 });
 dropZone.addEventListener('drop', function (e) {
-  if (e.dataTransfer && e.dataTransfer.files[0]) apri(e.dataTransfer.files[0]);
+  if (e.dataTransfer) accetta(e.dataTransfer.files);
 });
 window.addEventListener('dragover', function (e) { e.preventDefault(); });
 window.addEventListener('drop', function (e) { e.preventDefault(); });

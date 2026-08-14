@@ -55,8 +55,15 @@ var erroreBox = document.getElementById('errore');
 var erroreMsg = document.getElementById('erroreMsg');
 var condividiBtn = document.getElementById('condividiBtn');
 
+/* Oltre questo peso non si comincia nemmeno. Il motore lavora dentro il
+   browser e il file gli va messo tutto in memoria: da qui in su non finisce,
+   e scoprirlo dopo venti minuti di barra è la cosa peggiore che possa
+   succedere a chi aspetta. */
+var PESO_MAX = 500 * MB;
+
 var pesoMax = 25 * MB;
 var video = null;        // { file, durata, w, h, peso }
+var scartati = 0;        // quanti file sono stati lasciati fuori dalla scelta
 var uscita = null;       // { blob, nome }
 var orologio = null;     // il conta-secondi durante la lavorazione
 
@@ -125,11 +132,34 @@ function comeVerra(kbps, w, h) {
   return SOGLIE[SOGLIE.length - 1].dice;
 }
 
+/* Quanto ci vorrà, detto prima. La misura è quella del 12/08/2026: 4,5 secondi
+   di lavoro per ogni secondo di video a 720p, e il costo cresce coi pixel. Non
+   è una promessa al secondo, è l'ordine di grandezza — e serve a decidere se
+   vale la pena aspettare o se conviene tagliare il video. */
+function attesa() {
+  var pixel = (video.w * video.h) || (1280 * 720);
+  var secondi = video.durata * 4.5 * pixel / (1280 * 720);
+  if (secondi < 120) return '';
+  var minuti = Math.round(secondi / 60);
+  if (minuti >= 90) {
+    // Oltre l'ora e mezza il numero preciso non serve a nessuno: serve sapere
+    // che è una cosa da mezza giornata, e che forse conviene tagliare il video.
+    return ' Ci vorranno più di ' + Math.floor(minuti / 60) + ' ore, con la pagina aperta: ' +
+           'se puoi, taglia prima il pezzo che ti serve.';
+  }
+  return ' Ci vorranno all\'incirca ' + minuti + ' minuti, con la pagina aperta.';
+}
+
 function aggiornaPrevisione() {
   if (!video) return;
 
   scheda.textContent = video.file.name + ' · ' + durataUmana(video.durata) +
-    ' · ' + video.w + '×' + video.h + ' · ' + pesa(video.peso);
+    ' · ' + video.w + '×' + video.h + ' · ' + pesa(video.peso) +
+    // Se ne erano stati scelti più d'uno, il primo è quello su cui si lavora:
+    // prima gli altri sparivano senza che nessuno lo dicesse.
+    (scartati > 0
+      ? ' · un video alla volta: ' + (scartati === 1 ? 'l\'altro lo' : 'gli altri ' + scartati + ' li') + ' puoi fare dopo'
+      : '');
 
   if (video.peso <= pesoMax) {
     verdetto.innerHTML = '<b>È già sotto il limite.</b> Comprimerlo lo peggiorerebbe soltanto: ' +
@@ -150,7 +180,7 @@ function aggiornaPrevisione() {
   verdetto.innerHTML = 'Per stare sotto ' + pesa(pesoMax) + ' servono <b>' +
     kbps.toLocaleString('it-IT') + ' kbps</b>. ' + comeVerra(kbps, video.w, video.h) +
     '<br><span class="verdetto-nota">Le dimensioni non cambiano: resta ' +
-    video.w + '×' + video.h + '.</span>';
+    video.w + '×' + video.h + '.' + attesa() + '</span>';
   document.getElementById('viaBtn').disabled = false;
 }
 
@@ -297,7 +327,22 @@ function errore(testo) {
 
 function apri(file) {
   var pareVideo = /^video\//.test(file.type) || /\.(mp4|mov|m4v|webm|avi|mkv|3gp|mpg|mpeg|wmv)$/i.test(file.name);
-  if (!pareVideo) return errore('Questo non sembra un video.');
+  if (!pareVideo) {
+    return errore('Questo non sembra un video: qui vanno i filmati (MP4, MOV, WEBM, AVI, MKV). ' +
+                  'Per le foto c\'è «Comprimi immagini», per i documenti «Comprimi PDF».');
+  }
+
+  /* Due cose si sanno prima di aprire il file, e prima vanno dette: un file
+     vuoto e un file troppo grosso finivano tutti e due su «questo browser non
+     sa aprire questo video», che è falso e non aiuta nessuno. */
+  if (file.size === 0) {
+    return errore('Questo file è vuoto: dentro non c\'è nessun video. ' +
+                  'Se l\'hai scaricato o mandato via chat, controlla che il trasferimento sia finito.');
+  }
+  if (file.size > PESO_MAX) {
+    return errore('Questo video pesa ' + pesa(file.size) + ': troppo per essere compresso dentro il browser ' +
+                  '(il limite è ' + pesa(PESO_MAX) + '). Tagliane un pezzo e riprova con quello.');
+  }
 
   mostra(erroreBox, false);
   mostra(risultato, false);
@@ -305,7 +350,15 @@ function apri(file) {
   mostra(statusBox, true);
   progressBar.style.width = '0%';
 
+  /* Con un file che il browser non sa aprire l'attesa arriva a dodici secondi
+     (misurato) e la scritta resta ferma su «Guardo il video…»: sembra piantato.
+     A metà strada si dice che sta durando più del solito. */
+  var lenta = setTimeout(function () {
+    statusText.textContent = 'Ci sto mettendo più del solito: forse è un formato che il browser non conosce…';
+  }, 4000);
+
   leggi(file).then(function (dati) {
+    clearTimeout(lenta);
     if (!dati.durata || !isFinite(dati.durata)) throw new Error('senza durata');
     video = dati;
     mostra(statusBox, false);
@@ -313,13 +366,19 @@ function apri(file) {
     document.querySelector('.claims').classList.add('hidden');
     mostra(previsione, true);
     aggiornaPrevisione();
-  }).catch(function () {
-    errore('Questo browser non sa aprire questo video: se puoi, esporta un MP4 e riprova.');
+  }).catch(function (e) {
+    clearTimeout(lenta);
+    // «Scaduto» vuol dire che il browser non ha nemmeno risposto: quasi sempre
+    // è un formato che non conosce. Un errore vero vuol dire invece che il file
+    // c'è ma dentro non è un video. Sono due consigli diversi.
+    errore(e && e.message === 'scaduto'
+      ? 'Ci ho messo troppo ad aprire questo video: probabilmente è in un formato che il browser non conosce. Esporta un MP4 e riprova.'
+      : 'Non riesco ad aprire questo video: dentro non c\'è un filmato, oppure è rovinato. Se puoi, esporta un MP4 e riprova.');
   });
 }
 
 function ricomincia() {
-  video = null; uscita = null;
+  video = null; uscita = null; scartati = 0;
   mostra(previsione, false);
   mostra(risultato, false);
   mostra(erroreBox, false);
@@ -366,8 +425,17 @@ dropZone.addEventListener('click', function () { fileInput.click(); });
 dropZone.addEventListener('keydown', function (e) {
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
 });
+/* Il dialogo chiuso senza scegliere niente non deve muovere una foglia; più
+   file insieme se ne lavora uno, ma dicendolo. */
+function accetta(list) {
+  var tutti = [].slice.call(list || []);
+  if (!tutti.length) return;
+  scartati = tutti.length - 1;
+  apri(tutti[0]);
+}
+
 fileInput.addEventListener('change', function () {
-  if (fileInput.files[0]) apri(fileInput.files[0]);
+  accetta(fileInput.files);
   fileInput.value = '';
 });
 
@@ -378,7 +446,7 @@ fileInput.addEventListener('change', function () {
   dropZone.addEventListener(ev, function (e) { e.preventDefault(); dropZone.classList.remove('dragover'); });
 });
 dropZone.addEventListener('drop', function (e) {
-  if (e.dataTransfer && e.dataTransfer.files[0]) apri(e.dataTransfer.files[0]);
+  if (e.dataTransfer) accetta(e.dataTransfer.files);
 });
 window.addEventListener('dragover', function (e) { e.preventDefault(); });
 window.addEventListener('drop', function (e) { e.preventDefault(); });

@@ -41,6 +41,17 @@ var resetBtn   = document.getElementById('resetBtn');
 var forceBtn   = document.getElementById('forceBtn');
 var rasterBtn  = document.getElementById('rasterBtn');
 var targetSeg  = document.getElementById('targetSeg');
+var avvisoFile = document.getElementById('avvisoFile');
+
+/* Oltre questo peso non si prova nemmeno. Non è un capriccio: un PDF da 300 MB
+   va letto tutto in memoria e poi riscritto, e il browser resta fermo su «Apro
+   il documento…» senza mai arrivare in fondo (misurato: oltre un minuto senza
+   una parola). Meglio dirlo in mezzo secondo. */
+var PESO_MAX = 150 * 1024 * 1024;
+
+// Se sono arrivati più file insieme, la frase che lo dice: sopravvive
+// all'apertura del primo, ma cede il posto a un errore vero.
+var notaScelta = '';
 
 function pesa(b) {
   if (b < 1024) return b + ' B';
@@ -49,6 +60,20 @@ function pesa(b) {
 }
 
 function mostra(el, si) { if (el) el.classList.toggle('hidden', !si); }
+
+/* Un messaggio sopra il riquadro, per le cose che si capiscono prima ancora di
+   aprire il file. Se il posto per scriverlo non c'è, si ripiega sulla riga del
+   risultato: l'importante è che qualcosa venga detto. */
+function avvisa(testo) {
+  if (avvisoFile) {
+    avvisoFile.textContent = testo || '';
+    mostra(avvisoFile, !!testo);
+    if (testo) { mostra(statusBox, false); mostra(warnBox, false); }
+  } else if (testo) {
+    risultato = null;
+    mostraEsito('', testo, { errore: true });
+  }
+}
 
 function avanzamento(testo, frazione) {
   statusText.textContent = testo;
@@ -233,6 +258,26 @@ function mostraEsito(nomeFile, html, opzioni) {
 async function apri(file) {
   fileScelto = file;
   risultato = null;
+
+  /* Due controlli che costano niente e si fanno prima di leggere il file: un
+     documento vuoto e uno troppo pesante finivano tutti e due nello stesso
+     messaggio sbagliato («protetto da password?»), o peggio in un'attesa senza
+     fine. */
+  if (file.size === 0) {
+    mostra(statusBox, false);
+    mostra(result, false);
+    avvisa('Questo file è vuoto: dentro non c\'è niente. Riprova con il PDF giusto.');
+    return;
+  }
+  if (file.size > PESO_MAX) {
+    mostra(statusBox, false);
+    mostra(result, false);
+    avvisa('Questo PDF pesa ' + pesa(file.size) + ': troppo perché il browser lo apra senza bloccarsi. ' +
+           'Il limite qui è ' + pesa(PESO_MAX) + '. Se sono tante pagine, dividilo in due e riprova.');
+    return;
+  }
+  avvisa(notaScelta);
+
   // Il documento di prima va chiuso: pdf.js tiene un solo lavoratore in
   // sottofondo e i documenti dimenticati se lo mangiano.
   if (docTesto) { try { docTesto.destroy(); } catch (e) {} }
@@ -248,7 +293,19 @@ async function apri(file) {
     await lavora();
   } catch (e) {
     risultato = null;
-    mostraEsito(file.name, 'documento non leggibile (protetto da password?)', { errore: true });
+    /* Prima finiva tutto sotto «protetto da password?», anche un file di testo
+       rinominato .pdf: chi lo leggeva andava a cercare una password che non
+       esisteva. I tre casi sono diversi e si distinguono. */
+    var nomeErr = String((e && (e.name || e.message)) || '');
+    var messaggio;
+    if (/Password/i.test(nomeErr)) {
+      messaggio = 'questo PDF è protetto da password: toglila e riprova';
+    } else if (/InvalidPDF/i.test(nomeErr)) {
+      messaggio = 'questo file non è un PDF, o è rovinato: apri il documento originale e salvalo di nuovo in PDF';
+    } else {
+      messaggio = 'non riesco ad aprire questo documento: prova a salvarlo di nuovo in PDF e riprova';
+    }
+    mostraEsito(file.name, messaggio, { errore: true });
   }
 }
 
@@ -367,6 +424,8 @@ document.getElementById('cancelBtn').addEventListener('click', function () {
 
 resetBtn.addEventListener('click', function () {
   risultato = null; fileScelto = null; bytesOriginali = null; docTesto = null;
+  notaScelta = '';
+  avvisa('');
   mostra(result, false); mostra(warnBox, false); mostra(statusBox, false);
   fileInput.value = '';
 });
@@ -374,10 +433,33 @@ resetBtn.addEventListener('click', function () {
 // --- Ingresso file ---------------------------------------------------------
 
 function accetta(list) {
-  var f = [].slice.call(list).filter(function (x) {
+  var tutti = [].slice.call(list || []);
+  // Dialogo aperto e chiuso senza scegliere: non è successo niente, e niente
+  // va detto. Un messaggio d'errore qui sarebbe un rimprovero immotivato.
+  if (!tutti.length) return;
+
+  var pdf = tutti.filter(function (x) {
     return x.type === 'application/pdf' || /\.pdf$/i.test(x.name);
-  })[0];
-  if (f) apri(f);
+  });
+
+  /* Qui stava il silenzio peggiore: un file che non era un PDF veniva scartato
+     senza una parola, con la pagina identica a un secondo prima — e se c'era
+     già un risultato di prima restava lì, a far credere che riguardasse il
+     file appena scelto. */
+  if (!pdf.length) {
+    mostra(result, false);
+    avvisa(tutti.length === 1
+      ? 'Questo non è un PDF. Qui dentro vanno solo i file .pdf.'
+      : 'Fra questi file non c\'è nessun PDF. Qui dentro vanno solo i file .pdf.');
+    return;
+  }
+
+  // Uno alla volta: se ne arrivano tanti si lavora il primo, e lo si dice.
+  notaScelta = pdf.length > 1
+    ? 'Un PDF alla volta: ho preso «' + pdf[0].name + '», ' +
+      (pdf.length === 2 ? 'l\'altro lo' : 'gli altri ' + (pdf.length - 1) + ' li') + ' puoi fare dopo.'
+    : '';
+  apri(pdf[0]);
 }
 
 pickBtn.addEventListener('click', function (e) { e.stopPropagation(); fileInput.click(); });
