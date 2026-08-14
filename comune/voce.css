@@ -20,17 +20,36 @@
      e accanto al verde acqua non stona. */
   --ink:    #0f1614;
   --mut:    #5a6b67;
-  --faint:  #8b9793;
+
+  /* Il grigio delle note piccole. Era #8b9793, che sul bianco dà 3,02 di
+     contrasto: sotto il 4,5 che serve per leggere un testo di 12-13 px, e
+     misurato su tutti gli strumenti erano 163 righe illeggibili — proprio
+     quelle che spiegano cosa fa un comando. Scurito del minimo necessario:
+     la tinta è la stessa, cambia solo quanta luce arriva. */
+  --faint:  #68716d;
+
+  /* La seconda voce del titolone resta chiara: a 42 px la soglia è 3:1, non
+     4,5, e lì #8b9793 basta. Separarlo da --faint serve a non scurire il
+     titolo per colpa delle note — sono due mestieri diversi. */
+  --eco:    #8b9793;
+
   --line:   #e3e8e6;
   --line-forte: #ccd6d3;
 
   --bg:     #ffffff;
   --panel:  #f7faf9;
 
-  /* Il verde acqua è quello di stageplot.it, preso dal suo foglio di stile.
-     --teal-l sui fondi (è più chiaro, regge il testo scuro sopra),
-     --teal sul testo (il chiaro su bianco non avrebbe contrasto). */
-  --teal:       #0d9488;
+  /* Il verde acqua è quello di stageplot.it. --teal-l sui FONDI (è più chiaro
+     e regge il testo scuro sopra), --teal sul TESTO.
+
+     Sul testo era #0d9488: 3,74 sul bianco, sotto soglia per l'occhiello a
+     12 px e per i link. Ora #0a7d72, che a occhio è lo stesso verde.
+
+     Il valore è calcolato contro il fondo PEGGIORE, non contro il bianco: metà
+     delle note sta dentro riquadri grigini (#f7faf9 i pannelli, #f1f3f4 le
+     pillole) e lì il contrasto scende di un decimo. Il primo tentativo aveva
+     fatto i conti col bianco e sette strumenti tornavano sotto soglia. */
+  --teal:       #0a7d72;
   --teal-l:     #14b8a6;
   --teal-scuro: #04211d;
 
@@ -62,7 +81,7 @@
   line-height: 1.08;
   margin: 0;
 }
-.titolone .eco { color: var(--faint); }
+.titolone .eco { color: var(--eco); }
 
 .apertura {
   color: var(--mut);
