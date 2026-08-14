@@ -118,12 +118,19 @@
       <div class="progress"><div class="progress-bar" id="barra"></div></div>
     </section>
 
-    <!-- Una tela sola: prima le barre vive, poi la curva -->
-    <canvas id="tela" class="tela" aria-label="La risposta dell'impianto"></canvas>
+    <!-- Una tela sola: prima le barre vive, poi la curva.
+         Prende il fuoco («tabindex») perché il cursore che legge un punto si
+         muove anche con le frecce: chi non usa il mouse, o legge la pagina con
+         una voce sintetica, altrimenti non arrivava alla curva in nessun modo. -->
+    <canvas id="tela" class="tela" tabindex="0"
+            aria-label="La risposta dell'impianto. Con le frecce destra e sinistra leggi un punto della curva; con Maiuscolo premuto salti di dodici punti."
+            aria-describedby="lettura"></canvas>
 
     <!-- Il valore sotto il dito: i consigli dicono le cose grosse, qui si
-         controlla un punto preciso mentre si muove un cursore sull'EQ. -->
-    <p class="lettura" id="lettura" hidden></p>
+         controlla un punto preciso mentre si muove un cursore sull'EQ.
+         «aria-live» perché con le frecce il numero cambia senza che si sposti
+         il fuoco: senza, una lettura vocale non direbbe niente. -->
+    <p class="lettura" id="lettura" aria-live="polite" hidden></p>
 
     <div class="viste" id="viste" role="group" aria-label="Cosa guardare" hidden>
       <button type="button" class="vista-btn on" data-vista="curva">Curva</button>

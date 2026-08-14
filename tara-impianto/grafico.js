@@ -33,7 +33,14 @@ var GRAFICO = (function () {
 
     var ultimaCongelata = null, ultimoObiettivo = null;
 
+    /* Quale delle quattro cose sta sulla tela in questo momento. Serve perché
+       il cursore di lettura vale solo per la curva: senza questo, muovere il
+       dito (o una freccia) mentre si guarda l'impulso ridisegnava la curva al
+       posto suo. */
+    var ultimaVista = null;
+
     function disegna(curva, congelata, obiettivo) {
+      ultimaVista = 'curva';
       ultimaCurva = curva; ultimaCongelata = congelata; ultimoObiettivo = obiettivo;
       var dpr = window.devicePixelRatio || 1;
       var w = canvas.clientWidth, h = canvas.clientHeight;
@@ -108,7 +115,22 @@ var GRAFICO = (function () {
       return minF * Math.pow(maxF / minF, Math.max(0, Math.min(1, px / w)));
     }
 
+    /* I punti che stanno davvero dentro il grafico. Il cursore da tastiera si
+       muove su questi: fuori dai 20 Hz–20 kHz la curva non è disegnata, e una
+       freccia che va a fermarsi lì sembrerebbe rotta. */
+    function puntiVisibili() {
+      if (!ultimaCurva) return [];
+      return ultimaCurva.filter(function (p) { return p.f >= 20 && p.f <= 20000; });
+    }
+
+    function segna(p) {
+      segnaposto = p;
+      disegna(ultimaCurva, ultimaCongelata, ultimoObiettivo);
+      if (quandoLegge) quandoLegge(p);
+    }
+
     function leggi(clientX) {
+      if (ultimaVista !== 'curva') return;
       if (!ultimaCurva || !ultimaCurva.length) return;
       var r = canvas.getBoundingClientRect();
       var f = frequenzaDa(clientX - r.left, r.width);
@@ -117,9 +139,32 @@ var GRAFICO = (function () {
         var d = Math.abs(Math.log(p.f / f));
         if (d < dist) { dist = d; piu = p; }
       });
-      segnaposto = piu;
-      disegna(ultimaCurva, ultimaCongelata, ultimoObiettivo);
-      if (quandoLegge) quandoLegge(piu);
+      segna(piu);
+    }
+
+    /* Lo stesso cursore, ma con le frecce. Senza questo il valore sotto il
+       dito era letteralmente sotto il DITO: chi gira la pagina con la tastiera
+       — o con una lettura vocale — non aveva alcun modo di leggere un punto
+       della curva, che è poi la cosa che si fa mentre si muove un cursore
+       sull'equalizzatore. */
+    function muovi(passi) {
+      if (ultimaVista !== 'curva') return false;
+      var pv = puntiVisibili();
+      if (!pv.length) return false;
+      var i = pv.indexOf(segnaposto);
+      // il primo tasto non salta all'inizio: parte da metà curva, dove si guarda
+      if (i < 0) i = Math.floor(pv.length / 2);
+      else i = Math.max(0, Math.min(pv.length - 1, i + passi));
+      segna(pv[i]);
+      return true;
+    }
+
+    function vaiA(quale) {
+      if (ultimaVista !== 'curva') return false;
+      var pv = puntiVisibili();
+      if (!pv.length) return false;
+      segna(quale === 'inizio' ? pv[0] : pv[pv.length - 1]);
+      return true;
     }
 
     /* La curva si disegna a pezzi: ogni tratto prende la sua trasparenza dalla
@@ -149,6 +194,7 @@ var GRAFICO = (function () {
     /* Le barre dell'RTA, mentre la misura è in corso: servono a far vedere
        che qualcosa sta arrivando davvero nel microfono. */
     function barre(livelli, bande) {
+      ultimaVista = 'barre';
       var dpr = window.devicePixelRatio || 1;
       var w = canvas.clientWidth, h = canvas.clientHeight;
       canvas.width = w * dpr; canvas.height = h * dpr;
@@ -187,6 +233,7 @@ var GRAFICO = (function () {
        diretto; i baffi dopo sono le riflessioni della sala, e la loro
        distanza dal picco dice da quanto lontano tornano. */
     function impulso(ir, msVisibili) {
+      ultimaVista = 'impulso';
       var dpr = window.devicePixelRatio || 1;
       var w = canvas.clientWidth, h = canvas.clientHeight;
       canvas.width = w * dpr; canvas.height = h * dpr;
@@ -226,6 +273,7 @@ var GRAFICO = (function () {
        farebbe una scala che esce dal foglio. I salti verticali non sono
        guasti, sono il giro che ricomincia. */
     function fase(punti) {
+      ultimaVista = 'fase';
       var dpr = window.devicePixelRatio || 1;
       var w = canvas.clientWidth, h = canvas.clientHeight;
       canvas.width = w * dpr; canvas.height = h * dpr;
@@ -270,6 +318,33 @@ var GRAFICO = (function () {
       segnaposto = null;
       if (ultimaCurva) disegna(ultimaCurva, ultimaCongelata, ultimoObiettivo);
       if (quandoLegge) quandoLegge(null);
+    });
+
+    /* Le frecce quando la tela ha il fuoco. Il salto grosso (Shift, o le due
+       pagine) serve perché la curva ha centinaia di punti: senza, attraversare
+       lo spettro vorrebbe dire tenere premuto per mezzo minuto.
+
+       «preventDefault» solo quando il tasto è stato usato davvero: altrimenti
+       si toglierebbe a chi legge la pagina lo scorrimento con le frecce. */
+    var PASSO_GROSSO = 12;
+    canvas.addEventListener('keydown', function (e) {
+      if (e.altKey || e.ctrlKey || e.metaKey) return;
+      var fatto = false, grosso = e.shiftKey ? PASSO_GROSSO : 1;
+      if (e.key === 'ArrowRight')      fatto = muovi(grosso);
+      else if (e.key === 'ArrowLeft')  fatto = muovi(-grosso);
+      else if (e.key === 'PageUp')     fatto = muovi(PASSO_GROSSO);
+      else if (e.key === 'PageDown')   fatto = muovi(-PASSO_GROSSO);
+      else if (e.key === 'Home')       fatto = vaiA('inizio');
+      else if (e.key === 'End')        fatto = vaiA('fine');
+      else if (e.key === 'Escape') {
+        if (segnaposto) {
+          segnaposto = null;
+          if (ultimaCurva) disegna(ultimaCurva, ultimaCongelata, ultimoObiettivo);
+          if (quandoLegge) quandoLegge(null);
+          fatto = true;
+        }
+      }
+      if (fatto) e.preventDefault();
     });
 
     return {
