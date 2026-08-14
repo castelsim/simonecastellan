@@ -280,29 +280,6 @@ header { text-align: left; margin-bottom: 26px; }
   text-align: left;
 }
 
-/* ————— Il bersaglio ————— */
-.bersaglio { margin: 18px 0 6px; }
-.bersaglio-lbl {
-  display: block; font-size: 12px; color: var(--faint);
-  text-transform: uppercase; letter-spacing: .08em; margin-bottom: 7px;
-}
-.seg {
-  display: inline-flex; gap: 3px;
-  background: var(--pill); border-radius: 999px; padding: 4px;
-  max-width: 100%;
-}
-.seg-btn {
-  appearance: none; border: none; background: transparent;
-  color: var(--muted); font-family: inherit; font-size: 13px; font-weight: 600;
-  padding: 7px 15px; border-radius: 999px; cursor: pointer; white-space: nowrap;
-}
-.seg-btn.active { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
-/* La riga tratteggiata sul grafico è ocra: il bersaglio si distingue dalla
-   misura senza rubarle l'occhio. */
-.bersaglio-spiega {
-  margin-top: 8px; font-size: 12.5px; line-height: 1.6; color: var(--faint);
-}
-
 /* ————— Le posizioni ————— */
 .posizioni {
   margin: 18px 0 6px;
@@ -313,3 +290,21 @@ header { text-align: left; margin-bottom: 26px; }
 }
 .posizioni-stato { font-size: 13.5px; line-height: 1.6; color: var(--ink); margin-bottom: 11px; }
 .posizioni .btn-ghost { margin-top: 9px; display: block; }
+
+/* La riga di riepilogo va su una riga sola: con i nomi veri delle interfacce
+   arrivava a 88 caratteri e su un telefono occupava tre righe. Quello che
+   avanza si taglia con i puntini — il nome per intero sta nella tendina. */
+#riassuntoDisp {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.riga-disp { align-items: center; }
+
+/* Le note dentro il pannello non devono sembrare etichette di campi */
+.pannello-disp .disp-nota { margin: 7px 0 0; }
+.pannello-disp .seg { margin-bottom: 0; }
+.pannello-disp .seg-btn i {
+  display: block; font-style: normal; font-size: 10px; opacity: .6; margin-top: 2px;
+}

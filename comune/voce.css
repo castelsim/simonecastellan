@@ -95,3 +95,64 @@
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+/* ————— Roba grande abbastanza per un dito (13/08/2026) —————
+
+   Misurato su tutti e diciannove gli strumenti: 105 bersagli sotto i 44 px,
+   che è la misura minima di un tocco (linea guida Apple; Google dice 48). Le
+   chip stavano a 26 px, i segmenti a 29, certi comandi a 15.
+
+   Non è pignoleria: questi strumenti si usano in piedi in una sala, con una
+   mano che tiene il telefono e l'altra su un mixer. Un bersaglio da 26 px lì
+   si sbaglia, e sbagliarlo può voler dire far ripartire una misura da capo.
+
+   Si allarga SOLO dove si tocca — schermo stretto oppure puntatore grosso —
+   così sul computer, dove si punta col mouse, l'aspetto resta quello scelto.
+   Il testo non cambia mai dimensione: cresce l'area, non la grafica. */
+
+@media (max-width: 560px), (pointer: coarse) {
+  .btn,
+  .seg-btn,
+  .chip,
+  .scelta-btn,
+  .vista-btn,
+  .unit,
+  .step,
+  .f-dl,
+  .preset,
+  .adv-btn,
+  button.link-piccolo,
+  select,
+  /* comandi con un nome tutto loro, trovati misurando: la cella dei tempi in
+     BPM e il pulsante che copia i millisecondi in Ritardo diffusori — si
+     toccano per copiare un numero, e sbagliarli copia il numero sbagliato */
+  .cell,
+  .haas {
+    min-height: 44px;
+  }
+
+  /* I segmenti stanno in fila dentro una pillola: se cresce il figlio deve
+     crescere anche il vassoio, o il testo esce dal bordo arrotondato. */
+  .seg, .viste, .scelta, .unit-toggle, .chips { align-items: stretch; }
+  .seg-btn, .vista-btn, .scelta-btn, .unit, .chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* I comandi scritti come una parola sottolineata — «Nascondi i tempi»,
+     «Ricomincia da capo» — restano piccoli da vedere ma diventano grandi da
+     toccare: l'area si estende sopra e sotto il testo, invisibile. */
+  .btn-ghost, .reset-link {
+    position: relative;
+    display: inline-block;
+  }
+  .btn-ghost::after, .reset-link::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%;
+    height: 44px;
+    transform: translateY(-50%);
+  }
+}

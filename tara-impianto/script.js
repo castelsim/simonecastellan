@@ -11,9 +11,12 @@
 
 (function () {
 
-  var DURATA = 10;              // secondi di misura
+  /* Erano tre numeri fissi nel codice. In una sala rumorosa dieci secondi non
+     bastano — la coerenza crolla, la pagina dice giustamente che non sa
+     rispondere, e senza poterli cambiare non c'era modo di rimediare. */
+  var DURATA = 10;              // secondi di misura, scegliibili dal pannello
   var PER_RITARDO = 2;          // i primi secondi servono ad allineare
-  var LIVELLO_DB = -18;
+  var LIVELLO_DB = -18;         // dBFS in uscita, scegliibile dal pannello
 
   var ctx = null, worklet = null, sorgente = null, mediaStream = null;
   var analizzatore = null, rtaTimer = null;
@@ -288,6 +291,7 @@
       : n + ' posizioni, mediate. Le cancellazioni che esistono in un punto solo ' +
         'sono state ridimensionate.');
     mostra('azzeraPos', n > 1);
+    mostra('togliUltima', n >= 1);
   }
 
   function scriviRitardo(campioni, fs) {
@@ -406,6 +410,7 @@
         [].forEach.call(box.children, function (x) { x.classList.remove('active'); });
         b.classList.add('active');
         testo('obiettivoSpiega', OBIETTIVO.spiega(bersaglio));
+        testo('riassuntoDisp', riassuntoCompleto());
         // niente da rimisurare: i conti si rifanno sulla misura già in mano
         if (posizioni.length) ricalcola();
       });
@@ -432,8 +437,17 @@
     sel.value = scelto || '';
   }
 
+  /* La riga sotto il pulsante riassume TUTTE le scelte, non solo i
+     dispositivi: bersaglio, durata e microfono sono le tre cose che uno
+     controlla con un'occhiata prima di premere. */
+  function riassuntoCompleto() {
+    var nome = OBIETTIVO.elenco().filter(function (c) { return c.chiave === bersaglio; })[0];
+    var mic = DISPOSITIVI.riassunto().replace(/^Ingresso:\s*/, '').split(' · Uscita')[0];
+    return (nome ? nome.nome : '') + ' · ' + DURATA + ' s · ' + mic;
+  }
+
   function disegnaDispositivi() {
-    testo('riassuntoDisp', DISPOSITIVI.riassunto());
+    testo('riassuntoDisp', riassuntoCompleto());
     riempi($('selIngresso'), DISPOSITIVI.ingressi(), DISPOSITIVI.ingresso(),
            'Quello di sistema');
     mostra('nomiNascosti', !DISPOSITIVI.nomiVisibili());
@@ -500,6 +514,40 @@
          di spostarsi sta qui, dove serve, non in fondo alla pagina. */
       testo('statoTxt', 'Spostati di qualche metro, poi ascolto…');
       misura();
+    });
+
+    /* Durata e livello: due segmenti che cambiano davvero i numeri usati
+       dalla misura successiva. */
+    function collega(idSeg, attributo, quando) {
+      var box = $(idSeg);
+      if (!box) return;
+      [].forEach.call(box.querySelectorAll('.seg-btn'), function (b) {
+        b.addEventListener('click', function () {
+          [].forEach.call(box.querySelectorAll('.seg-btn'), function (x) {
+            x.classList.remove('active');
+          });
+          b.classList.add('active');
+          quando(Number(b.getAttribute(attributo)));
+          testo('riassuntoDisp', riassuntoCompleto());
+        });
+      });
+    }
+    collega('segDurata', 'data-s', function (v) { DURATA = v; });
+    collega('segLivello', 'data-db', function (v) { LIVELLO_DB = v; });
+
+    $('togliUltima').addEventListener('click', function () {
+      if (!posizioni.length) return;
+      posizioni.pop();
+      if (!posizioni.length) {
+        mostra('esito', false);
+        mostra('viste', false);
+        mostra('vistaNota', false);
+        $('vai').textContent = 'Misura';
+        scriviPosizioni();
+        return;
+      }
+      ultimoRisultato = posizioni[posizioni.length - 1];
+      ricalcola();
     });
 
     $('azzeraPos').addEventListener('click', function () {
