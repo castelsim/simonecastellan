@@ -156,3 +156,56 @@
     transform: translateY(-50%);
   }
 }
+
+/* ————— Il contorno di fuoco (14/08/2026) —————
+
+   Chi gira gli strumenti col tasto Tab — perché non usa il mouse, o perché ha
+   una mano sul mixer e l'altra sulla tastiera — deve VEDERE dove si trova.
+   Misurato su tutti e diciannove: nessuno aveva una regola «:focus-visible»,
+   e quattordici fogli locali spengono l'outline con «outline: none» sul
+   «:focus» o con «appearance: none», che se lo porta via da solo. Risultato:
+   si premeva Tab e non si muoveva niente di visibile.
+
+   Tre scelte, e il perché di ognuna:
+
+   1. «:focus-visible» e non «:focus». Così il contorno compare quando si
+      naviga da tastiera e NON quando si clicca col mouse — che è il motivo
+      per cui l'outline era stato spento in giro: dava fastidio al clic.
+
+   2. «!important». Non è pigrizia: i fogli locali si agganciano DOPO questo,
+      e la loro «.freq-input:focus { outline: none }» ha più peso di qualunque
+      selettore si scriva qui. Senza, il contorno resterebbe scritto e
+      invisibile. Nessun altro punto del sito usa «!important» sull'outline,
+      quindi qui non si scavalca una scelta di nessuno.
+
+   3. Il verde acqua e non il blu di sistema: è il colore della casa, e a
+      3 px con 2 px di stacco si vede sia sul bianco delle pagine sia sul
+      fondo scuro del tavolo di ritaglio di «Posso pubblicarlo?». */
+
+a[href]:focus-visible,
+area[href]:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible,
+[contenteditable]:focus-visible {
+  outline: 3px solid var(--teal) !important;
+  outline-offset: 2px !important;
+}
+
+/* Chi ha alzato il contrasto di sistema vuole un segno più netto, non più
+   elegante: il contorno diventa nero, che stacca su qualunque fondo. */
+@media (prefers-contrast: more) {
+  a[href]:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  summary:focus-visible,
+  [tabindex]:focus-visible,
+  [contenteditable]:focus-visible {
+    outline-color: var(--ink) !important;
+  }
+}
