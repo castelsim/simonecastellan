@@ -14,6 +14,7 @@ var PASSO = 1 / 25;          // un fotogramma a venticinque al secondo: buono pe
 // niente, l'errore fermava tutto il resto della pagina.
 var video = document.getElementById('video');
 var urlVideo = null, formato = 'jpg', nomeBase = '';
+var scartati = 0;            // quanti file sono stati lasciati fuori dalla scelta
 
 var dropZone  = document.getElementById('dropZone');
 var pickBtn   = document.getElementById('pickBtn');
@@ -52,11 +53,29 @@ function perIlNome(s) {
 
 function apri(file) {
   mostra(erroreBox, false);
+
+  /* Un file vuoto finiva su «potrebbe essere danneggiato», che manda a cercare
+     un guasto dove il guasto non c'è: il file non contiene niente, e succede
+     quando un trasferimento si interrompe. */
+  if (file.size === 0) {
+    return errore('Questo file è vuoto: dentro non c\'è nessun video. ' +
+                  'Se te l\'hanno mandato, fattelo rimandare.');
+  }
+
   if (urlVideo) URL.revokeObjectURL(urlVideo);
   urlVideo = URL.createObjectURL(file);
   nomeBase = file.name.replace(/\.[^.]+$/, '').replace(/[^\w\-. ]+/g, '').trim() || 'video';
 
+  /* Fra la scelta del file e la prima immagine possono passare quindici
+     secondi, e finora la pagina non diceva niente: restava com'era, come se il
+     pulsante non avesse funzionato. Adesso lo dice, e se ci mette troppo lo
+     ripete spiegando perché. */
   var risolto = false;
+  avvisa('Apro il video…');
+  var lenta = setTimeout(function () {
+    if (!risolto) avvisa('Ci sto mettendo più del solito: forse è un formato che il browser non conosce…');
+  }, 4000);
+
   var scaduto = setTimeout(function () {
     if (!risolto) errore('Questo browser non riesce ad aprire il video: prova con un MP4.');
   }, 15000);
@@ -64,8 +83,13 @@ function apri(file) {
   video.onloadedmetadata = function () {
     risolto = true;
     clearTimeout(scaduto);
+    clearTimeout(lenta);
     scheda.textContent = file.name + ' · ' + video.videoWidth + '×' + video.videoHeight +
-                         ' · ' + orologio(video.duration);
+                         ' · ' + orologio(video.duration) +
+                         // Se ne erano arrivati tanti, si lavora il primo e lo si dice.
+                         (scartati > 0
+                           ? ' · un video alla volta: ' + (scartati === 1 ? 'l\'altro lo' : 'gli altri ' + scartati + ' li') + ' puoi fare dopo'
+                           : '');
     barra.max = Math.max(1, Math.round(video.duration * 100));
     barra.value = 0;
     mostra(lavoroBox, true);
@@ -78,7 +102,9 @@ function apri(file) {
   video.onerror = function () {
     risolto = true;
     clearTimeout(scaduto);
-    errore('Non riesco ad aprire questo video: potrebbe essere danneggiato o in un formato che il browser non legge.');
+    clearTimeout(lenta);
+    errore('Non riesco ad aprire questo video: dentro non c\'è un filmato, oppure è rovinato. ' +
+           'Se puoi, esporta un MP4 e riprova.');
   };
   video.src = urlVideo;
 }
@@ -209,11 +235,21 @@ document.getElementById('formatoSeg').addEventListener('click', function (e) {
 // --- Ingresso file ----------------------------------------------------------
 
 function accetta(list) {
-  var f = [].slice.call(list).filter(function (x) {
+  var tutti = [].slice.call(list || []);
+  // Dialogo chiuso senza scegliere: non è successo niente, e non si dice niente.
+  if (!tutti.length) return;
+
+  // Non «video»: quello è già il <video> della pagina, e chiamarlo uguale qui
+  // dentro nasconderebbe l'elemento vero a chi legge.
+  var filmati = tutti.filter(function (x) {
     return /^video\//.test(x.type) || /\.(mp4|mov|m4v|webm|avi|mkv|3gp)$/i.test(x.name);
-  })[0];
-  if (f) apri(f);
-  else errore('Questo non sembra un video.');
+  });
+  if (!filmati.length) {
+    return errore('Questo non sembra un video: qui vanno i filmati (MP4, MOV, WEBM, AVI, MKV). ' +
+                  'Se è già una foto, non serve estrarne un fotogramma.');
+  }
+  scartati = filmati.length - 1;
+  apri(filmati[0]);
 }
 
 document.getElementById('erroreBtn').addEventListener('click', function () {
@@ -228,7 +264,7 @@ dropZone.addEventListener('keydown', function (e) {
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
 });
 fileInput.addEventListener('change', function () {
-  if (fileInput.files[0]) accetta(fileInput.files);
+  accetta(fileInput.files);
   fileInput.value = '';
 });
 
