@@ -28,9 +28,9 @@
     <header>
       <p class="occhiello">Sala · Impianto · Equalizzatore</p>
       <h1 class="titolone">Tara un impianto.<br><span class="eco">Misura, e dice cosa fare.</span></h1>
-      <p class="apertura">Manda il rumore rosa nelle casse, ascolta col microfono e ti dice
-        <b>dove l'impianto esagera e dove manca</b>. Misura in più punti e li media,
-        perché una sala non si giudica da un posto solo.</p>
+      <p class="apertura">Manda il rumore rosa nelle casse e ascolta col microfono. Poi dice
+        <b>dove l'impianto esagera e dove manca</b>. Puoi misurare in più punti: una sala
+        non si giudica da un posto solo.</p>
     </header>
 
     <!-- Il consiglio che cambia la misura più di qualunque impostazione: sta
@@ -52,7 +52,7 @@
       <!-- Il bersaglio si sceglie PRIMA, come si fa nella realtà: si sa già
            se si sta tarando un PA o un impianto per il parlato. -->
       <div class="disp-riga">
-        <span class="disp-lbl">A cosa punti</span>
+        <span class="disp-lbl">Curva obiettivo</span>
         <div class="seg" id="segObiettivo" role="group" aria-label="Curva obiettivo"></div>
         <p class="disp-nota" id="obiettivoSpiega"></p>
       </div>
@@ -76,8 +76,8 @@
           <button type="button" class="seg-btn active" data-db="-18">normale</button>
           <button type="button" class="seg-btn" data-db="-12">forte</button>
         </div>
-        <p class="disp-nota">Il volume vero si alza dal mixer. Questo è quanto forte
-          esce il segnale dal browser: alzalo se la misura risulta poco affidabile.</p>
+        <p class="disp-nota">Il volume vero si alza dal mixer. Qui scegli solo quanto forte
+          esce il segnale dal browser. Alzalo se la misura risulta poco affidabile.</p>
       </div>
       <!-- I nomi dei dispositivi il browser li nasconde finché il microfono non
            è stato concesso almeno una volta: è una difesa contro il
@@ -98,9 +98,9 @@
       </label>
 
       <p class="disp-nota" id="usciteNo" hidden>
-        Questo browser non lascia scegliere da dove esce l'audio: succede su
-        Safari e su iPhone. Il segnale va dove punta il sistema — scegli lì
-        l'interfaccia, oppure collegala e falla diventare l'uscita predefinita.
+        Questo browser non lascia scegliere da dove esce l'audio. Succede su
+        Safari e su iPhone. Il suono va dove punta il sistema. Scegli lì
+        l'interfaccia, oppure falla diventare l'uscita predefinita.
       </p>
     </section>
 
@@ -164,54 +164,80 @@
 
     <section class="spiega">
       <h2>A cosa serve</h2>
-      <p>Un impianto in una sala non suona come suonerebbe all'aperto: la stanza
-        aggiunge rimbombi e ne toglie altre parti. Qui mandi un rumore che contiene
-        tutte le frequenze, il microfono ascolta cosa torna, e la differenza fra le
-        due cose è quello che stanza e impianto stanno facendo al suono.</p>
+      <p>In una sala l'impianto non suona come all'aperto. La stanza aggiunge
+        rimbombi e toglie altre parti. Qui dalle casse esce un rumore che contiene
+        tutte le frequenze. Il microfono ascolta cosa torna indietro. La differenza
+        fra i due suoni è quello che sala e impianto fanno alla musica. Da lì
+        nascono i consigli: quanto togliere, a che frequenza, con quale Q. Sotto
+        trovi anche il ritardo fra le casse e il microfono.</p>
+
+      <h2>La curva obiettivo</h2>
+      <p>Un impianto in sala non deve venire piatto. L'orecchio riceve il suono
+        diretto più il riverbero, e il riverbero è ricco di acuti. Un impianto
+        misurato piatto suona brillante e stanca in mezz'ora.
+        La <b>curva obiettivo</b> è il bersaglio a cui puntare: sul grafico è la
+        riga tratteggiata. Scegline una prima di misurare. <b>Live</b> per la musica
+        amplificata, <b>Parlato</b> per conferenze e chiese, <b>Piatta</b> per lo
+        studio. I consigli guardano la distanza fra la tua curva e quella.</p>
+
+      <h2>Quanto ci si può fidare</h2>
+      <p>Accanto ai consigli c'è scritto quanta parte della curva è affidabile. Il
+        numero viene dalla <b>coerenza</b>. La coerenza dice quanto di ciò che il
+        microfono sente arriva davvero dalle casse, e non dal rumore in sala. Dove è
+        bassa, la curva sbiadisce e i consigli tacciono.
+        Se sbiadisce quasi tutto, alza il volume e fai silenzio. Puoi anche passare
+        a venti o a trenta secondi di ascolto. Tocca poi il grafico in un punto:
+        escono la frequenza, i decibel e quanto vale lì la misura.</p>
 
       <h2>Perché conviene misurare in più punti</h2>
-      <p>Una misura sola descrive un punto, non una sala. Le cancellazioni si spostano
-        di metro in metro: quello che davanti al mixer è un buco di dodici decibel,
-        due metri più in là non c'è. Se correggi quel buco, peggiori dappertutto
-        tranne che nel punto dove eri.</p>
-      <p>Perciò misura in tre o cinque posti diversi, sparsi dove starà il pubblico,
-        e premi «misura un altro punto». La pagina fa la media — sulle potenze, non
-        sui decibel, così un buco che esiste in un angolo solo non affossa il
-        risultato di tutta la sala.</p>
+      <p>Una misura sola descrive un punto, non una sala. Le cancellazioni si
+        spostano di metro in metro. Quello che davanti al mixer è un buco di dodici
+        decibel, due metri più in là non c'è. Se correggi quel buco, peggiori
+        dappertutto tranne che nel punto dove eri.
+        Misura quindi in tre o cinque posti, sparsi dove starà il pubblico. Ogni
+        volta premi «Misura un altro punto della sala». La pagina fa la media. La fa
+        sulle potenze e non sui decibel: così un buco che c'è in un angolo solo non
+        affossa tutta la sala.</p>
 
-      <h2>Le altre due viste</h2>
-      <p><b>Impulso</b> mostra cosa fa l'impianto a un colpo secco. Il picco è il
-        suono diretto; i baffi che vengono dopo sono le riflessioni della sala, e la
-        loro distanza dal picco dice da quanto lontano tornano. Una riflessione forte
-        nei primi millisecondi è una parete o un soffitto vicini.</p>
-      <p><b>Fase</b> dice di quanto l'impianto sposta nel tempo ogni frequenza. Si
-        disegna a punti e non a linea, perché fra un punto e l'altro può fare un giro
-        intero: unirli disegnerebbe pendenze che non esistono.</p>
+      <h2>Prima e dopo</h2>
+      <p>«Tieni questa come prima» mette da parte la curva di adesso. Poi correggi
+        l'equalizzatore e rimisuri. La vecchia resta tratteggiata sotto la nuova.
+        È il modo più rapido per vedere se la correzione ha migliorato le cose.</p>
+
+      <h2>La vista Impulso</h2>
+      <p>È la <b>risposta all'impulso</b>: cosa fa l'impianto a un colpo secco. Il
+        picco è il suono diretto. I baffi che vengono dopo sono le riflessioni della
+        sala. Più sono lontane dal picco, più viene da lontano la superficie che le
+        rimanda. Una riflessione forte nei primi millisecondi è una parete o un
+        soffitto vicini.</p>
+
+      <h2>La vista Fase</h2>
+      <p>La <b>fase</b> dice di quanto l'impianto sposta nel tempo ogni frequenza.
+        Si disegna a punti, non a linea. Fra un punto e l'altro la fase può fare un
+        giro intero, e unirli disegnerebbe pendenze che non esistono. I salti
+        verticali non sono guasti: sono il giro che ricomincia.</p>
 
       <h2>Domande</h2>
 
       <h3>Serve un microfono da misura?</h3>
-      <p>No, si può cominciare con quello del telefono. Vedrai bene i rimbombi e i
-        buchi, e vedrai benissimo se una correzione ha migliorato le cose. Quello
-        che non puoi avere è un livello assoluto in decibel: per quello serve un
-        fonometro tarato.</p>
-
-      <h3>Perché la curva a tratti sbiadisce?</h3>
-      <p>Perché lì la misura non è affidabile: il microfono sta sentendo più rumore
-        della sala che segnale. Invece di disegnare una linea inventata, la pagina
-        te lo dice. Se sbiadisce quasi tutto, alza il volume e fai silenzio.</p>
+      <p>No, si comincia con quello del telefono. Vedrai bene i rimbombi e i buchi.
+        E vedrai benissimo se una correzione ha migliorato le cose. Quello che non
+        puoi avere è un livello vero in decibel: per quello serve un fonometro
+        tarato.</p>
 
       <h3>Devo mettere l'equalizzatore a specchio della curva?</h3>
-      <p>No, ed è l'errore più comune. Si tolgono i rimbombi larghi, si lasciano
-        stare i buchi stretti — quelli sono cancellazioni, e alzando il cursore
-        mandi solo più energia dentro un punto dove il suono si annulla. Si sposta
-        una cassa, non si alza un cursore.</p>
+      <p>No, ed è l'errore più comune. I rimbombi larghi si tolgono. I buchi stretti
+        si lasciano stare: quelli sono cancellazioni. Alzando il cursore mandi solo
+        più energia in un punto dove il suono si annulla. Lì si sposta una cassa,
+        non si alza un cursore.</p>
 
       <h3>Cos'è il ritardo che mi dice?</h3>
       <p>Il tempo che il suono impiega dalle casse al microfono. Serve per le torri
-        di ritardo: se una cassa è più lontana del palco, la ritardi di quella
+        di ritardo. Se una torre è più lontana del palco, la ritardi di quella
         differenza e i due suoni tornano insieme. Nel numero c'è dentro anche il
-        ritardo della scheda audio, che non è distanza.</p>
+        ritardo della scheda audio, che non è distanza. Se hai già i metri e ti
+        bastano i millisecondi, il conto lo fa
+        <a href="/ritardo-diffusori/">Ritardo diffusori</a>.</p>
 
       <h3>I dati vengono caricati da qualche parte?</h3>
       <p>No. Il microfono resta nel browser: nessuna registrazione esce dal tuo
