@@ -309,7 +309,8 @@
 
   var NOTE_VISTA = {
     curva: 'La riga tratteggiata è il bersaglio. Dove la curva sbiadisce, la ' +
-           'misura non è affidabile. Tocca il grafico per leggere un punto.',
+           'misura non è affidabile. Tocca il grafico per leggere un punto, ' +
+           'oppure spostati sul grafico col tasto Tab e usa le frecce.',
     impulso: 'Il picco è il suono diretto. I baffi dopo sono le riflessioni: ' +
              'più sono lontane dal picco, più viene da lontano la superficie ' +
              'che le rimanda. Una riflessione forte entro i primi millisecondi ' +
@@ -571,7 +572,7 @@
     });
 
     grafico.allaLettura(function (p) {
-      if (!p) { testo('lettura', 'Tocca il grafico per leggere un punto.'); return; }
+      if (!p) { testo('lettura', 'Tocca il grafico — o usa le frecce — per leggere un punto.'); return; }
       var hz = p.f >= 1000 ? (p.f / 1000).toFixed(2).replace('.', ',') + ' kHz'
                            : Math.round(p.f) + ' Hz';
       var db = (p.db >= 0 ? '+' : '−') + Math.abs(p.db).toFixed(1).replace('.', ',');
