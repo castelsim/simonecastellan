@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Diagnosi audio — Tonalità</title>
+<link rel="stylesheet" href="/comune/voce.css" />
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0; padding: 18px 16px calc(40px + env(safe-area-inset-bottom));
+    background: #fff; color: #0f1614; line-height: 1.5;
+  }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  .sotto { color: #68716d; font-size: 14px; margin: 0 0 20px; }
+  .sez { border-top: 1px solid #e3e8e6; padding-top: 16px; margin-top: 20px; }
+  h2 { font-size: 16px; margin: 0 0 10px; }
+  button {
+    appearance: none; border: none; border-radius: 999px;
+    background: #14b8a6; color: #04211d;
+    font: 600 16px inherit; padding: 15px 20px; width: 100%;
+    margin-bottom: 10px; cursor: pointer; min-height: 52px;
+  }
+  button.grigio { background: #f1f3f4; color: #0f1614; }
+  .esito {
+    font: 400 13px ui-monospace, Menlo, monospace;
+    background: #f7faf9; border: 1px solid #e3e8e6; border-radius: 10px;
+    padding: 12px; margin-bottom: 14px; white-space: pre-wrap; word-break: break-word;
+  }
+  .ok { color: #0a7d72; font-weight: 700; }
+  .no { color: #c5221f; font-weight: 700; }
+  .barra { height: 22px; background: #f1f3f4; border-radius: 999px; overflow: hidden; margin-bottom: 8px; }
+  .barra > i { display: block; height: 100%; width: 0; background: #14b8a6; }
+  .nota { font-size: 13px; color: #68716d; margin: 0 0 16px; }
+</style>
+</head>
+<body>
+
+<h1>Diagnosi audio</h1>
+<p class="sotto">Da aprire sull'iPhone. Premi i pulsanti in ordine e dimmi cosa
+   compare: serve a capire perché la tastiera resta muta.</p>
+
+<div class="sez">
+  <h2>1. Cosa dice il telefono</h2>
+  <div class="esito" id="sistema">…</div>
+</div>
+
+<div class="sez">
+  <h2>2. Un LA con Web Audio</h2>
+  <p class="nota">È il modo in cui suona la tastiera di Tonalità. Se qui non
+     senti niente ma senti il punto 3, il problema è la categoria audio.</p>
+  <button id="b1">Suona un LA (Web Audio)</button>
+  <div class="esito" id="e1">non ancora provato</div>
+</div>
+
+<div class="sez">
+  <h2>3. Un LA con un elemento audio</h2>
+  <p class="nota">Stesso suono, ma passa dal lettore del sistema — come il brano
+     caricato. Questo di solito suona anche col silenzioso alzato.</p>
+  <button id="b2" class="grigio">Suona un LA (elemento audio)</button>
+  <div class="esito" id="e2">non ancora provato</div>
+</div>
+
+<div class="sez">
+  <h2>4. Prima l'elemento audio, poi Web Audio</h2>
+  <p class="nota">È la cura che sto provando: far partire un suono silenzioso
+     dal lettore di sistema «sposta» la categoria, e da lì in poi dovrebbe
+     suonare anche la tastiera. <b>Premi questo e poi torna al punto 2.</b></p>
+  <button id="b3" class="grigio">Sblocca, poi suona un LA</button>
+  <div class="esito" id="e3">non ancora provato</div>
+</div>
+
+<div class="sez">
+  <h2>5. Il microfono</h2>
+  <p class="nota">Se la barra si muove quando parli o metti musica, il microfono
+     arriva. Se resta ferma, «Ascolta la musica» non può funzionare.</p>
+  <button id="b4">Prova il microfono</button>
+  <div class="barra"><i id="liv"></i></div>
+  <div class="esito" id="e4">non ancora provato</div>
+</div>
+
+<div class="sez">
+  <h2>6. Riassunto da mandarmi</h2>
+  <button id="b5" class="grigio">Copia tutto</button>
+  <div class="esito" id="e5">premi «Copia tutto» e incollamelo</div>
+</div>
+
+<script>
+var registro = [];
+function scrivi(id, testo, buono) {
+  var e = document.getElementById(id);
+  e.innerHTML = testo;
+  registro.push('[' + id + '] ' + testo.replace(/<[^>]+>/g, ''));
+}
+
+/* ── 1. Il quadro di sistema ─────────────────────────────────────────── */
+(function () {
+  var AC = window.AudioContext || window.webkitAudioContext;
+  var righe = [];
+  righe.push('browser: ' + navigator.userAgent);
+  righe.push('');
+  righe.push('navigator.audioSession: ' +
+    (navigator.audioSession ? '<span class="ok">c\'è</span>' : '<span class="no">NON c\'è</span>'));
+  if (navigator.audioSession) {
+    try { righe.push('  tipo adesso: ' + navigator.audioSession.type); }
+    catch (e) { righe.push('  tipo: non leggibile (' + e.message + ')'); }
+  }
+  righe.push('AudioContext: ' + (AC ? 'c\'è' : '<span class="no">NON c\'è</span>'));
+  righe.push('getUserMedia: ' +
+    (navigator.mediaDevices && navigator.mediaDevices.getUserMedia ? 'c\'è' : '<span class="no">NON c\'è</span>'));
+  righe.push('pagina sicura (https): ' + (window.isSecureContext ? 'sì' : '<span class="no">NO</span>'));
+  scrivi('sistema', righe.join('\n'));
+})();
+
+/* ── 2. Web Audio puro ───────────────────────────────────────────────── */
+var ctxProva = null;
+function contesto() {
+  var AC = window.AudioContext || window.webkitAudioContext;
+  if (!ctxProva) ctxProva = new AC();
+  return ctxProva;
+}
+
+function suonaWebAudio(quando) {
+  var c = contesto();
+  var prima = c.state;
+  var p = (c.state === 'suspended') ? c.resume() : Promise.resolve();
+  return p.then(function () {
+    var o = c.createOscillator(), g = c.createGain();
+    o.frequency.value = 440;
+    g.gain.value = 0.25;
+    o.connect(g); g.connect(c.destination);
+    o.start();
+    setTimeout(function () { try { o.stop(); } catch (e) {} }, 1200);
+    return { prima: prima, dopo: c.state,
+             tipo: navigator.audioSession ? navigator.audioSession.type : '—' };
+  });
+}
+
+document.getElementById('b1').addEventListener('click', function () {
+  scrivi('e1', 'provo…');
+  suonaWebAudio().then(function (r) {
+    scrivi('e1', 'contesto: ' + r.prima + ' → <b>' + r.dopo + '</b>\n' +
+                 'categoria audio: ' + r.tipo + '\n\n' +
+                 '<b>Hai sentito un LA per un secondo?</b>\n' +
+                 'Se no: prova il punto 3, poi il punto 4.');
+  }).catch(function (e) {
+    scrivi('e1', '<span class="no">errore: ' + e.message + '</span>');
+  });
+});
+
+/* ── 3. Elemento audio: un LA sintetizzato dentro un WAV ─────────────── */
+function wavDiUnLa(secondi) {
+  var fs = 44100, n = Math.floor(fs * secondi);
+  var buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+  function testo(o, s) { for (var i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); }
+  testo(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); testo(8, 'WAVEfmt ');
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, fs, true); v.setUint32(28, fs * 2, true); v.setUint16(32, 2, true);
+  v.setUint16(34, 16, true); testo(36, 'data'); v.setUint32(40, n * 2, true);
+  for (var i = 0; i < n; i++) {
+    v.setInt16(44 + i * 2, Math.sin(2 * Math.PI * 440 * i / fs) * 12000, true);
+  }
+  return URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+}
+
+document.getElementById('b2').addEventListener('click', function () {
+  scrivi('e2', 'provo…');
+  var a = new Audio(wavDiUnLa(1.2));
+  a.play().then(function () {
+    scrivi('e2', '<span class="ok">partito</span>\n\n<b>Hai sentito un LA?</b>\n' +
+                 'Se qui SÌ e al punto 2 NO, il problema è la categoria audio\n' +
+                 'e la cura è il punto 4.');
+  }).catch(function (e) {
+    scrivi('e2', '<span class="no">non è partito: ' + e.name + ' — ' + e.message + '</span>');
+  });
+});
+
+/* ── 4. La cura da provare ───────────────────────────────────────────── */
+document.getElementById('b3').addEventListener('click', function () {
+  scrivi('e3', 'provo…');
+  var righe = [];
+  if (navigator.audioSession) {
+    try { navigator.audioSession.type = 'playback'; righe.push('categoria impostata su «playback»'); }
+    catch (e) { righe.push('categoria non impostabile: ' + e.message); }
+  } else {
+    righe.push('navigator.audioSession non c\'è su questo telefono');
+  }
+  /* Un WAV di silenzio fatto partire dal lettore di sistema: su iOS basta a
+     spostare la sessione, e da lì in poi anche gli oscillatori si sentono. */
+  var muto = new Audio(wavDiUnLa(0.4));
+  muto.volume = 0.01;
+  muto.play().then(function () {
+    righe.push('lettore di sistema avviato');
+    return suonaWebAudio();
+  }).then(function (r) {
+    righe.push('contesto: ' + r.prima + ' → ' + r.dopo);
+    righe.push('categoria adesso: ' + r.tipo);
+    scrivi('e3', righe.join('\n') + '\n\n<b>Adesso hai sentito il LA?</b>');
+  }).catch(function (e) {
+    righe.push('<span class="no">errore: ' + e.message + '</span>');
+    scrivi('e3', righe.join('\n'));
+  });
+});
+
+/* ── 5. Il microfono ─────────────────────────────────────────────────── */
+document.getElementById('b4').addEventListener('click', function () {
+  scrivi('e4', 'chiedo il permesso…');
+  navigator.mediaDevices.getUserMedia({
+    audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+  }).then(function (s) {
+    var t = s.getAudioTracks()[0];
+    var imp = t.getSettings ? t.getSettings() : {};
+    var c = contesto();
+    if (c.state === 'suspended') c.resume();
+    var src = c.createMediaStreamSource(s);
+    var an = c.createAnalyser();
+    an.fftSize = 2048;
+    src.connect(an);
+    var buf = new Float32Array(an.fftSize);
+    var picco = 0, letture = 0;
+    scrivi('e4', 'microfono aperto: ' + (t.label || 'senza nome') + '\n' +
+                 'guadagno automatico: ' + imp.autoGainControl + '\n' +
+                 'riduzione rumore: ' + imp.noiseSuppression + '\n' +
+                 'frequenza: ' + c.sampleRate + ' Hz\n\n' +
+                 'parla o metti musica: la barra deve muoversi');
+    (function giro() {
+      an.getFloatTimeDomainData(buf);
+      var max = 0;
+      for (var i = 0; i < buf.length; i++) if (Math.abs(buf[i]) > max) max = Math.abs(buf[i]);
+      if (max > picco) picco = max;
+      letture++;
+      document.getElementById('liv').style.width = Math.min(100, max * 300) + '%';
+      if (letture % 25 === 0) {
+        document.getElementById('e4').innerHTML =
+          'microfono aperto: ' + (t.label || 'senza nome') + '\n' +
+          'guadagno automatico: ' + imp.autoGainControl + '\n' +
+          'letture: ' + letture + ' · picco finora: ' + picco.toFixed(4) +
+          (picco > 0.01 ? '\n\n<span class="ok">il microfono arriva</span>'
+                        : '\n\n<span class="no">finora silenzio assoluto</span>');
+      }
+      setTimeout(giro, 100);
+    })();
+  }).catch(function (e) {
+    scrivi('e4', '<span class="no">' + e.name + ': ' + e.message + '</span>\n\n' +
+                 'Se dice NotAllowedError, il permesso è stato negato:\n' +
+                 'si rida da Impostazioni → Safari → Microfono.');
+  });
+});
+
+/* ── 6. Il riassunto ─────────────────────────────────────────────────── */
+document.getElementById('b5').addEventListener('click', function () {
+  var t = ['DIAGNOSI AUDIO — Tonalità', new Date().toISOString(), ''];
+  ['sistema', 'e1', 'e2', 'e3', 'e4'].forEach(function (id) {
+    t.push('--- ' + id + ' ---');
+    t.push(document.getElementById(id).textContent);
+    t.push('');
+  });
+  var testo = t.join('\n');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(testo).then(function () {
+      scrivi('e5', '<span class="ok">copiato</span> — incollamelo pure');
+    }).catch(function () {
+      document.getElementById('e5').textContent = testo;
+    });
+  } else {
+    document.getElementById('e5').textContent = testo;
+  }
+});
+</script>
+</body>
+</html>
