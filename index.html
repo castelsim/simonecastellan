@@ -156,21 +156,45 @@
        Su schermo largo stanno in fila; sotto i 620 px si incolonnano, perché
        tre riquadri da 33% su un telefono diventano tre francobolli con il
        testo a capo ogni due parole. */
-    /* L'occhiello portava con sé 12 px di stacco sotto: tolto lui, i riquadri
-       risalivano di altrettanto e finivano appiccicati alla frase. Lo stacco
-       resta qui, dove non dipende da un testo che c'è o non c'è. */
-    .sviluppo{margin-top:40px}
-    .progetti{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+    /* Lo stacco sopra la sezione sta qui e non sull'occhiello: così non
+       dipende da un testo che c'è o non c'è — l'occhiello è già uscito una
+       volta, e con lui se n'erano andati anche i suoi 12 px. */
+    .sviluppo{margin-top:36px}
+    .sviluppo-occhiello{
+      font:500 11px ui-monospace,SFMono-Regular,Menlo,monospace;
+      letter-spacing:.16em; text-transform:uppercase; color:#0a7d72;
+      margin-bottom:12px}
+    /* Riquadri PIENI e centrati, non contornati e a sinistra (15/08/2026).
+       La cornice era #e3e8e6 su bianco: quasi invisibile, e non si leggeva che
+       fossero cose da premere. Il fondo tenue è la stessa idea del pulsante
+       ChatGPT, che è pieno e senza bordo — così la pagina ha una grammatica
+       sola. E il testo si centra come tutto il resto: erano l'unica cosa
+       allineata a sinistra in una pagina centrata. */
+    /* Quattro riquadri, non più tre: in fila su schermo largo, a due a due
+       quando quattro diventano francobolli, e in colonna sul telefono. Le
+       soglie sono scritte a mano invece che con auto-fit perché il punto in cui
+       stringere lo decide il TESTO più lungo, non una larghezza minima uguale
+       per tutti. */
+    .progetti{display:grid; grid-template-columns:repeat(4,1fr); gap:10px}
     .progetto{
-      display:flex; flex-direction:column; justify-content:center; gap:4px;
-      min-height:76px; padding:14px 14px;
-      border:1px solid #e3e8e6; border-radius:14px;
-      background:#fff; text-decoration:none; text-align:left;
-      transition:border-color .15s ease, background .15s ease, transform .15s ease}
-    .progetto:hover{border-color:#0a7d72; background:#f7faf9}
+      display:flex; flex-direction:column; justify-content:center; align-items:center; gap:5px;
+      min-height:76px; padding:16px 14px;
+      border:1px solid transparent; border-radius:14px;
+      background:#f4f6f6; text-decoration:none; text-align:center;
+      transition:background .15s ease, transform .15s ease}
+    .progetto:hover{background:#eaf1ef}
     .progetto:active{transform:translateY(1px)}
-    .p-nome{font-size:15px; font-weight:650; color:#0f1614; letter-spacing:-.2px}
-    .p-cosa{font-size:12px; line-height:1.45; color:#68716d}
+    /* Tolto il nome, questa riga è rimasta sola: prende il corpo e il colore
+       che aveva il nome, altrimenti il riquadro conterrebbe solo una didascalia
+       grigia da 11,5 px — e una didascalia senza la cosa che descrive è un
+       testo che nessuno legge. Il contrasto sale da 4,64:1 (era appena sopra
+       la soglia) a 16,9:1 sul fondo tenue. */
+    .p-cosa{font-size:14.5px; font-weight:650; color:#0f1614; letter-spacing:-.2px; line-height:1.35}
+    /* Fra 620 e 900 px quattro in fila diventano quattro francobolli col testo
+       a capo ogni due parole: a due a due si leggono. */
+    @media (max-width:900px){
+      .progetti{grid-template-columns:repeat(2,1fr)}
+    }
     @media (max-width:620px){
       .progetti{grid-template-columns:1fr; gap:8px}
       .progetto{min-height:0; padding:13px 15px}
@@ -275,22 +299,43 @@
          viene subito dopo il nome perché sono la risposta alla domanda «e
          quindi, cosa fa?». -->
     <section class="sviluppo" aria-label="Progetti sviluppati">
-      <!-- L'occhiello «SVILUPPO» è uscito per scelta di Simone (15/08/2026):
-           i tre riquadri dicono già da sé cosa sono, e l'etichetta chiedeva una
-           riga di attenzione per ripetere una cosa evidente. La sezione tiene
-           l'aria-label, che serve a chi la pagina se la fa leggere. -->
+      <!-- L'occhiello era «SVILUPPO», è uscito, ed è tornato dicendo un'altra
+           cosa: adesso che dai riquadri sono spariti i nomi dei progetti, serve
+           qualcosa che dica CHE COSA sono quelle tre righe. «Sviluppo» nominava
+           un'attività, «Principali progetti» nomina gli oggetti che stanno
+           sotto — che è quello che manca da quando i nomi non ci sono più. -->
+      <!-- I nomi dei progetti sono usciti dai riquadri per scelta di Simone
+           (15/08/2026): resta quello che il progetto FA, non come si chiama.
+           Il nome però non sparisce del tutto — sta nell'aria-label, insieme a
+           dove porta il link: senza, chi si fa leggere la pagina sentirebbe
+           «musica per immagini» e non saprebbe che si apre un altro sito.
+           Il data-p resta com'era, altrimenti le statistiche di prima e quelle
+           di dopo non si potrebbero più confrontare. -->
+      <p class="sviluppo-occhiello">Principali progetti</p>
       <div class="progetti">
-        <a class="progetto" href="https://crastelstudio.com" target="_blank" rel="noopener" data-p="Crastel">
-          <span class="p-nome">Crastelstudio.com</span>
+        <a class="progetto" href="https://crastelstudio.com" target="_blank" rel="noopener"
+           data-p="Crastel" aria-label="Crastelstudio.com, musica per immagini — si apre in una nuova scheda">
           <span class="p-cosa">musica per immagini</span>
         </a>
-        <a class="progetto" href="https://stageplot.it/" target="_blank" rel="noopener" data-p="StagePlot">
-          <span class="p-nome">StagePlot.it</span>
-          <span class="p-cosa">il palco si disegna, il rider esce da sé</span>
+        <a class="progetto" href="https://stageplot.it/" target="_blank" rel="noopener"
+           data-p="StagePlot" aria-label="StagePlot.it, il tuo palco in scala — si apre in una nuova scheda">
+          <!-- «in scala» torna: è il fatto tecnico che distingue StagePlot da un
+               disegno qualsiasi, e stava già in due punti del sito («disegnare
+               stage plot in scala reale» nel profilo, «stage plot in scala» in
+               /tools/). Era uscito dalla home nella riscrittura del 15/08. -->
+          <span class="p-cosa">il tuo palco in scala</span>
         </a>
-        <a class="progetto" href="/tools/" data-p="Tools">
-          <span class="p-nome">Tools</span>
-          <span class="p-cosa">strumenti che girano nel browser</span>
+        <a class="progetto" href="/tools/" data-p="Tools"
+           aria-label="Tools, strumenti utili in locale">
+          <span class="p-cosa">strumenti utili in locale</span>
+        </a>
+        <!-- AVA Sound Live Music: è l'unico dei quattro che non è un progetto
+             suo ma il posto dove lavora (responsabile della sala). Sta qui
+             perché a chi cerca una sala serve sapere dove andare, e il nome
+             per esteso resta nell'aria-label come per gli altri. -->
+        <a class="progetto" href="https://www.avasoundlivemusic.eu/" target="_blank" rel="noopener"
+           data-p="AVA" aria-label="AVA Sound Live Music, studio di registrazione — si apre in una nuova scheda">
+          <span class="p-cosa">studio di registrazione</span>
         </a>
       </div>
     </section>
