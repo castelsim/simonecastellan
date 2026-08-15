@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Caso rotto — grigio troppo chiaro</title>
+<meta name="description" content="Pagina di controllo: una riga di testo grigio chiaro su fondo bianco, sotto 4,5:1, per far scattare il controllo del contrasto.">
+<style>
+  body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: #111; background: #fff; padding: 16px; }
+  /* IL DIFETTO: #b9b9b9 su bianco fa 1,96:1, contro i 4,5:1 che servono. */
+  .sbiadito { color: #b9b9b9; }
+  /* Il confronto: questo grigio fa 5,7:1 e non deve risultare rotto. */
+  .leggibile { color: #6b6b6b; }
+</style>
+</head>
+<body>
+<h1>Caso rotto: contrasto</h1>
+<p class="sbiadito">Questa riga è grigio chiaro su bianco: non si legge al sole.</p>
+<p class="leggibile">Questa riga invece si legge, e non deve risultare rotta.</p>
+</body>
+</html>

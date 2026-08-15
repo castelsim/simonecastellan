@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Caso rotto — testo scuro su fondo scuro</title>
+<meta name="description" content="Pagina di controllo: testo scuro dentro un riquadro scuro, dove il fondo è dichiarato su un genitore. Chi calcola contro il bianco lo dà per buono.">
+<style>
+  body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: #111; background: #fff; padding: 16px; }
+  /* IL DIFETTO, ed è quello che distingue un controllo vero da uno finto:
+     il fondo scuro sta sul riquadro, non sul paragrafo. Il paragrafo ha solo
+     un colore scuro. Chi misura il testo contro il bianco della pagina trova
+     14,7:1 e passa oltre; contro il fondo vero fa 1,4:1 e non si legge. */
+  .riquadro { background: #14181c; padding: 16px; border-radius: 8px; }
+  .riquadro p { color: #2b3138; }
+</style>
+</head>
+<body>
+<h1>Caso rotto: il fondo vero</h1>
+<p>Questa pagina esiste per essere trovata rotta. Se <code>tools/regressione.html</code>
+   la dà per buona, il contrasto lo sta calcolando contro il bianco invece che
+   contro il fondo che c'è davvero sotto la scritta.</p>
+<div class="riquadro">
+  <p>Questa riga è scura dentro un riquadro scuro: non si vede.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Caso rotto — sbordo orizzontale</title>
+<meta name="description" content="Pagina di controllo: contiene una riga più larga dello schermo, e serve solo a far scattare il controllo dello sbordo in tools/regressione.html.">
+<style>
+  body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: #111; background: #fff; padding: 16px; }
+  /* IL DIFETTO: 520 px dentro uno schermo da 390. La pagina si trascina di lato. */
+  .troppo-larga { width: 520px; background: #ddd; padding: 12px; }
+</style>
+</head>
+<body>
+<h1>Caso rotto: sbordo</h1>
+<p>Questa pagina esiste per essere trovata rotta. Se <code>tools/regressione.html</code>
+   la dà per buona, il controllo dello sbordo non sta misurando niente.</p>
+<div class="troppo-larga">Questa riga è larga 520&nbsp;px dentro uno schermo da 390.</div>
+</body>
+</html>

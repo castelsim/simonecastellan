@@ -20,6 +20,8 @@
 
   var ctx = null, worklet = null, sorgente = null, mediaStream = null;
   var analizzatore = null, rtaTimer = null;
+  var workletPronto = null;     // { contesto, promessa }: il modulo si carica una volta sola
+  var nodi = [];                // il grafo di questa misura, da smontare alla fine
   var bande = null, grafico = null;
   var congelata = null, ultima = null;
   var inCorso = false;
@@ -66,15 +68,33 @@
     return brutte;
   }
 
+  /* Il contesto adesso è uno solo e sopravvive alla misura (prima ne nasceva
+     uno nuovo a ogni «Misura di nuovo», e Chrome ne regge sei per pagina).
+     Quindi i nodi vanno staccati a mano: se restano attaccati, alla seconda
+     misura il rumore rosa esce due volte e la terza tre. */
   function fermaTutto() {
     if (rtaTimer) { clearInterval(rtaTimer); rtaTimer = null; }
     try { if (sorgente) sorgente.stop(); } catch (e) {}
     sorgente = null;
+    if (worklet) { worklet.port.onmessage = null; worklet = null; }
+    analizzatore = null;
+    nodi.forEach(function (n) { try { n.disconnect(); } catch (e) {} });
+    nodi = [];
     if (mediaStream) {
       mediaStream.getTracks().forEach(function (t) { t.stop(); });
       mediaStream = null;
     }
     inCorso = false;
+  }
+
+  /* Un guasto si racconta in un posto solo: prima lo stesso riquadro veniva
+     riempito da tre punti diversi del file. */
+  function fallita(msg) {
+    fermaTutto();
+    $('vai').disabled = false;
+    mostra('inCorso', false);
+    mostra('erroreBox', true);
+    testo('erroreTxt', msg);
   }
 
   /* ── La misura ────────────────────────────────────────────────────────── */
@@ -90,8 +110,10 @@
     ultimiScritti = 0;
     $('barra').style.width = '0%';
 
-    var CtxA = window.AudioContext || window.webkitAudioContext;
-    ctx = new CtxA();
+    /* Il contesto lo tiene /comune/audio.js: uno per pagina, sbloccato dentro
+       questo tocco, con la categoria audio di iOS già a posto. */
+    ctx = AUDIO.contesto();
+    if (!ctx) return fallita(AUDIO.messaggio('assente'));
 
     var passo = autoprova ? Promise.resolve(null) : chiediMicrofono();
 
@@ -111,7 +133,20 @@
          rilegge l'elenco, così la riga sotto il pulsante smette di dire
          «microfono di sistema» e dice come si chiama davvero. */
       DISPOSITIVI.aggiorna().then(disegnaDispositivi);
-      return ctx.audioWorklet.addModule('cattura.worklet.js');
+      /* Una volta sola per contesto. Prima il problema non si poneva: ogni
+         misura apriva un contesto nuovo. Provato il 14/08/2026: Chrome
+         sopporta di caricare due volte lo stesso modulo sullo stesso contesto
+         senza lamentarsi — le specifiche invece dicono che registrare due
+         volte lo stesso nome è un errore, e non c'è motivo di riscaricarlo. */
+      if (!workletPronto || workletPronto.contesto !== ctx) {
+        var p = ctx.audioWorklet.addModule('cattura.worklet.js');
+        // se il caricamento fallisce non va ricordato: riprovare deve poter riuscire
+        p.catch(function () { workletPronto = null; });
+        // insieme alla promessa si ricorda SU QUALE contesto: un modulo
+        // registrato altrove non vale, e il nodo nascerebbe senza processore
+        workletPronto = { contesto: ctx, promessa: p };
+      }
+      return workletPronto.promessa;
     }).then(function () {
       // l'uscita scelta va applicata PRIMA di far partire il suono, o il primo
       // pezzo di rumore rosa esce dalla cassa sbagliata
@@ -119,16 +154,11 @@
     }).then(function () {
       avvia();
     }).catch(function (e) {
-      inCorso = false;
-      $('vai').disabled = false;
-      mostra('inCorso', false);
-      mostra('erroreBox', true);
-      var msg = (e && e.name === 'NotAllowedError')
+      fallita((e && e.name === 'NotAllowedError')
         ? 'Senza microfono non posso misurare. Il permesso si dà dalla barra dell\'indirizzo, sull\'icona a sinistra.'
         : (e && e.name === 'NotFoundError')
         ? 'Non trovo nessun microfono su questo dispositivo.'
-        : 'Non sono riuscito ad aprire il microfono. ' + (e && e.message ? e.message : '');
-      testo('erroreTxt', msg);
+        : 'Non sono riuscito ad aprire il microfono. ' + (e && e.message ? e.message : ''));
     });
   }
 
@@ -144,6 +174,7 @@
       numberOfOutputs: 1,
       outputChannelCount: [1]
     });
+    nodi = [sorgente, vol, worklet];
 
     // il riferimento: alle casse e, uguale, al misuratore
     sorgente.connect(vol);
@@ -166,9 +197,11 @@
       var ritardo = ctx.createDelay(1);
       ritardo.delayTime.value = 0.02;                   // 20 ms, 6,9 metri
       vol.connect(gobba); gobba.connect(buco); buco.connect(ritardo);
+      nodi.push(gobba, buco, ritardo);
       ingresso = ritardo;
     } else {
       ingresso = ctx.createMediaStreamSource(mediaStream);
+      nodi.push(ingresso);
     }
     ingresso.connect(worklet, 0, 1);
 
@@ -177,12 +210,14 @@
     muto.gain.value = 0;
     worklet.connect(muto);
     muto.connect(ctx.destination);
+    nodi.push(muto);
 
     // l'RTA vivo, solo per far vedere che qualcosa entra davvero
     analizzatore = ctx.createAnalyser();
     analizzatore.fftSize = 8192;
     analizzatore.smoothingTimeConstant = 0.6;
     ingresso.connect(analizzatore);
+    nodi.push(analizzatore);
 
     var campioni = Math.floor(fs * DURATA);
     worklet.port.onmessage = function (e) {
@@ -198,7 +233,7 @@
     };
 
     sorgente.start();
-    if (ctx.state === 'suspended') ctx.resume();
+    AUDIO.riprendi();          // se è rimasto sospeso, il testimone qui sotto lo dice
     worklet.port.postMessage({ comando: 'parti', campioni: campioni });
 
     testo('statoTxt', 'Ascolto…');
@@ -215,15 +250,10 @@
     setTimeout(function () {
       if (!inCorso) return;              // finita per la sua strada: tutto bene
       if (ultimiScritti > 0) return;     // sta lavorando, solo più lenta
-      fermaTutto();
-      mostra('inCorso', false);
-      $('vai').disabled = false;
-      mostra('erroreBox', true);
-      testo('erroreTxt', ctx && ctx.state !== 'running'
-        ? 'Il browser ha tenuto l\'audio bloccato, quindi non è uscito niente dalle casse. ' +
-          'Tocca di nuovo «Misura». Su iPhone controlla la levetta del silenzioso.'
-        : 'Non è arrivato nessun campione dal microfono. Controlla che sia quello giusto ' +
-          'e che qualche altra applicazione non lo stia occupando.');
+      fallita(AUDIO.partito()
+        ? 'Non è arrivato nessun campione dal microfono. Controlla che sia quello giusto ' +
+          'e che qualche altra applicazione non lo stia occupando.'
+        : AUDIO.messaggio('sospeso') + ' Tocca di nuovo «Misura».');
     }, 4000);
   }
 
@@ -478,6 +508,14 @@
   function pronto() {
     grafico = GRAFICO.crea($('tela'));
     $('vai').addEventListener('click', misura);
+
+    /* L'audio bloccato si sa prima dei quattro secondi della rete di
+       sicurezza: lo dice /comune/audio.js appena il tentativo di sblocco
+       fallisce. Misurato: il riquadro compare dopo 1,2 s invece di 4. */
+    AUDIO.seNonParte(function (msg) {
+      if (!inCorso) return;              // nessuno sta aspettando un suono
+      fallita(msg + ' Tocca di nuovo «Misura».');
+    });
 
     DISPOSITIVI.avvia(disegnaDispositivi).then(disegnaDispositivi);
     $('apriDisp').addEventListener('click', function () {
