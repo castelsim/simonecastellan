@@ -5,7 +5,6 @@
 var ctx = null;
 var master = null, gainL = null, gainR = null, merger = null;
 var source = null;                 // BufferSource o Oscillator, secondo il segnale
-var buffers = {};                  // rosa e bianco generati una volta sola
 var playing = false;
 
 var kind = 'pink';                 // pink | white | sine | sweep
@@ -42,10 +41,14 @@ var levelVal = document.getElementById('levelVal');
 
 // --- Grafo audio -----------------------------------------------------------
 
+/* Il contesto lo tiene /comune/audio.js: lo crea una volta sola, lo sblocca
+   dentro il gesto, sposta la categoria audio di iOS e lo riprende quando si
+   torna sulla pagina. Qui resta il grafo, che è di questo strumento: un
+   guadagno generale che si sdoppia in sinistra e destra, per il Solo L / R. */
 function ensureCtx() {
   if (!ctx) {
-    var AC = window.AudioContext || window.webkitAudioContext;
-    ctx = new AC();
+    ctx = AUDIO.contesto();
+    if (!ctx) return false;
     master = ctx.createGain();
     master.gain.value = 0;                       // si entra sempre da zero
     gainL = ctx.createGain();
@@ -57,58 +60,17 @@ function ensureCtx() {
     gainR.connect(merger, 0, 1);
     merger.connect(ctx.destination);
     applyRoute();
+  } else {
+    AUDIO.contesto();                            // riprende se era sospeso
   }
-  // Su iOS il contesto nasce sospeso: si sblocca solo dentro un gesto dell'utente.
-  if (ctx.state === 'suspended') ctx.resume();
+  return true;
 }
 
-/* Rumore in un buffer che si richiude su se stesso: la coda sfuma dentro la
-   testa, così il punto di giunzione non fa "tac" a ogni giro. */
-function noiseBuffer(pink) {
-  var sr = ctx.sampleRate;
-  var len = Math.floor(sr * 10);
-  var cf = Math.floor(sr * 0.5);
-  var raw = new Float32Array(len + cf);
-  var b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-
-  for (var i = 0; i < raw.length; i++) {
-    var w = Math.random() * 2 - 1;
-    if (!pink) { raw[i] = w; continue; }
-    // Filtro di Paul Kellett: da bianco a rosa (−3 dB per ottava).
-    b0 = 0.99886 * b0 + w * 0.0555179;
-    b1 = 0.99332 * b1 + w * 0.0750759;
-    b2 = 0.96900 * b2 + w * 0.1538520;
-    b3 = 0.86650 * b3 + w * 0.3104856;
-    b4 = 0.55000 * b4 + w * 0.5329522;
-    b5 = -0.7616 * b5 - w * 0.0168980;
-    raw[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362;
-    b6 = w * 0.115926;
-  }
-
-  var out = new Float32Array(len);
-  for (var j = 0; j < len; j++) out[j] = raw[j];
-  for (var k = 0; k < cf; k++) {
-    var t = k / cf;
-    out[k] = out[k] * t + raw[len + k] * (1 - t);
-  }
-
-  // Normalizzo a valore efficace 1: così il dBFS scelto è l'RMS, il modo in cui
-  // si legge il rumore rosa su un fonometro o su un misuratore del mixer.
-  var sum = 0;
-  for (var m = 0; m < len; m++) sum += out[m] * out[m];
-  var rms = Math.sqrt(sum / len) || 1;
-  for (var n = 0; n < len; n++) out[n] /= rms;
-
-  var buf = ctx.createBuffer(1, len, sr);
-  if (buf.copyToChannel) buf.copyToChannel(out, 0);
-  else buf.getChannelData(0).set(out);
-  return buf;
-}
-
+/* Il rumore rosa lo genera SEGNALI, insieme a «Tara un impianto»: era la stessa
+   funzione scritta due volte, e due copie divergono sempre. Se un giorno si
+   corregge il filtro, si corregge per tutti e due. */
 function noise(pink) {
-  var key = pink ? 'pink' : 'white';
-  if (!buffers[key]) buffers[key] = noiseBuffer(pink);
-  return buffers[key];
+  return pink ? SEGNALI.rosa(ctx) : SEGNALI.bianco(ctx);
 }
 
 function amp() { return Math.pow(10, levelDb / 20); }
@@ -159,7 +121,7 @@ function fmtHz(f) {
 function start() {
   if (restartTimer) { clearTimeout(restartTimer); restartTimer = null; }
   if (playing) return;              // già in riproduzione: niente seconda sorgente
-  ensureCtx();
+  if (!ensureCtx()) return;         // niente Web Audio: l'avviso l'ha già scritto
   if (kind === 'pink' || kind === 'white') {
     source = ctx.createBufferSource();
     source.buffer = noise(kind === 'pink');
@@ -299,6 +261,15 @@ document.addEventListener('keydown', function (e) {
     e.preventDefault();
     playing ? stop() : start();
   }
+});
+
+/* Se l'audio non parte, il pulsante diceva STOP e dalle casse non usciva
+   niente: la pagina fingeva di suonare, e in sala si cerca il guasto sul
+   mixer. La riga grande — quella che di solito dice il nome del segnale — è
+   il posto dove uno sta già guardando. */
+AUDIO.seNonParte(function (msg) {
+  if (playing) stop();
+  readout.textContent = msg;
 });
 
 setFreq(440);
