@@ -253,3 +253,12 @@ header { text-align: left; margin-bottom: 30px; }
 .passo::first-letter { color: var(--teal); font-weight: 700; }
 .dropzone .btn-secondary { background: var(--teal-l); color: var(--teal-scuro); }
 .dropzone .btn-secondary:hover { background: var(--teal); }
+
+/* Una nota non è un errore: «ne hai scelti tre, lavoro il primo» finiva in
+   rosso e faceva credere che qualcosa fosse andato storto, mentre il lavoro
+   si fa lo stesso. Grigio come le altre righe di servizio. */
+.nota-file {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}

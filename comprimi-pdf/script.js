@@ -104,9 +104,15 @@ function mostra(el, si) { if (el) el.classList.toggle('hidden', !si); }
 /* Un messaggio sopra il riquadro, per le cose che si capiscono prima ancora di
    aprire il file. Se il posto per scriverlo non c'è, si ripiega sulla riga del
    risultato: l'importante è che qualcosa venga detto. */
-function avvisa(testo) {
+/* Due nature diverse, e finivano tutte e due in rosso.
+   «Questo non è un PDF» è un errore: il lavoro non si fa.
+   «Ne hai scelti tre, lavoro il primo» è una nota: il lavoro si fa lo stesso,
+   e colorarla di rosso fa credere che qualcosa sia andato storto. */
+function avvisa(testo, nota) {
   if (avvisoFile) {
     avvisoFile.textContent = testo || '';
+    avvisoFile.classList.toggle('errore-msg', !nota);
+    avvisoFile.classList.toggle('nota-file', !!nota);
     mostra(avvisoFile, !!testo);
     if (testo) { mostra(statusBox, false); mostra(warnBox, false); }
   } else if (testo) {
@@ -316,7 +322,7 @@ async function apri(file) {
            'Il limite qui è ' + pesa(PESO_MAX) + '. Se sono tante pagine, dividilo in due e riprova.');
     return;
   }
-  avvisa(notaScelta);
+  avvisa(notaScelta, true);   // nota: il lavoro si fa lo stesso
 
   // Il documento di prima va chiuso: pdf.js tiene un solo lavoratore in
   // sottofondo e i documenti dimenticati se lo mangiano.
