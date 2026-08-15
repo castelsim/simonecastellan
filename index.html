@@ -170,34 +170,46 @@
        ChatGPT, che è pieno e senza bordo — così la pagina ha una grammatica
        sola. E il testo si centra come tutto il resto: erano l'unica cosa
        allineata a sinistra in una pagina centrata. */
-    /* Quattro riquadri, non più tre: in fila su schermo largo, a due a due
-       quando quattro diventano francobolli, e in colonna sul telefono. Le
-       soglie sono scritte a mano invece che con auto-fit perché il punto in cui
-       stringere lo decide il TESTO più lungo, non una larghezza minima uguale
-       per tutti. */
-    .progetti{display:grid; grid-template-columns:repeat(4,1fr); gap:10px}
+    /* Pillole vuote con un filo sottile, non riquadri pieni (15/08/2026).
+       Il pieno resta al SOLO pulsante ChatGPT, che così torna a essere l'unica
+       cosa piena della pagina — cioè quella che l'occhio trova per prima. Il
+       filo basta a dire «questo si preme», che è quello che manca a un testo
+       nudo: sul telefono il passaggio del dito non esiste, e senza contenitore
+       non si capirebbe.
+
+       Tutte e quattro della stessa larghezza, per scelta di Simone: misurate,
+       si adattavano al testo e andavano da 156 a 178 px. Il minimo è 180, cioè
+       la più larga più due. Curiosità che spiega perché serviva misurare: «il
+       tuo palco in scala» ha PIÙ caratteri di «musica per immagini» (21 contro
+       19) ed era la più STRETTA — le tre «m» sono lettere larghe, e la
+       larghezza la fanno i pixel, non i caratteri.
+
+       Il minimo, e non una griglia a colonne: così su schermo stretto le
+       pillole restano larghe quanto basta e vanno a capo da sole, invece di
+       stirarsi per riempire la riga. */
+    .progetti{display:flex; flex-wrap:wrap; justify-content:center; gap:9px}
     .progetto{
-      display:flex; flex-direction:column; justify-content:center; align-items:center; gap:5px;
-      min-height:76px; padding:16px 14px;
-      border:1px solid transparent; border-radius:14px;
-      background:#f4f6f6; text-decoration:none; text-align:center;
-      transition:background .15s ease, transform .15s ease}
-    .progetto:hover{background:#eaf1ef}
+      display:inline-flex; align-items:center; justify-content:center;
+      min-width:180px; padding:10px 18px;
+      border:1px solid #e0e5e3; border-radius:999px;
+      background:transparent; text-decoration:none; text-align:center;
+      transition:border-color .15s ease, color .15s ease, transform .15s ease}
+    .progetto:hover{border-color:#0a7d72}
     .progetto:active{transform:translateY(1px)}
     /* Tolto il nome, questa riga è rimasta sola: prende il corpo e il colore
        che aveva il nome, altrimenti il riquadro conterrebbe solo una didascalia
        grigia da 11,5 px — e una didascalia senza la cosa che descrive è un
        testo che nessuno legge. Il contrasto sale da 4,64:1 (era appena sopra
        la soglia) a 16,9:1 sul fondo tenue. */
-    .p-cosa{font-size:14.5px; font-weight:650; color:#0f1614; letter-spacing:-.2px; line-height:1.35}
-    /* Fra 620 e 900 px quattro in fila diventano quattro francobolli col testo
-       a capo ogni due parole: a due a due si leggono. */
-    @media (max-width:900px){
-      .progetti{grid-template-columns:repeat(2,1fr)}
-    }
+    /* Niente grassetto: era quello, su fondo pieno, a far leggere i riquadri
+       come pulsanti di un'applicazione invece che come voci di un elenco. */
+    .p-cosa{font-size:13.5px; font-weight:400; color:#3c4043; line-height:1.35}
+    .progetto:hover .p-cosa{color:#0f1614}
+    /* Niente soglie a mano: con flex-wrap le pillole vanno a capo da sole
+       quando non ci stanno, che è il motivo per cui esistono le pillole. */
     @media (max-width:620px){
-      .progetti{grid-template-columns:1fr; gap:8px}
-      .progetto{min-height:0; padding:13px 15px}
+      .progetti{gap:8px}
+      .progetto{padding:11px 16px}
     }
     /* Menu: identico a quello di /tools/, così le due pagine sono lo stesso sito.
        Nessuno sfondo e nessuna pillola — la pillola è la forma del pulsante
@@ -260,6 +272,10 @@
         width:calc(100% + 14px); min-width:44px; height:44px;
         transform:translate(-50%,-50%)}
       .pills a, .pills button{min-height:44px}
+      /* Le pillole dei progetti misuravano 41 px di altezza: tre in meno di
+         quanto ne vuole un dito. Trovato misurando — a occhio la differenza
+         fra 41 e 44 non si vede, ed è esattamente per questo che va misurata. */
+      .progetto{min-height:44px}
     }
     .escape{display:none; position:fixed; top:0; left:0; right:0; background:#f1f3f4; color:#5f6368;
       font-size:13px; line-height:1.5; padding:10px 16px; text-align:center; z-index:10}
