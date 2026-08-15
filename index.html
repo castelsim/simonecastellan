@@ -160,17 +160,23 @@
        risalivano di altrettanto e finivano appiccicati alla frase. Lo stacco
        resta qui, dove non dipende da un testo che c'è o non c'è. */
     .sviluppo{margin-top:40px}
+    /* Riquadri PIENI e centrati, non contornati e a sinistra (15/08/2026).
+       La cornice era #e3e8e6 su bianco: quasi invisibile, e non si leggeva che
+       fossero cose da premere. Il fondo tenue è la stessa idea del pulsante
+       ChatGPT, che è pieno e senza bordo — così la pagina ha una grammatica
+       sola. E il testo si centra come tutto il resto: erano l'unica cosa
+       allineata a sinistra in una pagina centrata. */
     .progetti{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
     .progetto{
-      display:flex; flex-direction:column; justify-content:center; gap:4px;
-      min-height:76px; padding:14px 14px;
-      border:1px solid #e3e8e6; border-radius:14px;
-      background:#fff; text-decoration:none; text-align:left;
-      transition:border-color .15s ease, background .15s ease, transform .15s ease}
-    .progetto:hover{border-color:#0a7d72; background:#f7faf9}
+      display:flex; flex-direction:column; justify-content:center; align-items:center; gap:5px;
+      min-height:76px; padding:16px 14px;
+      border:1px solid transparent; border-radius:14px;
+      background:#f4f6f6; text-decoration:none; text-align:center;
+      transition:background .15s ease, transform .15s ease}
+    .progetto:hover{background:#eaf1ef}
     .progetto:active{transform:translateY(1px)}
-    .p-nome{font-size:15px; font-weight:650; color:#0f1614; letter-spacing:-.2px}
-    .p-cosa{font-size:12px; line-height:1.45; color:#68716d}
+    .p-nome{font-size:14.5px; font-weight:650; color:#0f1614; letter-spacing:-.2px}
+    .p-cosa{font-size:11.5px; line-height:1.4; color:#68716d}
     @media (max-width:620px){
       .progetti{grid-template-columns:1fr; gap:8px}
       .progetto{min-height:0; padding:13px 15px}
@@ -282,15 +288,19 @@
       <div class="progetti">
         <a class="progetto" href="https://crastelstudio.com" target="_blank" rel="noopener" data-p="Crastel">
           <span class="p-nome">Crastelstudio.com</span>
-          <span class="p-cosa">musica per immagini</span>
+          <span class="p-cosa">ascolta la musica per immagini</span>
         </a>
         <a class="progetto" href="https://stageplot.it/" target="_blank" rel="noopener" data-p="StagePlot">
           <span class="p-nome">StagePlot.it</span>
-          <span class="p-cosa">il palco si disegna, il rider esce da sé</span>
+          <!-- «in scala» torna: è il fatto tecnico che distingue StagePlot da un
+               disegno qualsiasi, e stava già in due punti del sito («disegnare
+               stage plot in scala reale» nel profilo, «stage plot in scala» in
+               /tools/). Era uscito dalla home nella riscrittura del 15/08. -->
+          <span class="p-cosa">disegna il tuo palco, in scala</span>
         </a>
         <a class="progetto" href="/tools/" data-p="Tools">
           <span class="p-nome">Tools</span>
-          <span class="p-cosa">strumenti che girano nel browser</span>
+          <span class="p-cosa">usa gli strumenti nel browser</span>
         </a>
       </div>
     </section>
