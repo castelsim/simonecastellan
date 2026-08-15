@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Caso rotto — errore JavaScript in fondo</title>
+<meta name="description" content="Pagina di controllo: uno script in fondo al corpo chiama una funzione che non esiste, per far scattare il controllo degli errori JavaScript.">
+<style>body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: #111; background: #fff; padding: 16px; }</style>
+</head>
+<body>
+<h1>Caso rotto: errore JavaScript</h1>
+<p>Questa pagina esiste per essere trovata rotta. Lo script qui sotto sta dove
+   stanno quelli degli strumenti: in fondo al corpo.</p>
+<script>
+  /* IL DIFETTO: una funzione che non esiste, come quando si rinomina qualcosa
+     e si dimentica un punto di chiamata. */
+  funzioneCheNonEsiste();
+</script>
+</body>
+</html>

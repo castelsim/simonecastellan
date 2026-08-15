@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Regressione — tutti i controlli del browser in un verdetto</title>
+<meta name="robots" content="noindex, nofollow">
+<!--
+  Strumento di manutenzione, non una pagina del sito. Sta in tools/ accanto a
+  verifica.py e a banco.html, e si apre da un server locale:
+
+      python3 -m http.server 8123      →  http://localhost:8123/tools/regressione.html
+
+  Fa in una volta sola i controlli che finora si facevano a mano, pagina per
+  pagina, e che quindi non si facevano quasi mai. Per ogni indirizzo del sito:
+
+    1. risposta   — la pagina esiste davvero e non è il 404 travestito
+    2. javascript — errori mentre la pagina si carica
+    3. sbordo     — qualcosa esce di lato in uno schermo da 390 px
+    4. bersagli   — comandi più piccoli di un dito (44 px)
+    5. contrasto  — testo sotto 4,5:1 CONTRO IL FONDO VERO, non contro il bianco
+    6. intestazione — titolo e descrizione dentro i limiti di Google
+
+  IL PATTO. Ogni controllo ha in tools/casi/ una pagina rotta apposta. Prima di
+  guardare il sito, la regressione guarda quelle: se una pagina rotta apposta
+  NON risulta rotta, il controllo non sta misurando niente e il verdetto è rosso
+  anche se il sito è perfetto. Un verde che non ha guardato niente è peggio di
+  un rosso.
+
+  QUELLO CHE QUI NON SI PUÒ FARE resta scritto in tools/PROVE-A-MANO.md:
+  il suono da un iPhone, il microfono vero, la rotazione, la tastiera di iOS,
+  Safari, Firefox, Edge, Android. Un browser solo non è tutti i browser.
+-->
+<style>
+  :root {
+    --testo: #14181c; --tenue: #5a6570; --fondo: #f6f7f8; --carta: #fff;
+    --bordo: #dfe3e7; --rosso: #b3261e; --verde: #0f7b45; --giallo: #8a6100;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px 20px 80px; background: var(--fondo); color: var(--testo);
+         font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; }
+  h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -.4px; }
+  .sotto { color: var(--tenue); margin: 0 0 20px; }
+  #verdetto { border-radius: 10px; padding: 16px 18px; margin-bottom: 20px; color: #fff;
+              background: #6b7280; font-size: 17px; font-weight: 600; }
+  #verdetto.ok { background: var(--verde); }
+  #verdetto.no { background: var(--rosso); }
+  #verdetto small { display: block; font-weight: 400; font-size: 14px; opacity: .95; margin-top: 4px; }
+  h2 { font-size: 16px; margin: 26px 0 8px; }
+  .blocco { background: var(--carta); border: 1px solid var(--bordo); border-radius: 10px;
+            padding: 4px 16px 12px; }
+  .riga { padding: 10px 0; border-top: 1px solid var(--bordo); }
+  .riga:first-child { border-top: 0; }
+  .via { font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .esito-ok { color: var(--verde); }
+  .esito-no { color: var(--rosso); font-weight: 600; }
+  .esito-avviso { color: var(--giallo); }
+  ul { margin: 6px 0 0; padding-left: 20px; }
+  li { margin: 2px 0; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px;
+         background: #eef1f3; padding: 1px 4px; border-radius: 4px; }
+  .tenue { color: var(--tenue); }
+  #barra { height: 4px; background: var(--bordo); border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
+  #barra i { display: block; height: 100%; width: 0; background: var(--testo); transition: width .2s; }
+  #culla { position: absolute; left: -10000px; top: 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Regressione</h1>
+  <p class="sotto">Tutti i controlli che si possono fare in un browser, su ogni pagina del sito,
+     con un verdetto solo. Prima però la pagina controlla sé stessa sui casi rotti apposta.</p>
+  <div id="verdetto">in corso…<small id="avanzamento">preparazione</small></div>
+  <div id="barra"><i></i></div>
+  <h2>Casi rotti apposta <span class="tenue">— se uno risulta sano, il controllo è cieco</span></h2>
+  <div class="blocco" id="casi"><div class="riga tenue">in attesa…</div></div>
+  <h2>Pagine del sito</h2>
+  <div class="blocco" id="pagine"><div class="riga tenue">in attesa…</div></div>
+  <p class="tenue" id="tempo"></p>
+</main>
+<div id="culla"></div>
+
+<script>
+/* ————— Cosa si guarda ————— */
+
+var LARGHEZZA = 390;          // iPhone 12/13/14: lo schermo più stretto che conti ancora
+var SOGLIA_DITO = 43.5;       // 44 px, ma un elemento alto 44 si misura 43,996
+var SOGLIA_CONTRASTO = 4.5;   // WCAG AA, testo normale
+var SOGLIA_GRANDE = 3;        // WCAG AA, testo grande (24px, o 18,66px in grassetto)
+var MAX_TITOLO = 60;          // oltre, Google tronca — e tronca dalla fine
+var MAX_DESCRIZIONE = 160;
+var ATTESA_SCRIPT = 1200;     // quanto si aspetta che gli script partano
+var ATTESA_SPIA = 700;        // il secondo giro serve solo agli errori di partenza
+var SCADENZA = 15000;         // oltre questa, la pagina è considerata piantata
+
+/* Gli strumenti, nello stesso ordine di verifica.py e banco.html. */
+var TOOL = ["tara-impianto", "audio-mp3", "bpm", "tonalita", "qrcode", "posso-pubblicarlo",
+            "fotogramma", "comprimi-immagini", "comprimi-pdf", "comprimi-video", "rumore-rosa",
+            "ritardo-diffusori", "link-utm", "conta-caratteri", "link-whatsapp",
+            "da-comunicato-a-post", "semplifica-testo", "alt-text",
+            "metriche-social"];   // nascosto dalla vetrina, ma la pagina è viva
+
+/* Le pagine che non sono strumenti. «rimando» vuol dire una pagina che esiste
+   solo per non lasciare nel vuoto i link vecchi: da lei non si pretende un
+   titolo da risultato di ricerca. */
+var PAGINE = [
+  { via: "/",                   tipo: "sito" },
+  { via: "/profilo/",           tipo: "sito" },
+  { via: "/cv/",                tipo: "sito" },
+  { via: "/en/profile/",        tipo: "sito" },
+  { via: "/privacy/",           tipo: "sito" },
+  { via: "/tienimi-presente/",  tipo: "sito" },
+  { via: "/tools/",             tipo: "sito" },
+  { via: "/BDG2029/",           tipo: "sito" },
+  { via: "/bando-in-chiaro/",   tipo: "sito" },
+  { via: "/immagini-social/",   tipo: "rimando" },
+  { via: "/stageplot/",         tipo: "rimando" },
+  { via: "/live-production-os/", tipo: "rimando" }
+];
+for (var i = 0; i < TOOL.length; i++) PAGINE.push({ via: "/" + TOOL[i] + "/", tipo: "strumento" });
+
+/* I casi rotti apposta: quale controllo DEVE trovarli rotti. */
+var CASI = [
+  { via: "/tools/casi/non-esiste-questa-pagina/", deve: "risposta",
+    perche: "un indirizzo che non c'è: il 404 del server è comunque HTML con un <h1>" },
+  { via: "/tools/casi/errore-js.html", deve: "javascript",
+    perche: "una funzione che non esiste, chiamata in fondo al corpo" },
+  { via: "/tools/casi/errore-js-testa.html", deve: "javascript",
+    perche: "lo stesso errore ma nella prima riga di script della testa: il punto più difficile da sorprendere" },
+  { via: "/tools/casi/sbordo.html", deve: "sbordo",
+    perche: "una riga da 520 px dentro uno schermo da 390" },
+  { via: "/tools/casi/bersagli.html", deve: "bersagli",
+    perche: "un pulsante da 30 px, sotto la misura di un dito" },
+  { via: "/tools/casi/contrasto.html", deve: "contrasto",
+    perche: "grigio #b9b9b9 su bianco: 1,96:1" },
+  { via: "/tools/casi/fondo-vero.html", deve: "contrasto",
+    perche: "testo scuro su fondo scuro dichiarato sul GENITORE: chi misura contro il bianco lo dà per buono" },
+  { via: "/tools/casi/intestazione.html", deve: "intestazione",
+    perche: "titolo e descrizione oltre il limite" }
+];
+
+/* ————— Colore: dal testo al fondo che c'è davvero sotto ————— */
+
+function aRgba(s) {
+  if (!s) return null;
+  var m = s.match(/rgba?\(([^)]+)\)/);
+  if (!m) return null;
+  var p = m[1].split(/[,\s\/]+/).filter(function (x) { return x !== ""; }).map(parseFloat);
+  return [p[0], p[1], p[2], p.length > 3 ? p[3] : 1];
+}
+
+/* «sopra» steso su «sotto», come due vetri colorati. */
+function sovrapponi(sopra, sotto) {
+  var a = sopra[3] + sotto[3] * (1 - sopra[3]);
+  if (a === 0) return [0, 0, 0, 0];
+  return [0, 1, 2].map(function (k) {
+    return (sopra[k] * sopra[3] + sotto[k] * sotto[3] * (1 - sopra[3])) / a;
+  }).concat([a]);
+}
+
+function luminanza(c) {
+  var v = [0, 1, 2].map(function (k) {
+    var x = c[k] / 255;
+    return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
+}
+
+function rapporto(a, b) {
+  var la = luminanza(a), lb = luminanza(b);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+/* IL PUNTO DELICATO. Il fondo di una scritta quasi mai è dichiarato sulla
+   scritta: sta su un riquadro tre livelli più su. Chi calcola il contrasto
+   contro il bianco della pagina trova numeri bellissimi e non vede niente —
+   ed è esattamente il caso di tools/casi/fondo-vero.html. Qui si risale di
+   genitore in genitore finché non si trova un colore opaco, sovrapponendo
+   quelli semitrasparenti incontrati per strada. */
+function fondoVero(el, win) {
+  var acc = [0, 0, 0, 0], n = el, immagine = null, opacita = 1;
+  while (n && n.nodeType === 1) {
+    var st = win.getComputedStyle(n);
+    if (st.opacity !== "" && +st.opacity < 1) opacita *= +st.opacity;
+    if (!immagine && st.backgroundImage && st.backgroundImage !== "none") immagine = st.backgroundImage;
+    var c = aRgba(st.backgroundColor);
+    if (c && c[3] > 0) {
+      acc = sovrapponi(acc, c);
+      if (acc[3] >= 0.999) break;
+    }
+    n = n.parentElement;
+  }
+  // Sotto tutto c'è il foglio: bianco, se nessuno ha detto altro.
+  if (acc[3] < 0.999) acc = sovrapponi(acc, [255, 255, 255, 1]);
+  return { rgb: acc, immagine: immagine, opacita: opacita };
+}
+
+function esa(c) {
+  return "#" + [0, 1, 2].map(function (k) {
+    return ("0" + Math.round(c[k]).toString(16)).slice(-2);
+  }).join("");
+}
+
+/* ————— I controlli sul documento aperto ————— */
+
+function visibile(el, win) {
+  var st = win.getComputedStyle(el);
+  if (st.visibility === "hidden" || st.display === "none") return false;
+  if (st.opacity === "0") return false;
+  if (el.closest && el.closest("[aria-hidden='true']")) return false;
+  var r = el.getBoundingClientRect();
+  return r.width > 0 && r.height > 0;
+}
+
+function indirizzo(el) {
+  var s = el.tagName.toLowerCase();
+  if (el.id) return s + "#" + el.id;
+  if (el.className && typeof el.className === "string") {
+    s += "." + el.className.trim().split(/\s+/).slice(0, 2).join(".");
+  }
+  var t = (el.textContent || "").replace(/\s+/g, " ").trim().slice(0, 28);
+  return s + (t ? " «" + t + "»" : "");
+}
+
+function controllaSbordo(doc, win) {
+  var de = doc.documentElement;
+  var visto = de.clientWidth;
+  var scorre = Math.max(de.scrollWidth, doc.body ? doc.body.scrollWidth : 0);
+  if (scorre <= visto + 0.5) return null;
+  // Chi sborda: l'elemento che esce mentre suo padre sta dentro.
+  var colpevoli = [];
+  var tutti = doc.querySelectorAll("body *");
+  for (var i = 0; i < tutti.length && colpevoli.length < 6; i++) {
+    var el = tutti[i];
+    if (!visibile(el, win)) continue;
+    if (dentroUnRullo(el, win)) continue;          // scorre dentro un contenitore: è voluto
+    var r = el.getBoundingClientRect();
+    if (r.right <= visto + 0.5 && r.left >= -0.5) continue;
+    var p = el.parentElement ? el.parentElement.getBoundingClientRect() : null;
+    if (p && (p.right > visto + 0.5 || p.left < -0.5)) continue;   // colpa del padre
+    colpevoli.push(indirizzo(el) + " → " + Math.round(r.right) + " px");
+  }
+  return "la pagina scorre di lato: " + Math.round(scorre) + " px dentro " + visto +
+         (colpevoli.length ? ". Esce: " + colpevoli.join("; ") : "");
+}
+
+function dentroUnRullo(el, win) {
+  var n = el.parentElement;
+  while (n && n.nodeType === 1 && n !== el.ownerDocument.body) {
+    var o = win.getComputedStyle(n).overflowX;
+    if (o === "auto" || o === "scroll" || o === "hidden") return true;
+    n = n.parentElement;
+  }
+  return false;
+}
+
+var SELETTORE_TOCCO = 'a[href], button, input, select, textarea, summary, label[for],' +
+                      '[role="button"], [role="link"], [role="tab"], [role="switch"], [onclick]';
+
+/* Un bersaglio può essere più grande di quello che si vede: comune/voce.css
+   allarga i comandi scritti come una parola sottolineata con un ::after
+   invisibile alto 44 px. Misurare solo il rettangolo dell'elemento darebbe
+   un rosso falso, quindi si guarda anche lo pseudo-elemento. */
+function misuraPallina(el) {
+  var fogli = el.ownerDocument.styleSheets, trovata = null;
+  for (var i = 0; i < fogli.length; i++) {
+    var regole;
+    try { regole = fogli[i].cssRules; } catch (e) { continue; }   // foglio di un'altra origine
+    if (!regole) continue;
+    for (var j = 0; j < regole.length; j++) {
+      var sel = regole[j].selectorText;
+      if (!sel || sel.indexOf("-webkit-slider-thumb") < 0) continue;
+      var base = sel.replace(/::?-webkit-slider-thumb/g, "").trim();
+      try { if (base && !el.matches(base)) continue; } catch (e) { continue; }
+      var l = parseFloat(regole[j].style.width), h = parseFloat(regole[j].style.height);
+      if (l > 0 && h > 0) trovata = { l: l, h: h };
+    }
+  }
+  return trovata;
+}
+
+function misuraBersaglio(el, win) {
+  var r = el.getBoundingClientRect();
+  var l = r.width, h = r.height;
+  /* Un cursore a scorrimento è alto quanto il suo binario — 4 px in
+     /rumore-rosa/ — ma quello che si prende col dito è la pallina. Misurare il
+     binario darebbe un numero vero e inutile. La pallina però non si misura
+     con getComputedStyle: su uno pseudo-elemento che non esiste per lo
+     standard Chrome restituisce lo stile dell'elemento, cioè 350×4 — e la
+     misura sembrava giusta. Si va a leggere la regola nel foglio di stile. */
+  if (el.type === "range") {
+    var p = misuraPallina(el);
+    if (p) return { l: p.l, h: p.h, nota: " (la pallina del cursore)" };
+  }
+  ["::after", "::before"].forEach(function (p) {
+    var st = win.getComputedStyle(el, p);
+    if (!st || st.content === "none" || st.content === "normal") return;
+    if (st.position !== "absolute" && st.position !== "fixed") return;
+    var pl = parseFloat(st.width), ph = parseFloat(st.height);
+    if (pl > l) l = pl;
+    if (ph > h) h = ph;
+  });
+  return { l: l, h: h };
+}
+
+function controllaBersagli(doc, win) {
+  var guasti = [], avvisi = [];
+  var tutti = doc.querySelectorAll(SELETTORE_TOCCO);
+  for (var i = 0; i < tutti.length; i++) {
+    var el = tutti[i];
+    if (el.disabled) continue;
+    if (el.type === "hidden") continue;
+    if (!visibile(el, win)) continue;
+    /* Un'etichetta larga quanto il modulo e alta venti pixel non è un bersaglio:
+       è la didascalia sopra il campo, e il bersaglio è il campo, che si misura
+       da sé. Le etichette in riga invece (la casella da spuntare col suo testo
+       accanto) restano dentro il conto. */
+    if (el.tagName === "LABEL" && win.getComputedStyle(el).display !== "inline") continue;
+    var m = misuraBersaglio(el, win);
+    /* Il selettore dei file si nasconde in un quadratino da un pixel e si
+       comanda dall'etichetta che gli sta sopra (lo fa /tonalita/): quel pixel
+       non è un bersaglio mancato, è un bersaglio finto. Il bersaglio vero è
+       l'etichetta, e viene misurata per conto suo. */
+    if (m.l < 8 && m.h < 8) continue;
+    var lato = Math.min(m.l, m.h);
+    if (lato >= SOGLIA_DITO) continue;
+    var voce = indirizzo(el) + " → " + m.l.toFixed(0) + "×" + m.h.toFixed(0) + " px" + (m.nota || "");
+    /* Un link dentro una frase non si può ingrandire senza spaccare la riga:
+       le linee guida lo escludono, e qui resta un avviso invece che un guasto.
+       Vale anche per la riga del piede — «Home · Profilo · Curriculum» — che è
+       scritta come una frase, non come una fila di pulsanti: sono tutti sotto
+       i 44 px (misurati: 33×14), e restano lì come avviso, da guardare quando
+       si rifà il piede. */
+    if (win.getComputedStyle(el).display === "inline" &&
+        el.closest("p, li, small, footer, nav, .credit, .site-footer")) {
+      avvisi.push(voce + " (link dentro il testo)");
+    } else {
+      guasti.push(voce);
+    }
+  }
+  return { guasti: guasti, avvisi: avvisi };
+}
+
+function controllaContrasto(doc, win) {
+  var guasti = [], avvisi = [], visti = {};
+  var tutti = doc.querySelectorAll("body *");
+  for (var i = 0; i < tutti.length; i++) {
+    var el = tutti[i];
+    var tag = el.tagName;
+    if (tag === "SCRIPT" || tag === "STYLE" || tag === "NOSCRIPT" || tag === "OPTION" ||
+        tag === "SVG" || tag === "TEMPLATE") continue;
+    var proprio = "";
+    for (var k = 0; k < el.childNodes.length; k++) {
+      if (el.childNodes[k].nodeType === 3) proprio += el.childNodes[k].nodeValue;
+    }
+    proprio = proprio.replace(/\s+/g, " ").trim();
+    if (!proprio) continue;
+    /* Un puntino di separazione fra due link non è testo da leggere: è un
+       segno grafico, e le regole sul contrasto non lo riguardano. */
+    if (!/[\p{L}\p{N}]/u.test(proprio)) continue;
+    /* Un comando spento è spento apposta — «PNG» in /qrcode/ resta grigio
+       finché il codice non c'è. Le linee guida escludono i comandi disabilitati,
+       e senza questa riga la regressione le segnava tutte come guasti. */
+    if (el.disabled || el.closest("[disabled], [aria-disabled='true']")) continue;
+    if (!visibile(el, win)) continue;
+    var st = win.getComputedStyle(el);
+    var testo = aRgba(st.color);
+    if (!testo) continue;
+    var f = fondoVero(el, win);
+    // L'opacità dei genitori sbiadisce la scritta quanto un colore più chiaro.
+    var sopra = [testo[0], testo[1], testo[2], testo[3] * f.opacita];
+    var colore = sovrapponi(sopra, f.rgb);
+    var r = rapporto(colore, f.rgb);
+    var dim = parseFloat(st.fontSize), peso = parseInt(st.fontWeight, 10) || 400;
+    var grande = dim >= 24 || (dim >= 18.66 && peso >= 700);
+    var soglia = grande ? SOGLIA_GRANDE : SOGLIA_CONTRASTO;
+    if (r >= soglia) continue;
+    var voce = "«" + proprio.slice(0, 34) + "» " + esa(colore) + " su " + esa(f.rgb) +
+               " = " + r.toFixed(2) + ":1 (serve " + soglia + ")";
+    if (visti[voce]) continue;
+    visti[voce] = 1;
+    // Sopra un'immagine o una sfumatura il colore del fondo non è un numero
+    // solo: qui il conto non vale, e lo si dice invece di inventarlo.
+    if (f.immagine) avvisi.push(voce + " — ma sotto c'è " + f.immagine.slice(0, 30) + ", da guardare a occhio");
+    else guasti.push(voce);
+    if (guasti.length >= 8) break;
+  }
+  return { guasti: guasti, avvisi: avvisi };
+}
+
+function controllaIntestazione(html) {
+  var guasti = [];
+  var t = html.match(/<title>([\s\S]*?)<\/title>/i);
+  if (!t) guasti.push("manca il <title>");
+  else {
+    var titolo = t[1].replace(/\s+/g, " ").trim();
+    if (titolo.length > MAX_TITOLO) {
+      guasti.push("titolo di " + titolo.length + " caratteri (massimo " + MAX_TITOLO +
+                  "): Google tronca dalla fine, cioè dove è scritto cosa fa la pagina");
+    }
+  }
+  /* Le virgolette che chiudono devono essere quelle che hanno aperto, non una
+     qualsiasi delle due: la descrizione della home contiene un apostrofo, e
+     con «["']» al posto della coppia il conto si fermava lì — 161 caratteri
+     invece di 235, cioè un limite superato che passava per rispettato. */
+  var d = html.match(/<meta[^>]+name=["']description["'][^>]*content=(["'])([\s\S]*?)\1/i);
+  if (!d) guasti.push("manca la meta description");
+  else {
+    var desc = d[2].replace(/\s+/g, " ").trim();
+    if (desc.length > MAX_DESCRIZIONE) {
+      guasti.push("descrizione di " + desc.length + " caratteri (massimo " + MAX_DESCRIZIONE +
+                  "): Google la taglia a metà frase");
+    }
+  }
+  return guasti;
+}
+
+/* ————— Aprire una pagina in un riquadro da 390 px ————— */
+
+function descriviErrore(ev) {
+  if (ev.message) {
+    return ev.message + " @ " + String(ev.filename || "").split("/").pop() + ":" + ev.lineno;
+  }
+  var b = ev.target && ev.target.tagName ? ev.target.tagName.toLowerCase() : "?";
+  return "RISORSA " + b + " non caricata: " +
+         String((ev.target && (ev.target.src || ev.target.href)) || "").split("/").pop();
+}
+
+function nuovoRiquadro() {
+  var f = document.createElement("iframe");
+  f.setAttribute("scrolling", "no");
+  f.style.cssText = "width:" + LARGHEZZA + "px;height:844px;border:0;display:block";
+  document.getElementById("culla").appendChild(f);
+  return f;
+}
+
+/* Il riquadro è largo 390 px, ma la sua barra di scorrimento ruba larghezza al
+   documento: si finirebbe per misurare uno schermo da 375 e trovare sbordi che
+   sul telefono non esistono. Si allarga il riquadro di quanto manca. */
+function raddrizzaLarghezza(f) {
+  try {
+    var manca = LARGHEZZA - f.contentDocument.documentElement.clientWidth;
+    if (manca > 0 && manca < 40) f.style.width = (LARGHEZZA + manca) + "px";
+  } catch (e) {}
+}
+
+/* PRIMO GIRO — la pagina vera, al suo indirizzo vero.
+   Serve per misurare: il CSS è quello, gli script girano con la loro location,
+   le immagini stanno al loro posto. Gli errori raccolti qui sono solo quelli
+   che arrivano DOPO il caricamento (timer, promesse): per quelli di partenza
+   c'è il secondo giro, qui sotto, e il perché è spiegato là. */
+function apriVera(via) {
+  return new Promise(function (risolvi) {
+    var f = nuovoRiquadro();
+    var errori = [], risorse = [], chiuso = false;
+    /* Se il tempo scade ma il documento è finito lo stesso, non è la pagina a
+       essere lenta: è questa scheda che sta in secondo piano, e il browser le
+       rallenta i timer fino a un secondo l'uno. In quel caso si misura e basta.
+       Senza questa distinzione, ogni giro fatto mentre si guarda altrove
+       riempiva il verdetto di rossi finti. */
+    var scaduto = setTimeout(function () {
+      var pronta = false;
+      try { pronta = f.contentDocument.readyState === "complete"; } catch (e) {}
+      if (pronta) { risorse.push("scheda rallentata: misurata allo scadere del tempo"); chiudi(); }
+      else chiudi("non ha finito di caricare in " + (SCADENZA / 1000) + " s");
+    }, SCADENZA);
+
+    function chiudi(extra) {
+      if (chiuso) return;
+      chiuso = true;
+      clearTimeout(scaduto);
+      var esito = { errori: errori, risorse: risorse, extra: extra || "" };
+      try {
+        esito.doc = f.contentDocument;
+        esito.win = f.contentWindow;
+      } catch (e) { esito.extra = "documento non leggibile: " + e.message; }
+      esito.chiudi = function () { f.remove(); };
+      risolvi(esito);
+    }
+
+    f.onload = function () {
+      raddrizzaLarghezza(f);
+      try {
+        f.contentWindow.addEventListener("error", function (ev) {
+          (ev.message ? errori : risorse).push("dopo il caricamento: " + descriviErrore(ev));
+        }, true);
+        f.contentWindow.addEventListener("unhandledrejection", function (ev) {
+          errori.push("promessa rifiutata: " + ((ev.reason && ev.reason.message) || ev.reason));
+        });
+      } catch (e) { errori.push("non si riesce ad ascoltare la pagina: " + e.message); }
+      setTimeout(function () { chiudi(); }, ATTESA_SCRIPT);
+    };
+    f.onerror = function () { chiudi("la pagina non si apre"); };
+    f.src = via + (via.indexOf("?") < 0 ? "?" : "&") + "regressione=1&_=" + Date.now();
+  });
+}
+
+/* SECONDO GIRO — gli errori del primo secondo, quelli che rompono davvero.
+
+   Un errore alla riga uno di script.js non lo sente nessuno: per ascoltare una
+   pagina bisogna agganciarsi alla sua finestra, e la finestra nuova nasce
+   quando la navigazione parte, cioè quando è già troppo tardi. Provato: un
+   sondaggio ogni 3 ms non prende mai errore-js.html, perché mentre il figlio
+   si carica il padre non gira — è lo stesso filo. banco.html ha lo stesso buco
+   (si aggancia su onload) e non se n'era mai accorto nessuno, perché il suo
+   caso di controllo, il nome scritto male, lo prende il controllo dell'HTTP.
+
+   Il modo che funziona: si parte da un riquadro «about:blank», che è già lì e
+   già della stessa origine, e ci si riversa dentro l'HTML con document.write,
+   MESSA DAVANTI A TUTTO una riga di script che ascolta. La riga deve stare
+   dentro la pagina, non fuori: document.open() spazza via gli ascoltatori
+   messi dal padre — provato, si perdevano anche gli errori a 30 ms di
+   distanza — mentre quello che si aggancia da dentro, dopo l'apertura,
+   resta e sente anche il primo script della testa.
+
+   Il prezzo, dichiarato: il documento così scritto si porta dietro l'indirizzo
+   di questa pagina, non il suo. Le vie relative si raddrizzano con un <base>,
+   ma uno script che legge location.href per costruirsi un percorso (audio-mp3
+   lo fa, per il worker) qui lo costruisce sbagliato. Per questo di questo giro
+   si tengono SOLO gli errori di JavaScript: misure e risorse vengono dal primo. */
+function apriConSpia(via, html) {
+  return new Promise(function (risolvi) {
+    var f = nuovoRiquadro();
+    var errori = [], chiuso = false;
+    var scaduto = setTimeout(function () { chiudi(); }, SCADENZA);
+
+    function chiudi() {
+      if (chiuso) return;
+      chiuso = true;
+      clearTimeout(scaduto);
+      f.remove();
+      risolvi({ errori: errori });
+    }
+
+    try {
+      window.__raccolta = errori;   // dove la spia scarica quello che sente
+      var base = new URL(via, location.href).href;
+      var spia = "<script>(function(){var r=function(t){try{parent.__raccolta.push(t);}catch(e){}};" +
+                 "window.addEventListener('error',function(e){if(e.message)r(e.message+' @ '+" +
+                 "String(e.filename||'').split('/').pop()+':'+e.lineno);},true);" +
+                 "window.addEventListener('unhandledrejection',function(e){" +
+                 "r('promessa rifiutata: '+((e.reason&&e.reason.message)||e.reason));});})();<\/script>";
+      var testa = "<base href=\"" + base + "\">" + spia;
+      var conSpia = html.replace(/<head([^>]*)>/i, "<head$1>" + testa);
+      if (conSpia === html) conSpia = testa + html;
+      var d = f.contentWindow.document;
+      d.open();
+      d.write(conSpia);
+      d.close();
+    } catch (e) {
+      errori.push("la pagina non si riesce nemmeno a riversare nel riquadro: " + e.message);
+      return chiudi();
+    }
+    setTimeout(chiudi, ATTESA_SPIA);
+  });
+}
+
+/* ————— L'esame di una pagina ————— */
+
+function esamina(pag) {
+  var esito = { via: pag.via, tipo: pag.tipo, guasti: {}, avvisi: [] };
+  function guasto(controllo, testo) {
+    (esito.guasti[controllo] = esito.guasti[controllo] || []).push(testo);
+  }
+  return fetch(pag.via + (pag.via.indexOf("?") < 0 ? "?" : "&") + "_=" + Date.now(),
+               { cache: "no-store" })
+    .then(function (r) {
+      esito.stato = r.status;
+      return r.text().then(function (html) { return { r: r, html: html }; });
+    })
+    .catch(function (e) {
+      guasto("risposta", "irraggiungibile: " + e.message);
+      return null;
+    })
+    .then(function (d) {
+      if (!d) return esito;
+      if (!d.r.ok) {
+        guasto("risposta", "HTTP " + d.r.status);
+        return esito;
+      }
+      var ct = d.r.headers.get("content-type") || "";
+      if (ct.indexOf("html") < 0) guasto("risposta", "non è HTML ma " + ct);
+
+      /* Una pagina che rimanda altrove non ha niente da mostrare, e aprirla in
+         un riquadro vorrebbe dire andarsi a caricare un sito esterno: si
+         controlla che il rimando ci sia, e si passa oltre. */
+      var rimanda = /<meta[^>]+http-equiv=["']refresh["']/i.test(d.html);
+      if (rimanda) {
+        var dove = d.html.match(/url=([^"'\s>]+)/i);
+        if (!dove) guasto("risposta", "dice di rimandare ma non dice dove");
+        esito.avvisi.push("pagina di rimando verso " + (dove ? dove[1] : "?") + ": non si apre");
+        return esito;
+      }
+
+      /* Il 404 di un server statico è HTML anche lui: quello che manca a una
+         pagina che non esiste è il titolo del sito e un <h1>. */
+      if (!/<h1[^>]*>/i.test(d.html)) guasto("risposta", "risponde 200 ma non ha un <h1>: pagina fantasma");
+      if (pag.tipo !== "rimando") {
+        controllaIntestazione(d.html).forEach(function (g) { guasto("intestazione", g); });
+      }
+      if (esito.guasti.risposta) return esito;   // se non esiste, inutile aprirla
+
+      return apriConSpia(pag.via, d.html).then(function (s) {
+        s.errori.forEach(function (e) { guasto("javascript", e); });
+        return apriVera(pag.via);
+      }).then(function (q) {
+        if (q.extra) guasto("risposta", q.extra);
+        q.errori.forEach(function (e) { guasto("javascript", e); });
+        q.risorse.forEach(function (e) { esito.avvisi.push(e); });
+        if (q.doc && q.doc.body) {
+          try {
+            var s = controllaSbordo(q.doc, q.win);
+            if (s) guasto("sbordo", s);
+            var b = controllaBersagli(q.doc, q.win);
+            b.guasti.forEach(function (g) { guasto("bersagli", g); });
+            b.avvisi.forEach(function (a) { esito.avvisi.push(a); });
+            var c = controllaContrasto(q.doc, q.win);
+            c.guasti.forEach(function (g) { guasto("contrasto", g); });
+            c.avvisi.forEach(function (a) { esito.avvisi.push(a); });
+          } catch (e) {
+            guasto("risposta", "i controlli sul documento sono esplosi: " + e.message);
+          }
+        } else if (!q.extra) {
+          guasto("risposta", "il documento non si legge dal riquadro");
+        }
+        q.chiudi();
+        return esito;
+      });
+    });
+}
+
+/* ————— Il giro, e il verdetto ————— */
+
+var NOMI = { risposta: "risposta", javascript: "javascript", sbordo: "sbordo",
+             bersagli: "bersagli", contrasto: "contrasto", intestazione: "intestazione" };
+
+function riga(esito, extra) {
+  var d = document.createElement("div");
+  d.className = "riga";
+  var quanti = Object.keys(esito.guasti);
+  var testa = '<span class="via">' + esito.via + "</span> ";
+  if (quanti.length) {
+    testa += '<span class="esito-no">rotto: ' + quanti.join(", ") + "</span>";
+  } else {
+    testa += '<span class="esito-ok">a posto</span>';
+  }
+  if (esito.avvisi.length) testa += ' <span class="esito-avviso">· ' + esito.avvisi.length + " avvisi</span>";
+  if (extra) testa += ' <span class="tenue">— ' + extra + "</span>";
+  var corpo = "";
+  quanti.forEach(function (c) {
+    corpo += "<li><b>" + NOMI[c] + "</b>: " + esito.guasti[c].map(function (x) {
+      return String(x).replace(/</g, "&lt;");
+    }).join("<br>") + "</li>";
+  });
+  esito.avvisi.forEach(function (a) {
+    corpo += '<li class="esito-avviso">avviso: ' + String(a).replace(/</g, "&lt;") + "</li>";
+  });
+  d.innerHTML = testa + (corpo ? "<ul>" + corpo + "</ul>" : "");
+  return d;
+}
+
+function avanza(fatti, totale, che) {
+  document.querySelector("#barra i").style.width = Math.round(fatti / totale * 100) + "%";
+  document.getElementById("avanzamento").textContent = fatti + "/" + totale + " — " + che;
+}
+
+(function () {
+  var partenza = Date.now();
+  /* ?casi=1 prova solo i casi rotti apposta (serve mentre si scrive un
+     controllo nuovo); ?solo=/bpm/,/qrcode/ restringe alle pagine toccate. */
+  var soloCasi = /[?&]casi=1/.test(location.search);
+  var filtro = (location.search.match(/[?&]solo=([^&]+)/) || [])[1];
+  var pagine = PAGINE;
+  if (filtro) {
+    var voluti = decodeURIComponent(filtro).split(",");
+    pagine = PAGINE.filter(function (p) {
+      return voluti.some(function (v) { return p.via.indexOf(v) >= 0; });
+    });
+  }
+  if (soloCasi) pagine = [];
+  var totale = CASI.length + pagine.length, fatti = 0;
+  var ciechi = [], rotte = [], esiti = [], esitiCasi = [];
+
+  var conCasi = document.getElementById("casi");
+  var conPagine = document.getElementById("pagine");
+  conCasi.innerHTML = "";
+  conPagine.innerHTML = "";
+
+  function passo(lista, indice, dopo) {
+    if (indice >= lista.length) return dopo();
+    var voce = lista[indice];
+    avanza(fatti, totale, voce.via);
+    esamina(voce).then(function (esito) {
+      fatti++;
+      if (voce.deve) {
+        var trovato = !!esito.guasti[voce.deve];
+        esito.caso = voce;
+        esito.trovato = trovato;
+        esitiCasi.push(esito);
+        var d = document.createElement("div");
+        d.className = "riga";
+        d.innerHTML = '<span class="via">' + voce.via + "</span> — " +
+          (trovato
+            ? '<span class="esito-ok">trovato rotto («' + voce.deve + '»), il controllo guarda</span>'
+            : '<span class="' + (voce.limite ? "esito-avviso" : "esito-no") + '">NON trovato rotto: ' +
+              (voce.limite ? "caso limite, il controllo arriva tardi" :
+                             "il controllo «" + voce.deve + "» non sta misurando niente") + "</span>") +
+          // il perché parla di <h1> e di <base>: senza questo la pagina se li mangia
+          '<br><span class="tenue">' + voce.perche.replace(/</g, "&lt;") + "</span>";
+        conCasi.appendChild(d);
+        if (!trovato && !voce.limite) ciechi.push(voce.deve + " (" + voce.via + ")");
+      } else {
+        esiti.push(esito);
+        conPagine.appendChild(riga(esito));
+        if (Object.keys(esito.guasti).length) rotte.push(esito.via);
+      }
+      passo(lista, indice + 1, dopo);
+    });
+  }
+
+  passo(CASI, 0, function () {
+    passo(pagine, 0, function () {
+      var secondi = ((Date.now() - partenza) / 1000).toFixed(1);
+      var v = document.getElementById("verdetto");
+      var quanti = 0;
+      esiti.forEach(function (e) { quanti += Object.keys(e.guasti).length; });
+      var righe = [];
+      if (ciechi.length) righe.push("controlli ciechi: " + ciechi.join(", "));
+      if (rotte.length) righe.push(rotte.length + " pagine con qualcosa da sistemare: " + rotte.join(", "));
+      var ok = !ciechi.length && !rotte.length;
+      v.className = ok ? "ok" : "no";
+      // Attenzione: qui dentro c'è #avanzamento, e riscrivendo lo si butta via.
+      v.innerHTML = (ok ? "TUTTO A POSTO" : "DA SISTEMARE") +
+        "<small>" + (righe.join(" · ") || (pagine.length + " pagine, " + CASI.length + " casi di controllo")) +
+        "</small>";
+      document.getElementById("tempo").textContent =
+        pagine.length + " pagine e " + CASI.length + " casi in " + secondi + " secondi. " +
+        "Quello che qui non si può provare sta in tools/PROVE-A-MANO.md.";
+      /* Per chi legge questa pagina da fuori (uno script, un agente). */
+      window.__ESITI = esiti;
+      window.__CASI = esitiCasi;
+      window.__RIASSUNTO = (ok ? "VERDE" : "ROSSO") + " · ciechi: " + (ciechi.join(", ") || "nessuno") +
+        " · guasti: " + quanti + " su " + pagine.length + " pagine · " + secondi + " s";
+      window.__FINITO = true;
+    });
+  });
+})();
+</script>
+</body>
+</html>
