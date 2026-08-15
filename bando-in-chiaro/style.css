@@ -330,3 +330,16 @@ h1 { font-size: 27px; font-weight: 500; color: var(--ink); letter-spacing: -0.3p
   font-size: 11.5px; line-height: 1.55; color: var(--muted);
   white-space: pre-wrap; max-height: 260px; overflow: auto;
 }
+
+/* ── La misura di un dito ───────────────────────────────────────────────────
+   Questo strumento non era nella vetrina né nella lista delle prove, e la
+   regola dei 44 px non l'aveva mai vista: i pulsanti stavano a 41,5 e la riga
+   «Cosa verrà chiesto» a 17. La regola sta in OR — lo schermo stretto si può
+   misurare, il tipo di puntatore no — e fa crescere l'area, non il testo. */
+@media (max-width: 560px), (pointer: coarse) {
+  .btn { min-height: 44px; }
+  .avanzate summary {
+    min-height: 44px; display: flex; align-items: center;
+  }
+  .dropzone { padding-bottom: 20px; }
+}

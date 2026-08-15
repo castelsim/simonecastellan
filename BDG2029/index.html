@@ -70,6 +70,12 @@
   footer p + p{ margin-top:.7rem; }
 
   @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+  /* La misura di un dito: i quattro collegamenti erano alti 38 px. La regola
+     sta in OR — lo schermo stretto si può misurare, il tipo di puntatore no. */
+  @media (max-width: 560px), (pointer: coarse){
+    .pill{ min-height:44px; }
+  }
 </style>
 </head>
 <body>

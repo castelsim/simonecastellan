@@ -108,8 +108,9 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <!-- pdf.js sta già nel sito per il compressore: si riusa quello, non se ne scarica un altro. -->
-  <script src="/comprimi-pdf/vendor/pdf.min.js"></script>
+  <!-- pdf.js sta già nel sito per il compressore: si riusa quello, non se ne
+       scarica un altro. E non si carica qui: 313 KB scaricati aprendo la pagina
+       li pagava anche chi incolla il testo. Lo carica script.js al primo PDF. -->
   <script src="script.js"></script>
 </body>
 </html>

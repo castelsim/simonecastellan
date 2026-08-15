@@ -231,7 +231,15 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
 
 /* Sotto la cifra, a cosa serve quel peso: «1 MB» da solo non dice niente a chi
    non fa questo mestiere. */
-.seg-btn i { display: block; font-style: normal; font-size: 10px; opacity: .6; margin-top: 2px; }
+/* Il sottotitolo del segmento («2 MB», «email»…) era attenuato con
+   «opacity: .6». Non è un colore che si vede scritto da nessuna parte: nasce
+   solo a schermo, mescolando il testo col fondo. Sul grigio dei segmenti
+   veniva fuori #999da0, cioè 2,46:1 — poco più della metà del minimo
+   leggibile, su un testo da 10 px. Sul segmento attivo, fondo bianco, faceva
+   4,10:1: sotto anche quello. Ora il colore è dichiarato, e si può leggere
+   nel sorgente: 5,4:1 sul grigio, 6,1:1 sul bianco. */
+.seg-btn i { display: block; font-style: normal; font-size: 10px; color: var(--muted); margin-top: 2px; }
+.seg-btn.active i { color: var(--muted); }
 
 /* La riga che spiega i limiti a parole */
 .modo-nota {

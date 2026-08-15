@@ -167,7 +167,14 @@
 
     sorgente = SEGNALI.sorgente(ctx, 'rosa');
     var vol = ctx.createGain();
-    vol.gain.value = SEGNALI.ampiezza(LIVELLO_DB);
+    /* «forte» chiedeva −18+6 = −12 dBFS di valore efficace, ma il rumore rosa
+       ha una punta 12,5–13,4 dB sopra: a −12 il picco esce oltre l'uno e il
+       segnale distorce PRIMA di entrare nell'impianto. In uno strumento di
+       misura è il peggiore dei difetti, perché la distorsione la si sente e la
+       si attribuisce alle casse. Il tetto lo dice il generatore, che il picco
+       lo ha misurato sul buffer vero. */
+    var tetto = SEGNALI.massimoSenzaClip(ctx, 'rosa');
+    vol.gain.value = SEGNALI.ampiezza(Math.min(LIVELLO_DB, tetto));
 
     worklet = new AudioWorkletNode(ctx, 'cattura', {
       numberOfInputs: 2,

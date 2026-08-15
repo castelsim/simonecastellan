@@ -149,17 +149,22 @@
     function setActions(on) { btnPng.disabled = !on; btnSvg.disabled = !on; btnCopy.disabled = !on; btnShare.disabled = !on; }
     function setNote(msg, err) { note.textContent = msg || ""; note.classList.toggle("error", !!err); }
 
+    // Toglie di mezzo il quadrato disegnato prima. Va chiamata su OGNI strada che
+    // non produce un QR nuovo: se resta a video quello vecchio, chi lo stampa
+    // stampa il link precedente senza accorgersene.
+    function svuota() {
+      currentQR = null;
+      canvas.classList.add("hidden"); emptyIcon.classList.remove("hidden");
+      preview.classList.remove("has-qr");
+      setActions(false);
+    }
+
     function update() {
       var text = $("textInput").value.trim();
-      if (!text) {
-        currentQR = null;
-        canvas.classList.add("hidden"); emptyIcon.classList.remove("hidden");
-        preview.classList.remove("has-qr");
-        setActions(false); setNote(""); return;
-      }
+      if (!text) { svuota(); setNote(""); return; }
       var qr;
       try { qr = qrcode(0, "M"); qr.addData(text); qr.make(); }
-      catch (e) { setNote("Troppo testo — accorcialo.", true); setActions(false); return; }
+      catch (e) { svuota(); setNote("Troppo testo — accorcialo.", true); return; }
       currentQR = qr;
       draw(qr);
       canvas.classList.remove("hidden"); emptyIcon.classList.add("hidden");

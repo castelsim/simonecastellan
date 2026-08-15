@@ -66,6 +66,12 @@ else
   manca "$QUI/prova-tonalita.js" "riconoscimento tonalità"
 fi
 
+if [ -f "$QUI/prova-segnali.js" ]; then
+  prova "segnali di prova (clip)" node "$QUI/prova-segnali.js"
+else
+  manca "$QUI/prova-segnali.js" "segnali di prova (clip)"
+fi
+
 printf '\n%s\n' "${TENUE}——— riassunto ———${FINE}"
 for i in "${!NOMI[@]}"; do
   if [ "${ESITI[$i]}" = "ok" ]; then
@@ -86,10 +92,16 @@ printf '\n%s\n' "${VERDE}Tutte le prove da riga di comando sono passate.${FINE}"
 cat <<FINEMESSAGGIO
 ${TENUE}Restano quelle che vogliono un browser e quelle che vogliono le mani:
 
-  python3 -m http.server $PORTA --directory "$RADICE"
+  python3 -c "from http.server import SimpleHTTPRequestHandler as H, ThreadingHTTPServer as S; from functools import partial; S(('127.0.0.1',$PORTA), partial(H, directory='$RADICE')).serve_forever()"
   → http://localhost:$PORTA/tools/regressione.html   (risposta, JavaScript, sbordo,
     bersagli, contrasto, intestazioni — su ogni pagina, con i casi rotti apposta)
+  → http://localhost:$PORTA/tools/banco.html         (errori JavaScript su ogni
+    strumento; la PRIMA riga dice se la spia sta guardando davvero)
   → $QUI/PROVE-A-MANO.md   (iPhone, microfono, rotazione, Safari, Firefox, Edge, Android)
+
+  Il server è a più thread, non «python3 -m http.server»: quello a thread
+  singolo si impicca a metà: le pagine chiedono altre risorse mentre la loro
+  richiesta è ancora aperta, e uno strumento sano sembra rotto.
 
   La porta cambia a ogni giro apposta: il browser serve JavaScript e CSS dalla
   cache anche quando sono cambiati, e su una porta nuova non ce li ha.${FINE}

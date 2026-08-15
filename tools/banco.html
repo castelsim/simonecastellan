@@ -4,90 +4,156 @@
 <meta name="robots" content="noindex, nofollow">
 <!-- Strumento di manutenzione, non una pagina del sito: sta in tools/ accanto
      a verifica.py. Si apre da un server locale dopo un giro di modifiche e dice
-     quali strumenti hanno errori JavaScript. Ha dentro un nome sbagliato apposta:
-     se quello NON risulta rotto, il banco non sta guardando niente. -->
+     quali strumenti hanno errori JavaScript.
+
+     COME FA A GUARDARE. La spia degli errori non si può agganciare dall'esterno:
+     provato, e non funziona. Una pagina piccola nasce, esegue i suoi script e
+     finisce dentro un solo giro di lavoro del browser, quindi né `onload` (che
+     scatta a cose fatte) né un controllo ripetuto ogni pochi millisecondi
+     riescono a infilarsi prima. Per mesi il banco ha detto «zero errori» senza
+     aver mai guardato: il suo caso sbagliato — un nome di cartella storpiato —
+     veniva colto dal 404 del server, cioè per un'altra strada, e sembrava che
+     tutto funzionasse.
+
+     Ora la pagina viene scaricata, le si mette in testa una spia, e la si apre
+     da quel testo. La spia è la prima cosa che gira, prima di qualsiasi script
+     della pagina.
+
+     LEGGERE SEMPRE LA PRIMA RIGA DELL'ESITO: dice se la spia ha visto i due
+     casi costruiti apposta per rompersi. Se non li vede, tutti gli «zero
+     errori» sotto non valgono niente. -->
+<style>body{font:13px/1.5 ui-monospace,Menlo,monospace;padding:16px}</style>
 <body>
-<!-- File di prova, non va pubblicato: carica ogni strumento in un riquadro e
-     registra gli errori del suo JavaScript. Serve dopo un giro di modifiche,
-     per sapere se una pagina si è rotta senza aprirle tutte a mano. -->
 <pre id="out">in corso…</pre>
 <script>
 var TOOL = ["tara-impianto","audio-mp3","bpm","tonalita","qrcode","posso-pubblicarlo","fotogramma",
             "comprimi-immagini","comprimi-pdf","comprimi-video","rumore-rosa",
-            "ridardo-diffusori-SBAGLIATO",   // controllo: deve risultare rotto
+            "ridardo-diffusori-SBAGLIATO",   // controllo: deve risultare rotto (404)
             "ritardo-diffusori","link-utm","conta-caratteri","link-whatsapp",
-            "da-comunicato-a-post","semplifica-testo","alt-text","metriche-social"];
+            "da-comunicato-a-post","semplifica-testo","alt-text","metriche-social",
+            "bando-in-chiaro"];              // c'è, funziona, e mancava da questa lista
+
+/* I due casi che dicono se la spia sta guardando davvero. Non sono strumenti:
+   sono pagine costruite per rompersi, una con l'errore in fondo al corpo (dove
+   stanno gli script degli strumenti) e una nella testa, che è il caso limite. */
+var CASI_ERRORE = [
+  { url: 'casi/errore-js.html',       dove: 'in fondo al corpo' },
+  { url: 'casi/errore-js-testa.html', dove: 'nella testa' }
+];
+
+/* La spia, iniettata come primo script della pagina.
+   Spegne anche la registrazione dei service worker: due strumenti ne
+   registrano uno che, non trovandosi al comando, ricarica la pagina — dentro
+   il banco quella ricarica manderebbe tutto per aria, e l'eventuale errore di
+   registrazione verrebbe scambiato per un difetto dello strumento. */
+var SPIA = [
+  '<script>(function(){',
+  'window.__ERRORI=[];',
+  'addEventListener("error",function(e){__ERRORI.push((e.message||"errore")+" @ "+String(e.filename||"").split("/").pop()+":"+e.lineno);});',
+  'addEventListener("unhandledrejection",function(e){__ERRORI.push("promessa rifiutata: "+e.reason);});',
+  'try{Object.defineProperty(navigator,"serviceWorker",{configurable:true,value:{',
+  '  register:function(){return new Promise(function(){});},',
+  '  addEventListener:function(){},ready:new Promise(function(){}),controller:null}});}catch(e){}',
+  '})();<\/script>'
+].join('');
 
 var esiti = [];
 
 /* Prima di aprire il riquadro si chiede al server se la pagina esiste davvero.
    Senza questo controllo una pagina inesistente passava per buona: il 404 del
    server è comunque una paginetta HTML con dentro un <h1>, e l'iframe la
-   carica senza lamentarsi. Diciannove verdi di cui uno falso. */
-async function prova(nome) {
-  try {
-    var r = await fetch('/' + nome + '/', { method: 'GET' });
-    if (!r.ok) { esiti.push({ nome: nome, errori: [], extra: 'HTTP ' + r.status }); return; }
-    var testo = await r.text();
-    if (!/<h1[^>]*>/i.test(testo)) { esiti.push({ nome: nome, errori: [], extra: 'senza <h1>' }); return; }
-  } catch (e) {
-    esiti.push({ nome: nome, errori: [], extra: 'irraggiungibile' });
-    return;
-  }
-  return apri(nome);
+   carica senza lamentarsi. */
+async function scarica(url) {
+  var r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  var testo = await r.text();
+  if (!/<h1[^>]*>/i.test(testo)) throw new Error('senza <h1>');
+  return testo;
 }
 
-function apri(nome) {
+/* Mette la spia in testa e fissa la base, altrimenti i percorsi relativi
+   (style.css, script.js, favicon) cercherebbero dentro /tools/. */
+function prepara(html, base) {
+  var testa = '<base href="' + base + '">' + SPIA;
+  if (/<head[^>]*>/i.test(html)) return html.replace(/<head[^>]*>/i, function (m) { return m + testa; });
+  return testa + html;
+}
+
+function apri(nome, html) {
   return new Promise(function (risolvi) {
     var f = document.createElement('iframe');
     f.style.cssText = 'width:420px;height:800px;border:0;position:absolute;left:-9999px';
-    var errori = [];
-    var scaduto = setTimeout(function () { chiudi('non ha finito di caricare'); }, 9000);
+    var scaduto = setTimeout(function () { chiudi('non ha finito di caricare'); }, 12000);
 
     function chiudi(extra) {
       clearTimeout(scaduto);
       if (f.__chiuso) return;
       f.__chiuso = true;
-      var d = null;
-      try { d = f.contentDocument; } catch (e) {}
-      var info = { nome: nome, errori: errori.slice(), extra: extra || '' };
+      var d = null, w = null;
+      try { d = f.contentDocument; w = f.contentWindow; } catch (e) {}
+      var info = { nome: nome, errori: (w && w.__ERRORI) ? w.__ERRORI.slice() : [], extra: extra || '' };
+      if (!w || !w.__ERRORI) info.extra = (info.extra ? info.extra + ', ' : '') + 'spia non installata';
       if (d) {
         info.titolo = (d.title || '').slice(0, 40);
         info.h1 = !!d.querySelector('h1');
         info.piede = !!d.querySelector('.site-footer');
-        // i comandi principali: quanti pulsanti e campi ci sono
         info.pulsanti = d.querySelectorAll('button').length;
         info.campi = d.querySelectorAll('input, textarea').length;
-        info.inglese = /Designed and built/.test(d.body.innerHTML);
+        info.inglese = /Designed and built/.test(d.body ? d.body.innerHTML : '');
       }
       esiti.push(info);
       f.remove();
-      risolvi();
+      risolvi(info);
     }
 
-    f.src = '/' + nome + '/?banco=1';
-    f.onload = function () {
-      // gli errori dell'iframe si catturano dal padre: stessa origine
-      try {
-        f.contentWindow.addEventListener('error', function (e) {
-          errori.push((e.message || 'errore') + ' @ ' + (e.filename || '').split('/').pop() + ':' + e.lineno);
-        });
-        f.contentWindow.addEventListener('unhandledrejection', function (e) {
-          errori.push('promessa rifiutata: ' + e.reason);
-        });
-      } catch (e) { errori.push('non accessibile: ' + e.message); }
-      // un attimo perché gli script partano e aggancino i comandi
-      setTimeout(function () { chiudi(); }, 1200);
-    };
+    f.onload = function () { setTimeout(function () { chiudi(); }, 1200); };
     f.onerror = function () { chiudi('la pagina non si apre'); };
     document.body.appendChild(f);
+    f.srcdoc = html;
   });
+}
+
+async function prova(nome) {
+  var base = new URL('/' + nome + '/', location.origin).href;
+  var html;
+  try { html = await scarica(base); }
+  catch (e) { esiti.push({ nome: nome, errori: [], extra: e.message }); return; }
+  return apri(nome, prepara(html, base));
 }
 
 (async function () {
   for (var i = 0; i < TOOL.length; i++) await prova(TOOL[i]);
+
+  // I casi di controllo per ultimi, e tenuti fuori dal conteggio degli strumenti.
+  var controlli = [];
+  for (var c = 0; c < CASI_ERRORE.length; c++) {
+    var url = new URL(CASI_ERRORE[c].url, location.href).href;
+    var html = await scarica(url);
+    var prima = esiti.length;
+    await apri(CASI_ERRORE[c].url, prepara(html, url));
+    var esito = esiti.splice(prima, 1)[0] || { errori: [] };
+    controlli.push({ dove: CASI_ERRORE[c].dove, visto: esito.errori.length > 0, errori: esito.errori });
+  }
+
+  var spiaViva = controlli.length && controlli.every(function (k) { return k.visto; });
   window.__ESITI = esiti;
-  document.getElementById('out').textContent = 'fatto: ' + esiti.length;
+  window.__CONTROLLI = controlli;
+  window.__SPIA_VIVA = spiaViva;
+
+  var righe = [];
+  righe.push(spiaViva
+    ? '✔ La spia degli errori funziona: tutti i casi costruiti per rompersi sono stati visti.'
+    : '✗ ATTENZIONE — la spia degli errori non vede tutto. Gli «zero errori» qui sotto non valgono.');
+  controlli.forEach(function (k) {
+    righe.push('    caso rotto ' + k.dove + ': ' + (k.visto ? 'visto' : 'NON VISTO'));
+  });
+  righe.push('', 'strumenti provati: ' + esiti.length, '');
+  esiti.forEach(function (e) {
+    righe.push((e.errori.length || e.extra ? '✗ ' : '  ') + e.nome +
+               (e.extra ? '  [' + e.extra + ']' : '') +
+               (e.errori.length ? '  ' + e.errori.join(' | ') : ''));
+  });
+  document.getElementById('out').textContent = righe.join('\n');
 })();
 </script>
 </body>

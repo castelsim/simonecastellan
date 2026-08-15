@@ -218,9 +218,16 @@
        pixel. Vale solo dove si tocca. */
     @media (max-width:620px), (pointer:coarse){
       .nav a, .contact a, .credit a{position:relative; display:inline-block}
+      /* Sei pixel per lato non bastavano sulle voci corte: «EN» è largo 17 px
+         di testo, l'area arrivava a 29 e la regola dei 44 restava disattesa in
+         larghezza mentre in altezza era rispettata. Il minimo è dichiarato,
+         così vale anche per la voce più corta che verrà. Sotto i 44 px il
+         riquadro cresce simmetrico attorno al testo e non si sovrappone al
+         vicino: fra due voci ci sono il puntino e i suoi margini. */
       .nav a::after, .contact a::after, .credit a::after{
-        content:""; position:absolute; left:-6px; right:-6px; top:50%;
-        height:44px; transform:translateY(-50%)}
+        content:""; position:absolute; left:50%; top:50%;
+        width:calc(100% + 14px); min-width:44px; height:44px;
+        transform:translate(-50%,-50%)}
       .pills a, .pills button{min-height:44px}
     }
     .escape{display:none; position:fixed; top:0; left:0; right:0; background:#f1f3f4; color:#5f6368;

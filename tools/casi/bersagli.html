@@ -12,6 +12,36 @@
   .piccolo { width: 30px; height: 30px; font-size: 12px; padding: 0; }
   /* Il confronto: questo invece è grande abbastanza e non deve risultare rotto. */
   .giusto { min-width: 44px; min-height: 44px; }
+
+  /* IL DIFETTO NUMERO DUE: un campo dentro un'etichetta stretta. Un campo che
+     sta dentro la sua etichetta si comanda toccando l'etichetta, e il
+     controllo lo tiene buono se l'etichetta è grande abbastanza — è il caso
+     di /metriche-social/, dove i campi sono alti 20 px dentro etichette da 87.
+     Qui l'etichetta è alta 24: né il campo né l'etichetta arrivano a 44, e
+     deve risultare rotto lo stesso. Senza questo, la regola dell'etichetta
+     sarebbe una scusa buona per qualsiasi campo minuscolo. */
+  .etichetta-stretta { display: block; height: 24px; overflow: hidden; font-size: 11px; }
+  .etichetta-stretta input { height: 16px; font-size: 11px; padding: 0; border: 1px solid #ccc; }
+
+  /* Il confronto della stessa regola: campo basso, ma etichetta abbastanza
+     grande. Questo NON deve risultare rotto. */
+  .etichetta-larga { display: block; min-height: 60px; padding: 8px; border: 1px solid #ccc; }
+  .etichetta-larga input { height: 18px; font-size: 12px; padding: 0; border: 0; width: 100%; }
+
+  /* IL DIFETTO NUMERO TRE: la pallina di un cursore, piccola, e dichiarata
+     DENTRO una media query. Serve a provare che il controllo scende dentro le
+     @media invece di leggere solo il primo livello del foglio: la pallina di
+     /rumore-rosa/ era stata portata a 44 px proprio lì dentro, e continuava a
+     risultare 18 perché nessuno andava a guardare. Fuori dalla media query ce
+     n'è una grande abbastanza, così se il controllo NON entra nella @media
+     legge 44 e dà la pagina per sana — che è esattamente l'errore da
+     smascherare. */
+  .cursore-bugiardo { width: 200px; }
+  .cursore-bugiardo::-webkit-slider-thumb { -webkit-appearance: none; width: 44px; height: 44px; background: #333; }
+  /* Il difetto vero sta qui dentro, e vince perché viene dopo. */
+  @media (max-width: 560px), (pointer: coarse) {
+    .cursore-bugiardo::-webkit-slider-thumb { width: 18px; height: 18px; }
+  }
 </style>
 </head>
 <body>
@@ -20,5 +50,10 @@
    la dà per buona, il controllo dei bersagli non sta misurando niente.</p>
 <button class="piccolo" type="button">×</button>
 <button class="giusto" type="button">ok</button>
+
+<label class="etichetta-stretta">stretta <input type="text"></label>
+<label class="etichetta-larga">larga abbastanza<br><input type="text"></label>
+
+<input class="cursore-bugiardo" type="range" min="0" max="10" value="5" aria-label="cursore con la pallina piccola">
 </body>
 </html>

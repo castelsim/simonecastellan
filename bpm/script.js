@@ -31,6 +31,7 @@ var tapHint   = document.getElementById('tapHint');
 var advBtn    = document.getElementById('advBtn');
 var advPanel  = document.getElementById('advanced');
 var rowsEl    = document.getElementById('rows');
+var fuoriEl   = document.getElementById('fuoriScala');
 var unitBtns  = document.querySelectorAll('.unit');
 var toastEl   = document.getElementById('toast');
 
@@ -105,6 +106,25 @@ function buildRows() {
   });
 }
 
+// Il campo non si tocca mentre si scrive (vedi getBpm), quindi può restare a
+// video un numero diverso da quello su cui la tabella calcola: scritto 9999, la
+// tabella lavorava su 300 senza dirlo, e i millisecondi sembravano sbagliati.
+// Il rimedio non è forzare il campo — il numero salterebbe sotto le dita — ma
+// dichiarare quale valore si sta usando.
+function diciSeFuoriScala() {
+  var scritto = parseFloat(bpmInput.value);
+  var usato = getBpm();
+  if (bpmInput.value.trim() === '' || !isFinite(scritto) || Math.round(scritto) === usato) {
+    fuoriEl.classList.add('hidden');
+    fuoriEl.textContent = '';
+    return;
+  }
+  fuoriEl.textContent = scritto > MAX_BPM
+    ? 'Sto calcolando su ' + MAX_BPM + ' BPM, il massimo.'
+    : 'Sto calcolando su ' + MIN_BPM + ' BPM, il minimo.';
+  fuoriEl.classList.remove('hidden');
+}
+
 // Aggiorna solo i numeri (senza ricostruire il DOM).
 function render() {
   var bpm = getBpm();
@@ -113,6 +133,7 @@ function render() {
     var ms = noteMs(bpm, parseFloat(cell.dataset.denom), cell.dataset.kind);
     cell.textContent = fmt(ms);
   });
+  diciSeFuoriScala();
 }
 
 // --- Copia negli appunti ---

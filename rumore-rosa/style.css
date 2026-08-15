@@ -306,3 +306,35 @@ header { text-align: left; margin-bottom: 30px; }
     justify-content: center;
   }
 }
+
+/* La pallina del cursore era 18 px: si prende col dito e ne vuole 44. Non si
+   può però disegnarne una da 44, sarebbe un pallone in mezzo alla riga. Il
+   trucco: la pallina MISURA 44 px, ma il colore riempie solo il centro
+   («background-clip: content-box» con un bordo trasparente da 13 px), quindi
+   se ne vedono 18 come prima e se ne toccano 44. Anche il binario diventa
+   alto 44 px, così il trascinamento si può cominciare da tutta la riga e non
+   solo dalla pallina — il binario resta disegnato sottile dal suo sfondo. */
+@media (max-width: 560px), (pointer: coarse) {
+  /* L'area diventa 44 px, ma il binario resta disegnato sottile: alzando e
+     basta, lo sfondo dell'elemento cresceva con lui e al posto della riga
+     compariva una barra grigia spessa. Il binario ora è dipinto con una
+     striscia da 4 px al centro, e i 44 px restano trasparenti attorno. */
+  .range {
+    height: 44px;
+    border-radius: 0;
+    background: linear-gradient(var(--line-soft), var(--line-soft)) center/100% 4px no-repeat;
+  }
+  .range::-webkit-slider-thumb {
+    width: 44px; height: 44px;
+    background-color: var(--ink);
+    background-clip: content-box;
+    border: 13px solid transparent;
+  }
+  .range::-moz-range-thumb {
+    width: 44px; height: 44px;
+    background-color: var(--ink);
+    background-clip: content-box;
+    border: 13px solid transparent;
+    box-sizing: border-box;
+  }
+}

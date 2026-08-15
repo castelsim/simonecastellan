@@ -189,3 +189,15 @@ body.ha-testo .pulisci { display: flex; }
   .nav { font-size: 12.5px; }
   .nav .sep { margin: 0 6px; }
 }
+
+/* ── La misura di un dito ───────────────────────────────────────────────────
+   Questa pagina è la porta d'ingresso a tutti gli strumenti, e non era mai
+   passata dalla regola dei 44 px che vale dentro di essi: i sei filtri erano
+   alti 35. La regola sta in OR — lo schermo stretto si può misurare, il tipo
+   di puntatore no — così su un telefono vale comunque, e su un desktop stretto
+   non fa danno (nessuno tocca lo schermo, ma un pulsante più alto non disturba).
+   Cresce l'area, non il testo. */
+@media (max-width: 560px), (pointer: coarse) {
+  .chip { min-height: 44px; display: inline-flex; align-items: center; }
+  .chips { align-items: stretch; }
+}

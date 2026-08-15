@@ -124,6 +124,13 @@ h1 {
   margin: -6px 0 18px;
 }
 
+/* Quando il numero scritto è fuori scala e la tabella calcola su un altro. */
+.bpm-fuori {
+  font-size: 13px;
+  color: #a4501e;          /* 5,46:1 su --bg #ffffff, calcolato */
+  margin: -12px 0 16px;
+}
+
 /* Bottoni — pillole come sul sito */
 .btn {
   appearance: none;

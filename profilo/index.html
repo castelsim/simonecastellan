@@ -125,8 +125,12 @@
     /* Dove si tocca con un dito i comandi e i link di servizio devono essere
        grandi almeno 44 px: stessa regola di comune/voce.css. */
     @media (max-width:560px), (pointer:coarse){
+      /* Il minimo vale in tutte e due le direzioni: con la sola altezza,
+         «Home» restava 33 px di larghezza e «English» 41 — un dito le sbaglia
+         allo stesso modo, che siano basse o strette. */
       .lang a, .credit a, .contact a{
-        display:inline-flex; align-items:center; min-height:44px;
+        display:inline-flex; align-items:center; justify-content:center;
+        min-height:44px; min-width:44px;
       }
       /* Sul riquadro dell'assistente cresce l'imbottitura, non il display:
          cambiarlo in flex porterebbe via il triangolino che dice «si apre». */

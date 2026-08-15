@@ -215,7 +215,13 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
 
 /* Sotto la cifra, a cosa serve quel peso: «1 MB» da solo non dice niente a chi
    non fa questo mestiere. */
-.seg-btn i { display: block; font-style: normal; font-size: 10px; opacity: .6; margin-top: 2px; }
+/* Vedi la nota in comprimi-pdf/style.css: «opacity: .6» produceva un grigio
+   da 2,46:1 sul fondo dei segmenti e 4,10:1 su quello attivo, entrambi sotto
+   il minimo su un testo da 10 px. Il colore ora è dichiarato. Qui il controllo
+   non se n'era accorto solo perché il pannello coi segmenti si apre dopo una
+   scelta, e chi misura lo stato iniziale non lo vede. */
+.seg-btn i { display: block; font-style: normal; font-size: 10px; color: var(--muted); margin-top: 2px; }
+.seg-btn.active i { color: var(--muted); }
 
 /* La riga che spiega i limiti a parole */
 .modo-nota {
