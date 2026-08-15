@@ -47,6 +47,7 @@ var ASCOLTA = (function (DSP) {
   var pesi = new Float64Array(12);
   var blocchiVisti = 0;
   var votiTotali = 0;
+  var ultimoPicco = 0, piccoMassimo = 0;
 
   /* Quanti contributi servono, in media per blocco, perché ci sia davvero
      della musica. Sotto, la pagina deve dire che non sa — vedi `affidabile()`.
@@ -141,6 +142,13 @@ var ASCOLTA = (function (DSP) {
     },
 
     inAscolto: function () { return attivo; },
+
+    /* Quanto arriva dal microfono, adesso e al massimo finora. Serve a
+       distinguere «il microfono non arriva» da «arriva ma non è musica»:
+       due guasti diversi, con due rimedi diversi. */
+    livello: function () { return ultimoPicco; },
+    livelloMassimo: function () { return piccoMassimo; },
+    silenzio: function () { return piccoMassimo < 0.005; },
     blocchi: function () { return blocchiVisti; },
 
     /* Esposta apposta: è il modo per provare il riconoscimento con note di cui
@@ -182,6 +190,8 @@ var ASCOLTA = (function (DSP) {
       pesi = new Float64Array(12);
       blocchiVisti = 0;
       votiTotali = 0;
+      ultimoPicco = 0;
+      piccoMassimo = 0;
     },
 
     avvia: function (contesto, aggiorna) {
@@ -210,6 +220,17 @@ var ASCOLTA = (function (DSP) {
         (function giro() {
           if (!attivo) return;
           nodo.getFloatTimeDomainData(buf);
+          /* Quanto forte arriva, prima di qualunque analisi: senza questo
+             numero «non funziona» e «non sento musica» sono indistinguibili,
+             e chi guarda non sa se avvicinare il telefono o smettere. */
+          var picco = 0;
+          for (var i = 0; i < buf.length; i++) {
+            var a = buf[i] < 0 ? -buf[i] : buf[i];
+            if (a > picco) picco = a;
+          }
+          ultimoPicco = picco;
+          if (picco > piccoMassimo) piccoMassimo = picco;
+
           unBlocco(buf, ctx.sampleRate);
           if (quandoAggiorna) quandoAggiorna();
           /* setTimeout e non requestAnimationFrame: con la pagina in secondo

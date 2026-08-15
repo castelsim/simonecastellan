@@ -332,6 +332,10 @@ header { align-self: stretch; }
 }
 .ascolta-btn:hover { background: var(--teal); }
 .ascolta-stato {
+  /* monospaziato: la barretta di livello è fatta di caratteri, e con un font
+     proporzionale ballerebbe a ogni aggiornamento */
+  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  white-space: pre-line;
   font-size: 13px;
   line-height: 1.55;
   color: var(--muted);

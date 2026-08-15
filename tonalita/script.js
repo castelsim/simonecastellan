@@ -78,9 +78,37 @@ function categoriaAudioDiSistema() {
   return false;
 }
 
+/* Dichiarare la categoria non basta: provato su un iPhone vero, la tastiera
+   restava muta lo stesso. Serve anche far partire davvero qualcosa dal lettore
+   di sistema — un frammento di silenzio è sufficiente — perché iOS sposti la
+   sessione. Da lì in poi si sentono anche gli oscillatori.
+
+   Costa un decimo di secondo e succede una volta sola, dentro il primo tocco:
+   fuori da un gesto dell'utente iOS non lo lascerebbe partire. */
+var sessioneSpostata = false;
+function spostaLaSessione() {
+  if (sessioneSpostata) return;
+  sessioneSpostata = true;
+  try {
+    var fs = 8000, n = Math.floor(fs * 0.12);
+    var buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+    var t = function (o, s) { for (var i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    t(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); t(8, 'WAVEfmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, fs, true); v.setUint32(28, fs * 2, true); v.setUint16(32, 2, true);
+    v.setUint16(34, 16, true); t(36, 'data'); v.setUint32(40, n * 2, true);
+    // campioni tutti a zero: silenzio vero, nessuno lo sente
+    var a = new Audio(URL.createObjectURL(new Blob([buf], { type: 'audio/wav' })));
+    a.volume = 0.01;
+    var p = a.play();
+    if (p && p.catch) p.catch(function () {});
+  } catch (e) {}
+}
+
 function audio() {
   if (!ctx) {
     categoriaAudioDiSistema();
+    spostaLaSessione();
     var AC = window.AudioContext || window.webkitAudioContext;
     ctx = new AC();
     master = ctx.createGain();
@@ -442,18 +470,39 @@ setOctave(octave);
 
   function scrivi(t) { stato.hidden = !t; stato.textContent = t || ''; }
 
+  /* Una barretta di livello: senza, «non funziona» e «non sento musica» sono
+     la stessa frase, e chi guarda non sa se avvicinare il telefono o smettere. */
+  function barretta(v) {
+    var n = Math.max(0, Math.min(20, Math.round(v * 60)));
+    return '▁'.repeat(20 - n) + '█'.repeat(n);
+  }
+
   function aggiorna() {
+    var liv = ASCOLTA.livello();
+
+    /* Tre stati diversi, e prima erano tutti la stessa riga.
+       1) dal microfono non arriva NIENTE: è un guasto o un permesso;
+       2) arriva del suono ma non è musica riconoscibile;
+       3) tutto bene. */
+    if (ASCOLTA.silenzio() && ASCOLTA.blocchi() > 8) {
+      scrivi('Dal microfono non arriva niente. Su iPhone controlla il permesso in ' +
+             'Impostazioni → Safari → Microfono, e che nessun\'altra app lo stia usando.');
+      return;
+    }
+
     var p = ASCOLTA.profilo();
     if (!p) {
       /* Non è un errore: è lo strumento che ammette di non sentire abbastanza.
          Meglio dirlo che mostrare una tonalità inventata — su rumore puro
          succedeva, e aveva la stessa faccia sicura di una risposta vera. */
-      scrivi('Sento troppo poco. Avvicina il telefono alla cassa, o alza il volume.');
+      scrivi(barretta(liv) + '  sento qualcosa, ma non abbastanza musica.\n' +
+             'Avvicina il telefono alla cassa, o alza il volume.');
       return;
     }
     counts = p;
     updateKeyGuess();
-    scrivi('Sto ascoltando… ' + ASCOLTA.blocchi() + ' letture. Più aspetti, più è sicura.');
+    scrivi(barretta(liv) + '  ascolto… ' + ASCOLTA.blocchi() +
+           ' letture. Più aspetti, più è sicura.');
   }
 
   btn.addEventListener('click', function () {
