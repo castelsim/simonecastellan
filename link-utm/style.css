@@ -26,7 +26,11 @@ body {
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  padding: 44px 20px calc(72px + env(safe-area-inset-bottom));
+  /* In orizzontale il notch mangia un lato: senza «env(safe-area-inset-left)»
+     e «-right» la prima colonna di testo finisce sotto la tacca o sotto
+     l'angolo tondo. Il «max()» tiene i 20px di sempre quando l'incavo non
+     c'è — cioè su tutto quello che non è un iPhone ruotato (15/08/2026). */
+  padding: 44px max(20px, env(safe-area-inset-right)) calc(72px + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   text-align: center;
 }
 
@@ -255,3 +259,10 @@ header { text-align: left; margin-bottom: 30px; }
    vincerebbe, lasciando il pulsante nero. Provato — restava nero. */
 .btn.primario { background: var(--teal-l); color: var(--teal-scuro); }
 .btn.primario:hover:not(:disabled) { background: var(--teal); }
+
+/* ————— Il telefono in mano (15/08/2026) —————
+   La riga «＋ Ho due link nello stesso posto» era alta 27px: si apre con un
+   dito, quindi va alta come un dito. Cresce lo spazio, non il testo. */
+@media (max-width: 560px), (pointer: coarse) {
+  .extra summary { padding: 13px 0; }
+}

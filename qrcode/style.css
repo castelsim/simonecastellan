@@ -29,7 +29,11 @@ body {
                                     finestra il titolo finirebbe sopra il
                                     bordo, irraggiungibile (12/08/2026) */
   min-height: 100vh;
-  padding: 24px 20px calc(64px + env(safe-area-inset-bottom));
+  /* In orizzontale il notch mangia un lato: senza «env(safe-area-inset-left)»
+     e «-right» la prima colonna di testo finisce sotto la tacca o sotto
+     l'angolo tondo. Il «max()» tiene i 20px di sempre quando l'incavo non
+     c'è — cioè su tutto quello che non è un iPhone ruotato (15/08/2026). */
+  padding: 24px max(20px, env(safe-area-inset-right)) calc(64px + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   text-align: center;
 }
 
@@ -269,3 +273,33 @@ header { text-align: left; margin-bottom: 30px; }
 /* Il modo scelto — link oppure Wi-Fi — va visto a colpo d'occhio: è la
    scelta che decide cosa si vede sotto. */
 .scelta-btn.on { background: var(--teal-l); color: var(--teal-scuro); }
+
+/* ————— Toccare un campo non deve ingrandire la pagina (15/08/2026) —————
+
+   Safari su iPhone fa una cosa sola quando tocchi un campo con il testo sotto
+   i 16px: ingrandisce tutta la pagina per farlo leggere. Da lì non torna
+   indietro da solo, e chi sta scrivendo la password del Wi-Fi si ritrova la
+   pagina fuori squadra e l'anteprima del codice fuori schermo.
+
+   Qui erano tutti sotto: il campo grande a 15px, SSID e password a 15px.
+   Portarli a 16px non è «testo più grande per far entrare le cose» — è la
+   soglia oltre la quale iOS smette di intervenire. Solo dove si tocca. */
+@media (max-width: 560px), (pointer: coarse) {
+  textarea,
+  .wifi-form input { font-size: 16px; }
+
+  /* Dentro il riquadro del Wi-Fi ci sono due comandi che nessuna regola
+     comune copriva, perché non hanno una classe: la scelta fra «WPA/WPA2» e
+     «Rete aperta» (96×29) e il «chiudi» (35×17). Il primo decide se il codice
+     funzionerà davvero: sbagliarlo produce un QR che non fa entrare nessuno. */
+  .seg button { min-height: 44px; }
+  .wifi-close { position: relative; display: inline-block; }
+  .wifi-close::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%;
+    height: 44px;
+    transform: translateY(-50%);
+  }
+}
