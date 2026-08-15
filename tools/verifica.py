@@ -48,7 +48,7 @@ TOOL = ["tara-impianto", "audio-mp3", "bpm", "tonalita", "qrcode", "posso-pubbli
 # link, non compare in /tools/ né nella sitemap né nelle ricerche.  Restano qui
 # perché la voce comune vale anche per loro — e perché se una cella tornasse in
 # vetrina per distrazione, qualcuno deve accorgersene.
-NASCOSTI = ["metriche-social"]
+NASCOSTI = ["metriche-social", "bando-in-chiaro"]
 
 # Google mostra ~155-160 caratteri di descrizione: oltre, taglia a metà frase.
 MAX_DESCRIZIONE = 160
@@ -234,12 +234,22 @@ def controlla_nascosti():
     pagina torni a farsi trovare senza che nessuno l'abbia deciso: niente cella
     in /tools/, niente riga in sitemap, noindex sulla pagina.  La pagina però
     deve continuare a esistere e a rimandare agli altri strumenti: chi ci arriva
-    da un vecchio link non deve trovare un vicolo cieco."""
+    da un vecchio link non deve trovare un vicolo cieco.
+
+    Quello che NON vuol dire è «irraggiungibile».  Fino al 15/08/2026 questi
+    strumenti non erano linkati da nessuna pagina del sito: si poteva arrivarci
+    solo sapendo l'indirizzo a memoria.  Nascondere da Google e togliere ogni
+    strada per arrivarci sono due decisioni diverse, e solo la prima era stata
+    presa.  Perciò il divieto è sulla CELLA della vetrina, non su ogni link:
+    una riga in fondo, che dice quello che sono, è quello che serve."""
     vetrina = leggi("tools/index.html")
     xml = leggi("sitemap.xml")
     for t in NASCOSTI:
-        if f'href="/{t}/"' in vetrina:
-            errore(f"/{t}/ è fra i nascosti ma ha ancora una cella in /tools/")
+        if re.search(rf'class="cella"[^>]*href="/{re.escape(t)}/"', vetrina):
+            errore(f"/{t}/ è fra i nascosti ma ha di nuovo una cella nella vetrina di /tools/")
+        if f'href="/{t}/"' not in vetrina:
+            errore(f"/{t}/ è fra i nascosti e non lo raggiunge nessun link da /tools/: "
+                   f"nascondere da Google non vuol dire rendere irraggiungibile")
         if f"/{t}/" in xml:
             errore(f"/{t}/ è fra i nascosti ma è ancora nella sitemap: Google continuerebbe "
                    f"a proporlo")
@@ -286,7 +296,46 @@ def controlla_sitemap():
     mancanti = pubblicate - set(urls)
     if mancanti:
         errore("pagine pubblicate ma assenti dalla sitemap: " + ", ".join(sorted(mancanti)))
-    print(f"  sitemap: {len(urls)} indirizzi, tutti esistenti")
+
+    orfane = trova_orfane(urls)
+    if orfane:
+        errore("dichiarate a Google nella sitemap ma senza nessun link interno che ci porti: "
+               + ", ".join("/" + u for u in sorted(orfane))
+               + " — una pagina che si raggiunge solo sapendone l'indirizzo non la trova "
+                 "nessuno, e Google la considera meno importante di quanto sia")
+
+    print(f"  sitemap: {len(urls)} indirizzi, tutti esistenti e tutti raggiungibili")
+
+
+def trova_orfane(urls):
+    """Quali pagine della sitemap non sono linkate da nessun'altra pagina del sito.
+
+    Nato il 15/08/2026: /BDG2029/ era dichiarata a Google e non la raggiungeva
+    nessun link — una pagina che esiste, che i motori conoscono, e a cui dal
+    sito non si arriva.  Nessun controllo poteva accorgersene perché la sitemap
+    veniva confrontata solo con l'elenco dei file esistenti.
+
+    Si guardano tutti gli .html del sito, escluse le prove in tools/casi/ e la
+    pagina stessa (una pagina che linka sé stessa resta orfana)."""
+    testi = {}
+    for cartella, _, file in os.walk(ROOT):
+        if os.sep + ".git" in cartella or os.sep + "casi" in cartella:
+            continue
+        for nome in file:
+            if nome.endswith(".html"):
+                p = os.path.join(cartella, nome)
+                testi[os.path.relpath(p, ROOT)] = open(p, encoding="utf-8").read()
+
+    orfane = set()
+    for u in urls:
+        if not u:
+            continue                                   # la home è la radice: ci si arriva sempre
+        mia = os.path.join(u, "index.html").replace(os.sep, "/")
+        # sia «/BDG2029/» sia «BDG2029/index.html», e sia con le virgolette doppie sia con le singole
+        forme = (f'href="/{u}"', f"href='/{u}'", f'href="/{u}index.html"')
+        if not any(f in testo for altra, testo in testi.items() if altra != mia for f in forme):
+            orfane.add(u)
+    return orfane
 
 
 def controlla_json_ld():
