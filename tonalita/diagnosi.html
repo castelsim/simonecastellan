@@ -55,6 +55,22 @@
 </div>
 
 <div class="sez">
+  <h2>2bis. Un LA <b>lungo</b>, per controllare il volume</h2>
+  <p class="nota">Il file di prova è verificato: contiene un LA a 440 Hz vero, non
+     silenzio. Se «partito» e non senti niente, il suono si perde dopo — nel
+     volume o nell'uscita. <b>Mentre suona, premi il tasto del volume su</b> e
+     guarda cosa compare sullo schermo:<br>
+     • se compare <b>«Suoneria»</b> stai alzando la suoneria, non i media: il
+       volume dei media si regola SOLO mentre qualcosa sta suonando, ed è per
+       questo che serve un suono lungo;<br>
+     • se compare un altoparlante o il nome di un dispositivo (AirPods, cassa
+       Bluetooth, auto), l'audio sta uscendo da lì.</p>
+  <button id="b2b">Suona un LA per 15 secondi</button>
+  <button id="b2c" class="grigio">Ferma</button>
+  <div class="esito" id="e2b">non ancora provato</div>
+</div>
+
+<div class="sez">
   <h2>3. Un LA con un elemento audio</h2>
   <p class="nota">Stesso suono, ma passa dal lettore del sistema — come il brano
      caricato. Questo di solito suona anche col silenzioso alzato.</p>
@@ -147,6 +163,30 @@ document.getElementById('b1').addEventListener('click', function () {
   }).catch(function (e) {
     scrivi('e1', '<span class="no">errore: ' + e.message + '</span>');
   });
+});
+
+
+/* ── 2bis. Il suono lungo ────────────────────────────────────────────────
+   Su iPhone il volume dei media è separato dalla suoneria e si regola SOLO
+   mentre qualcosa sta suonando: con un suono da un secondo non si fa in tempo,
+   e uno finisce per alzare la suoneria credendo di alzare i media. */
+var lungo = null;
+document.getElementById('b2b').addEventListener('click', function () {
+  if (lungo) { try { lungo.pause(); } catch (e) {} }
+  lungo = new Audio(wavDiUnLa(15));
+  lungo.loop = false;
+  lungo.play().then(function () {
+    scrivi('e2b', '<span class="ok">sta suonando</span> — hai 15 secondi.\n\n' +
+                  'ADESSO premi il tasto del volume su e guarda:\n' +
+                  '· «Suoneria» → stai alzando la cosa sbagliata\n' +
+                  '· altoparlante o nome di un dispositivo → esce da lì');
+  }).catch(function (e) {
+    scrivi('e2b', '<span class="no">non è partito: ' + e.name + '</span>');
+  });
+});
+document.getElementById('b2c').addEventListener('click', function () {
+  if (lungo) { try { lungo.pause(); lungo.currentTime = 0; } catch (e) {} }
+  scrivi('e2b', 'fermato');
 });
 
 /* ── 3. Elemento audio: un LA sintetizzato dentro un WAV ─────────────── */
