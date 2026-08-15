@@ -12,7 +12,32 @@
    lunghezza che un URL regge — quindi finisce negli appunti e lo incolla
    l'utente. Due gesti invece di uno, ma funziona sempre. */
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/comprimi-pdf/vendor/pdf.worker.min.js';
+/* ── pdf.js arriva quando serve, non prima ─────────────────────────────────
+   Erano 313 KB scaricati aprendo la pagina — nove volte il peso di tutto il
+   resto — pagati anche da chi incolla il testo e un PDF non lo apre mai.
+   Stessa cura già applicata al compressore: la libreria si carica al primo
+   file scelto. Se la rete cade a metà, la promessa si azzera, altrimenti lo
+   strumento resterebbe rotto fino al ricaricamento della pagina. */
+var pdfPronto = null;
+
+function preparaPdfJs() {
+  if (pdfPronto) return pdfPronto;
+  pdfPronto = new Promise(function (ok, no) {
+    if (typeof pdfjsLib !== 'undefined') return ok();
+    var s = document.createElement('script');
+    s.src = '/comprimi-pdf/vendor/pdf.min.js';
+    s.onload = ok;
+    s.onerror = function () { no(new Error('pdf.min.js')); };
+    document.head.appendChild(s);
+  }).then(function () {
+    if (typeof pdfjsLib === 'undefined') throw new Error('pdf.js caricato ma non disponibile');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '/comprimi-pdf/vendor/pdf.worker.min.js';
+  }).catch(function (e) {
+    pdfPronto = null;
+    throw e;
+  });
+  return pdfPronto;
+}
 
 var MAX_CARATTERI = 45000;   // oltre, conviene tagliare: nessun assistente legge bene un muro
 
@@ -85,6 +110,17 @@ testo.addEventListener('input', aggiorna);
 async function daPdf(file) {
   mostra(erroreBox, false);
   mostra(statusBox, true);
+  statusText.textContent = 'Preparo il lettore di PDF…';
+
+  try {
+    await preparaPdfJs();
+  } catch (e) {
+    mostra(statusBox, false);
+    erroreMsg.textContent = 'Non sono riuscito a caricare il lettore di PDF. Controlla la connessione e riprova, ' +
+                            'oppure incolla il testo qui sotto.';
+    return mostra(erroreBox, true);
+  }
+
   statusText.textContent = 'Apro il PDF…';
 
   var doc;

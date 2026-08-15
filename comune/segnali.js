@@ -45,9 +45,23 @@ var SEGNALI = (function () {
     var rms = Math.sqrt(sum / len) || 1;
     for (var n = 0; n < len; n++) out[n] /= rms;
 
+    /* Il picco che resta DOPO la normalizzazione: normalizzare al valore
+       efficace non dice niente su quanto sale la punta più alta. Il rosa che
+       esce da Kellett ha un fattore di cresta fra 12,5 e 13,4 dB (misurato su
+       dieci realizzazioni), quindi a −12 dBFS di RMS la punta arriva a 1,175 —
+       distorce. Chi usa il segnale ha bisogno di questo numero per non
+       chiedere un livello impossibile, e siccome cambia a ogni rigenerazione
+       va misurato, non indovinato. */
+    var picco = 0;
+    for (var p = 0; p < len; p++) {
+      var a = out[p] < 0 ? -out[p] : out[p];
+      if (a > picco) picco = a;
+    }
+
     var buf = ctx.createBuffer(1, len, sr);
     if (buf.copyToChannel) buf.copyToChannel(out, 0);
     else buf.getChannelData(0).set(out);
+    buf.__picco = picco;
     return buf;
   }
 
@@ -74,7 +88,17 @@ var SEGNALI = (function () {
 
     /* Da dBFS a fattore di moltiplicazione. −20 dBFS è il punto da cui si
        parte a tarare: lascia margine e non fa male a nessuno. */
-    ampiezza: function (dbfs) { return Math.pow(10, dbfs / 20); }
+    ampiezza: function (dbfs) { return Math.pow(10, dbfs / 20); },
+
+    /* Il livello efficace più alto che il segnale regge senza che la punta
+       superi lo zero, in dBFS (numero negativo). Sopra questo valore lo
+       strumento con cui si misura un impianto distorce da solo — e la
+       distorsione la si sentirebbe attribuendola all'impianto. */
+    massimoSenzaClip: function (ctx, tipo) {
+      var buf = (tipo === 'bianco') ? this.bianco(ctx) : this.rosa(ctx);
+      if (!buf.__picco) return -12;
+      return -20 * Math.log10(buf.__picco);
+    }
   };
 })();
 

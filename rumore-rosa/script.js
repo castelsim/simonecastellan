@@ -77,7 +77,25 @@ function noise(pink) {
   return pink ? SEGNALI.rosa(ctx) : SEGNALI.bianco(ctx);
 }
 
-function amp() { return Math.pow(10, levelDb / 20); }
+/* Il tetto del cursore non è fisso: dipende da quanto sale la punta del
+   segnale. Il rumore ha un fattore di cresta di 12,5–13,4 dB, quindi a −12
+   dBFS di valore efficace la punta arriva oltre l'uno e distorce; un tono, che
+   ha cresta 3 dB, a −12 sta larghissimo. Il numero si chiede al generatore
+   invece di indovinarlo, perché cambia a ogni rigenerazione del rumore. */
+var TETTO_TONO = -12;
+function tetto() {
+  if (kind !== 'pink' && kind !== 'white') return TETTO_TONO;
+  if (!ctx) return TETTO_TONO;
+  return Math.min(TETTO_TONO, Math.floor(SEGNALI.massimoSenzaClip(ctx, kind === 'pink' ? 'rosa' : 'bianco')));
+}
+
+function applicaTetto() {
+  var t = tetto();
+  levelInp.max = String(t);
+  if (levelDb > t) { levelInp.value = String(t); setLevel(t); }
+}
+
+function amp() { return Math.pow(10, Math.min(levelDb, tetto()) / 20); }
 
 function applyRoute() {
   if (!gainL) return;
@@ -135,6 +153,9 @@ function start() {
     source.type = 'sine';
     source.frequency.value = (kind === 'sine') ? freq : 20;
   }
+  // Il buffer ora c'è: solo adesso si conosce la punta vera e si può abbassare
+  // il tetto del cursore prima che la rampa porti il guadagno a regime.
+  applicaTetto();
   source.connect(master);
   source.start();
   // playing PRIMA dello sweep: l'animazione della frequenza viva si ferma da
