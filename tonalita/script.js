@@ -54,70 +54,33 @@ var BASE_W = 0.4;                           // piccolo peso d'avvio a ogni nota 
 // --- Web Audio ---
 var ctx = null, master = null;
 
-/* ── Perché su iPhone la tastiera non suonava ──────────────────────────────
-   Questa pagina ha due sorgenti audio e iOS le tratta in modo opposto:
-
-     il brano caricato   passa da un elemento <audio> → categoria «playback»,
-                         suona anche con la levetta del silenzioso alzata;
-     la tastiera         è Web Audio puro (un oscillatore) → categoria
-                         «ambient», che il silenzioso ZITTISCE.
-
-   Il sintomo è quello che confonde di più: il brano si sente e i tasti no,
-   così sembra rotta la tastiera mentre è una levetta sul fianco del telefono.
-
-   `navigator.audioSession` (Safari da iOS 16.4) permette di dire che questa
-   pagina fa «playback», e allora anche gli oscillatori suonano in silenzioso.
-   Dove non esiste, resta l'avviso scritto in pagina. */
-function categoriaAudioDiSistema() {
-  try {
-    if (navigator.audioSession && 'type' in navigator.audioSession) {
-      navigator.audioSession.type = 'playback';
-      return true;
-    }
-  } catch (e) {}
-  return false;
-}
-
-/* Dichiarare la categoria non basta: provato su un iPhone vero, la tastiera
-   restava muta lo stesso. Serve anche far partire davvero qualcosa dal lettore
-   di sistema — un frammento di silenzio è sufficiente — perché iOS sposti la
-   sessione. Da lì in poi si sentono anche gli oscillatori.
-
-   Costa un decimo di secondo e succede una volta sola, dentro il primo tocco:
-   fuori da un gesto dell'utente iOS non lo lascerebbe partire. */
-var sessioneSpostata = false;
-function spostaLaSessione() {
-  if (sessioneSpostata) return;
-  sessioneSpostata = true;
-  try {
-    var fs = 8000, n = Math.floor(fs * 0.12);
-    var buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
-    var t = function (o, s) { for (var i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
-    t(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); t(8, 'WAVEfmt ');
-    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
-    v.setUint32(24, fs, true); v.setUint32(28, fs * 2, true); v.setUint16(32, 2, true);
-    v.setUint16(34, 16, true); t(36, 'data'); v.setUint32(40, n * 2, true);
-    // campioni tutti a zero: silenzio vero, nessuno lo sente
-    var a = new Audio(URL.createObjectURL(new Blob([buf], { type: 'audio/wav' })));
-    a.volume = 0.01;
-    var p = a.play();
-    if (p && p.catch) p.catch(function () {});
-  } catch (e) {}
-}
-
+/* Contesto, categoria di iOS, frammento di silenzio, ripresa dopo il secondo
+   piano: tutto in /comune/audio.js. Erano sessanta righe qui dentro, e le
+   stesse tre righe di apertura — senza il resto — anche negli altri due
+   strumenti che suonano. Qui resta solo quello che è di questa pagina: il
+   guadagno d'uscita della tastiera. */
 function audio() {
-  if (!ctx) {
-    categoriaAudioDiSistema();
-    spostaLaSessione();
-    var AC = window.AudioContext || window.webkitAudioContext;
-    ctx = new AC();
+  var c = AUDIO.contesto();
+  if (!c) return null;
+  if (!master) {
+    ctx = c;
     master = ctx.createGain();
     master.gain.value = 0.8;
     master.connect(ctx.destination);
   }
-  if (ctx.state === 'suspended') ctx.resume();
   return ctx;
 }
+
+/* Se l'audio non parte, la pagina lo dice invece di restare muta: una tastiera
+   rotta e un contesto bloccato hanno esattamente lo stesso aspetto. La riga è
+   la stessa dell'avviso sul silenzioso — è lo stesso momento, quello in cui
+   premi un tasto e non senti niente. */
+AUDIO.seNonParte(function (msg) {
+  var e = document.getElementById('avvisoSilenzioso');
+  if (!e) return;
+  e.textContent = msg;
+  e.hidden = false;
+});
 
 function freqOf(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
 function midiForIdx(idx) { return 12 * (octave + 1) + idx; }   // idx 0..11 nella pagina corrente
@@ -186,14 +149,14 @@ function buildKeyboard() {
 function bindKey(el, idx) {
   el.addEventListener('pointerdown', function (e) {
     e.preventDefault();
-    audio();
+    if (!audio()) return;          // niente Web Audio: l'avviso l'ha già scritto
     toggleNote(idx);
   });
   // Da tastiera (Invio o barra) pointerdown non scatta mai e il tasto restava
   // muto.  I click veri hanno e.detail > 0: così col dito non suona due volte.
   el.addEventListener('click', function (e) {
     if (e.detail !== 0) return;
-    audio();
+    if (!audio()) return;
     toggleNote(idx);
   });
 }
@@ -514,8 +477,10 @@ setOctave(octave);
     }
     ASCOLTA.azzera();
     resetGuess();
+    var c = audio();
+    if (!c) return;                // senza contesto non c'è niente da ascoltare
     scrivi('Chiedo il microfono…');
-    ASCOLTA.avvia(audio(), aggiorna).then(function () {
+    ASCOLTA.avvia(c, aggiorna).then(function () {
       btn.textContent = 'Basta ascoltare';
       scrivi('Sto ascoltando…');
     }).catch(function (e) {
@@ -534,7 +499,5 @@ setOctave(octave);
 (function avvisaSoloSeServe() {
   var e = document.getElementById('avvisoSilenzioso');
   if (!e) return;
-  var apple = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (apple && !categoriaAudioDiSistema()) e.hidden = false;
+  if (AUDIO.dispositivoApple() && !AUDIO.categoriaDiSistema()) e.hidden = false;
 })();
