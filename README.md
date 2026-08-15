@@ -1,6 +1,6 @@
 # simonecastellan.com
 
-Sito personale di Simone Castellan — tecnico del suono e produttore audio.
+Sito personale di Simone Castellan — tecnologia applicata al suono.
 
 Home minimale in stile "Ask AI": il pulsante apre ChatGPT con **una riga** che invita ad aprire
 `/profilo`, dove l'assistente trova le istruzioni per fare da mediatore («curriculum dinamico»).
