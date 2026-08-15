@@ -250,10 +250,12 @@
   <!-- CV fuori dal menu: viveva accanto a Profilo e portava quasi allo stesso posto.
        «Home» è la via di ritorno da ogni pagina; /cv/ resta linkato da /profilo/. -->
   <nav class="nav" id="nav" aria-label="Pagine del sito">
-    <!-- StagePlot è uscito dal menu: compariva due volte nel sito, e il suo
-         ingresso vero è il bottone nella sezione Sviluppo, accanto agli altri
-         due progetti. Un nome in due posti fa sembrare che siano due cose. -->
-    <a href="/" aria-current="page">Home</a><span class="sep">·</span><a href="/profilo/">Profilo</a><span class="sep">·</span><a href="/tools/">Tools</a><span class="sep">·</span><a href="/en/profile/" hreflang="en" lang="en">EN</a>
+    <!-- Due voci sole, per scelta di Simone (15/08/2026). Quelle uscite hanno
+         tutte un altro ingresso in pagina: Tools è uno dei tre riquadri di
+         Sviluppo, e StagePlot un altro — un nome in due posti fa sembrare che
+         siano due cose. Il Profilo si raggiunge dal CV e da /tools/, la
+         versione inglese dal Profilo. -->
+    <a href="/" aria-current="page">Home</a><span class="sep">·</span><a href="/cv/">CV</a>
   </nav>
 
   <main>
@@ -303,9 +305,12 @@
       <a id="wa" href="#" target="_blank" rel="noopener" aria-label="Scrivi su WhatsApp — apri in una nuova scheda">WhatsApp</a>
       ·
       <a id="email" href="mailto:castellansimone@gmail.com">Email</a>
-      ·
-      <a id="tienimi" href="/tienimi-presente/">Tienimi presente</a>
     </div>
+    <!-- «Tienimi presente» è uscito da qui per scelta di Simone (15/08/2026):
+         due modi di scrivere sono una scelta, tre sono un elenco. La pagina
+         resta viva e la raggiunge /tools/ («Se ne manca uno, dimmelo»). -->
+
+
 
   <!-- Il richiamo a Tools che stava qui è sparito: adesso Tools è uno dei tre
        bottoni della sezione Sviluppo, e ripeterlo in fondo lo faceva sembrare
@@ -420,7 +425,11 @@
 
     document.getElementById("wa").addEventListener("click", function(){ track("click", "WhatsApp"); });
     document.getElementById("email").addEventListener("click", function(){ track("click", "Email"); });
-    document.getElementById("tienimi").addEventListener("click", function(){ track("click", "TienimiPresente"); });
+    /* Qui c'era l'aggancio a #tienimi. Tolto insieme al link: senza questa riga
+       cancellata, getElementById avrebbe restituito null e il punto avrebbe
+       fatto saltare TUTTO lo script da qui in giù — menu compreso. Non si
+       avvolge in un «if (el)»: quello nasconderebbe il prossimo id sparito
+       invece di farlo vedere. */
 
 
     // Quale voce del menu si usa davvero: senza questo non si saprebbe se serve.
