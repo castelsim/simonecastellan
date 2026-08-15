@@ -34,7 +34,11 @@ body {
      raggiunge più. Chi non capisce «safe» ignora la riga e allinea in alto:
      brutto, ma leggibile. */
   justify-content: safe center;
-  padding: 24px 20px calc(40px + env(safe-area-inset-bottom));
+  /* In orizzontale il notch mangia un lato: senza «env(safe-area-inset-left)»
+     e «-right» la prima colonna di testo finisce sotto la tacca o sotto
+     l'angolo tondo. Il «max()» tiene i 20px di sempre quando l'incavo non
+     c'è — cioè su tutto quello che non è un iPhone ruotato (15/08/2026). */
+  padding: 24px max(20px, env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   text-align: center;
 }
 
@@ -53,6 +57,13 @@ h1 { font-size: 26px; font-weight: 500; color: var(--ink); letter-spacing: -0.2p
   padding: 4px;
   margin-bottom: 22px;
   max-width: 100%;
+  /* Andare a capo, non sparire. «max-width: 100%» accorcia il vassoio ma non
+     i pulsanti, che hanno «white-space: nowrap»: a 320px la fila dei pesi
+     usciva di 69px (PDF) e di 81px (immagini) e l'ultimo peso — quello per la
+     posta — restava fuori dallo schermo. Su due righe ci sono tutti, e la
+     pillola diventa un rettangolo tondo. (15/08/2026) */
+  flex-wrap: wrap;
+  justify-content: center;
 }
 .seg-btn {
   appearance: none;

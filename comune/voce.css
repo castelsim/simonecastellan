@@ -214,6 +214,31 @@ summary:focus-visible,
   outline-offset: 2px !important;
 }
 
+/* ————— Il dito, anche in larghezza (15/08/2026) —————
+
+   La regola qui sopra fa crescere i bersagli SOLO in altezza («min-height»).
+   Misurato: i comandi tondi — il «−» e il «+» dell'ottava in Tonalità — sono
+   larghi 30 px e alti 44. Un bersaglio 30×44 si sbaglia come uno 30×30: il
+   dito arriva di lato. Serve anche la larghezza, e su un comando tondo con
+   «border-radius: 999px» il cerchio resta un cerchio.
+
+   E le righe che si aprono («＋ Metti il pulsante nel tuo sito», «▸ Oppure
+   parti da un file»): sono alte 27-31 px perché il loro riquadro è alto
+   quanto il testo. Un «summary» è per definizione una cosa da toccare — non
+   esiste un «summary» decorativo — quindi la regola può essere generale.
+
+   Stessa storia per i segmenti stretti: «Live» in Tara un impianto misura 28
+   px di larghezza, «10 s» 29, la pillola «X» di Posso pubblicarlo? 40 — tutti
+   alti 44 e larghi come la parola che contengono. Su una fila di tre, portarli
+   a 44 costa 50 px in tutto: entrano anche in una scheda da 280. */
+
+@media (max-width: 560px), (pointer: coarse) {
+  .step,
+  .seg-btn,
+  .chip { min-width: 44px; }
+  summary { min-height: 44px; }
+}
+
 /* Chi ha alzato il contrasto di sistema vuole un segno più netto, non più
    elegante: il contorno diventa nero, che stacca su qualunque fondo. */
 @media (prefers-contrast: more) {
