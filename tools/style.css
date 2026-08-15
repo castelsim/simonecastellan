@@ -157,6 +157,12 @@ body.ha-testo .pulisci { display: flex; }
   border-bottom: 1px solid var(--line); padding-bottom: 2px; }
 .progetto a:hover { border-color: var(--ink); }
 
+/* La riga degli strumenti fuori vetrina: più piccola della griglia, più grande
+   del piede. Sta a mezza voce apposta — sono raggiungibili, non consigliati. */
+.fuori { margin-top: 26px; text-align: left; font-size: 13px; line-height: 1.65; color: var(--faint); }
+.fuori a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line-soft); }
+.fuori a:hover { color: var(--ink); border-color: var(--line); }
+
 .foot { margin-top: 30px; font-size: 12px; line-height: 1.65; color: var(--faint); }
 .foot a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line-soft); }
 .foot a:hover { color: var(--ink); }
