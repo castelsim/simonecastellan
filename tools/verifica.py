@@ -408,6 +408,66 @@ def controlla_intestazioni_altre_pagine():
                        f"(massimo {MAX_DESCRIZIONE}): Google la taglia a metà frase")
 
 
+def controlla_cv_allineato():
+    """I fatti del curriculum stanno in DUE posti, ed è un rischio noto.
+
+    `cv/dati.js` alimenta il PDF; `cv/index.html` porta gli stessi fatti scritti
+    a mano, perché le intelligenze artificiali non eseguono JavaScript e quella
+    pagina serve anche a loro. Due copie divergono sempre, prima o poi — a meno
+    che qualcuno non le confronti a ogni giro.
+
+    Qui si confrontano i dati che, se sbagliati, mandano a monte una
+    candidatura: le votazioni dei titoli e i livelli di lingua. Non tutto il
+    testo: la pagina è una sintesi e deve poter dire meno del PDF, ma non
+    può dire una cosa DIVERSA.
+    """
+    dati = leggi("cv/dati.js")
+    pagina = leggi("cv/index.html")
+
+    # I voti dei titoli, come sono scritti in dati.js
+    voti = re.findall(r"voto:\s*'([^']+)'", dati)
+    for v in voti:
+        atteso = v.replace("’", "'")
+        if atteso.replace("'", "’") not in pagina and atteso not in pagina:
+            errore(f"cv: la votazione «{v}» sta in dati.js (e quindi nel PDF) "
+                   f"ma non nella pagina: i due documenti direbbero cose diverse")
+
+    # I livelli di lingua: se il PDF dice B2 e la pagina C1, uno dei due mente
+    # «{ lingua:» e non «lingua:»: senza la graffa il pattern cattura anche
+    # «madrelingua», e la lingua madre nella tabella NON c'è — giustamente,
+    # perché la scala del Quadro europeo descrive chi una lingua la impara.
+    ABILITA = ("ascolto", "lettura", "interazione", "produzione", "scritto")
+    for m in re.finditer(r"\{\s*lingua:\s*'([^']+)'(.*?)certificazione", dati, re.S):
+        lingua, blocco = m.group(1), m.group(2)
+        riga = re.search(r"<td[^>]*>" + re.escape(lingua) + r"</td>(.*?)</tr>", pagina, re.S)
+        if not riga:
+            errore(f"cv: la lingua «{lingua}» è in dati.js ma non nella tabella della pagina")
+            continue
+        # Si confrontano TUTTE E CINQUE le abilità, in ordine. Cercare se il
+        # livello «compare» nella riga non serviva a niente: con cinque celle
+        # uguali, cambiarne una lasciava le altre quattro a far passare il
+        # controllo. Provato mettendo C1 al posto di un B2: passava.
+        attesi = [re.search(a + r":\s*'([^']+)'", blocco) for a in ABILITA]
+        attesi = [x.group(1) for x in attesi if x]
+        nella_pagina = re.findall(r"<td[^>]*>([ABC][12])</td>", riga.group(1))
+        if len(attesi) == 5 and attesi != nella_pagina:
+            errore(f"cv: «{lingua}» ha livelli diversi fra la pagina e il PDF — "
+                   f"dati.js dice {attesi}, la pagina dice {nella_pagina}")
+
+    # La qualifica che apre il CV
+    q = re.search(r"qualifica:\s*'([^']+)'", dati)
+    if q:
+        # la pagina la può spezzare su più righe: si confrontano le parole
+        parole = [p for p in re.split(r"[^\wàèéìòùÀÈÉÌÒÙ]+", q.group(1)) if len(p) > 4]
+        mancanti = [p for p in parole if p not in pagina]
+        if mancanti:
+            errore("cv: la qualifica di dati.js non si ritrova nella pagina "
+                   f"(mancano: {', '.join(mancanti)})")
+
+    print(f"  curriculum: pagina e dati allineati su {len(voti)} votazioni e "
+          f"{len(re.findall(chr(123) + chr(92) + 's*lingua:', dati))} lingue straniere")
+
+
 def main():
     print("Verifica del sito…")
     home = leggi("index.html")
@@ -426,6 +486,7 @@ def main():
     controlla_sitemap()
     controlla_json_ld()
     controlla_hreflang()
+    controlla_cv_allineato()
 
     for a in AVVISI:
         print("  AVVISO: " + a)
