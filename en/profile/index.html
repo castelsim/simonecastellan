@@ -92,8 +92,12 @@
     /* Where a finger does the pointing, controls and service links must be at
        least 44 px tall: same rule as comune/voce.css. */
     @media (max-width:560px), (pointer:coarse){
+      /* The minimum applies in both directions: with height alone, «Home» was
+         still 33 px wide and «Italiano» 41 — a finger misses a narrow target
+         just as easily as a short one. */
       .lang a, .credit a, .contact a{
-        display:inline-flex; align-items:center; min-height:44px;
+        display:inline-flex; align-items:center; justify-content:center;
+        min-height:44px; min-width:44px;
       }
       /* On the assistant box the padding grows, not the display: switching it
          to flex would take away the little triangle that says «this opens». */

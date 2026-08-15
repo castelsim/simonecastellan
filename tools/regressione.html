@@ -262,20 +262,40 @@ var SELETTORE_TOCCO = 'a[href], button, input, select, textarea, summary, label[
    allarga i comandi scritti come una parola sottolineata con un ::after
    invisibile alto 44 px. Misurare solo il rettangolo dell'elemento darebbe
    un rosso falso, quindi si guarda anche lo pseudo-elemento. */
-function misuraPallina(el) {
+function misuraPallina(el, win) {
   var fogli = el.ownerDocument.styleSheets, trovata = null;
-  for (var i = 0; i < fogli.length; i++) {
-    var regole;
-    try { regole = fogli[i].cssRules; } catch (e) { continue; }   // foglio di un'altra origine
-    if (!regole) continue;
+
+  /* Le regole non stanno tutte al primo livello: quelle che valgono solo dove
+     si tocca stanno dentro un @media, e leggere il foglio senza scendere lì
+     dentro le salta tutte. È successo davvero — la pallina portata a 44 px
+     dentro una media query continuava a risultare 18, e sembrava che la
+     correzione non avesse funzionato. Delle @media si guardano solo quelle
+     valide adesso, alla larghezza in cui si sta misurando. */
+  function scorri(regole) {
+    if (!regole) return;
     for (var j = 0; j < regole.length; j++) {
-      var sel = regole[j].selectorText;
+      var r = regole[j];
+      if (r.media) {                                    // @media: si entra se vale
+        var testo = r.conditionText || r.media.mediaText;
+        try { if (testo && !win.matchMedia(testo).matches) continue; } catch (e) {}
+        try { scorri(r.cssRules); } catch (e) {}
+        continue;
+      }
+      if (r.cssRules && !r.selectorText) {              // @supports, @layer…
+        try { scorri(r.cssRules); } catch (e) {}
+        continue;
+      }
+      var sel = r.selectorText;
       if (!sel || sel.indexOf("-webkit-slider-thumb") < 0) continue;
       var base = sel.replace(/::?-webkit-slider-thumb/g, "").trim();
       try { if (base && !el.matches(base)) continue; } catch (e) { continue; }
-      var l = parseFloat(regole[j].style.width), h = parseFloat(regole[j].style.height);
+      var l = parseFloat(r.style.width), h = parseFloat(r.style.height);
       if (l > 0 && h > 0) trovata = { l: l, h: h };
     }
+  }
+
+  for (var i = 0; i < fogli.length; i++) {
+    try { scorri(fogli[i].cssRules); } catch (e) { continue; }   // foglio di un'altra origine
   }
   return trovata;
 }
@@ -290,8 +310,22 @@ function misuraBersaglio(el, win) {
      standard Chrome restituisce lo stile dell'elemento, cioè 350×4 — e la
      misura sembrava giusta. Si va a leggere la regola nel foglio di stile. */
   if (el.type === "range") {
-    var p = misuraPallina(el);
+    var p = misuraPallina(el, win);
     if (p) return { l: p.l, h: p.h, nota: " (la pallina del cursore)" };
+  }
+  /* Un campo che sta DENTRO la sua etichetta si comanda toccando l'etichetta:
+     in /metriche-social/ i campi sono alti 20 px ma stanno dentro un <label>
+     da 87, e il dito che prende il nome della metrica porta comunque il fuoco
+     nel campo. Misurando solo il campo uscivano dieci bersagli rossi che
+     rossi non sono. Vale per i campi da riempire, non per i cursori: su un
+     cursore toccare l'etichetta non trascina niente. */
+  if (/^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName) && el.type !== "range") {
+    var etichetta = el.closest("label");
+    if (etichetta) {
+      var er = etichetta.getBoundingClientRect();
+      if (er.width > l) l = er.width;
+      if (er.height > h) h = er.height;
+    }
   }
   ["::after", "::before"].forEach(function (p) {
     var st = win.getComputedStyle(el, p);

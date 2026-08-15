@@ -297,4 +297,7 @@ header { text-align: left; margin-bottom: 30px; }
 @media (max-width: 560px), (pointer: coarse) {
   .sel { font-size: 16px; }
   .extra summary { padding: 13px 0; }
+  /* Il campo del numero era alto 35 px: cresce l'imbottitura, non il testo,
+     che sotto i 16 px farebbe ingrandire la pagina a iOS. */
+  .txt { padding: 12px 0; min-height: 44px; }
 }

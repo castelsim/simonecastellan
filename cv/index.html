@@ -78,8 +78,22 @@
     /* Dove si tocca con un dito, i comandi devono essere alti almeno 44 px:
        stessa regola di comune/voce.css. Cresce l'area, non il testo. */
     @media (max-width:560px), (pointer:coarse){
+      /* Il minimo vale in tutte e due le direzioni: con la sola altezza,
+         «Home» restava 35 px di larghezza e «English» 42. */
       .btn{ min-height:44px; }
-      .foot a{ display:inline-flex; align-items:center; min-height:44px; }
+      .foot a{
+        display:inline-flex; align-items:center; justify-content:center;
+        min-height:44px; min-width:44px;
+      }
+      /* I titoli delle voci che portano da qualche parte (StagePlot, gli
+         strumenti) erano righe di 19 px. Qui l'area cresce con un riquadro
+         invisibile invece che con l'imbottitura: il CV è fitto e va anche in
+         stampa, e allargare le righe scombinerebbe l'impaginazione. */
+      .what a{ position:relative; display:inline-block; }
+      .what a::after{
+        content:""; position:absolute; left:0; right:0; top:50%;
+        height:44px; transform:translateY(-50%);
+      }
     }
     @media print{
       @page{ margin:14mm; }

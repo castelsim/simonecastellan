@@ -265,4 +265,9 @@ header { text-align: left; margin-bottom: 30px; }
    dito, quindi va alta come un dito. Cresce lo spazio, non il testo. */
 @media (max-width: 560px), (pointer: coarse) {
   .extra summary { padding: 13px 0; }
+  /* I sei campi erano alti 35 px. Un campo di testo è un bersaglio come un
+     pulsante: se sono in colonna e alti 35, il dito prende quello sopra o
+     quello sotto. Cresce l'imbottitura, non il testo — che deve restare a
+     16 px, altrimenti iOS ingrandisce la pagina appena si scrive dentro. */
+  .txt { padding: 12px 0; min-height: 44px; }
 }

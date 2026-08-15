@@ -311,9 +311,13 @@ header { text-align: left; margin-bottom: 30px; }
   .link::after {
     content: "";
     position: absolute;
-    left: 0; right: 0;
+    /* Non basta l'altezza: «Claude» è largo 39 px e un dito ne vuole 44 in
+       tutte e due le direzioni. L'area cresce simmetrica attorno alla parola
+       e resta invisibile, quindi la riga di testo non si muove. */
+    left: 50%;
+    width: 100%; min-width: 44px;
     top: 50%;
     height: 44px;
-    transform: translateY(-50%);
+    transform: translate(-50%, -50%);
   }
 }
