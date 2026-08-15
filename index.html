@@ -18,8 +18,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="google-site-verification" content="mKCM2Ga7GOlr9kqlOPLvC3_v7kF12Yrlz3uZmfp35TE" />
-  <title>Simone Castellan — Tecnico del suono, mix, mastering, Dolby Atmos</title>
-  <meta name="description" content="Simone Castellan, tecnico del suono, sound designer e compositore elettroacustico in Veneto: registrazione, mix, mastering, Dolby Atmos e audio live. Chiedi a un'intelligenza artificiale chi è e se c'è un'opportunità di collaborazione.">
+  <title>Simone Castellan — Tecnologia applicata al suono</title>
+  <meta name="description" content="Tecnologia applicata al suono: strumenti di misura e di lavoro che girano nel browser. I progetti — Crastel Studio, StagePlot, Tools — e il profilo tecnico.">
   <meta name="author" content="Simone Castellan">
   <meta name="copyright" content="© 2026 Simone Castellan — simonecastellan.com">
   <meta name="rights" content="Codice e design originali di Simone Castellan. Riproduzione integrale non autorizzata. Firma: SCASTELLAN·AVA·2026">
@@ -63,11 +63,11 @@
         "url": "https://simonecastellan.com/",
         "mainEntityOfPage": "https://simonecastellan.com/profilo/",
         "image": "https://simonecastellan.com/og-image.png",
-        "jobTitle": "Tecnico del suono, sound designer e compositore",
-        "description": "Tecnico del suono, sound designer e compositore elettroacustico; docente AFAM di Elettroacustica. Opera in Veneto e in tutta Italia.",
+        "jobTitle": "Tecnologia applicata al suono",
+        "description": "Tecnologia applicata al suono: misura, elaborazione del segnale e strumenti che girano nel browser. Progetti: Crastel Studio, StagePlot, Tools.",
         "knowsLanguage": ["it", "en"],
         "address": { "@type": "PostalAddress", "addressRegion": "Veneto", "addressCountry": "IT" },
-        "knowsAbout": ["Registrazione audio", "Mix", "Mastering", "Dolby Atmos", "Audio live", "Sound design", "Pro Tools", "Registrazione orchestrale", "Produzione musicale", "Direzione di produzione", "Elettroacustica"],
+        "knowsAbout": ["Elaborazione del segnale audio", "Misura acustica", "Web Audio API", "Elettroacustica", "Sound design", "Mix", "Mastering", "Dolby Atmos", "Sviluppo di strumenti web", "Pro Tools"],
         "worksFor": {
           "@type": "Organization",
           "name": "AVA Sound Live Music",
@@ -139,7 +139,37 @@
     .sub a{color:#5f6368; text-decoration:none; border-bottom:1px solid #c2c6cc; padding-bottom:1px;
       white-space:nowrap}
     .sub a:hover{color:#1a1a1a}
-    .askline{margin-top:13px; font-size:13px; color:#9aa0a6}
+    .askline{margin-top:34px; margin-bottom:13px; font-size:13px; color:#68716d}
+
+    /* ————— I tre progetti —————
+       Devono leggersi come UN ecosistema, non come tre link finiti vicini. Da
+       qui la cornice comune, la stessa forma per tutti e tre e nessuna
+       gerarchia fra loro: sono paritari, e chi guarda deve capire in un colpo
+       d'occhio che sono la stessa mano.
+
+       Su schermo largo stanno in fila; sotto i 620 px si incolonnano, perché
+       tre riquadri da 33% su un telefono diventano tre francobolli con il
+       testo a capo ogni due parole. */
+    .sviluppo{margin-top:34px}
+    .sviluppo-occhiello{
+      font:500 11px ui-monospace,SFMono-Regular,Menlo,monospace;
+      letter-spacing:.16em; text-transform:uppercase; color:#0a7d72;
+      margin-bottom:12px}
+    .progetti{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+    .progetto{
+      display:flex; flex-direction:column; justify-content:center; gap:4px;
+      min-height:76px; padding:14px 14px;
+      border:1px solid #e3e8e6; border-radius:14px;
+      background:#fff; text-decoration:none; text-align:left;
+      transition:border-color .15s ease, background .15s ease, transform .15s ease}
+    .progetto:hover{border-color:#0a7d72; background:#f7faf9}
+    .progetto:active{transform:translateY(1px)}
+    .p-nome{font-size:15px; font-weight:650; color:#0f1614; letter-spacing:-.2px}
+    .p-cosa{font-size:12px; line-height:1.45; color:#68716d}
+    @media (max-width:620px){
+      .progetti{grid-template-columns:1fr; gap:8px}
+      .progetto{min-height:0; padding:13px 15px}
+    }
     /* Menu: identico a quello di /tools/, così le due pagine sono lo stesso sito.
        Nessuno sfondo e nessuna pillola — la pillola è la forma del pulsante
        ChatGPT e non va prestata a nient'altro. */
@@ -176,17 +206,23 @@
     .credit{padding:0 24px 22px; text-align:center; font-size:12px; color:#6b7075; letter-spacing:.2px}
     .credit a{color:#6b7075; text-decoration:none; border-bottom:1px solid #d6d9de}
     .credit a:hover{color:#1a1a1a}
-    /* «Tools»: stesso maiuscoletto spaziato dell'occhiello in cima, così la
-       pagina si chiude in simmetria senza aggiungere peso. */
-    .toolslink{margin-top:34px; text-decoration:none; display:block}
-    .tl-word{display:block; width:max-content; margin:0 auto; font-size:12px; letter-spacing:1.6px;
-      text-transform:uppercase; color:#9aa0a6; border-bottom:1px solid #e3e5e8; padding-bottom:3px;
-      transition:color .15s ease, border-color .15s ease}
-    /* La riga sotto non dice quanti sono: il numero andrebbe corretto a ogni
-       strumento nuovo, e prima o poi resterebbe sbagliato. */
-    .tl-sub{display:block; margin-top:7px; font-size:12px; color:#b3b8bd; transition:color .15s ease}
-    .toolslink:hover .tl-word{color:#1a1a1a; border-color:#c2c6cc}
-    .toolslink:hover .tl-sub{color:#5f6368}
+
+    /* ————— Roba grande abbastanza per un dito —————
+       La home ha gli stili in linea e non carica comune/voce.css, dove questa
+       regola vive per tutti gli strumenti: risultato, la pagina più visitata
+       del sito aveva i bersagli più piccoli di tutti — 15 px il menu, 17 i
+       contatti, contro i 44 che serve un tocco.
+
+       Cresce l'area, non il testo: sui link scritti in riga si allarga con uno
+       pseudo-elemento invisibile, così l'impaginazione non si muove di un
+       pixel. Vale solo dove si tocca. */
+    @media (max-width:620px), (pointer:coarse){
+      .nav a, .contact a, .credit a{position:relative; display:inline-block}
+      .nav a::after, .contact a::after, .credit a::after{
+        content:""; position:absolute; left:-6px; right:-6px; top:50%;
+        height:44px; transform:translateY(-50%)}
+      .pills a, .pills button{min-height:44px}
+    }
     .escape{display:none; position:fixed; top:0; left:0; right:0; background:#f1f3f4; color:#5f6368;
       font-size:13px; line-height:1.5; padding:10px 16px; text-align:center; z-index:10}
     .escape a{color:#1a1a1a; font-weight:600; text-decoration:underline}
@@ -207,21 +243,45 @@
   <!-- CV fuori dal menu: viveva accanto a Profilo e portava quasi allo stesso posto.
        «Home» è la via di ritorno da ogni pagina; /cv/ resta linkato da /profilo/. -->
   <nav class="nav" id="nav" aria-label="Pagine del sito">
-    <a href="/" aria-current="page">Home</a><span class="sep">·</span><a href="/profilo/">Profilo</a><span class="sep">·</span><a href="/tools/">Tools</a><span class="sep">·</span><a class="out" href="https://stageplot.it/" target="_blank" rel="noopener">StagePlot<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></a><span class="sep">·</span><a href="/en/profile/" hreflang="en" lang="en">EN</a>
+    <!-- StagePlot è uscito dal menu: compariva due volte nel sito, e il suo
+         ingresso vero è il bottone nella sezione Sviluppo, accanto agli altri
+         due progetti. Un nome in due posti fa sembrare che siano due cose. -->
+    <a href="/" aria-current="page">Home</a><span class="sep">·</span><a href="/profilo/">Profilo</a><span class="sep">·</span><a href="/tools/">Tools</a><span class="sep">·</span><a href="/en/profile/" hreflang="en" lang="en">EN</a>
   </nav>
 
   <main>
     <!-- Il nome sta nell'<h1> statico: è quello che resta a chi non esegue JavaScript. -->
     <h1>Simone Castellan</h1>
-    <p class="lead">Mi occupo di tecnologia applicata al suono — in studio e dal vivo.</p>
-    <p class="sub">Insegno elettroacustica alla
-      <a href="https://musica.fondazionemilano.eu/" target="_blank" rel="noopener">Civica Scuola Claudio Abbado</a>
-      di Milano e lavoro in
-      <a href="https://www.avasoundlivemusic.eu" target="_blank" rel="noopener">AVA Sound Live Music</a>,
-      studio certificato Dolby Atmos.</p>
+    <p class="lead">Tecnologia applicata al suono.</p>
 
+    <!-- I tre progetti, vicini e coordinati: si devono leggere come un
+         ecosistema solo, non come tre link capitati lì. Sono la cosa che
+         viene subito dopo il nome perché sono la risposta alla domanda «e
+         quindi, cosa fa?». -->
+    <section class="sviluppo" aria-label="Progetti sviluppati">
+      <p class="sviluppo-occhiello">Sviluppo</p>
+      <div class="progetti">
+        <a class="progetto" href="https://crastelstudio.com" target="_blank" rel="noopener" data-p="Crastel">
+          <span class="p-nome">Crastelstudio.com</span>
+          <span class="p-cosa">musica per immagini</span>
+        </a>
+        <a class="progetto" href="https://stageplot.it/" target="_blank" rel="noopener" data-p="StagePlot">
+          <span class="p-nome">StagePlot.it</span>
+          <span class="p-cosa">il palco si disegna, il rider esce da sé</span>
+        </a>
+        <a class="progetto" href="/tools/" data-p="Tools">
+          <span class="p-nome">Tools</span>
+          <span class="p-cosa">strumenti che girano nel browser</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- La funzione c'era già ma stava dopo i pulsanti, e la riga di
+         spiegazione arrivava quando uno aveva già premuto. Adesso viene prima,
+         in italiano, e sta sotto i tre progetti: chi vuole sapere di più ha
+         appena visto di cosa. -->
+    <p class="askline">Chiedi di più a un'intelligenza artificiale</p>
     <div class="pills" id="pills"></div>
-    <p class="askline">Ask more about Simone Castellan</p>
     <noscript>
       <p class="ns">I pulsanti richiedono JavaScript. Il profilo completo è leggibile qui:
         <a href="/profilo/">simonecastellan.com/profilo</a></p>
@@ -236,14 +296,9 @@
       <a id="tienimi" href="/tienimi-presente/">Tienimi presente</a>
     </div>
 
-  <!-- Un solo appiglio invece della fila dei sette nomi (che su iPhone andava a
-       due righe): stesso maiuscoletto dell'occhiello in cima, e l'elenco vero
-       vive in /tools/. «Tools» da solo non diceva cosa ci fosse dietro a chi
-       arriva la prima volta: due parole in italiano tolgono il dubbio. -->
-    <a class="toolslink" id="toolslink" href="/tools/">
-      <span class="tl-word">Tools</span>
-      <span class="tl-sub">strumenti gratuiti da usare nel browser</span>
-    </a>
+  <!-- Il richiamo a Tools che stava qui è sparito: adesso Tools è uno dei tre
+       bottoni della sezione Sviluppo, e ripeterlo in fondo lo faceva sembrare
+       una cosa diversa dalla prima. -->
   </main>
 
   <footer class="credit">
@@ -356,9 +411,14 @@
     document.getElementById("email").addEventListener("click", function(){ track("click", "Email"); });
     document.getElementById("tienimi").addEventListener("click", function(){ track("click", "TienimiPresente"); });
 
-    document.getElementById("toolslink").addEventListener("click", function(){ track("click", "Tools"); });
 
     // Quale voce del menu si usa davvero: senza questo non si saprebbe se serve.
+    // Quale dei tre progetti viene aperto: senza, non si saprebbe se la
+    // sezione Sviluppo serve a qualcosa.
+    Array.prototype.forEach.call(document.querySelectorAll(".progetto"), function(a){
+      a.addEventListener("click", function(){ track("click", "Progetto:" + a.dataset.p); });
+    });
+
     document.getElementById("nav").addEventListener("click", function(e){
       var a = e.target.closest && e.target.closest("a");
       if (a) track("click", "Nav:" + a.textContent.trim());
