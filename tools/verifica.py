@@ -16,6 +16,7 @@ Esiste per impedire il ritorno di problemi già capitati davvero:
 
 Esce con codice 1 se un controllo fallisce.
 """
+import html
 import json
 import os
 import re
@@ -316,6 +317,48 @@ def controlla_versione_profilo(home):
         errore(f"la versione V={v.group(1)} non compare nel prompt")
 
 
+def controlla_intestazioni_altre_pagine():
+    """Titolo e descrizione delle pagine che NON sono strumenti.
+
+    Il controllo di sopra guarda solo i diciannove strumenti, e per mesi
+    nessuno ha guardato le altre: il 15/08/2026 il titolo di `/tools/` stava a
+    82 caratteri e quattro descrizioni fra 168 e 271. Google mostra ~60 e ~160,
+    e il titolo si tronca dalla fine — cioè dove è scritto cosa c'è dentro.
+
+    Le pagine sono elencate a mano e non trovate frugando nelle cartelle: così
+    aggiungerne una nuova obbliga a passare di qui, invece di lasciarla fuori
+    dai controlli senza che nessuno se ne accorga."""
+    ALTRE = ["index.html", "tools/index.html", "profilo/index.html", "cv/index.html",
+             "privacy/index.html", "tienimi-presente/index.html",
+             "en/profile/index.html", "bando-in-chiaro/index.html",
+             "BDG2029/index.html"]
+    for rel in ALTRE:
+        percorso = os.path.join(ROOT, rel)
+        if not os.path.exists(percorso):
+            continue
+        pagina = leggi(rel)
+
+        t = re.search(r"<title>(.*?)</title>", pagina, re.S)
+        if not t:
+            errore(f"{rel}: manca il <title>")
+        else:
+            # gli apostrofi tipografici e le entità vanno sciolti prima di
+            # contare, o il conto si ferma dove non deve
+            testo = html.unescape(re.sub(r"\s+", " ", t.group(1)).strip())
+            if len(testo) > MAX_TITOLO:
+                errore(f"{rel}: titolo di {len(testo)} caratteri (massimo {MAX_TITOLO}): "
+                       f"Google lo tronca, e a sparire è la fine")
+
+        d = re.search(r'<meta\s+name="description"\s+content="(.*?)"\s*/?>', pagina, re.S)
+        if not d:
+            errore(f"{rel}: manca la meta description")
+        else:
+            testo = html.unescape(re.sub(r"\s+", " ", d.group(1)).strip())
+            if len(testo) > MAX_DESCRIZIONE:
+                errore(f"{rel}: descrizione di {len(testo)} caratteri "
+                       f"(massimo {MAX_DESCRIZIONE}): Google la taglia a metà frase")
+
+
 def main():
     print("Verifica del sito…")
     home = leggi("index.html")
@@ -328,6 +371,7 @@ def main():
     controlla_firma_contatto()
     controlla_uscita_leggera()
     controlla_intestazioni_tool()
+    controlla_intestazioni_altre_pagine()
     controlla_nascosti()
     controlla_rimandi()
     controlla_sitemap()
