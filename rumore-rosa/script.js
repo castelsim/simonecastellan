@@ -21,7 +21,11 @@ var wakeLock = null;
 
 var NAMES = { pink: 'Rumore rosa', white: 'Rumore bianco', sine: 'Sinusoide', sweep: 'Sweep 20 Hz → 20 kHz' };
 
-// A che serve ognuno: il nome del segnale non lo dice a chi non fa il mestiere.
+/* A che serve ognuno: il nome del segnale non lo dice a chi non fa il mestiere.
+   Il testo era scritto qui e non lo leggeva nessuno: la riga sotto i pulsanti
+   restava ferma su quella del rosa, così chi passava a Sweep continuava a
+   leggere «tiene dentro tutte le frequenze insieme» — dello sweep non è vero,
+   una frequenza alla volta è esattamente il suo contrario. */
 var USI = {
   pink:  'Tiene dentro tutte le frequenze insieme. È il suono con cui si tara un impianto.',
   white: 'Come il rosa, ma più acuto e sibilante. Va bene per una prova veloce.',
@@ -193,6 +197,11 @@ function updateReadout() {
   readout.textContent = (kind === 'sine') ? 'Sinusoide · ' + fmtHz(freq) : NAMES[kind];
 }
 
+// La riga che dice a cosa serve il segnale scelto: cambia con lui.
+function updateUse() {
+  useHint.textContent = USI[kind];
+}
+
 function setKind(k) {
   if (k === kind) return;
   var wasPlaying = playing;
@@ -203,6 +212,7 @@ function setKind(k) {
   });
   freqBox.classList.toggle('hidden', k !== 'sine');
   updateReadout();
+  updateUse();
   // Il cambio di segnale mentre suona non deve costringere a ripremere PLAY.
   if (wasPlaying) setTimeout(start, 170);
 }
@@ -275,3 +285,6 @@ AUDIO.seNonParte(function (msg) {
 setFreq(440);
 setLevel(-20);
 updateReadout();
+// anche all'avvio il testo viene da USI: nell'HTML c'è la stessa frase, ma
+// serve solo a non lasciare la riga vuota prima che parta lo script
+updateUse();
