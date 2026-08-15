@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Caso rotto — errore JavaScript nella testa</title>
+<meta name="description" content="Pagina di controllo: lo script che sbaglia sta nella testa, prima di tutto il resto. Serve a sapere se la spia degli errori arriva in tempo.">
+<script>
+  /* IL DIFETTO, messo nel punto più difficile da sorprendere: prima riga di
+     script della pagina. È il caso limite della spia degli errori, che si
+     aggancia dall'esterno mentre la pagina sta ancora caricando. Se questo
+     risulta sano mentre errore-js.html risulta rotto, vuol dire che la spia
+     arriva tardi e vede solo gli errori dopo la testa. */
+  funzioneCheNonEsisteNemmenoQui();
+</script>
+<style>body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: #111; background: #fff; padding: 16px; }</style>
+</head>
+<body>
+<h1>Caso rotto: errore nella testa</h1>
+<p>Questa pagina esiste per essere trovata rotta, nel punto più difficile.</p>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Caso rotto — bersaglio troppo piccolo</title>
+<meta name="description" content="Pagina di controllo: contiene un pulsante da 30 px, sotto la misura di un dito, e serve a far scattare il controllo dei bersagli tattili.">
+<style>
+  body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: #111; background: #fff; padding: 16px; }
+  /* IL DIFETTO: 30 px di lato, quando un dito ne vuole 44. */
+  .piccolo { width: 30px; height: 30px; font-size: 12px; padding: 0; }
+  /* Il confronto: questo invece è grande abbastanza e non deve risultare rotto. */
+  .giusto { min-width: 44px; min-height: 44px; }
+</style>
+</head>
+<body>
+<h1>Caso rotto: bersagli</h1>
+<p>Questa pagina esiste per essere trovata rotta. Se <code>tools/regressione.html</code>
+   la dà per buona, il controllo dei bersagli non sta misurando niente.</p>
+<button class="piccolo" type="button">×</button>
+<button class="giusto" type="button">ok</button>
+</body>
+</html>
