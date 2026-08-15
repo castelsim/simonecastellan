@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Tonalità — capire in che tonalità è un brano</title>
-  <meta name="description" content="Scegli un brano, prova le note sopra l'audio e senti quali stanno bene. A ogni nota ti dico la tonalità più probabile. Il brano resta sul tuo dispositivo." />
+  <meta name="description" content="Fai ascoltare la musica al telefono e ti dico in che tonalità è. Oppure provi le note sulla tastiera. Niente sale in rete: tutto resta qui." />
   <meta name="theme-color" content="#ffffff" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Tonalità" />
-  <meta property="og:description" content="Prova le note sopra il tuo brano e senti quali stanno bene: così si trova la tonalità. Funziona nel browser." />
+  <meta property="og:description" content="Appoggia il telefono vicino alla cassa: ascolta la musica e ti dice in che tonalità è. Oppure la cerchi a orecchio sulla tastiera." />
   <meta property="og:image" content="og-image.svg" />
   <meta property="og:locale" content="it_IT" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -25,19 +25,31 @@
   <main class="card">
     <header>
       <p class="occhiello">Cover · Trasporto · Studio</p>
-      <h1 class="titolone">Tonalità.<br><span class="eco">Trovarla suonandoci sopra.</span></h1>
-      <p class="apertura">La tonalità dice quali note stanno bene su un brano. Serve per
-        suonarci sopra, per cantarlo o per cambiargli altezza.
-        <b>Il brano non sale in rete.</b></p>
+      <h1 class="titolone">Tonalità.<br><span class="eco">Falla sentire, te la dico.</span></h1>
+      <p class="apertura">Fai suonare la musica e <b>appoggia il telefono vicino alla cassa</b>:
+        ascolto io e ti dico la tonalità. Oppure la cerchi a orecchio, premendo i tasti.
+        Niente esce dal tuo dispositivo.</p>
     </header>
 
-    <!-- Carica audio -->
-    <div class="upload">
-      <input type="file" id="fileInput" class="file-input"
-             accept="audio/*,.mp3,.wav,.aiff,.aif,.flac,.m4a,.ogg" />
-      <label for="fileInput" class="btn btn-secondary upload-btn" id="uploadBtn">Scegli il brano</label>
-      <span id="fileName" class="file-name"></span>
-    </div>
+    <!-- Ascolta dal microfono: la strada principale.
+         Su un telefono il brano sta in Apple Music o in Spotify e non è un file
+         che si possa scegliere — «carica il brano» lì è una promessa che non si
+         può mantenere. Ma la musica suona da qualche parte, e il microfono la
+         sente: si appoggia il telefono e si aspetta. -->
+    <button type="button" id="ascoltaBtn" class="btn btn-secondary ascolta-btn">Ascolta la musica</button>
+    <p id="ascoltaStato" class="ascolta-stato" hidden></p>
+
+    <!-- Il file resta per chi ce l'ha davvero, ma non è più la prima cosa che
+         si vede: su telefono non serve quasi mai. -->
+    <details class="da-file">
+      <summary>Oppure parti da un file</summary>
+      <div class="upload">
+        <input type="file" id="fileInput" class="file-input"
+               accept="audio/*,.mp3,.wav,.aiff,.aif,.flac,.m4a,.ogg" />
+        <label for="fileInput" class="btn btn-secondary upload-btn" id="uploadBtn">Scegli il brano</label>
+        <span id="fileName" class="file-name"></span>
+      </div>
+    </details>
     <!-- Un file che il browser non sa leggere lasciava il lettore a 0:00 e muto. -->
     <p id="fileMsg" class="file-msg hidden" role="status"></p>
 
@@ -58,7 +70,7 @@
 
     <!-- Tastiera -->
     <div id="keyboard" class="keyboard"></div>
-    <p class="kb-hint">Fai partire il brano e premi i tasti. Le note della tonalità non stonano.</p>
+    <p class="kb-hint">Puoi anche cercarla a orecchio: premi i tasti sopra la musica. Le note della tonalità non stonano.</p>
 
     <!-- Ottava (solo − / +) -->
     <div class="ctrl-row">
@@ -83,6 +95,15 @@
     <p id="resultNote" class="result-note hidden">
       I pallini segnano le note di questa tonalità. Provale sul brano: se stanno bene, è quella giusta.
     </p>
+
+    <!-- Compare solo su iPhone e iPad, e solo se il sistema non lascia
+         spostare l'audio nella categoria giusta: senza questa riga uno crede
+         che sia rotta la tastiera, mentre è una levetta sul fianco. -->
+    <p id="avvisoSilenzioso" class="avviso-silenzioso" hidden>
+      Se premi i tasti e non senti niente, controlla la <b>levetta del silenzioso</b>
+      sul fianco dell'iPhone: da lì in giù i suoni generati dalla pagina restano muti,
+      mentre il brano continua a sentirsi.
+    </p>
   </main>
 
   <footer class="site-footer">
@@ -92,6 +113,8 @@
 
   <audio id="audio" preload="metadata"></audio>
 
+  <script src="/comune/dsp.js"></script>
+  <script src="ascolta.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
