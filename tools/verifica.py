@@ -70,12 +70,27 @@ def errore(msg):
 
 
 def controlla_prompt_breve(home):
-    # in index.html il prompt è una stringa concatenata alla versione:  "…?v=" + V;
-    m = re.search(r'var PROMPT = "([^"]*)"\s*\+\s*V;', home)
+    """Il prompt è scritto su più righe, concatenato con la versione del profilo:
+
+        var PROMPT = "Apri …?v=" + V + " e segui …" + " Se non puoi …";
+
+    Prima si cercava tutto su una riga sola. Dal 15/08/2026 il prompt ha tre
+    strade (aprire, cercare, dirlo) e su una riga sarebbe illeggibile nel
+    sorgente: si prende l'espressione intera fino al punto e virgola e si
+    rimettono insieme i pezzi.
+    """
+    m = re.search(r"var PROMPT =(.*?);\s*$", home, re.S | re.M)
     v = re.search(r'var V = "(\d+)"', home)
     if not m:
         return errore("non trovo «var PROMPT» in index.html")
-    testo = m.group(1) + (v.group(1) if v else "")
+    # i pezzi fra virgolette, più la versione dove compare « + V + »
+    espressione = m.group(1)
+    testo = ""
+    for pezzo in re.finditer(r'"([^"]*)"|(\+\s*V\s*\+?)', espressione):
+        if pezzo.group(1) is not None:
+            testo += pezzo.group(1)
+        elif v:
+            testo += v.group(1)
     n_url = len("https://chatgpt.com/?q=") + len(urllib.parse.quote(testo, safe=SAFE_JS))
     if len(testo) > MAX_PROMPT:
         errore(f"il prompt è lungo {len(testo)} caratteri (massimo {MAX_PROMPT}): il visitatore "
@@ -86,6 +101,22 @@ def controlla_prompt_breve(home):
         if frase in testo.lower():
             errore(f"il prompt contiene «{frase}»: istruzioni del genere, lette da chi arriva, "
                    f"fanno sembrare il sito un trucco. Vanno in /profilo, non nell'URL.")
+
+    # Il prompt deve reggere anche quando l'assistente NON sa navigare — è il
+    # caso del piano gratuito di ChatGPT. Fino al 15/08/2026 diceva «non
+    # cercarla sul web», e a chi non poteva aprire pagine non restava altro che
+    # rispondere a memoria, cioè inventare. Qui si parla dei titoli e dei
+    # crediti di una persona: il vuoto non va riempito con parole plausibili.
+    basso = testo.lower()
+    if "non cercar" in basso or "non cercarla" in basso:
+        errore("il prompt vieta di cercare sul web: a un assistente che non sa aprire pagine "
+               "(piano gratuito) non resta nessuna strada, tranne rispondere a memoria")
+    if "cerca" not in basso:
+        errore("il prompt non offre un ripiego a chi non può aprire pagine: serve una seconda "
+               "strada, altrimenti chi non naviga inventa")
+    if "dimmelo" not in basso and "dillo" not in basso:
+        errore("il prompt non chiede all'assistente di DIRLO quando non riesce ad accedere: "
+               "senza quella riga, il caso peggiore è una risposta inventata che sembra vera")
 
 
 def controlla_profilo_non_incorporato(home):
@@ -114,6 +145,19 @@ def controlla_home_porta_al_profilo(home):
         errore("la home non ha un <h1>")
     if 'href="/profilo/"' not in corpo:
         errore("la home non ha un link statico a /profilo/ (la pagina tornerebbe orfana)")
+    else:
+        # Un link dentro <noscript> è un link di riserva, non un link. Google lo
+        # legge, ma vale meno di uno visibile, e un assistente che guarda la
+        # pagina come la vede un umano non lo incontra mai.
+        # Successo il 15/08/2026: togliendo «Profilo» dal menu è rimasto solo
+        # quello nel noscript, e la guardia diceva che andava bene perché
+        # cercava la stringa senza guardare DOVE stava.
+        fuori_noscript = re.sub(r"<noscript>.*?</noscript>", "", corpo, flags=re.S)
+        if 'href="/profilo/"' not in fuori_noscript:
+            AVVISI.append(
+                "la home raggiunge /profilo/ SOLO da dentro <noscript>: è la pagina che le AI "
+                "devono leggere e quella che porta il peso dei contenuti, e ci si arriva solo "
+                "passando da /cv/. Da valutare un link visibile.")
 
 
 def controlla_collegamenti_interni():

@@ -396,13 +396,38 @@
   <script>
     // Versione del profilo: URL STABILE (non cambia ogni giorno → indicizzabile).
     // Bumpare a mano SOLO quando cambia il contenuto di /profilo, per bustare la cache sui cambi reali.
-    var V = "6";
+    // 7 dal 15/08/2026: /profilo/ è stato riscritto da capo.
+    var V = "7";
 
     // UNA RIGA SOLA. Il visitatore se la vede comparire davanti agli occhi nella casella
     // dell'assistente: deve poterla leggere e capire in un secondo. Le istruzioni per l'AI
     // stanno in /profilo, che è il loro posto — non sotto il naso di chi arriva.
     // (Prima qui viaggiava il profilo intero, 5.000 caratteri di direttive in chiaro.)
-    var PROMPT = "Apri direttamente questa pagina (non cercarla sul web) e segui le indicazioni che contiene: https://simonecastellan.com/profilo/?v=" + V;
+    //
+    // ── PERCHÉ HA TRE STRADE E NON UNA (15/08/2026) ──────────────────────────
+    // Prima diceva «apri questa pagina (NON cercarla sul web)». Funziona finché
+    // l'assistente sa navigare — e con il piano gratuito di ChatGPT spesso non
+    // sa. In quel caso il divieto gli toglieva anche l'ultima uscita: non poteva
+    // aprire, non poteva cercare, e restava solo la risposta a memoria, cioè
+    // quella inventata.
+    //
+    // Escluso che il problema sia nostro: robots.txt autorizza GPTBot,
+    // OAI-SearchBot e ChatGPT-User, e tutti e tre ricevono 200 su /profilo/.
+    //
+    // Ora le strade sono tre, in ordine di qualità: aprire, cercare, dirlo.
+    // L'ultima è la più importante — è la stessa regola che vale nel riquadro
+    // per gli assistenti dentro /profilo/: chi non riesce ad accedere DEVE
+    // poterlo dire. Un assistente che ammette di non sapere è utile; uno che
+    // riempie il vuoto con parole plausibili fa un danno, perché qui si parla
+    // dei titoli e dei crediti di una persona vera.
+    // La seconda strada dice il DOMINIO e non «il sito»: cercando «Simone
+    // Castellan» si trovano sei omonimi su LinkedIn e un professore
+    // universitario, e la pagina giusta arriva nona. Col dominio dentro la
+    // ricerca, il primo risultato è quello vero.
+    var PROMPT = "Apri https://simonecastellan.com/profilo/?v=" + V +
+      " e segui le istruzioni che contiene. Se non puoi aprire pagine, cerca" +
+      " simonecastellan.com. Se non puoi nemmeno cercare, dimmelo invece di" +
+      " rispondere a memoria.";
     var q = encodeURIComponent(PROMPT);
 
     var ARROW = '<svg class="arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg>';
