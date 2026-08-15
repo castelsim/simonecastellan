@@ -31,7 +31,11 @@ body {
                                     finestra il titolo finirebbe sopra il
                                     bordo, irraggiungibile (12/08/2026) */
   min-height: 100vh;
-  padding: 24px 20px calc(64px + env(safe-area-inset-bottom));
+  /* In orizzontale il notch mangia un lato: senza «env(safe-area-inset-left)»
+     e «-right» la prima colonna di testo finisce sotto la tacca o sotto
+     l'angolo tondo. Il «max()» tiene i 20px di sempre quando l'incavo non
+     c'è — cioè su tutto quello che non è un iPhone ruotato (15/08/2026). */
+  padding: 24px max(20px, env(safe-area-inset-right)) calc(64px + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   text-align: center;
 }
 
@@ -283,3 +287,22 @@ header { text-align: left; margin-bottom: 30px; }
 }
 .rimando b { color: var(--ink); font-weight: 650; }
 .rimando a { color: var(--teal); text-decoration: none; border-bottom: 1px solid #b8ded9; font-weight: 600; }
+
+
+/* ————— Il telefono in mano (15/08/2026) —————
+
+   Le sei frequenze di scorciatoia — 100, 250, 440, 1k, 4k, 10k — erano
+   pillole da 27px di altezza e da 39 a 51 di larghezza. Questo strumento si
+   usa in piedi in una sala, con una mano sul telefono e l'altra sul mixer:
+   toccare 4k al posto di 1k mentre si cerca un fischio manda fuori strada la
+   ricerca. La fila va già a capo da sola («flex-wrap: wrap»), quindi
+   allargarle non fa uscire niente dallo schermo — verificato a 320px. */
+@media (max-width: 560px), (pointer: coarse) {
+  .pset {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

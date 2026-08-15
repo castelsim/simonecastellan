@@ -27,7 +27,11 @@ body {
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  padding: 44px 20px calc(72px + env(safe-area-inset-bottom));
+  /* In orizzontale il notch mangia un lato: senza «env(safe-area-inset-left)»
+     e «-right» la prima colonna di testo finisce sotto la tacca o sotto
+     l'angolo tondo. Il «max()» tiene i 20px di sempre quando l'incavo non
+     c'è — cioè su tutto quello che non è un iPhone ruotato (15/08/2026). */
+  padding: 44px max(20px, env(safe-area-inset-right)) calc(72px + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   text-align: center;
 }
 
@@ -286,3 +290,30 @@ header { text-align: left; margin-bottom: 30px; }
    vincerebbe, lasciando il pulsante nero. Provato — restava nero. */
 .btn.primario { background: var(--teal-l); color: var(--teal-scuro); }
 .btn.primario:hover:not(:disabled) { background: var(--teal); }
+
+
+/* ————— Il telefono in mano (15/08/2026) —————
+
+   «apri Claude» è un pulsante scritto dentro una frase: alto 15px, largo 40.
+   Da mouse si centra, da dito no — e da lì passa l'unica alternativa a
+   ChatGPT che la pagina offre.
+
+   Non si ingrandisce il testo, che dentro la frase deve restare quello: si
+   allarga l'area sopra e sotto, invisibile, come già si fa per «.btn-ghost»
+   in comune/voce.css. La frase è l'ultima riga del blocco e il pulsante è
+   uno solo: la fascia non copre nessun altro comando — verificato misurando
+   le distanze, non a occhio. */
+@media (max-width: 560px), (pointer: coarse) {
+  .link {
+    position: relative;
+    display: inline-block;
+  }
+  .link::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%;
+    height: 44px;
+    transform: translateY(-50%);
+  }
+}
