@@ -302,7 +302,13 @@ var CVPDF = (function () {
 
   function premi(st) {
     sezione(st, 'Premi e riconoscimenti');
-    CV.premi.forEach(function (p) {
+    /* L'ordine lo decide l'anno, non la posizione nell'elenco: una voce
+       aggiunta in fondo a `dati.js` finiva in fondo alla pagina anche se era
+       del 2022, in mezzo a premi del 2017. Ordinando qui, chi aggiunge un
+       premio non deve ricordarsi dove infilarlo. */
+    CV.premi.slice().sort(function (a, b) {
+      return Number(b.anno) - Number(a.anno);
+    }).forEach(function (p) {
       testo(st, p.anno + ' — ' + p.testo, { corpo: 9, dopo: 1.2 });
     });
   }
