@@ -319,5 +319,51 @@ header { align-self: stretch; }
 .key-guess { color: var(--teal); }
 
 /* Il pulsante che porta dentro il brano è il gesto principale. */
-.upload-btn { background: var(--teal-l); color: var(--teal-scuro); }
-.upload-btn:hover { background: var(--teal); }
+/* Il verde acqua sta sul gesto principale, e il gesto principale è cambiato:
+   prima era scegliere il file, ora è far ascoltare la musica. Il pulsante del
+   file torna neutro — è la seconda strada, e sta dietro un dettaglio. */
+.upload-btn { background: var(--pill); color: var(--ink); }
+.upload-btn:hover { background: var(--pill-hover); }
+
+/* ————— Ascolta dal microfono ————— */
+.ascolta-btn {
+  width: 100%; max-width: 340px; margin: 0 auto 10px; display: block;
+  background: var(--teal-l); color: var(--teal-scuro);
+}
+.ascolta-btn:hover { background: var(--teal); }
+.ascolta-stato {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted);
+  margin-bottom: 14px;
+  min-height: 20px;
+}
+
+/* Il file non è più la prima cosa: si apre solo se uno ce l'ha davvero. */
+.da-file { margin-bottom: 16px; }
+.da-file summary {
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 8px 0;
+  list-style: none;
+}
+.da-file summary::-webkit-details-marker { display: none; }
+.da-file summary::before { content: "▸ "; }
+.da-file[open] summary::before { content: "▾ "; }
+.da-file summary:hover { color: var(--ink); }
+
+/* L'avviso sulla levetta del silenzioso: giallo come gli altri avvisi del
+   sito, perché non è un errore ma una cosa da sapere. */
+.avviso-silenzioso {
+  margin-top: 20px;
+  text-align: left;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #8a5a00;
+  background: #fff8ed;
+  border: 1px solid #f0dfc0;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.avviso-silenzioso b { color: #6b4600; }

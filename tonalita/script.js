@@ -53,8 +53,34 @@ var BASE_W = 0.4;                           // piccolo peso d'avvio a ogni nota 
 
 // --- Web Audio ---
 var ctx = null, master = null;
+
+/* ── Perché su iPhone la tastiera non suonava ──────────────────────────────
+   Questa pagina ha due sorgenti audio e iOS le tratta in modo opposto:
+
+     il brano caricato   passa da un elemento <audio> → categoria «playback»,
+                         suona anche con la levetta del silenzioso alzata;
+     la tastiera         è Web Audio puro (un oscillatore) → categoria
+                         «ambient», che il silenzioso ZITTISCE.
+
+   Il sintomo è quello che confonde di più: il brano si sente e i tasti no,
+   così sembra rotta la tastiera mentre è una levetta sul fianco del telefono.
+
+   `navigator.audioSession` (Safari da iOS 16.4) permette di dire che questa
+   pagina fa «playback», e allora anche gli oscillatori suonano in silenzioso.
+   Dove non esiste, resta l'avviso scritto in pagina. */
+function categoriaAudioDiSistema() {
+  try {
+    if (navigator.audioSession && 'type' in navigator.audioSession) {
+      navigator.audioSession.type = 'playback';
+      return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
 function audio() {
   if (!ctx) {
+    categoriaAudioDiSistema();
     var AC = window.AudioContext || window.webkitAudioContext;
     ctx = new AC();
     master = ctx.createGain();
@@ -399,3 +425,67 @@ volEl.addEventListener('input', function () { au.volume = volEl.value / 100; });
 // --- Avvio ---
 buildKeyboard();
 setOctave(octave);
+
+/* ── Ascoltare la musica invece di caricarla ──────────────────────────────
+   Il cervello non cambia: `estimateKey()` confronta il vettore `counts` con i
+   profili di Krumhansl. Cambia solo chi lo riempie — prima i tasti che premi,
+   ora anche le note che il microfono sente. */
+(function ascoltoDalVivo() {
+  var btn = document.getElementById('ascoltaBtn');
+  var stato = document.getElementById('ascoltaStato');
+  if (!btn || typeof ASCOLTA === 'undefined') return;
+
+  if (!ASCOLTA.disponibile()) {
+    btn.hidden = true;
+    return;
+  }
+
+  function scrivi(t) { stato.hidden = !t; stato.textContent = t || ''; }
+
+  function aggiorna() {
+    var p = ASCOLTA.profilo();
+    if (!p) {
+      /* Non è un errore: è lo strumento che ammette di non sentire abbastanza.
+         Meglio dirlo che mostrare una tonalità inventata — su rumore puro
+         succedeva, e aveva la stessa faccia sicura di una risposta vera. */
+      scrivi('Sento troppo poco. Avvicina il telefono alla cassa, o alza il volume.');
+      return;
+    }
+    counts = p;
+    updateKeyGuess();
+    scrivi('Sto ascoltando… ' + ASCOLTA.blocchi() + ' letture. Più aspetti, più è sicura.');
+  }
+
+  btn.addEventListener('click', function () {
+    if (ASCOLTA.inAscolto()) {
+      ASCOLTA.ferma();
+      btn.textContent = 'Ascolta la musica';
+      scrivi('');
+      return;
+    }
+    ASCOLTA.azzera();
+    resetGuess();
+    scrivi('Chiedo il microfono…');
+    ASCOLTA.avvia(audio(), aggiorna).then(function () {
+      btn.textContent = 'Basta ascoltare';
+      scrivi('Sto ascoltando…');
+    }).catch(function (e) {
+      var negato = e && e.name === 'NotAllowedError';
+      scrivi(negato
+        ? 'Senza microfono non posso ascoltare. Il permesso si dà dall\'icona nella barra dell\'indirizzo.'
+        : 'Non sono riuscito ad aprire il microfono. Controlla che non lo stia usando un\'altra applicazione.');
+    });
+  });
+})();
+
+/* L'avviso sulla levetta si mostra solo a chi può incontrarla — un iPhone o un
+   iPad — e solo se il sistema NON lascia spostare l'audio in «playback». Su
+   iOS aggiornati la categoria si imposta e la tastiera suona lo stesso: lì la
+   riga sarebbe un allarme per un problema che non c'è. */
+(function avvisaSoloSeServe() {
+  var e = document.getElementById('avvisoSilenzioso');
+  if (!e) return;
+  var apple = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (apple && !categoriaAudioDiSistema()) e.hidden = false;
+})();
