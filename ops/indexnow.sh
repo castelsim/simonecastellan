@@ -36,12 +36,18 @@ SITO="simonecastellan.com"
 #  · /cv/         il curriculum, rifatto il 15/08
 #  · /en/profile/ la versione inglese del profilo
 #  · /tools/      la vetrina, che porta a diciotto pagine
+#  · /llms.txt    il file che gli assistenti leggono per convenzione. Non sta
+#                 nella sitemap — quella dichiara pagine fatte per le persone —
+#                 ma qui ci va: se un assistente cerca invece di aprire, questo
+#                 è il documento che gli serve, ed era l'unico pezzo del
+#                 sistema che nessuno aveva mai segnalato a nessun motore.
 PAGINE=(
   "/profilo/"
   "/"
   "/cv/"
   "/en/profile/"
   "/tools/"
+  "/llms.txt"
 )
 
 if [ $# -gt 0 ]; then PAGINE=("$@"); fi
