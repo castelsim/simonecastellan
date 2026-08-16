@@ -512,6 +512,37 @@ def controlla_cv_allineato():
           f"{len(re.findall(chr(123) + chr(92) + 's*lingua:', dati))} lingue straniere")
 
 
+def controlla_pagine_del_sistema():
+    """Le pagine su cui poggia «Chiedi di più su Simone» devono essere fra
+    quelle che si segnalano ai motori.
+
+    Il 15/08/2026 `llms.txt` non stava né nella sitemap né nell'elenco di
+    IndexNow: risponde 200, è linkato dal profilo, e nessun motore ne aveva
+    mai saputo niente. È il documento che un assistente legge per convenzione,
+    quindi è esattamente il pezzo che serve quando l'assistente CERCA invece di
+    aprire — cioè il caso del piano gratuito, quello per cui il prompt ha una
+    seconda strada.
+    """
+    percorso = os.path.join(ROOT, "ops", "indexnow.sh")
+    if not os.path.exists(percorso):
+        return errore("manca ops/indexnow.sh: non c'è più il modo di segnalare "
+                      "le pagine ai motori")
+    script = leggi("ops/indexnow.sh")
+    blocco = re.search(r"PAGINE=\((.*?)\)", script, re.S)
+    if not blocco:
+        return errore("ops/indexnow.sh non ha più l'elenco PAGINE")
+    elenco = blocco.group(1)
+    for pagina, perche in [
+        ("/profilo/", "è la pagina che l'assistente deve leggere"),
+        ("/llms.txt", "è il documento che gli assistenti leggono per convenzione"),
+        ("/en/profile/", "è il profilo per chi non parla italiano"),
+        ("/", "è il punto d'ingresso e porta il prompt"),
+    ]:
+        if f'"{pagina}"' not in elenco:
+            errore(f"ops/indexnow.sh non segnala più {pagina}, che {perche}")
+    print("  sistema AI: profilo, llms.txt, versione inglese e home fra le pagine segnalate")
+
+
 def main():
     print("Verifica del sito…")
     home = leggi("index.html")
@@ -531,6 +562,7 @@ def main():
     controlla_json_ld()
     controlla_hreflang()
     controlla_cv_allineato()
+    controlla_pagine_del_sistema()
 
     for a in AVVISI:
         print("  AVVISO: " + a)
