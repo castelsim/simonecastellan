@@ -79,7 +79,16 @@ done
 echo "ok (${#PAGINE[@]})"
 
 # 3. L'invio vero
-ELENCO=$(printf '"https://%s%s",' "$SITO" "${PAGINE[@]}" | sed 's/,$//')
+# Un ciclo, non printf. Il formato «"https://%s%s",» consuma DUE argomenti a
+# ogni giro: passandogli il dominio una volta sola e poi tutte le pagine, dal
+# secondo URL in avanti accoppiava le pagine FRA LORO e usciva «https:////cv/».
+# Il primo URL era giusto, e infatti a occhio sembrava funzionare: il motore ha
+# risposto 400 senza dire quale URL fosse rotto.
+ELENCO=""
+for p in "${PAGINE[@]}"; do
+  ELENCO+="\"https://$SITO$p\","
+done
+ELENCO="${ELENCO%,}"
 CORPO=$(cat <<FINE
 {
   "host": "$SITO",
@@ -89,6 +98,19 @@ CORPO=$(cat <<FINE
 }
 FINE
 )
+
+# Il corpo si controlla PRIMA di spedirlo: un JSON malformato torna indietro
+# come 400 secco, senza dire quale URL fosse rotto — e sono venti minuti persi
+# a indovinare. Se python3 non c'è, si spedisce lo stesso.
+if command -v python3 >/dev/null 2>&1; then
+  printf 'corpo della richiesta… '
+  if ! echo "$CORPO" | python3 -c 'import json,sys; d=json.load(sys.stdin); assert all(u.startswith("https://"+d["host"]+"/") for u in d["urlList"]), "un URL non appartiene al dominio"' 2>/dev/null; then
+    echo "NO"
+    echo "$CORPO"
+    exit 1
+  fi
+  echo "ok"
+fi
 
 printf 'invio a IndexNow… '
 RISPOSTA=$(curl -s -o /dev/null -w '%{http_code}' -X POST "https://api.indexnow.org/IndexNow" \
