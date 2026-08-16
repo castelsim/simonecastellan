@@ -512,6 +512,53 @@ def controlla_cv_allineato():
           f"{len(re.findall(chr(123) + chr(92) + 's*lingua:', dati))} lingue straniere")
 
 
+def controlla_formule_smentite():
+    """Le formule che i documenti smentiscono non devono tornare.
+
+    Il 12 e il 15/08/2026 otto affermazioni pubblicate sono risultate smentite
+    dai loro stessi allegati, e tre erano già passate in domande inviate. Le
+    versioni sbagliate erano rimaste in circolazione per mesi perché nessuno le
+    cercava.
+
+    ── PERCHÉ NON BASTA CERCARE LA PAROLA ──────────────────────────────────
+    In `llms.txt` e in `/profilo/` quelle stesse parole compaiono di proposito,
+    dentro le istruzioni che le VIETANO: «"ammessa e presentata" non è
+    "finalista"», «non usare "finalista"». Un controllo che cerca la parola e
+    basta segnala tre negazioni su quattro e fa perdere fiducia in sé stesso —
+    provato. Qui si guarda la riga: se contiene una negazione, è un'istruzione
+    e va bene.
+    """
+    # Le negazioni sono in due lingue, perché la versione inglese del profilo
+    # spiega agli assistenti la stessa cosa in inglese: «Leading a course is
+    # NOT a tenured post». Con le sole forme italiane il controllo segnalava
+    # come errori tre righe che dicono esattamente il contrario.
+    NEGAZIONI = (
+        # italiano
+        "non è", "non usare", "non ha", "non sono", "non vale", "niente «",
+        "invece di", "al posto di", "non «", "cosa diversa", "non attribuir",
+        # inglese
+        "is not", "isn't", "not a tenured", "rather than", "instead of",
+        "no «", "never «",
+    )
+    VIETATE = [
+        ("docente titolare", "è titolare DELL'INSEGNAMENTO, non di un posto di ruolo"),
+        ("tenured", "in inglese afferma un posto permanente che non esiste"),
+        ("graduatorie nazionali", "non esistono: le idoneità sono di singoli conservatori"),
+        ("sony music (", "Sony è la distribuzione, l'editore è Fenix"),
+    ]
+    for f in ("llms.txt", "profilo/index.html", "en/profile/index.html", "cv/index.html"):
+        if not os.path.exists(os.path.join(ROOT, f)):
+            continue
+        for numero, riga in enumerate(leggi(f).splitlines(), 1):
+            basso = riga.lower()
+            if any(n in basso for n in NEGAZIONI):
+                continue          # è un'istruzione che vieta la formula
+            for formula, perche in VIETATE:
+                if formula in basso:
+                    errore(f"{f}:{numero} usa «{formula}»: {perche}")
+    print("  formule: nessuna delle versioni smentite dai documenti è tornata")
+
+
 def controlla_pagine_del_sistema():
     """Le pagine su cui poggia «Chiedi di più su Simone» devono essere fra
     quelle che si segnalano ai motori.
@@ -563,6 +610,7 @@ def main():
     controlla_hreflang()
     controlla_cv_allineato()
     controlla_pagine_del_sistema()
+    controlla_formule_smentite()
 
     for a in AVVISI:
         print("  AVVISO: " + a)
