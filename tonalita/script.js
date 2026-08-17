@@ -492,12 +492,38 @@ setOctave(octave);
   });
 })();
 
-/* L'avviso sulla levetta si mostra solo a chi può incontrarla — un iPhone o un
-   iPad — e solo se il sistema NON lascia spostare l'audio in «playback». Su
-   iOS aggiornati la categoria si imposta e la tastiera suona lo stesso: lì la
-   riga sarebbe un allarme per un problema che non c'è. */
-(function avvisaSoloSeServe() {
+/* L'avviso sulla levetta, e QUANDO si mostra.
+   ────────────────────────────────────────────────────────────────────────
+   Prima compariva solo se il sistema NON lasciava spostare l'audio in
+   «playback», partendo dal presupposto che dove la categoria si imposta il
+   suono esca comunque. Il presupposto è sbagliato: il 15/08/2026 Simone ha
+   segnalato che sul suo iPhone la tastiera non suona, e quel telefono la
+   categoria la imposta — quindi non vedeva nessuna spiegazione. Restava con
+   uno strumento muto e nessun perché.
+
+   Verificato che la nota è generata bene: in un contesto offline l'oscillatore
+   rende un suono vero (picco 0,144). Il silenzio, quando c'è, arriva DOPO
+   Web Audio — dalla levetta o dal volume dei media.
+
+   Ora l'avviso compare a chi può incontrare quella levetta appena preme il
+   primo tasto: non prima, che sarebbe rumore per tutti, e non «mai», che era
+   il caso di Simone. Chi il suono lo sente lo legge e tira dritto; chi non lo
+   sente ha finalmente la risposta sotto gli occhi. */
+(function avvisaChiPuoIncontrarla() {
   var e = document.getElementById('avvisoSilenzioso');
-  if (!e) return;
-  if (AUDIO.dispositivoApple() && !AUDIO.categoriaDiSistema()) e.hidden = false;
+  if (!e || !AUDIO.dispositivoApple()) return;
+
+  if (!AUDIO.categoriaDiSistema()) { e.hidden = false; return; }   // iOS vecchi: subito
+
+  var mostrato = false;
+  function alPrimoTasto() {
+    if (mostrato) return;
+    mostrato = true;
+    e.hidden = false;
+    document.removeEventListener('pointerdown', ascolta, true);
+  }
+  function ascolta(ev) {
+    if (ev.target && ev.target.closest && ev.target.closest('.keyboard')) alPrimoTasto();
+  }
+  document.addEventListener('pointerdown', ascolta, true);
 })();

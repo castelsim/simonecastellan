@@ -137,6 +137,16 @@ var AUDIO = (function () {
   function ripristina(annuncia, poi) {
     if (!ctx) { if (annuncia) segnala('assente'); if (poi) poi(false); return; }
 
+    /* La categoria si RIDICHIARA a ogni ripresa, non solo alla creazione.
+       Su iOS la sessione audio si azzera da sola in più occasioni — una
+       telefonata, una sveglia, la pagina che va in secondo piano e torna — e
+       da quel momento in poi il suono ricade nella categoria «ambient», cioè
+       quella che la levetta del silenzioso zittisce. Dichiararla una volta
+       sola, alla creazione del contesto, vuol dire che la prima volta si
+       sente e dopo la prima interruzione no: un guasto intermittente, il
+       peggiore da capire perché a chi lo racconta non si crede. */
+    categoriaDiSistema();
+
     var risposto = false;
     function esito() {
       if (risposto) return;

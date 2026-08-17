@@ -375,3 +375,18 @@ header { align-self: stretch; }
   padding: 12px 14px;
 }
 .avviso-silenzioso b { color: #6b4600; }
+
+
+/* ── Cosa si vede su un telefono ───────────────────────────────────────────
+   Su telefono lo strumento fa una cosa sola: la tastiera. «Ascolta la musica»
+   e «Oppure parti da un file» sono nascosti per scelta di Simone (15/08/2026),
+   perche su iPhone non funzionavano — e un comando che non fa niente e peggio
+   di un comando che non c'e.
+
+   Le due classi non sono legate a una larghezza: la classe «telefono» la mette
+   un controllo in cima alla pagina, che chiede il dito E lo schermo piccolo.
+   Un portatile touch risponde «dito», ma li le funzioni restano perche li
+   funzionano. */
+.solo-telefono { display: none; }
+.telefono .solo-grande { display: none !important; }
+.telefono .solo-telefono { display: block; }
