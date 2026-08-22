@@ -97,3 +97,28 @@ chi.
 
 Da allora la mappa sta in tutte e tre le fonti, e `tools/verifica.py`
 (`controlla_mappa_agganci`) fallisce se una delle tre la perde o perde una voce.
+
+---
+
+## Il nodo Person duplicato nella home (22/08/2026)
+
+Il riordino del 15/08/2026 unificò `/profilo/` e la pagina inglese sotto un solo
+nodo `Person`, e saltò la home. Per una settimana `index.html` ha continuato a
+pubblicare nel JSON-LD la lista di premi vecchia:
+
+| Come stava nella home | Cosa dice il documento |
+|---|---|
+| «Finalista al Premio Nazionale delle Arti (2022)» | l'attestato è di partecipazione: opera **ammessa e presentata**, categoria B |
+| «1° Premio "Your Sound for Silents" — Lago Film Fest (2023)» | premio **intestato a M. Crivellaro**, con il contributo di S. Castellan e F. Motta |
+| «1° Premio "Violoncello ed Elettronica" — Steffani (2017)» | Call for works 2017, 1° premio per **«Skrik»** |
+| «Docente di Elettroacustica (COME/04 — AFAM047)» | due **idoneità di istituto**, non un titolo di docenza |
+
+Il guaio non era solo la copia vecchia: tutte le pagine dichiarano lo stesso
+`@id` per la persona, e i motori fondono i nodi con lo stesso `@id`. I cinque
+premi della home non sostituivano quelli corretti del profilo — **ci si
+sommavano**. Chi leggeva il dato strutturato vedeva le due versioni una accanto
+all'altra.
+
+Da allora le proprietà di merito (`award`, `hasCredential`, `alumniOf`) stanno
+solo in `/profilo/`, e `tools/verifica.py` (`controlla_person_definita_una_volta`)
+fallisce se un'altra pagina le ridichiara.

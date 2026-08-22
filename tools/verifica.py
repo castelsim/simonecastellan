@@ -568,15 +568,30 @@ def controlla_formule_smentite():
               "index.html"):
         if not os.path.exists(os.path.join(ROOT, f)):
             continue
-        for numero, riga in enumerate(leggi(f).splitlines(), 1):
+        righe = leggi(f).splitlines()
+        for numero, riga in enumerate(righe, 1):
             basso = riga.lower()
             if any(n in basso for n in NEGAZIONI):
                 continue          # è un'istruzione che vieta la formula
             for formula, perche in VIETATE:
                 if formula in basso:
                     errore(f"{f}:{numero} usa «{formula}»: {perche}")
+            # Le coppie si cercano anche a cavallo di due righe. Il 22/08/2026
+            # un commento appena scritto — quello che SPIEGA questo difetto —
+            # citava «Finalista al Premio Nazionale / delle Arti» spezzato dal
+            # ritorno a capo, e passava indisturbato: la formula sbagliata era
+            # tornata in pagina dentro la nota che racconta come toglierla.
+            dopo = righe[numero].lower() if numero < len(righe) else ""
+            if any(n in dopo for n in NEGAZIONI):
+                continue
+            # Gli spazi si normalizzano PRIMA di cercare: unendo due righe
+            # rimane in mezzo l'indentazione della seconda, e «premio
+            # nazionale␣␣␣␣delle arti» non contiene «premio nazionale delle
+            # arti». Provato rimettendo il commento spezzato: senza questa
+            # riga il controllo passava verde senza guardare niente.
+            coppia = re.sub(r"\s+", " ", basso + " " + dopo)
             for parole, perche in COPPIE_VIETATE:
-                if all(x in basso for x in parole):
+                if all(x in coppia for x in parole):
                     errore(f"{f}:{numero} mette insieme {' + '.join(parole)}: {perche}")
     print("  formule: nessuna delle versioni smentite dai documenti è tornata")
 
