@@ -1,7 +1,7 @@
 # /llms.txt — Simone Castellan
 
 > Scheda di conoscenza su Simone Castellan, per assistenti e agenti che leggono il sito.
-> Aggiornata il 15/08/2026. La stessa cosa, in pagina, sta su
+> Aggiornata il 22/08/2026. La stessa cosa, in pagina, sta su
 > https://simonecastellan.com/profilo/ (italiano) e https://simonecastellan.com/en/profile/
 > (inglese): le tre fonti dicono le stesse cose, e se una diverge vale il curriculum,
 > https://simonecastellan.com/cv/ , che è la pagina dove i fatti si correggono per primi.

@@ -44,6 +44,26 @@
   <meta name="twitter:title" content="Simone Castellan">
   <meta name="twitter:description" content="Un profilo dinamico leggibile dall'intelligenza artificiale: chiedi a ChatGPT, Claude, Grok o Perplexity chi è Simone Castellan e come potreste creare valore insieme.">
   <meta name="twitter:image" content="https://simonecastellan.com/og-image.png?v=2">
+  <!--
+    ── PERCHÉ QUI IL NODO Person È CORTO (22/08/2026) ─────────────────────
+    Titoli, premi e scuole NON stanno qui: stanno in /profilo/, che dichiara
+    lo stesso `@id`. Due pagine che definiscono la stessa entità non si
+    scelgono a vicenda — i motori le fondono, e chi legge il risultato vede
+    le due versioni sommate.
+
+    È esattamente quello che succedeva. Il riordino del 15/08/2026 unificò
+    /profilo/ e la pagina inglese e si dimenticò della home, che ha
+    continuato a pubblicare la lista vecchia: «Finalista al Premio Nazionale
+    delle Arti», mentre l'attestato dice opera ammessa e presentata; «1°
+    Premio Your Sound for Silents», mentre il premio è intestato a M.
+    Crivellaro con il contributo di Simone e di F. Motta. Formulazioni
+    corrette a mano in tre documenti e rimaste in circolazione, in chiaro,
+    nel dato strutturato della pagina più visitata del sito.
+
+    Qui restano le proprietà di identità (chi è, dove lavora, i profili
+    ufficiali). Quelle di merito — `award`, `hasCredential`, `alumniOf` —
+    hanno un posto solo, /profilo/, che è dove si correggono.
+  -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -73,30 +93,6 @@
           "name": "AVA Sound Live Music",
           "url": "https://www.avasoundlivemusic.eu"
         },
-        "alumniOf": [
-          { "@type": "CollegeOrUniversity", "name": "Conservatorio di Musica \u00abA. Steffani\u00bb, Castelfranco Veneto" },
-          { "@type": "CollegeOrUniversity", "name": "Universit\u00e0 IUAV di Venezia" }
-        ],
-        "hasCredential": [
-          {
-            "@type": "EducationalOccupationalCredential",
-            "name": "Diploma accademico di II livello in Musica Elettronica (Musica per l'immagine) \u2014 110 e lode",
-            "credentialCategory": "degree",
-            "educationalLevel": "Diploma accademico di secondo livello"
-          },
-          {
-            "@type": "EducationalOccupationalCredential",
-            "name": "Docente di Elettroacustica (COME/04 \u2014 AFAM047)",
-            "credentialCategory": "certification"
-          }
-        ],
-        "award": [
-          "1\u00b0 Premio \u00abYour Sound for Silents\u00bb \u2014 Lago Film Fest (2023)",
-          "Finalista al Premio Nazionale delle Arti (2022)",
-          "Selezione ICMC 2021 (Santiago del Cile)",
-          "2\u00b0 Premio \u00abSounds of Silences\u00bb \u2014 Edison Studio / Romaeuropa (2020)",
-          "1\u00b0 Premio \u00abVioloncello ed Elettronica\u00bb \u2014 Conservatorio Steffani (2017)"
-        ],
         "sameAs": [
           "https://open.spotify.com/artist/7rtqcm8fkOo9DpC8Lr9TCr",
           "https://www.facebook.com/castellansimone/",
@@ -396,8 +392,8 @@
   <script>
     // Versione del profilo: URL STABILE (non cambia ogni giorno → indicizzabile).
     // Bumpare a mano SOLO quando cambia il contenuto di /profilo, per bustare la cache sui cambi reali.
-    // 7 dal 15/08/2026: /profilo/ è stato riscritto da capo.
-    var V = "7";
+    // 8 dal 22/08/2026: /profilo/ ha preso la mappa degli agganci.
+    var V = "8";
 
     // UNA RIGA SOLA. Il visitatore se la vede comparire davanti agli occhi nella casella
     // dell'assistente: deve poterla leggere e capire in un secondo. Le istruzioni per l'AI
@@ -489,16 +485,22 @@
       document.body.classList.add("has-escape");   // il menu scende sotto il banner
       track("inapp_webview");
     }
-    // Mobile: SOLO ChatGPT — è l'unico il cui universal link apre l'app col prompt già scritto
-    // (Claude non registra /new nell'AASA, Grok è incostante, Gemini non accetta prefill).
-    // Desktop: tutti quelli che ricevono il prompt dall'URL. Gemini resta fuori ovunque perché
-    // andrebbe incollato a mano; su mobile il prompt finisce comunque negli appunti.
+    // UN SOLO PULSANTE, OVUNQUE: ChatGPT. Su mobile è l'unico il cui universal link apre
+    // l'app col prompt già scritto (Claude non registra /new nell'AASA, Grok è incostante,
+    // Gemini non accetta prefill); su desktop Claude e Grok riceverebbero il prompt, ma
+    // Claude mostra una fascia rossa di avviso su ogni prompt che arriva da un link esterno
+    // e Grok chiede il login prima di rispondere — due modi diversi di far sembrare rotto
+    // un pulsante che funziona. Restano definiti sopra, pronti a rientrare.
+    // (Questo commento diceva «Desktop: tutti quelli che ricevono il prompt dall'URL»,
+    // e il filtro qui sotto ne ha sempre lasciato passare uno: chi leggeva credeva a una
+    // riga che il codice smentiva due caratteri più in là.)
     var AIS_VISIBLE = AIS.filter(function(ai){ return ai.name === "ChatGPT"; });
     AIS_VISIBLE.forEach(function(ai){
       var a = document.createElement("a");
       a.className = "pill";
-      // Desktop: prompt ibrido (profilo incluso come fallback se l'AI non apre la pagina).
-      // Mobile: prompt corto (apre l'app; il profilo è già negli appunti).
+      // Lo stesso prompt corto ovunque: il profilo non viaggia più nell'URL da luglio.
+      // (Qui c'era scritto «Desktop: prompt ibrido, profilo incluso come fallback»: una
+      // versione che non esiste più, lasciata a raccontare un meccanismo immaginario.)
       a.href = ai.href(); a.rel = "noopener";
       a.target = IS_MOBILE ? "_self" : "_blank";   // mobile stessa scheda (universal link → app); desktop nuova scheda
       a.setAttribute("aria-label", "Chiedi a " + ai.name + (IS_MOBILE ? " — apri l'app (prompt copiato)" : " — apri in una nuova scheda"));

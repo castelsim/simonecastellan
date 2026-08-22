@@ -382,9 +382,15 @@ def trova_orfane(urls):
     return orfane
 
 
+# Le pagine che portano dati strutturati. Serve a due controlli — la validità
+# del JSON e l'unicità del nodo Person — e tenerne due copie significa che
+# prima o poi una pagina nuova entra in uno solo dei due elenchi.
+PAGINE_JSONLD = ("index.html", "profilo/index.html", "cv/index.html",
+                 "en/profile/index.html", "tools/index.html")
+
+
 def controlla_json_ld():
-    for f in ("index.html", "profilo/index.html", "cv/index.html", "en/profile/index.html",
-              "tools/index.html"):
+    for f in PAGINE_JSONLD:
         for blocco in re.findall(r'<script type="application/ld\+json">(.*?)</script>', leggi(f), re.S):
             try:
                 json.loads(blocco)
@@ -546,7 +552,20 @@ def controlla_formule_smentite():
         ("graduatorie nazionali", "non esistono: le idoneità sono di singoli conservatori"),
         ("sony music (", "Sony è la distribuzione, l'editore è Fenix"),
     ]
-    for f in ("llms.txt", "profilo/index.html", "en/profile/index.html", "cv/index.html"):
+    # «finalista» da solo è legittimo — a Seeyousound 2020 lo era davvero. Lo
+    # diventa quando sta accanto al Premio Nazionale delle Arti, dove
+    # l'attestato dice opera ammessa e presentata: si guarda la coppia, non la
+    # parola. Con la parola nuda il controllo avrebbe bocciato un premio vero.
+    COPPIE_VIETATE = [
+        (("finalista", "premio nazionale delle arti"),
+         "l'attestato dice opera ammessa e presentata, non «finalista»"),
+    ]
+    # index.html c'è dal 22/08/2026, e non è un'aggiunta di scrupolo: la home
+    # pubblicava «Finalista al Premio Nazionale delle Arti» nel JSON-LD, cioè
+    # nel dato che i motori leggono per primo, mentre le altre tre fonti erano
+    # già corrette da una settimana. Nessun controllo la guardava.
+    for f in ("llms.txt", "profilo/index.html", "en/profile/index.html", "cv/index.html",
+              "index.html"):
         if not os.path.exists(os.path.join(ROOT, f)):
             continue
         for numero, riga in enumerate(leggi(f).splitlines(), 1):
@@ -556,6 +575,9 @@ def controlla_formule_smentite():
             for formula, perche in VIETATE:
                 if formula in basso:
                     errore(f"{f}:{numero} usa «{formula}»: {perche}")
+            for parole, perche in COPPIE_VIETATE:
+                if all(x in basso for x in parole):
+                    errore(f"{f}:{numero} mette insieme {' + '.join(parole)}: {perche}")
     print("  formule: nessuna delle versioni smentite dai documenti è tornata")
 
 
@@ -590,6 +612,160 @@ def controlla_pagine_del_sistema():
     print("  sistema AI: profilo, llms.txt, versione inglese e home fra le pagine segnalate")
 
 
+def controlla_mappa_agganci():
+    """La mappa «Dove può nascere un incontro» deve stare in TUTTE E TRE le fonti.
+
+    È il pezzo che fa il lavoro del sistema: dice quale aggancio usare con chi.
+    Fino al 22/08/2026 esisteva solo in `llms.txt` — il file che nessuna pagina
+    linka e dove il pulsante della home non manda nessuno — mentre `/profilo/`,
+    cioè la pagina che l'assistente apre davvero, non ce l'aveva.
+
+    Non è una mancanza teorica: chiesto a un modello, con /profilo/ davanti e
+    senza mappa, «sono un fonico di un service, cosa c'entra Simone con me?»,
+    la risposta è stata che il service potrebbe FORNIRE Simone — pescata dalla
+    riga «con chi lavora». L'aggancio giusto è la misura. I dati c'erano tutti;
+    mancava quale usare con chi.
+
+    Si contano anche le voci: se una fonte ne perde per strada, le tre versioni
+    ricominciano a divergere, che è esattamente come sono nati i guai passati.
+    """
+    # Si aggancia il TITOLO della sezione, non il nome: «Dove può nascere un
+    # incontro» compare anche dentro le istruzioni, che a quella sezione
+    # rimandano. Cercando il nome nudo, il conteggio partiva da lì e trovava
+    # zero voci in llms.txt e quattro nel profilo — provato.
+    FONTI = [
+        ("llms.txt", "Dove può nascere un incontro",
+         r"^## Dove può nascere un incontro\s*$", r"^- \*\*(.+?)\*\*"),
+        ("profilo/index.html", "Dove può nascere un incontro",
+         r"<h2>Dove può nascere un incontro</h2>", r"<li><strong>(.+?)</strong>"),
+        ("en/profile/index.html", "Where a connection can start",
+         r"<h2>Where a connection can start</h2>", r"<li><strong>(.+?)</strong>"),
+    ]
+    conteggi = {}
+    for percorso, titolo, ancora, riga_voce in FONTI:
+        testo = leggi(percorso)
+        inizio = re.search(ancora, testo, re.M)
+        if not inizio:
+            errore(f"{percorso} non ha più la sezione «{titolo}»: è il pezzo che dice "
+                   f"quale aggancio usare con chi, e senza di esso l'assistente lo inventa")
+            continue
+        dopo = testo[inizio.end():]
+        fine = re.search(r"\n## |<h2", dopo)
+        blocco = dopo[:fine.start()] if fine else dopo
+        conteggi[percorso] = len(re.findall(riga_voce, blocco, re.M))
+
+    if len(conteggi) == 3 and len(set(conteggi.values())) > 1:
+        errore("la mappa degli agganci ha un numero diverso di voci nelle tre fonti "
+               + ", ".join(f"{k}: {v}" for k, v in conteggi.items())
+               + " — una delle tre ha perso per strada un interlocutore")
+    if conteggi:
+        print(f"  mappa degli agganci: presente in {len(conteggi)} fonti su 3, "
+              f"{min(conteggi.values())} interlocutori")
+
+
+def controlla_fatti_allineati():
+    """I cinque fatti che l'assistente ripete più spesso devono coincidere
+    fra profilo italiano, profilo inglese e llms.txt.
+
+    È già successo: «inglese C1 di qua e B2 di là», tre `jobTitle` diversi per
+    lo stesso `@id`, l'ordine dei dischi cambiato. Il curriculum ha già la sua
+    guardia (`controlla_cv_allineato`); queste tre fonti non ne avevano
+    nessuna, e sono quelle che un'intelligenza artificiale legge per prime.
+
+    Si confrontano i numeri, non le frasi: le tre pagine dicono le stesse cose
+    con parole diverse, e va bene così — ma l'anno in cui è nato, i canali
+    della sala e il livello d'inglese o sono uguali dappertutto o uno mente.
+    """
+    FATTI = [
+        ("anno di nascita", [r"\b1991\b"], [r"\b1991\b"]),
+        ("canali della sala", [r"7\.1\.4"], [r"7\.1\.4"]),
+        ("sala Atmos dal", [r"[Dd]al (\d{4})[^.]{0,60}(?:sala|Atmos)"],
+                           [r"[Ss]ince (\d{4})[^.]{0,80}Atmos"]),
+        ("Civica dal", [r"[Dd]al (\d{4})[^.]{0,80}Civica"],
+                       [r"[Ss]ince (\d{4})[^.]{0,80}Civica"]),
+        ("livello d'inglese", [r"inglese\s+([ABC][12])"], [r"English\s*\(?([ABC][12])"]),
+    ]
+    ITALIANE = ["profilo/index.html", "llms.txt"]
+    INGLESE = "en/profile/index.html"
+
+    def valore(testo, schemi):
+        for s in schemi:
+            m = re.search(s, testo)
+            if m:
+                # se il pattern cattura un gruppo (l'anno, il livello) vale quello,
+                # altrimenti vale la stringa intera trovata
+                return m.group(1) if m.groups() else m.group(0)
+        return None
+
+    # I commenti HTML raccontano le correzioni passate e contengono di proposito
+    # le versioni sbagliate («inglese C1 di qua»): confrontarli farebbe fallire
+    # il controllo su una frase che nessuno legge come un fatto.
+    def senza_commenti(percorso):
+        return re.sub(r"<!--.*?-->", "", leggi(percorso), flags=re.S)
+
+    contati = 0
+    for nome, schemi_it, schemi_en in FATTI:
+        trovati = {}
+        for f in ITALIANE:
+            v = valore(senza_commenti(f), schemi_it)
+            if v:
+                trovati[f] = v
+        v = valore(senza_commenti(INGLESE), schemi_en)
+        if v:
+            trovati[INGLESE] = v
+        if len(trovati) < 2:
+            continue          # il fatto sta in una fonte sola: niente da confrontare
+        if len(set(trovati.values())) > 1:
+            errore(f"«{nome}» non coincide fra le fonti che l'assistente legge: "
+                   + ", ".join(f"{k} dice {v}" for k, v in trovati.items()))
+        else:
+            contati += 1
+    print(f"  fatti del profilo: {contati} dati chiave uguali in italiano, inglese e llms.txt")
+
+
+def controlla_person_definita_una_volta():
+    """Le proprietà di MERITO della persona devono stare in una pagina sola.
+
+    `award`, `hasCredential` e `alumniOf` dicono cosa ha vinto e cosa ha
+    studiato: sono le prime a essere corrette quando un documento smentisce una
+    formula, e le ultime a essere ricontrollate dappertutto. Tutte le pagine
+    del sito dichiarano lo stesso `@id` per la persona, e i motori fondono i
+    nodi con lo stesso `@id`: due elenchi di premi non si sostituiscono, si
+    SOMMANO. Chi legge il risultato vede la versione corretta e quella vecchia
+    una accanto all'altra.
+
+    Successo davvero: il riordino del 15/08/2026 unificò /profilo/ e la pagina
+    inglese e saltò la home, che ha continuato a pubblicare «Finalista al
+    Premio Nazionale delle Arti» — la formula smentita dall'attestato — dentro
+    il JSON-LD della pagina più visitata, per una settimana, senza che nessun
+    controllo la guardasse.
+
+    La definizione piena vive in /profilo/. Le altre pagine possono nominare la
+    persona quanto vogliono, ma non ridichiarare cosa ha vinto.
+    """
+    MERITO = ("award", "hasCredential", "alumniOf")
+    CASA = "profilo/index.html"
+    for percorso in PAGINE_JSONLD:
+        if percorso == CASA:
+            continue
+        for blocco in re.findall(r'<script type="application/ld\+json">(.*?)</script>',
+                                 leggi(percorso), re.S):
+            try:
+                dato = json.loads(blocco)
+            except ValueError:
+                continue          # la validità del JSON la controlla già controlla_json_ld
+            nodi = dato.get("@graph", [dato]) if isinstance(dato, dict) else dato
+            for nodo in nodi:
+                if not isinstance(nodo, dict) or nodo.get("@type") != "Person":
+                    continue
+                doppie = [k for k in MERITO if k in nodo]
+                if doppie:
+                    errore(f"{percorso}: il nodo Person ridichiara {', '.join(doppie)} — "
+                           f"i motori li sommano a quelli di {CASA} invece di sostituirli, "
+                           f"e la versione vecchia resta pubblicata accanto a quella corretta")
+    print(f"  dati strutturati: premi, titoli e scuole dichiarati solo in {CASA}")
+
+
 def main():
     print("Verifica del sito…")
     home = leggi("index.html")
@@ -611,6 +787,9 @@ def main():
     controlla_cv_allineato()
     controlla_pagine_del_sistema()
     controlla_formule_smentite()
+    controlla_mappa_agganci()
+    controlla_fatti_allineati()
+    controlla_person_definita_una_volta()
 
     for a in AVVISI:
         print("  AVVISO: " + a)
