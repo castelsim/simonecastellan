@@ -42,7 +42,7 @@ FRASI_DA_NON_METTERE_NEL_PROMPT = ("ignora l'errore", "non dire mai")
 TOOL = ["tara-impianto", "audio-mp3", "bpm", "tonalita", "qrcode", "posso-pubblicarlo", "fotogramma",
         "comprimi-immagini", "comprimi-pdf", "comprimi-video",
         "rumore-rosa", "ritardo-diffusori", "link-utm", "conta-caratteri", "link-whatsapp",
-        "da-comunicato-a-post", "semplifica-testo", "alt-text"]
+        "da-comunicato-a-post", "semplifica-testo", "alt-text", "trasporta-accordi"]
 
 # Strumenti tolti dalla vetrina ma ancora vivi: la pagina funziona per chi ha il
 # link, non compare in /tools/ né nella sitemap né nelle ricerche.  Restano qui
