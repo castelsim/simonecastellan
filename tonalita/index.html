@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <title>Tonalità — capire in che tonalità è un brano</title>
-  <meta name="description" content="Fai ascoltare la musica al telefono e ti dico in che tonalità è. Oppure provi le note sulla tastiera. Niente sale in rete: tutto resta qui." />
+  <title>Tonalità — trovare a orecchio la tonalità di un brano</title>
+  <meta name="description" content="Premi i tasti sopra il brano che sta suonando: quelli che non stonano sono della sua tonalità. La pagina te la dice. Niente esce dal tuo dispositivo." />
   <meta name="theme-color" content="#ffffff" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Tonalità" />
-  <meta property="og:description" content="Appoggia il telefono vicino alla cassa: ascolta la musica e ti dice in che tonalità è. Oppure la cerchi a orecchio sulla tastiera." />
+  <meta property="og:description" content="Premi i tasti sopra il brano: quelli che non stonano sono della sua tonalità, e la pagina te la dice." />
   <meta property="og:image" content="og-image.svg" />
   <meta property="og:locale" content="it_IT" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -25,28 +25,16 @@
   <main class="card">
     <header>
       <p class="occhiello">Cover · Trasporto · Studio</p>
-      <h1 class="titolone">Tonalità.<br><span class="eco">Falla sentire, te la dico.</span></h1>
-      <!-- Due aperture, perché su telefono lo strumento fa una cosa sola.
-           Il microfono e il file sono spariti da lì (scelta del 15/08/2026:
-           su iPhone non funzionavano), e lasciare la frase sul microfono
-           sarebbe una promessa che la pagina non può più mantenere. -->
-      <p class="apertura solo-grande">Fai suonare la musica e <b>appoggia il telefono vicino alla
-        cassa</b>: ascolto io e ti dico la tonalità. Oppure la cerchi a orecchio, premendo i tasti.
-        Niente esce dal tuo dispositivo.</p>
-      <p class="apertura solo-telefono">Fai suonare la musica e <b>cerca la tonalità a orecchio</b>:
-        premi i tasti sopra il brano, quelli che non stonano sono della sua tonalità.
-        Niente esce dal tuo dispositivo.</p>
+      <h1 class="titolone">Tonalità.<br><span class="eco">Cercala a orecchio.</span></h1>
+      <!-- Un'apertura sola, dal 23/08/2026. Prima ce n'erano due: quella del
+           computer prometteva «appoggia il telefono vicino alla cassa, ascolto
+           io», cioè il microfono — che oggi non c'è più. Il modo di lavorare è
+           uno per tutti: si preme sopra la musica e si sente cosa stona. Quello
+           che cambia fra computer e telefono è solo il lettore qui sotto. -->
+      <p class="apertura">Fai suonare la musica e <b>cerca la tonalità a orecchio</b>: premi i
+        tasti sopra il brano, quelli che non stonano sono della sua tonalità — e più ne premi,
+        più la pagina la riconosce. Niente esce dal tuo dispositivo.</p>
     </header>
-
-    <!-- Ascolta dal microfono: la strada principale.
-         Su un telefono il brano sta in Apple Music o in Spotify e non è un file
-         che si possa scegliere — «carica il brano» lì è una promessa che non si
-         può mantenere. Ma la musica suona da qualche parte, e il microfono la
-         sente: si appoggia il telefono e si aspetta. -->
-    <div class="solo-grande" id="daMicrofono">
-      <button type="button" id="ascoltaBtn" class="btn btn-secondary ascolta-btn">Ascolta la musica</button>
-      <p id="ascoltaStato" class="ascolta-stato" hidden></p>
-    </div>
 
     <!-- Il file resta per chi ce l'ha davvero, ma non è più la prima cosa che
          si vede: su telefono non serve quasi mai. -->
@@ -148,7 +136,7 @@
 
   <script src="/comune/audio.js"></script>
   <script src="/comune/dsp.js"></script>
-  <script src="ascolta.js"></script>
+  <script src="stima.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

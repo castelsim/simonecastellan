@@ -42,8 +42,8 @@ function keyName(c) {
 }
 
 // Profili di Krumhansl-Schmuckler (tonica in posizione 0).
-var KS_MAJOR = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88];
-var KS_MINOR = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17];
+/* I profili di Krumhansl, la correlazione e la stima stanno in `stima.js`:
+   lì si possono provare con `node`, qui dentro no. */
 
 // --- Stato ---
 var octave = 4;   // si parte dall'ottava del Do centrale
@@ -200,43 +200,12 @@ function stopAll() {
   updateKeyGuess();
 }
 
-function pearson(x, p) {
-  var n = 12, sx = 0, sp = 0, sxp = 0, sxx = 0, spp = 0;
-  for (var i = 0; i < n; i++) {
-    sx += x[i]; sp += p[i];
-    sxp += x[i] * p[i]; sxx += x[i] * x[i]; spp += p[i] * p[i];
-  }
-  var den = Math.sqrt((n * sxx - sx * sx) * (n * spp - sp * sp));
-  return den === 0 ? 0 : (n * sxp - sx * sp) / den;
-}
-
-function estimateKey() {
-  var cands = [];
-  for (var t = 0; t < 12; t++) {
-    ['major', 'minor'].forEach(function (m) {
-      var base = (m === 'major') ? KS_MAJOR : KS_MINOR;
-      var prof = [];
-      for (var pc = 0; pc < 12; pc++) prof[pc] = base[(pc - t + 12) % 12];
-      cands.push({ t: t, mode: m, r: pearson(counts, prof) });
-    });
-  }
-  // Ordinate per somiglianza (r): conta chi vince e di quanto, e il «di quanto»
-  // si legge sul distacco fra le prime due, non su una percentuale.
-  cands.sort(function (a, b) { return b.r - a.r; });
-  return cands;
-}
+function estimateKey() { return STIMA.stima(counts); }
 
 // Pallini sulle note della tonalità stimata (scala maggiore / minore naturale):
 // si vede a colpo d'occhio quali tasti «stanno dentro» e si verifica a orecchio.
-var MAJOR_SCALE = [0, 2, 4, 5, 7, 9, 11];
-var MINOR_SCALE = [0, 2, 3, 5, 7, 8, 10];
 function markScale(cand) {
-  var inkey = null;
-  if (cand) {
-    inkey = {};
-    var iv = (cand.mode === 'major') ? MAJOR_SCALE : MINOR_SCALE;
-    iv.forEach(function (s) { inkey[(cand.t + s) % 12] = true; });
-  }
+  var inkey = STIMA.noteDellaScala(cand);
   for (var i = 0; i < 12; i++) {
     if (inkey && inkey[i]) addCls(i, 'inkey'); else rmCls(i, 'inkey');
   }
@@ -416,81 +385,6 @@ volEl.addEventListener('input', function () { au.volume = volEl.value / 100; });
 // --- Avvio ---
 buildKeyboard();
 setOctave(octave);
-
-/* ── Ascoltare la musica invece di caricarla ──────────────────────────────
-   Il cervello non cambia: `estimateKey()` confronta il vettore `counts` con i
-   profili di Krumhansl. Cambia solo chi lo riempie — prima i tasti che premi,
-   ora anche le note che il microfono sente. */
-(function ascoltoDalVivo() {
-  var btn = document.getElementById('ascoltaBtn');
-  var stato = document.getElementById('ascoltaStato');
-  if (!btn || typeof ASCOLTA === 'undefined') return;
-
-  if (!ASCOLTA.disponibile()) {
-    btn.hidden = true;
-    return;
-  }
-
-  function scrivi(t) { stato.hidden = !t; stato.textContent = t || ''; }
-
-  /* Una barretta di livello: senza, «non funziona» e «non sento musica» sono
-     la stessa frase, e chi guarda non sa se avvicinare il telefono o smettere. */
-  function barretta(v) {
-    var n = Math.max(0, Math.min(20, Math.round(v * 60)));
-    return '▁'.repeat(20 - n) + '█'.repeat(n);
-  }
-
-  function aggiorna() {
-    var liv = ASCOLTA.livello();
-
-    /* Tre stati diversi, e prima erano tutti la stessa riga.
-       1) dal microfono non arriva NIENTE: è un guasto o un permesso;
-       2) arriva del suono ma non è musica riconoscibile;
-       3) tutto bene. */
-    if (ASCOLTA.silenzio() && ASCOLTA.blocchi() > 8) {
-      scrivi('Dal microfono non arriva niente. Su iPhone controlla il permesso in ' +
-             'Impostazioni → Safari → Microfono, e che nessun\'altra app lo stia usando.');
-      return;
-    }
-
-    var p = ASCOLTA.profilo();
-    if (!p) {
-      /* Non è un errore: è lo strumento che ammette di non sentire abbastanza.
-         Meglio dirlo che mostrare una tonalità inventata — su rumore puro
-         succedeva, e aveva la stessa faccia sicura di una risposta vera. */
-      scrivi(barretta(liv) + '  sento qualcosa, ma non abbastanza musica.\n' +
-             'Avvicina il telefono alla cassa, o alza il volume.');
-      return;
-    }
-    counts = p;
-    updateKeyGuess();
-    scrivi(barretta(liv) + '  ascolto… ' + ASCOLTA.blocchi() +
-           ' letture. Più aspetti, più è sicura.');
-  }
-
-  btn.addEventListener('click', function () {
-    if (ASCOLTA.inAscolto()) {
-      ASCOLTA.ferma();
-      btn.textContent = 'Ascolta la musica';
-      scrivi('');
-      return;
-    }
-    ASCOLTA.azzera();
-    resetGuess();
-    var c = audio();
-    if (!c) return;                // senza contesto non c'è niente da ascoltare
-    scrivi('Chiedo il microfono…');
-    ASCOLTA.avvia(c, aggiorna).then(function () {
-      btn.textContent = 'Basta ascoltare';
-      scrivi('Sto ascoltando…');
-    }).catch(function (e) {
-      var negato = e && e.name === 'NotAllowedError';
-      scrivi(negato
-        ? 'Senza microfono non posso ascoltare. Il permesso si dà dall\'icona nella barra dell\'indirizzo.'
-        : 'Non sono riuscito ad aprire il microfono. Controlla che non lo stia usando un\'altra applicazione.');
-    });
-  });
-})();
 
 /* L'avviso sulla levetta, e QUANDO si mostra.
    ────────────────────────────────────────────────────────────────────────
