@@ -220,9 +220,22 @@
         },
         label: 'Sembra un numero di telefono',
         action: 'Formatta come tel:',
+        /* Il «+» NON si mette di nostra iniziativa (corretto il 23/08/2026).
+           Prima lo prendeva qualunque numero, e il risultato era un numero di
+           un altro paese scritto con la faccia di quello giusto:
+             340 1234567  →  tel:+3401234567   chiama la SPAGNA (+34)
+             351 123 4567 →  tel:+3511234567   chiama il PORTOGALLO (+351)
+             0424 522111  →  tel:+0424522111   «+0» non esiste, molti
+                                                telefoni non lo compongono
+           Il prefisso internazionale è un'informazione che solo chi scrive
+           possiede: indovinarlo vuol dire far stampare su una locandina un
+           numero che squilla altrove. Un numero nazionale senza prefisso
+           funziona benissimo così com'è, dallo stesso paese.
+           L'unica trasformazione lecita è «00» → «+», che non è un indovinello
+           ma la stessa cosa scritta in due modi. */
         format: function (t) {
           var d = t.replace(/[\s\-\(\)\.]/g, '');
-          if (d.charAt(0) !== '+') d = '+' + d;
+          if (d.indexOf('00') === 0) d = '+' + d.slice(2);
           return 'tel:' + d;
         }
       },
@@ -321,7 +334,13 @@
     function wifiEsc(v) { return v.replace(/([\\;,:"])/g, '\\$1'); }
     function wifiRender() {
       var s = wifiSsid.value.trim();
-      if (!s) return;
+      /* Senza nome di rete non c'è QR da fare — e soprattutto non deve restare
+         quello di prima. Qui c'era un `return` nudo: cancellando il nome della
+         rete il quadrato precedente rimaneva a video, con i pulsanti Scarica
+         ancora accesi. Chi lo stampava stampava la rete di prima, che è
+         esattamente il caso che `svuota()` esiste per impedire — il commento
+         là sopra dice «va chiamata su OGNI strada», e questa era scoperta. */
+      if (!s) { $("textInput").value = ''; svuota(); setNote(''); return; }
       $("textInput").value = (wifiSec === 'WPA')
         ? 'WIFI:T:WPA;S:' + wifiEsc(s) + ';P:' + wifiEsc(wifiPass.value) + ';;'
         : 'WIFI:T:nopass;S:' + wifiEsc(s) + ';;';

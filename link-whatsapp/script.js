@@ -75,9 +75,18 @@ function paeseDichiarato(grezzo) {
   return trovato;
 }
 
+/* Il primo avviso del giro è quello che si vede: vince la CAUSA, non
+   l'ultimo controllo eseguito. Prima i tre controlli qui sotto chiamavano
+   `avviso()` uno dopo l'altro e l'ultimo cancellava i precedenti — con un
+   prefisso fuori elenco (per esempio +998) si leggeva «I numeri fissi non
+   hanno WhatsApp», che è falso e manda a cercare il problema dalla parte
+   sbagliata, mentre il messaggio giusto era già stato scritto e buttato via. */
+var dettoInQuestoGiro = false;
+
 function costruisci() {
   var grezzo = numEl.value;
   numErr.classList.add('hidden');
+  dettoInQuestoGiro = false;
 
   if (!grezzo.trim()) return null;
 
@@ -116,8 +125,11 @@ function costruisci() {
 
 // L'avviso non ferma niente: mostra e restituisce quello che gli si passa.
 function avviso(t, ritorno) {
-  numErr.textContent = t;
-  numErr.classList.remove('hidden');
+  if (!dettoInQuestoGiro) {
+    dettoInQuestoGiro = true;
+    numErr.textContent = t;
+    numErr.classList.remove('hidden');
+  }
   return ritorno;
 }
 

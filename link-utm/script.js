@@ -113,7 +113,7 @@ function costruisci() {
   if (cont) u.searchParams.set('utm_content', cont);
   if (term) u.searchParams.set('utm_term', term);
 
-  return { url: u.toString(), vecchi: vecchi, mancano: !src || !med };
+  return { url: u.toString(), vecchi: vecchi, manca: (!src && 'sorgente') || (!med && 'mezzo') || '' };
 }
 
 function mostraErrore(t) {
@@ -152,6 +152,22 @@ function aggiorna() {
   }
 
   copiaBtn.disabled = qrBtn.disabled = !!r.nudo;
+
+  /* Quello che manca si dice, e si dice cosa comporta. Il link senza sorgente
+     o senza mezzo funziona benissimo — porta dove deve — ma in Analytics
+     quei clic finiscono in un mucchio chiamato «(none)», cioè esattamente il
+     posto da cui si voleva tirarli fuori: si scopre a fine campagna, quando
+     non si può più rifare il volantino. Il codice se ne accorgeva già (era
+     `r.mancano`) e non lo diceva a nessuno: la nota in pagina restava vuota. */
+  if (r.manca === 'mezzo') {
+    nota('Manca il mezzo. Il link funziona, ma in Analytics questi clic finiranno '
+       + 'sotto «(none)» invece che sotto il canale giusto.');
+  } else if (r.manca === 'sorgente') {
+    nota('Manca la sorgente: è il campo da cui Analytics capisce da dove arriva '
+       + 'il clic. Senza, il resto conta poco.');
+  } else {
+    nota('');
+  }
 
   if (r.vecchi && r.vecchi.length) {
     urlErr.textContent = 'Questo indirizzo aveva già dei parametri UTM: li ho rifatti da capo.';

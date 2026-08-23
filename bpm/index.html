@@ -34,8 +34,12 @@
     <section class="bpm" aria-label="Battiti per minuto">
       <button type="button" id="minusBtn" class="step" aria-label="Diminuisci BPM">−</button>
       <div class="bpm-field">
-        <input type="number" id="bpm" class="bpm-input" value="120" min="20" max="300" step="1"
-               inputmode="numeric" aria-label="BPM" />
+        <!-- step="any": i mezzi BPM esistono (i programmi di registrazione li
+             danno con i decimali) e con step="1" il campo li considera fuori
+             passo. inputmode="decimal" perché sul telefono deve comparire il
+             tasto della virgola. -->
+        <input type="number" id="bpm" class="bpm-input" value="120" min="20" max="300" step="any"
+               inputmode="decimal" aria-label="BPM" />
         <span class="bpm-unit">BPM</span>
       </div>
       <button type="button" id="plusBtn" class="step" aria-label="Aumenta BPM">+</button>
