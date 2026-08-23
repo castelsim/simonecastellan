@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Varianti della tastiera di Tonalità</title>
+<!--
+  Pagina di confronto, non una pagina del sito: serve a scegliere come
+  sistemare i cinque tasti neri di /tonalita/, che misurano 28×50 px contro i
+  44 che vuole un dito. È l'ultimo difetto rimasto in tutto il sito, e da
+  quando il microfono è uscito dallo strumento quella tastiera è l'unica cosa
+  che resta in quella pagina su un telefono.
+
+  Il vincolo vero: sette tasti bianchi in 358 px fanno 51 px l'uno, e i cinque
+  neri stanno IN MEZZO. Non si può allargare l'area invisibile dei neri sopra
+  i bianchi: ruberebbe i tocchi al tasto sotto, e sul sito vale la regola che
+  lo stesso gesto sulla stessa area deve fare la stessa cosa.
+
+  Ogni variante qui sotto è vera e si tocca: le misure accanto sono quelle
+  misurate dal browser, non quelle dichiarate nel CSS.
+-->
+<style>
+  :root{ --ink:#1a1a1a; --line:#dadce0; --pill:#f1f3f4; --teal:#0a7d72; --mut:#5f6368; }
+  *{ box-sizing:border-box }
+  body{ margin:0; padding:26px 18px 60px; background:#fff; color:var(--ink);
+        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+        line-height:1.55 }
+  h1{ font-size:22px; font-weight:600; margin:0 0 6px }
+  .intro{ color:var(--mut); font-size:14px; max-width:760px; margin:0 0 26px }
+  .griglia{ display:flex; flex-wrap:wrap; gap:26px }
+  .var{ width:390px; border:1px solid var(--line); border-radius:14px; padding:16px 16px 18px }
+  .var h2{ font-size:15px; margin:0 0 2px; font-weight:600 }
+  .var .che{ font-size:12.5px; color:var(--mut); margin:0 0 14px; min-height:34px }
+  .misure{ margin-top:12px; font-size:11.5px; color:var(--mut);
+           font-family:ui-monospace,Menlo,monospace; white-space:pre-line }
+  .ok{ color:var(--teal); font-weight:600 }
+  .ko{ color:#b3261e; font-weight:600 }
+  button{ appearance:none; font-family:inherit; cursor:pointer; border:none }
+  .premuto{ background:var(--teal) !important; color:#fff !important }
+
+  /* ── OGGI ─────────────────────────────────────────────────────────────── */
+  .kb0{ position:relative; width:100%; height:84px; display:flex; gap:2px;
+        touch-action:none; user-select:none }
+  .kb0 .w{ flex:1; background:#fff; border:1px solid var(--line); border-radius:0 0 6px 6px;
+           display:flex; align-items:flex-end; justify-content:center; padding-bottom:5px;
+           font-size:9px; font-weight:600; color:var(--mut); z-index:1 }
+  .kb0 .b{ position:absolute; top:0; height:60%; width:8%; background:var(--ink);
+           border-radius:0 0 4px 4px; color:#cfcfcf; font-size:7px; font-weight:600;
+           display:flex; align-items:flex-end; justify-content:center; padding-bottom:4px; z-index:2 }
+
+  /* ── A · pianoforte proporzionato ─────────────────────────────────────── */
+  .kbA{ position:relative; width:100%; height:158px; display:flex; gap:2px;
+        touch-action:none; user-select:none }
+  .kbA .w{ flex:1; background:#fff; border:1px solid var(--line); border-radius:0 0 7px 7px;
+           display:flex; align-items:flex-end; justify-content:center; padding-bottom:8px;
+           font-size:11px; font-weight:600; color:var(--mut); z-index:1 }
+  .kbA .b{ position:absolute; top:0; height:58%; width:44px; background:var(--ink);
+           border-radius:0 0 5px 5px; color:#d8d8d8; font-size:9px; font-weight:600;
+           display:flex; align-items:flex-end; justify-content:center; padding-bottom:7px; z-index:2 }
+
+  /* ── B · due file ─────────────────────────────────────────────────────── */
+  .kbB{ user-select:none; touch-action:none }
+  .kbB .fila{ display:flex; gap:4px }
+  .kbB .fila + .fila{ margin-top:5px }
+  .kbB .b{ flex:1; height:48px; background:var(--ink); color:#e8e8e8; border-radius:7px;
+           font-size:11px; font-weight:600 }
+  .kbB .w{ flex:1; height:48px; background:#fff; border:1px solid var(--line);
+           border-radius:7px; color:var(--mut); font-size:11px; font-weight:600 }
+  .kbB .vuoto{ flex:1; height:48px }
+
+  /* ── C · dodici pulsanti ──────────────────────────────────────────────── */
+  .kbC{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; user-select:none }
+  .kbC button{ height:52px; border-radius:9px; font-size:13px; font-weight:600 }
+  .kbC .w{ background:#fff; border:1px solid var(--line); color:var(--ink) }
+  .kbC .b{ background:var(--ink); color:#e8e8e8 }
+
+  /* ── E · tastiera staccata ────────────────────────────────────────────── */
+  .kbE{ user-select:none; touch-action:none }
+  .kbE .sopra{ position:relative; height:52px; margin-bottom:4px }
+  .kbE .b{ position:absolute; top:0; width:44px; height:52px; background:var(--ink);
+           color:#e8e8e8; border-radius:7px; font-size:10px; font-weight:600 }
+  .kbE .sotto{ display:flex; gap:3px }
+  .kbE .w{ flex:1; height:52px; background:#fff; border:1px solid var(--line);
+           border-radius:7px; color:var(--mut); font-size:11px; font-weight:600 }
+
+  /* ── D · pianoforte che scorre ────────────────────────────────────────── */
+  .kbD-fuori{ overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:6px }
+  .kbD{ position:relative; width:520px; height:132px; display:flex; gap:2px;
+        touch-action:pan-x; user-select:none }
+  .kbD .w{ flex:1; background:#fff; border:1px solid var(--line); border-radius:0 0 7px 7px;
+           display:flex; align-items:flex-end; justify-content:center; padding-bottom:7px;
+           font-size:11px; font-weight:600; color:var(--mut); z-index:1 }
+  .kbD .b{ position:absolute; top:0; height:58%; width:46px; background:var(--ink);
+           border-radius:0 0 5px 5px; color:#d8d8d8; font-size:9px; font-weight:600;
+           display:flex; align-items:flex-end; justify-content:center; padding-bottom:7px; z-index:2 }
+  .scorri{ font-size:11px; color:var(--mut); margin-top:2px }
+</style>
+</head>
+<body>
+
+<h1>I cinque tasti neri di Tonalità</h1>
+<p class="intro">Oggi misurano <b>28×50 px</b>: un dito ne vuole 44 in tutte e due le direzioni.
+  Il vincolo è che sette tasti bianchi in 358 px fanno 51 px l'uno, e i neri stanno in mezzo.
+  Allargare solo l'area invisibile non si può: ruberebbe il tocco al tasto bianco sotto.
+  Ogni riquadro qui è largo quanto un telefono e i tasti si premono davvero.</p>
+
+<div class="griglia">
+
+  <div class="var">
+    <h2>Oggi</h2>
+    <p class="che">Com'è adesso. I neri sono l'8% della larghezza e il 60% dell'altezza.</p>
+    <div class="kb0" id="kb0"></div>
+    <div class="misure" id="m0"></div>
+  </div>
+
+  <div class="var">
+    <h2>A · Pianoforte proporzionato</h2>
+    <p class="che">Resta un pianoforte, ma cresce: i neri passano a 44 px veri e la tastiera
+      si alza. Sotto i neri il tasto bianco resta libero per tutta la sua larghezza.</p>
+    <div class="kbA" id="kbA"></div>
+    <div class="misure" id="mA"></div>
+  </div>
+
+  <div class="var">
+    <h2>B · Due file</h2>
+    <p class="che">I neri diventano una riga a sé, sopra i bianchi, nella stessa posizione
+      relativa. Si perde il disegno del pianoforte, si guadagna un bersaglio largo il doppio.</p>
+    <div class="kbB" id="kbB"></div>
+    <div class="misure" id="mB"></div>
+  </div>
+
+  <div class="var">
+    <h2>C · Dodici pulsanti</h2>
+    <p class="che">Niente pianoforte: dodici note in griglia, tutte della stessa misura.
+      I neri restano scuri per riconoscerli. Il più semplice da toccare, il più lontano
+      da uno strumento.</p>
+    <div class="kbC" id="kbC"></div>
+    <div class="misure" id="mC"></div>
+  </div>
+
+  <div class="var">
+    <h2>E · Tastiera staccata</h2>
+    <p class="che">I neri salgono di una riga ma restano <b>nella loro posizione</b>: sopra il
+      confine fra i due bianchi a cui appartengono. Si legge ancora come un pianoforte e
+      nessun tasto ne copre un altro.</p>
+    <div class="kbE" id="kbE">
+      <div class="sopra" id="kbE-sopra"></div>
+      <div class="sotto" id="kbE-sotto"></div>
+    </div>
+    <div class="misure" id="mE"></div>
+  </div>
+
+  <div class="var">
+    <h2>D · Pianoforte che scorre</h2>
+    <p class="che">I tasti diventano grandi come su un pianoforte vero e la tastiera esce
+      dallo schermo: si scorre di lato con un dito.</p>
+    <div class="kbD-fuori"><div class="kbD" id="kbD"></div></div>
+    <p class="scorri">← si scorre →</p>
+    <div class="misure" id="mD"></div>
+  </div>
+
+</div>
+
+<script>
+var BIANCHI = ['Do','Re','Mi','Fa','Sol','La','Si'];
+var NERI    = ['Do#','Re#','Fa#','Sol#','La#'];
+// dopo quale tasto bianco sta ciascun nero (0-based)
+var DOPO    = [0, 1, 3, 4, 5];
+
+function premibile(b) {
+  b.addEventListener('pointerdown', function () { b.classList.add('premuto'); });
+  ['pointerup','pointerleave','pointercancel'].forEach(function (e) {
+    b.addEventListener(e, function () { b.classList.remove('premuto'); });
+  });
+  return b;
+}
+
+function tasto(classe, testo) {
+  var b = document.createElement('button');
+  b.type = 'button'; b.className = classe; b.textContent = testo;
+  return premibile(b);
+}
+
+/* Pianoforte: i bianchi in fila, i neri assoluti sopra il confine fra due
+   bianchi. La posizione si calcola sulla larghezza vera, non a percentuali
+   fisse: con tasti di misura diversa le percentuali cadono nel posto sbagliato. */
+function pianoforte(el, largoNero) {
+  BIANCHI.forEach(function (n) { el.appendChild(tasto('w', n)); });
+  var largo = el.getBoundingClientRect().width;
+  var passo = largo / 7;
+  NERI.forEach(function (n, i) {
+    var b = tasto('b', n);
+    b.style.left = Math.round(passo * (DOPO[i] + 1) - largoNero / 2) + 'px';
+    if (largoNero) b.style.width = largoNero + 'px';
+    el.appendChild(b);
+  });
+}
+
+pianoforte(document.getElementById('kb0'), 0);          // 0 = lascia l'8% del CSS
+pianoforte(document.getElementById('kbA'), 44);
+pianoforte(document.getElementById('kbD'), 46);
+
+// E — staccata: i neri sopra, ma nella posizione del pianoforte
+(function () {
+  var sopra = document.getElementById('kbE-sopra');
+  var sotto = document.getElementById('kbE-sotto');
+  BIANCHI.forEach(function (n) { sotto.appendChild(tasto('w', n)); });
+  var largo = document.getElementById('kbE').getBoundingClientRect().width;
+  var passo = largo / 7;
+  NERI.forEach(function (n, i) {
+    var b = tasto('b', n);
+    // centrato sul confine fra i due bianchi, come su un pianoforte vero,
+    // ma su una riga sua: nessuna sovrapposizione, nessun tocco rubato
+    b.style.left = Math.max(0, Math.min(largo - 44,
+        Math.round(passo * (DOPO[i] + 1) - 22))) + 'px';
+    sopra.appendChild(b);
+  });
+})();
+
+// B — due file
+(function () {
+  var el = document.getElementById('kbB');
+  var sopra = document.createElement('div'); sopra.className = 'fila';
+  NERI.forEach(function (n) { sopra.appendChild(tasto('b', n)); });
+  // due spazi vuoti, dove sul pianoforte i neri non ci sono
+  sopra.insertBefore(document.createElement('div'), sopra.children[2])
+       .className = 'vuoto';
+  var sotto = document.createElement('div'); sotto.className = 'fila';
+  BIANCHI.forEach(function (n) { sotto.appendChild(tasto('w', n)); });
+  el.appendChild(sopra); el.appendChild(sotto);
+})();
+
+// C — dodici pulsanti in ordine cromatico
+(function () {
+  var el = document.getElementById('kbC');
+  var ordine = ['Do','Do#','Re','Re#','Mi','Fa','Fa#','Sol','Sol#','La','La#','Si'];
+  ordine.forEach(function (n) {
+    el.appendChild(tasto(n.indexOf('#') > 0 ? 'b' : 'w', n));
+  });
+})();
+
+/* Le misure: quelle vere del browser. Un CSS che dichiara 44 px non prova
+   niente — conta quanto misura il rettangolo che il dito incontra. */
+function misura(idTastiera, idTesto) {
+  var el = document.getElementById(idTastiera);
+  var righe = [];
+  [['bianchi','.w'], ['neri','.b']].forEach(function (coppia) {
+    var tasti = el.querySelectorAll(coppia[1]);
+    if (!tasti.length) return;
+    var r = tasti[0].getBoundingClientRect();
+    var w = Math.round(r.width), h = Math.round(r.height);
+    var basta = w >= 44 && h >= 44;
+    righe.push(coppia[0] + ': ' + w + '×' + h + ' px  ' +
+      '<span class="' + (basta ? 'ok' : 'ko') + '">' + (basta ? '✓ 44' : '✗ sotto i 44') + '</span>');
+  });
+  var alto = Math.round(el.getBoundingClientRect().height);
+  righe.push('la tastiera occupa ' + alto + ' px di altezza');
+  document.getElementById(idTesto).innerHTML = righe.join('\n');
+}
+
+misura('kb0','m0'); misura('kbA','mA'); misura('kbB','mB');
+misura('kbC','mC'); misura('kbD','mD'); misura('kbE','mE');
+</script>
+</body>
+</html>
