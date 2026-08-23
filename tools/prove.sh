@@ -66,6 +66,18 @@ else
   manca "$QUI/prova-tonalita.js" "riconoscimento tonalità"
 fi
 
+if [ -f "$QUI/prova-peso-x.js" ]; then
+  prova "quanto pesa per X" node "$QUI/prova-peso-x.js"
+else
+  manca "$QUI/prova-peso-x.js" "quanto pesa per X"
+fi
+
+if [ -f "$QUI/prova-leggibilita.js" ]; then
+  prova "leggibilità (Gulpease)" node "$QUI/prova-leggibilita.js"
+else
+  manca "$QUI/prova-leggibilita.js" "leggibilità (Gulpease)"
+fi
+
 if [ -f "$QUI/prova-segnali.js" ]; then
   prova "segnali di prova (clip)" node "$QUI/prova-segnali.js"
 else
