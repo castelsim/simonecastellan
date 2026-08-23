@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <title>Trasporta gli accordi — in un'altra tonalità</title>
+  <meta name="description" content="Incolla il testo con gli accordi e scegli quanto alzare o abbassare. Gli accordi restano sopra la loro sillaba e le parole non si toccano." />
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="canonical" href="https://simonecastellan.com/trasporta-accordi/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Trasporta gli accordi" />
+  <meta property="og:description" content="Il pezzo un tono più basso, per la voce che lo canta. Gli accordi si spostano, le parole restano dove sono." />
+  <meta property="og:image" content="og-image.svg" />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <!-- La voce comune viene prima del foglio locale: porta i colori e tre classi. -->
+  <link rel="stylesheet" href="/comune/voce.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <header>
+      <p class="occhiello">Prove · Cover · Coro</p>
+      <h1 class="titolone">Trasporta gli accordi.<br><span class="eco">Nella tonalità che canta.</span></h1>
+      <p class="apertura">Il pezzo è in Do e la voce non ci arriva. Incolla il foglio e scegli
+        di quanto scendere: <b>gli accordi si spostano, le parole restano dove sono</b> — e
+        ogni accordo resta sopra la sua sillaba. Niente esce dal tuo dispositivo.</p>
+    </header>
+
+    <!-- Il testo di partenza -->
+    <section class="blocco" aria-label="Il foglio di partenza">
+      <div class="blocco-testa">
+        <span class="field-label">Il tuo foglio</span>
+        <button type="button" id="esempio" class="link-btn">prova con un esempio</button>
+      </div>
+      <textarea id="dentro" class="testo" rows="10" spellcheck="false"
+        placeholder="Incolla qui il testo con gli accordi.&#10;&#10;Do          Sol         Lam        Fa&#10;Nel blu   dipinto     di      blu"></textarea>
+      <p class="stato" id="stato"></p>
+    </section>
+
+    <!-- Di quanto -->
+    <section class="quanto" aria-label="Di quanto spostare">
+      <span class="field-label">Di quanto</span>
+      <div class="quanto-row">
+        <button type="button" id="giu" class="step" aria-label="Un semitono più in basso">−</button>
+        <div class="quanto-num">
+          <span id="semitoni" class="num-big" aria-live="polite">0</span>
+          <span class="unit-big" id="unita">semitoni</span>
+        </div>
+        <button type="button" id="su" class="step" aria-label="Un semitono più in alto">+</button>
+      </div>
+      <p class="quanto-nota" id="daA"></p>
+    </section>
+
+    <!-- Il risultato -->
+    <section class="blocco" aria-label="Il foglio trasportato">
+      <div class="blocco-testa">
+        <span class="field-label">Come diventa</span>
+        <div class="scelte">
+          <!-- La notazione: chi suona incontra tutte e due, spesso lo stesso
+               pomeriggio. Si parte da quella che ha usato chi scrive. -->
+          <button type="button" class="chip on" id="notIt" data-not="it">Do Re Mi</button>
+          <button type="button" class="chip" id="notEn" data-not="en">C D E</button>
+        </div>
+      </div>
+      <pre id="fuori" class="testo fuori" aria-live="polite"></pre>
+      <div class="azioni">
+        <button type="button" id="copia" class="btn btn-primario">Copia il foglio</button>
+        <button type="button" id="scambia" class="btn">Riparti da questo</button>
+      </div>
+    </section>
+
+    <!-- Il capotasto: per la chitarra la risposta spesso non è «accordi nuovi» -->
+    <section class="capo hidden" id="capoBox" aria-label="Con il capotasto">
+      <p id="capoTesto"></p>
+      <p class="capo-nota">Con il capotasto suoni le posizioni di prima e la canzone
+        esce nella tonalità nuova. Comodo se gli accordi trasportati sono scomodi.</p>
+    </section>
+
+    <p class="hint">
+      Le righe di accordi si riconoscono da sole: una riga fatta di accordi si sposta,
+      una riga di parole no. Così «La chitarra» e «Mi ricordo» restano quello che sono.
+    </p>
+  </main>
+
+  <footer class="site-footer">
+    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
+    · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="accordi.js"></script>
+  <script src="/track.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
