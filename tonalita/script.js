@@ -139,7 +139,12 @@ function buildKeyboard() {
     el.className = 'key black';
     el.textContent = b.name;
     el.dataset.idx = idx;
-    el.style.left = 'calc(' + (b.pos * 100 / WHITES) + '% - 4%)';
+    /* Il «meno metà larghezza» che centra il tasto nero sul confine fra due
+       bianchi NON è più scritto qui: sta in una variabile del foglio di stile,
+       perché sotto il dito il nero cambia misura (44 px invece dell'8%) e il
+       centraggio deve cambiare con lui. Scrivendo «- 4%» qui dentro, i tasti
+       si spostavano di venti pixel appena si allargavano. */
+    el.style.left = 'calc(' + (b.pos * 100 / WHITES) + '% - var(--mezzo-nero))';
     kb.appendChild(el);
     keyEls[idx] = el;
     bindKey(el, idx);

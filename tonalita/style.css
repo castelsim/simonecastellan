@@ -157,6 +157,11 @@ h1 {
 }
 
 /* Tastiera */
+/* La larghezza del tasto nero, e la metà che serve a centrarlo sul confine
+   fra due bianchi. Stanno qui e non nel JavaScript perché sotto il dito
+   cambiano tutte e due insieme: vedi il blocco in fondo al foglio. */
+:root { --nero-largo: 8%; --mezzo-nero: 4%; }
+
 .keyboard {
   position: relative;
   width: 100%;
@@ -193,7 +198,7 @@ h1 {
   position: absolute;
   top: 0;
   height: 60%;
-  width: 8%;
+  width: var(--nero-largo);
   background: var(--ink);
   border-radius: 0 0 4px 4px;
   color: #cfcfcf;
@@ -303,7 +308,63 @@ h1 {
 
 @media (max-width: 460px) {
   h1 { font-size: 18px; }
-  .keyboard { height: 84px; }
+  /* ── LA TASTIERA STACCATA (23/08/2026, scelta di Simone) ────────────────
+     I cinque tasti neri misuravano 28×50 px: sotto i 44 che vuole un dito, e
+     l'ultimo difetto rimasto in tutto il sito. Da quando il microfono è uscito
+     da questo strumento, questa tastiera è l'unica cosa che resta in pagina su
+     un telefono, quindi il difetto pesa più di prima.
+
+     Il vincolo: sette tasti bianchi in 358 px fanno 51 px l'uno, e i neri
+     stanno IN MEZZO. Allargare la sola area invisibile del nero non si può —
+     ruberebbe il tocco al bianco sotto, e qui vale la regola che lo stesso
+     gesto sulla stessa area deve fare la stessa cosa.
+
+     La soluzione scelta fra cinque provate nel browser: i neri salgono di una
+     riga, ma restano NELLA LORO POSIZIONE, sopra il confine fra i due bianchi
+     a cui appartengono. Si legge ancora come un pianoforte — Do# e Re# vicini,
+     lo stacco dove il nero non c'è, poi Fa# Sol# La# — nessun tasto ne copre
+     un altro, e costa 24 px di altezza.
+
+     Le altre quattro, e perché no: allargare tutto tenendo il pianoforte
+     (a 358 px i neri diventano larghi quasi quanto i bianchi e non somiglia
+     più a una tastiera); i neri in fila equidistante (perdono la posizione);
+     dodici pulsanti in griglia (si tocca benissimo, ma sparisce il riferimento
+     visivo che serve a cercare una nota a orecchio); pianoforte grande che
+     scorre (su un pezzo si torna sugli stessi tasti molte volte, e ogni volta
+     bisogna ritrovarli).
+
+     Sul computer non cambia niente: lì si punta col mouse, il difetto non
+     esiste, e la voce comune dice di allargare SOLO dove si tocca. */
+  :root { --nero-largo: 44px; --mezzo-nero: 22px; }
+
+  .keyboard {
+    height: 108px;
+    align-items: flex-end;   /* i bianchi in basso, i neri restano in alto */
+    gap: 3px;
+  }
+  /* Il nome del tasto resta IN BASSO e il pallino sopra, come sulla tastiera
+     larga: i pallini che segnano le note della tonalità sono posizionati
+     rispetto al fondo del tasto (`bottom: 22px`), e centrando il testo si
+     erano piantati in mezzo alla parola — visto nello screenshot, non nel
+     codice. Qui cambiano solo l'altezza e gli angoli. */
+  .key.white {
+    height: 52px;
+    border-radius: 7px;
+    font-size: 11px;
+  }
+  .key.black {
+    height: 52px;
+    border-radius: 7px;
+    font-size: 10px;
+  }
+  /* I pallini che segnano le note della tonalità sono posizionati rispetto al
+     FONDO del tasto, con misure pensate per la tastiera alta: sul nero, che
+     qui passa da 50 px a 52 ma col nome in basso, «bottom: 7px» finiva dentro
+     la parola — si leggeva «F●#». Visto nello screenshot, non nel codice: le
+     due misure erano entrambe plausibili sulla carta.
+     Qui stanno tutti e due sopra il nome, alla stessa altezza. */
+  .key.white.inkey::after { bottom: 20px; }
+  .key.black.inkey::after { bottom: 20px; }
   .seg-btn { padding: 6px 11px; }
   .btn { padding: 8px 13px; }
 }
