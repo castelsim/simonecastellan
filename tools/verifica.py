@@ -781,6 +781,59 @@ def controlla_person_definita_una_volta():
     print(f"  dati strutturati: premi, titoli e scuole dichiarati solo in {CASA}")
 
 
+def controlla_agganci_css():
+    """Le classi che il codice cerca devono esistere: in pagina o create dal
+    codice stesso.
+
+    Il 23/08/2026 `/comprimi-video/` era rotto per TUTTI: `script.js` chiamava
+    `document.querySelector('.claims').classList.add(...)`, ma in quella pagina
+    il paragrafo ha `class="privacy"` — `.claims` è di un altro strumento. La
+    chiamata restituiva `null`, la riga esplodeva, e siccome stava dentro un
+    `then()` abbracciato da un `catch` largo, l'errore veniva riscritto così:
+    «Non riesco ad aprire questo video: dentro non c'è un filmato, oppure è
+    rovinato». Lo strumento dava la colpa al file di chi lo usava, con
+    qualunque video. Verificato in produzione con un MP4 valido di 21 KB.
+
+    Perché nessuno se n'era accorto: il banco di prova apre le pagine e ascolta
+    gli errori, ma questo errore arriva solo DOPO che si carica un file. Una
+    pagina che si apre bene e si rompe al primo gesto è verde per il banco.
+
+    ── DUE COSE DA NON DIMENTICARE, IMPARATE SCRIVENDO QUESTO CONTROLLO ─────
+    1. Metà delle classi cercate non stanno nell'HTML perché le crea il codice
+       (`b.className = 'f-dl'`): cercarle solo in pagina dava cinque falsi
+       allarmi su sei, e un controllo che grida al lupo viene spento.
+    2. La prima versione segnalava anche la classe nominata dentro il commento
+       qui sopra — cioè si accusava da sola. I commenti vanno tolti prima di
+       guardare il codice.
+    """
+    def senza_commenti(js):
+        js = re.sub(r"/\*.*?\*/", " ", js, flags=re.S)
+        return re.sub(r"(^|[^:])//.*$", r"\1", js, flags=re.M)
+
+    trovati = 0
+    for nome in TOOL + NASCOSTI:
+        js = os.path.join(ROOT, nome, "script.js")
+        html = os.path.join(ROOT, nome, "index.html")
+        if not (os.path.exists(js) and os.path.exists(html)):
+            continue
+        pagina = leggi(os.path.join(nome, "index.html"))
+        codice = senza_commenti(leggi(os.path.join(nome, "script.js")))
+        for m in re.finditer(r"""querySelector(?:All)?\(\s*['"]\.([a-zA-Z0-9_-]+)['"]\s*\)""", codice):
+            classe = m.group(1)
+            trovati += 1
+            in_pagina = re.search(r'class\s*=\s*["\'][^"\']*\b' + re.escape(classe) + r'\b', pagina)
+            # oppure è il codice stesso a metterla: className = 'x',
+            # classList.add('x'), o dentro un pezzo di HTML che costruisce
+            creata = re.search(r"""(className\s*=\s*['"][^'"]*\b|classList\.add\(\s*['"]|class=\\?["'][^"']*\b)"""
+                               + re.escape(classe) + r"\b", codice)
+            if not (in_pagina or creata):
+                riga = codice[:m.start()].count("\n") + 1
+                errore(f"{nome}/script.js:{riga} cerca «.{classe}», che non esiste né in "
+                       f"{nome}/index.html né fra le classi che il codice assegna: "
+                       f"querySelector torna null e la riga dopo esplode")
+    print(f"  agganci CSS: {trovati} classi cercate dal codice, tutte esistenti")
+
+
 def main():
     print("Verifica del sito…")
     home = leggi("index.html")
@@ -805,6 +858,7 @@ def main():
     controlla_mappa_agganci()
     controlla_fatti_allineati()
     controlla_person_definita_una_volta()
+    controlla_agganci_css()
 
     for a in AVVISI:
         print("  AVVISO: " + a)

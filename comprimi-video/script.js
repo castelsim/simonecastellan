@@ -18,7 +18,15 @@
    più l'onestà di dire prima come verrà, invece di far scoprire dopo che a
    quel peso il video è illeggibile. */
 
-var MB = 1024 * 1024;
+/* ── MEGABYTE DECIMALI, NON BINARI (23/08/2026) ───────────────────────────
+   Un megabyte vale 1.000.000 di byte qui dentro, non 1.048.576. La differenza
+   non è accademica: scegliendo «1 MB · moduli» lo strumento consegnava un file
+   da 1.039.877 byte — sotto 1 MiB, ma SOPRA il milione. Un portale che conta
+   in decimali (e sono la maggioranza, come il Finder del Mac) lo rifiuta, e
+   chi lo ha appena compresso non capisce perché.
+   Il decimale è la scelta sicura in tutti e due i casi: un file sotto
+   1.000.000 sta sotto anche a chi conta in binario. Il contrario no. */
+var MB = 1000 * 1000;
 
 // L'audio si tiene basso ma non insultante: sotto i 64 kbps si sente.
 var AUDIO_KBPS = 96;
@@ -54,6 +62,16 @@ var esitoEl   = document.getElementById('esito');
 var erroreBox = document.getElementById('errore');
 var erroreMsg = document.getElementById('erroreMsg');
 var condividiBtn = document.getElementById('condividiBtn');
+
+/* La riga «il video non viene caricato online», che sparisce quando il lavoro
+   comincia. Il riferimento si prende QUI, insieme agli altri, e non ogni volta
+   con un querySelector in mezzo al codice: prima era
+   `document.querySelector('.claims')`, una classe che in questa pagina non è
+   mai esistita — qui il paragrafo ha `class="privacy"` — e la riga esplodeva
+   al primo file caricato, con QUALUNQUE video. Un riferimento preso all'avvio
+   sbaglia una volta sola e si vede subito; uno preso al momento dell'uso
+   sbaglia quando l'utente sta lavorando. */
+var promessa  = document.querySelector('.privacy');
 
 /* Oltre questo peso non si comincia nemmeno. Il motore lavora dentro il
    browser e il file gli va messo tutto in memoria: da qui in su non finisce,
@@ -383,16 +401,20 @@ function apri(file) {
     statusText.textContent = 'Ci sto mettendo più del solito: forse è un formato che il browser non conosce…';
   }, 4000);
 
-  leggi(file).then(function (dati) {
-    clearTimeout(lenta);
-    if (!dati.durata || !isFinite(dati.durata)) throw new Error('senza durata');
-    video = dati;
-    mostra(statusBox, false);
-    mostra(dropZone, false);
-    document.querySelector('.claims').classList.add('hidden');
-    mostra(previsione, true);
-    aggiornaPrevisione();
-  }).catch(function (e) {
+  /* ⚠️ Il `.catch` copre SOLO la lettura del file, non quello che viene dopo
+     (corretto il 23/08/2026).
+
+     Prima abbracciava anche il corpo del `then`, e lì dentro c'era una riga
+     che chiamava `.classList` su un elemento inesistente. Risultato: il video
+     veniva letto benissimo — durata e dimensioni arrivavano — poi il codice
+     crollava per conto suo, e l'utente leggeva «dentro non c'è un filmato,
+     oppure è rovinato». Lo strumento dava la colpa al file di chi lo usava per
+     un difetto proprio, e lo faceva con QUALUNQUE video: era rotto per tutti.
+
+     Un `catch` largo non è prudenza: è un modo per non accorgersi mai di un
+     guasto. Qui dice una cosa sola — non sono riuscito a leggere il file — e
+     tutto il resto, se si rompe, si rompe rumorosamente. */
+  leggi(file).catch(function (e) {
     clearTimeout(lenta);
     // «Scaduto» vuol dire che il browser non ha nemmeno risposto: quasi sempre
     // è un formato che non conosce. Un errore vero vuol dire invece che il file
@@ -400,6 +422,19 @@ function apri(file) {
     errore(e && e.message === 'scaduto'
       ? 'Ci ho messo troppo ad aprire questo video: probabilmente è in un formato che il browser non conosce. Esporta un MP4 e riprova.'
       : 'Non riesco ad aprire questo video: dentro non c\'è un filmato, oppure è rovinato. Se puoi, esporta un MP4 e riprova.');
+    return null;
+  }).then(function (dati) {
+    if (!dati) return;                 // la lettura è già fallita e l'ha detto
+    clearTimeout(lenta);
+    if (!dati.durata || !isFinite(dati.durata)) {
+      return errore('Questo file non dichiara la sua durata: il browser non lo sa aprire come video. Esporta un MP4 e riprova.');
+    }
+    video = dati;
+    mostra(statusBox, false);
+    mostra(dropZone, false);
+    mostra(promessa, false);
+    mostra(previsione, true);
+    aggiornaPrevisione();
   });
 }
 
@@ -410,7 +445,7 @@ function ricomincia() {
   mostra(erroreBox, false);
   mostra(statusBox, false);
   mostra(dropZone, true);
-  document.querySelector('.claims').classList.remove('hidden');
+  mostra(promessa, true);
 }
 
 // --- Comandi -----------------------------------------------------------------

@@ -48,15 +48,33 @@ function getBpm() {
   return clamp(v);
 }
 
+/* Il valore si limita, NON si arrotonda (corretto il 23/08/2026).
+   Prima ogni BPM passava da Math.round, e i mezzi BPM sparivano in silenzio:
+   scritto 93,5, il campo mostrava 93,5 e la tabella calcolava su 94 — 638,3 ms
+   sul quarto invece di 641,7, cioè 13,7 ms di scarto su una battuta intera.
+   Su un delay ritmico quella deriva si sente, e chi guarda non ha modo di
+   accorgersene: il numero che ha scritto è ancora lì.
+   I BPM interi sono una convenzione dei metronomi, non della musica: i
+   programmi di registrazione li danno con i decimali, e un brano registrato a
+   93,5 resta a 93,5. */
 function clamp(v) {
-  v = Math.round(v);
   if (v < MIN_BPM) v = MIN_BPM;
   if (v > MAX_BPM) v = MAX_BPM;
   return v;
 }
 
+/* Nel CAMPO ci va un numero leggibile: un decimale basta (il TAP produce
+   valori come 120,3718…), e lo zero inutile non si scrive. Il conto però usa
+   il valore pieno, non questo. */
+function perIlCampo(v) {
+  // Col PUNTO, non con la virgola: questo è un <input type="number">, e un
+  // valore che lui non sa leggere lo fa restare vuoto. Chi scrive la virgola
+  // la può scrivere — è il browser a convertirla — ma noi non gliela mettiamo.
+  return String(Math.round(v * 10) / 10);
+}
+
 function setBpm(v) {
-  bpmInput.value = clamp(v);
+  bpmInput.value = perIlCampo(clamp(v));
   render();
 }
 
@@ -114,7 +132,9 @@ function buildRows() {
 function diciSeFuoriScala() {
   var scritto = parseFloat(bpmInput.value);
   var usato = getBpm();
-  if (bpmInput.value.trim() === '' || !isFinite(scritto) || Math.round(scritto) === usato) {
+  // Si confronta il valore VERO, non arrotondato: da quando i decimali
+  // contano, «93,5» e «93,5» sono uguali e non c'è niente da dichiarare.
+  if (bpmInput.value.trim() === '' || !isFinite(scritto) || scritto === usato) {
     fuoriEl.classList.add('hidden');
     fuoriEl.textContent = '';
     return;

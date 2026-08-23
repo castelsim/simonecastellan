@@ -130,21 +130,33 @@ function costruisciRighe() {
   });
 }
 
-function aggiornaRighe(quanti) {
+/* X ha un conto suo, e va fatto — non descritto in una nota.
+   Le emoji pesano 2, il giapponese 2 a carattere, un collegamento 23 comunque
+   sia lungo. Fino al 23/08/2026 la riga di X mostrava lo stesso numero di
+   tutte le altre e una nota accanto diceva «X li conta come N», dove N erano
+   le unità UTF-16: sulla famiglia 👨‍👩‍👧‍👦 diceva 11, e X ne conta 2. Il
+   risultato era una riga verde «280 / 280» accanto a una nota che diceva 281.
+   Vedi conta-caratteri/peso-x.js e le prove in tools/prova-peso-x.js. */
+function quantiPer(v, t, quanti) {
+  return v.piattaforma === 'X' ? PESO_X.peso(t) : quanti;
+}
+
+function aggiornaRighe(quanti, testo) {
   SOCIAL_TESTO.forEach(function (v) {
     var r = righe[v.id];
+    var suoi = quantiPer(v, testo, quanti);
     // Dove non c'è un massimo dichiarato (l'oggetto di una mail) il metro è
     // il punto di taglio: è l'unico numero che significa qualcosa lì.
     var metro = v.massimo || v.taglio;
-    var quota = Math.min(1, quanti / metro);
+    var quota = Math.min(1, suoi / metro);
 
     r.dentro.style.width = (quota * 100).toFixed(1) + '%';
     r.n.textContent = v.massimo
-      ? quanti + ' / ' + v.massimo.toLocaleString('it-IT', { useGrouping: true })
-      : quanti + ' / ~' + v.taglio;
+      ? suoi + ' / ' + v.massimo.toLocaleString('it-IT', { useGrouping: true })
+      : suoi + ' / ~' + v.taglio;
 
     r.riga.classList.remove('ok', 'giusto', 'fuori');
-    if (v.massimo && quanti > v.massimo) r.riga.classList.add('fuori');
+    if (v.massimo && suoi > v.massimo) r.riga.classList.add('fuori');
     else if (quota >= 0.8) r.riga.classList.add('giusto');
     else r.riga.classList.add('ok');
   });
@@ -213,12 +225,17 @@ function aggiorna() {
   nPar.textContent = contaParole(t).toLocaleString('it-IT');
   nHash.textContent = contaHashtag(t);
 
-  // X e i contatori di molte piattaforme lavorano sulle unità UTF-16: un emoji
-  // che qui vale 1 lì ne pesa 2 o più. Se i due numeri divergono va detto.
-  var unita = t.length;
-  if (unita > quanti) {
-    notaEmoji.textContent = 'Attenzione agli emoji: qui contano ' + quanti +
-      ', ma alcune piattaforme — X in testa — li contano come ' + unita + '.';
+  /* La riga di X ora porta il SUO numero: qui si spiega solo perché è diverso,
+     e solo quando lo è davvero. Prima questa nota dichiarava un conteggio
+     sbagliato (le unità UTF-16) su un numero che nessuno stava usando. */
+  var perX = PESO_X.peso(t);
+  if (perX !== quanti) {
+    var causa = [];
+    if (/\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(t)) causa.push('le emoji contano 2');
+    if (/(https?:\/\/|www\.)/i.test(t)) causa.push('ogni link conta 23, corto o lungo');
+    if (/[\u3000-\u9FFF\uAC00-\uD7AF]/.test(t)) causa.push('gli ideogrammi contano 2');
+    notaEmoji.textContent = 'Su X questo testo pesa ' + perX + ' invece di ' + quanti +
+      (causa.length ? ': ' + causa.join(', ') + '.' : '.');
     notaEmoji.classList.remove('hidden');
   } else {
     notaEmoji.classList.add('hidden');
@@ -226,15 +243,20 @@ function aggiorna() {
 
   var invisibili = contaInvisibili(t);
   if (invisibili) {
-    notaInvisibili.textContent = 'Ci sono ' + invisibili + ' caratteri che non si vedono, ' +
-      'arrivati da un copia e incolla. Occupano posto lo stesso. ';
+    // Uno solo è il caso più frequente — un carattere invisibile incollato da
+    // Word — e leggere «Ci sono 1 caratteri» fa sembrare rotto lo strumento
+    // proprio mentre sta dicendo una cosa giusta.
+    notaInvisibili.textContent = invisibili === 1
+      ? "C'è 1 carattere che non si vede, arrivato da un copia e incolla. Occupa posto lo stesso. "
+      : 'Ci sono ' + invisibili + ' caratteri che non si vedono, ' +
+        'arrivati da un copia e incolla. Occupano posto lo stesso. ';
     notaInvisibili.appendChild(puliscibtn);
     notaInvisibili.classList.remove('hidden');
   } else {
     notaInvisibili.classList.add('hidden');
   }
 
-  aggiornaRighe(quanti);
+  aggiornaRighe(quanti, t);
 
   anteprimaBox.classList.toggle('hidden', quanti === 0);
   if (quanti) disegnaAnteprima(g);

@@ -4,12 +4,20 @@
 
    Un riconoscitore di tonalità sbagliato non se ne accorge: una risposta esce
    sempre, e ha la stessa faccia sicura di quella giusta. Perciò qui gli si dà
-   in pasto musica finta ma di tonalità NOTA, e si guarda se la trova.
+   in pasto un giro di accordi di tonalità NOTA e si guarda se la trova.
 
-   La musica è costruita con le note vere degli accordi, armoniche comprese:
-   un'onda pura non somiglia a niente di quello che il microfono sentirà. */
+   ── COSA PROVANO ADESSO, E PERCHÉ È CAMBIATO (23/08/2026) ────────────────
+   Fino a ieri queste prove interrogavano `tonalita/ascolta.js`, cioè il
+   riconoscimento delle note dal microfono. Il microfono è uscito dallo
+   strumento per scelta di Simone, e con lui quel file: erano prove su codice
+   che non gira più, la peggior specie di verde.
 
-var ASCOLTA = require('../tonalita/ascolta.js');
+   Adesso provano `tonalita/stima.js`, che è il cervello vero e unico di quello
+   che resta — da dodici pesi alla tonalità. È lo stesso file che carica la
+   pagina, non una copia: se qui passa e in pagina no, la differenza è nel DOM,
+   non nel conto. */
+
+var STIMA = require('../tonalita/stima.js');
 
 var passate = 0, fallite = 0;
 
@@ -19,175 +27,108 @@ function prova(nome, fn) {
 }
 
 var NOMI = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
-var FS = 48000, DIM = 8192;
+var DO = 0, RE = 2, MI = 4, FA = 5, SOL = 7, LA = 9;
 
-function hzDi(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
+/* Chi suona sulla tastiera accumula PESO su ogni classe di nota, non conteggi:
+   un tasto tenuto due secondi pesa il doppio di uno sfiorato. Qui si simula
+   come fa la pagina — un peso per nota — perché è il vettore che `stima()`
+   riceve davvero. */
+function suonato(note, peso) {
+  var c = [0,0,0,0,0,0,0,0,0,0,0,0];
+  note.forEach(function (n) { c[((n % 12) + 12) % 12] += (peso || 1); });
+  return c;
+}
 
-/* Un accordo con le sue armoniche, come lo sentirebbe un microfono: la
-   fondamentale più cinque parziali che calano di ampiezza. */
-function accordo(midiNote, campioni, ampiezza) {
-  var x = new Float32Array(campioni);
-  midiNote.forEach(function (m) {
-    var f0 = hzDi(m);
-    for (var arm = 1; arm <= 5; arm++) {
-      var f = f0 * arm;
-      if (f > FS / 2) break;
-      var a = (ampiezza || 1) / (arm * arm);
-      for (var i = 0; i < campioni; i++) {
-        x[i] += a * Math.sin(2 * Math.PI * f * i / FS);
-      }
+function maggiore(t) { return [t, t + 4, t + 7]; }
+function minore(t)   { return [t, t + 3, t + 7]; }
+
+/* Il giro più suonato della musica leggera: I–V–vi–IV.
+   In Do: Do, Sol, La minore, Fa. */
+function giroPop(t) {
+  return [].concat(maggiore(t), maggiore(t + 7), minore(t + 9), maggiore(t + 5));
+}
+
+function nome(c) { return NOMI[c.t] + (c.mode === 'major' ? ' maggiore' : ' minore'); }
+
+function deveDire(counts, atteso, quando) {
+  var vinta = STIMA.stima(counts)[0];
+  if (nome(vinta) !== atteso) {
+    throw new Error(quando + ': atteso «' + atteso + '», risponde «' + nome(vinta) + '»');
+  }
+}
+
+console.log('Riconoscimento della tonalità (tonalita/stima.js)');
+
+prova('un accordo di Do maggiore dice Do maggiore', function () {
+  deveDire(suonato(maggiore(DO)), 'Do maggiore', 'accordo isolato');
+});
+
+prova('un accordo di La minore dice La minore', function () {
+  deveDire(suonato(minore(LA)), 'La minore', 'accordo isolato');
+});
+
+prova('il giro I-V-vi-IV in Do dice Do maggiore', function () {
+  deveDire(suonato(giroPop(DO)), 'Do maggiore', 'giro pop');
+});
+
+prova('lo stesso giro trasportato in Re dice Re maggiore', function () {
+  deveDire(suonato(giroPop(RE)), 'Re maggiore', 'giro pop trasportato');
+});
+
+/* La prova che vale più delle altre: le dodici trasposizioni devono dare
+   dodici risposte diverse. Un riconoscitore che risponde sempre la stessa cosa
+   passerebbe le prove qui sopra una volta su dodici — e le passa TUTTE se
+   quella volta è Do. */
+prova('le dodici trasposizioni danno dodici tonalità diverse', function () {
+  var viste = {};
+  for (var t = 0; t < 12; t++) {
+    var vinta = STIMA.stima(suonato(giroPop(t)))[0];
+    if (vinta.t !== t % 12 || vinta.mode !== 'major') {
+      throw new Error('giro in ' + NOMI[t] + ': risponde «' + nome(vinta) + '»');
     }
-  });
-  return x;
-}
-
-function rumore(campioni, ampiezza, seme) {
-  var s = seme >>> 0, x = new Float32Array(campioni);
-  for (var i = 0; i < campioni; i++) {
-    s = (s * 1664525 + 1013904223) >>> 0;
-    x[i] = ((s / 4294967296) * 2 - 1) * ampiezza;
+    viste[nome(vinta)] = true;
   }
-  return x;
-}
-
-function somma(a, b) {
-  var x = new Float32Array(a.length);
-  for (var i = 0; i < a.length; i++) x[i] = a[i] + (b[i] || 0);
-  return x;
-}
-
-/* Suona una giro di accordi e restituisce il profilo delle dodici note. */
-function ascoltaGiro(giro) {
-  ASCOLTA.azzera();
-  giro.forEach(function (note) {
-    /* Cinque blocchi per accordo, cioè circa mezzo secondo tenuto: sotto i
-       quattro blocchi lo strumento si rifiuta di rispondere, e giustamente —
-       ma allora le prove devono dargli il materiale che chiede. */
-    for (var v = 0; v < 5; v++) ASCOLTA.analizza(accordo(note, DIM), FS);
-  });
-  return ASCOLTA.profilo();
-}
-
-function piuForte(profilo) {
-  var i, piu = 0;
-  for (i = 1; i < 12; i++) if (profilo[i] > profilo[piu]) piu = i;
-  return piu;
-}
-
-/* Le tre note di un accordo, dal nome: 60 = Do centrale */
-var DO = 60;
-function maggiore(fondamentale) { return [fondamentale, fondamentale + 4, fondamentale + 7]; }
-function minore(fondamentale) { return [fondamentale, fondamentale + 3, fondamentale + 7]; }
-
-console.log('\nRiconoscere le note che suonano\n');
-
-prova('un Do maggiore da solo mette il Do in cima', function () {
-  var p = ascoltaGiro([maggiore(DO)]);
-  var vinc = piuForte(p);
-  if (vinc !== 0) throw new Error('in cima c\'è ' + NOMI[vinc] + ', non Do');
-  // e le altre due note dell'accordo devono essere ben presenti
-  if (p[4] < 20) throw new Error('il Mi dell\'accordo pesa solo ' + Math.round(p[4]));
-  if (p[7] < 20) throw new Error('il Sol dell\'accordo pesa solo ' + Math.round(p[7]));
-});
-
-prova('un La minore mette il La in cima', function () {
-  var p = ascoltaGiro([minore(DO + 9)]);
-  var vinc = piuForte(p);
-  if (vinc !== 9) throw new Error('in cima c\'è ' + NOMI[vinc] + ', non La');
-});
-
-prova('CONTROPROVA: le note che NON suonano restano in fondo', function () {
-  /* Senza questa, un profilo che risponde «tutto uguale» passerebbe la prova
-     di sopra per caso, dato che una qualche nota in cima c'è sempre. */
-  var p = ascoltaGiro([maggiore(DO)]);   // Do, Mi, Sol
-  [1, 3, 6, 8, 10].forEach(function (pc) {   // le cinque nere: nessuna suona
-    if (p[pc] > 25) {
-      throw new Error(NOMI[pc] + ' pesa ' + Math.round(p[pc]) + ' pur non suonando');
-    }
-  });
-});
-
-console.log('\nRiconoscere la tonalità di un giro di accordi\n');
-
-/* Il giro più comune della musica leggera: I–V–vi–IV. In Do maggiore è
-   Do–Sol–Lam–Fa. */
-function giroPop(tonica) {
-  return [maggiore(tonica), maggiore(tonica + 7), minore(tonica + 9), maggiore(tonica + 5)];
-}
-
-prova('Do–Sol–Lam–Fa: le sette note della scala di Do stanno sopra le altre', function () {
-  var p = ascoltaGiro(giroPop(DO));
-  var dentro = [0, 2, 4, 5, 7, 9, 11];          // la scala di Do maggiore
-  var fuori = [1, 3, 6, 8, 10];
-  var minDentro = Math.min.apply(null, dentro.map(function (i) { return p[i]; }));
-  var maxFuori = Math.max.apply(null, fuori.map(function (i) { return p[i]; }));
-  if (maxFuori >= minDentro) {
-    throw new Error('una nota fuori scala (' + Math.round(maxFuori) + ') pesa quanto una dentro (' +
-                    Math.round(minDentro) + ')');
+  if (Object.keys(viste).length !== 12) {
+    throw new Error('solo ' + Object.keys(viste).length + ' risposte diverse su 12');
   }
 });
 
-prova('lo stesso giro trasportato in Re dà le note di Re', function () {
-  /* Se il riconoscimento funzionasse «per caso» sul Do — per esempio perché
-     la prima riga della FFT ci cade dentro — trasportando andrebbe a pezzi. */
-  var p = ascoltaGiro(giroPop(DO + 2));
-  var dentro = [2, 4, 6, 7, 9, 11, 1];          // la scala di Re maggiore
-  var fuori = [0, 3, 5, 8, 10];
-  var minDentro = Math.min.apply(null, dentro.map(function (i) { return p[i]; }));
-  var maxFuori = Math.max.apply(null, fuori.map(function (i) { return p[i]; }));
-  if (maxFuori >= minDentro) {
-    throw new Error('in Re una nota fuori scala (' + Math.round(maxFuori) +
-                    ') pesa quanto una dentro (' + Math.round(minDentro) + ')');
+/* Il peso conta: la stessa nota tenuta a lungo deve spostare la risposta.
+   Se non la sposta, la pagina sta contando i tasti invece del tempo. */
+prova('il peso sposta la risposta', function () {
+  var pari = suonato([DO, RE, MI, FA, SOL, LA, 11]);        // scala di Do, tutte uguali
+  var caricoSuFa = suonato([DO, RE, MI, FA, SOL, LA, 11]);
+  caricoSuFa[FA] += 40;                                     // il Fa tenuto a lungo
+  var a = STIMA.stima(pari)[0], b = STIMA.stima(caricoSuFa)[0];
+  if (nome(a) === nome(b)) {
+    throw new Error('caricare il Fa non cambia niente: risponde «' + nome(a) + '» in tutti e due i casi');
   }
 });
 
-console.log('\nQuando la stanza è rumorosa\n');
+/* Il silenzio non deve produrre una tonalità con la faccia sicura: con tutti i
+   pesi a zero la correlazione non è definita, e deve valere 0 — non un numero
+   qualsiasi che poi vince la classifica. */
+prova('senza niente di suonato nessuna tonalità stacca le altre', function () {
+  var c = STIMA.stima([0,0,0,0,0,0,0,0,0,0,0,0]);
+  if (c[0].r !== 0) throw new Error('con zero note la somiglianza vale ' + c[0].r + ', non 0');
+});
 
-prova('con rumore di fondo forte la tonalità si trova lo stesso', function () {
-  ASCOLTA.azzera();
-  giroPop(DO).forEach(function (note) {
-    for (var v = 0; v < 3; v++) {
-      ASCOLTA.analizza(somma(accordo(note, DIM), rumore(DIM, 0.35, 7 + v)), FS);
-    }
-  });
-  var p = ASCOLTA.profilo();
-  var dentro = [0, 2, 4, 5, 7, 9, 11];
-  var fuori = [1, 3, 6, 8, 10];
-  var minDentro = Math.min.apply(null, dentro.map(function (i) { return p[i]; }));
-  var maxFuori = Math.max.apply(null, fuori.map(function (i) { return p[i]; }));
-  if (maxFuori >= minDentro) {
-    throw new Error('col rumore le note fuori scala (' + Math.round(maxFuori) +
-                    ') raggiungono quelle dentro (' + Math.round(minDentro) + ')');
+/* I pallini sui tasti: sono la verifica a orecchio di chi legge, quindi devono
+   essere le note giuste della scala, non «più o meno». */
+prova('le note segnate in Do maggiore sono quelle dei tasti bianchi', function () {
+  var dentro = STIMA.noteDellaScala({ t: DO, mode: 'major' });
+  var attese = [0, 2, 4, 5, 7, 9, 11];
+  attese.forEach(function (n) { if (!dentro[n]) throw new Error('manca il ' + NOMI[n]); });
+  if (Object.keys(dentro).length !== 7) throw new Error('sono ' + Object.keys(dentro).length + ' note, non 7');
+});
+
+prova('in La minore le note sono le stesse di Do maggiore', function () {
+  var la = STIMA.noteDellaScala({ t: LA, mode: 'minor' });
+  var doM = STIMA.noteDellaScala({ t: DO, mode: 'major' });
+  if (Object.keys(la).sort().join() !== Object.keys(doM).sort().join()) {
+    throw new Error('le due scale relative dovrebbero avere le stesse note');
   }
 });
 
-prova('LA PROVA CHE CONTA: su rumore soltanto dice che non sa', function () {
-  /* Il modo peggiore di sbagliare: un telefono appoggiato in una stanza
-     silenziosa che mostra una tonalità con la stessa faccia sicura di una
-     vera. Succedeva davvero — qualche riga superava la soglia per caso, il
-     profilo si normalizzava su quella, e una nota andava a 100. */
-  ASCOLTA.azzera();
-  for (var i = 0; i < 12; i++) ASCOLTA.analizza(rumore(DIM, 0.5, 100 + i), FS);
-  if (ASCOLTA.affidabile()) {
-    throw new Error('si dichiara affidabile su rumore puro (' +
-                    Math.round(ASCOLTA.votiPerBlocco()) + ' voti per blocco)');
-  }
-  if (ASCOLTA.profilo() !== null) throw new Error('restituisce un profilo invece di niente');
-});
-
-prova('CONTROPROVA: sulla musica invece si dichiara affidabile', function () {
-  /* Senza questa, una soglia messa troppo in alto zittirebbe lo strumento
-     sempre — e la prova di sopra passerebbe lo stesso. */
-  ASCOLTA.azzera();
-  giroPop(DO).forEach(function (note) {
-    for (var v = 0; v < 3; v++) ASCOLTA.analizza(accordo(note, DIM), FS);
-  });
-  if (!ASCOLTA.affidabile()) {
-    throw new Error('non si fida nemmeno di un giro di accordi pulito (' +
-                    Math.round(ASCOLTA.votiPerBlocco()) + ' voti per blocco)');
-  }
-  if (!ASCOLTA.profilo()) throw new Error('non restituisce il profilo');
-});
-
-console.log('\n' + passate + ' passate, ' + fallite + ' fallite\n');
+console.log('\n' + passate + ' passate, ' + fallite + ' fallite');
 process.exit(fallite ? 1 : 0);

@@ -55,7 +55,15 @@ function preparaLibrerie() {
   return libreriePronte;
 }
 
-var targetKB = 5120;
+/* ── MEGABYTE DECIMALI, NON BINARI (23/08/2026) ───────────────────────────
+   Un megabyte vale 1.000.000 di byte qui dentro, non 1.048.576. La differenza
+   non è accademica: scegliendo «1 MB · moduli» lo strumento consegnava un file
+   da 1.039.877 byte — sotto 1 MiB, ma SOPRA il milione. Un portale che conta
+   in decimali (e sono la maggioranza, come il Finder del Mac) lo rifiuta, e
+   chi lo ha appena compresso non capisce perché.
+   Il decimale è la scelta sicura in tutti e due i casi: un file sotto
+   1.000.000 sta sotto anche a chi conta in binario. Il contrario no. */
+var targetKB = 5000;   // come il pulsante attivo in pagina
 var fileScelto = null;
 var bytesOriginali = null;   // Uint8Array del file com'è arrivato
 var risultato = null;        // Uint8Array di ciò che si scarica
@@ -94,9 +102,9 @@ var PESO_MAX = 150 * 1024 * 1024;
 var notaScelta = '';
 
 function pesa(b) {
-  if (b < 1024) return b + ' B';
-  if (b < 1024 * 1024) return Math.round(b / 1024) + ' KB';
-  return (Math.round(b / 1024 / 102.4) / 10).toString().replace('.', ',') + ' MB';
+  if (b < 1000) return b + ' B';
+  if (b < 1000 * 1000) return Math.round(b / 1000) + ' KB';
+  return (Math.round(b / 100000) / 10).toString().replace('.', ',') + ' MB';
 }
 
 function mostra(el, si) { if (el) el.classList.toggle('hidden', !si); }
@@ -370,7 +378,7 @@ async function apri(file) {
 }
 
 async function lavora(forza) {
-  var limite = targetKB * 1024;
+  var limite = targetKB * 1000;
   var prima = fileScelto.size;
   nomeUscita = fileScelto.name.replace(/\.pdf$/i, '') + ' (leggero).pdf';
 
@@ -425,7 +433,7 @@ async function viaRasterizzazione() {
   avanzamento('Trasformo le pagine in immagini…', 0.05);
   var bytes;
   try {
-    bytes = await comprimiRasterizzando(targetKB * 1024);
+    bytes = await comprimiRasterizzando(targetKB * 1000);
   } catch (e) {
     // Senza questo, un errore qui lasciava la barra ferma per sempre e
     // l'utente davanti a una pagina che non diceva niente.

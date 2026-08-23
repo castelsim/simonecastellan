@@ -2,7 +2,15 @@
    Nasce da un problema concreto: allegati di email, moduli e domande che
    rifiutano i file oltre un certo peso. Tutto in locale, niente upload. */
 
-var targetKB = 1024;
+/* ── MEGABYTE DECIMALI, NON BINARI (23/08/2026) ───────────────────────────
+   Un megabyte vale 1.000.000 di byte qui dentro, non 1.048.576. La differenza
+   non è accademica: scegliendo «1 MB · moduli» lo strumento consegnava un file
+   da 1.039.877 byte — sotto 1 MiB, ma SOPRA il milione. Un portale che conta
+   in decimali (e sono la maggioranza, come il Finder del Mac) lo rifiuta, e
+   chi lo ha appena compresso non capisce perché.
+   Il decimale è la scelta sicura in tutti e due i casi: un file sotto
+   1.000.000 sta sotto anche a chi conta in binario. Il contrario no. */
+var targetKB = 1000;   // come il pulsante attivo in pagina
 var modo = 'invisibile';    // «invisibile» = più leggera possibile, «peso» = sotto un limite
 var jobs = [];
 var busy = false;
@@ -30,9 +38,9 @@ var QUALITA = [0.85, 0.75, 0.65, 0.55, 0.45, 0.35];
 var PESO_MAX = 100 * 1024 * 1024;
 
 function pesa(b) {
-  if (b < 1024) return b + ' B';
-  if (b < 1024 * 1024) return Math.round(b / 1024) + ' KB';
-  return (Math.round(b / 1024 / 102.4) / 10).toString().replace('.', ',') + ' MB';
+  if (b < 1000) return b + ' B';
+  if (b < 1000 * 1000) return Math.round(b / 1000) + ' KB';
+  return (Math.round(b / 100000) / 10).toString().replace('.', ',') + ' MB';
 }
 
 /* «Da X a Y, tanto in meno»: la stessa frase, con le stesse parole, nei tre
@@ -284,7 +292,7 @@ function coda() {
   busy = true;
   prossimo.stateEl.textContent = 'compressione…';
 
-  var limite = targetKB * 1024;
+  var limite = targetKB * 1000;
 
   /* Un file da zero byte non è un'immagine rotta, è un file vuoto: dirlo con
      parole sue evita di far cercare colpe al browser. */
@@ -313,6 +321,12 @@ function coda() {
   if (modo === 'peso' && prossimo.file.size <= limite) {
     prossimo.blob = prossimo.file;
     prossimo.intatta = true;
+    /* Il file esce com'è entrato, quindi deve tenersi il SUO nome: prima
+       usciva come «foto (leggera).jpg» anche quando dentro era un PNG intatto
+       — l'estensione mentiva sul contenuto, e un PNG chiamato .jpg lo rifiuta
+       il primo portale che controlla il tipo. Qui non abbiamo compresso
+       niente: non c'è nemmeno motivo di chiamarla «leggera». */
+    prossimo.name = prossimo.file.name;
     fatta(prossimo);
     return setTimeout(coda, 0);
   }
@@ -329,6 +343,11 @@ function coda() {
     if (blob.size >= prossimo.file.size) {
       prossimo.blob = prossimo.file;
       prossimo.intatta = true;
+      // «con il suo nome» lo diceva il commento qui sopra, e non lo faceva
+      // nessuno: il file usciva rinominato in .jpg pur restando quello di
+      // partenza. Un PNG chiamato .jpg lo rifiuta il primo portale che
+      // controlla il tipo davvero.
+      prossimo.name = prossimo.file.name;
     } else {
       prossimo.blob = blob;
     }
@@ -354,7 +373,7 @@ function fatta(job) {
   if (modo === 'invisibile') {
     testo += dopo >= prima ? ' · era già al minimo' : ' · −' + risparmio + '%, senza differenze visibili';
   }
-  else if (dopo > targetKB * 1024) testo += ' · più giù non scende';
+  else if (dopo > targetKB * 1000) testo += ' · più giù non scende';
   else if (risparmio > 0) testo += ' · −' + risparmio + '%';
   else testo += ' · era già leggera';
   job.stateEl.innerHTML = testo;
