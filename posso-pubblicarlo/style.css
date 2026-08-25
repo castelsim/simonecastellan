@@ -382,6 +382,19 @@ h1 { font-size: 27px; font-weight: 500; color: var(--ink); letter-spacing: -0.3p
   margin-top: 18px; font-size: 13.5px; color: var(--muted); cursor: pointer; }
 #lavoro .interruttore input { accent-color: var(--acc); width: 16px; height: 16px; }
 #lavoro .azioni { display: flex; gap: 10px; justify-content: center; margin-top: 28px; flex-wrap: wrap; }
+
+/* La riga che spiega «Manda». Sta sotto i comandi e non sopra le anteprime:
+   chi lavora sul ritaglio non deve leggerla ogni volta, chi cerca come
+   mandare la foto la trova dove stanno gli altri modi di portarsela via. */
+#lavoro .manda-nota {
+  max-width: 640px;
+  margin: 14px auto 0;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--lav-mut);
+}
+#lavoro .manda-nota b { color: var(--lav-testo); font-weight: 600; }
 #lavoro .privacy { margin-top: 20px; text-align: center; font-family: var(--mono);
   font-size: 11.5px; color: var(--faint); }
 #lavoro .avanzate { margin-top: 24px; text-align: center; }
