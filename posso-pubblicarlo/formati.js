@@ -15,6 +15,19 @@
 */
 
 var FORMATI = (function () {
+
+  /* Questo dispositivo sa condividere un FILE, non solo un testo?
+     Si chiede una volta sola, con un file finto: `navigator.canShare` esiste
+     anche dove i file non passano — il pulsante «Condividi» in fondo alla
+     pagina compariva proprio così, guardando solo se la funzione esisteva. */
+  var SA_CONDIVIDERE_FILE = (function () {
+    try {
+      if (!navigator.canShare || !navigator.share) return false;
+      var finto = new File([new Uint8Array([0])], 'p.jpg', { type: 'image/jpeg' });
+      return navigator.canShare({ files: [finto] });
+    } catch (e) { return false; }
+  })();
+
   var sorgente = null;        // ImageBitmap a piena risoluzione, per l'esportazione
   var lavoro = null;          // copia ridotta, per disegnare le anteprime senza far fumare il telefono
   var nomeBase = '';
@@ -339,6 +352,41 @@ var FORMATI = (function () {
     scarica.textContent = 'Scarica';
     scarica.addEventListener('click', function () { scaricaUna(voce); });
     mods.appendChild(scarica);
+
+    /* «Manda» — questa immagine, a un'app.
+       ────────────────────────────────────────────────────────────────────
+       È la cosa più vicina a «apri Instagram con la foto dentro» che il web
+       permetta: un sito NON può scegliere l'app di destinazione, e non è una
+       mancanza di questo strumento — è un divieto dei browser, perché una
+       pagina che potesse aprire un'app con dentro un file lo farebbe senza
+       che nessuno se ne accorga. Si apre il foglio del sistema e la scelta
+       la fa chi guarda: un tocco in più, e l'app si apre con la foto già
+       dentro, pronta per il testo.
+
+       Compare solo dove il dispositivo sa davvero condividere un FILE: su un
+       computer da tavolo il foglio spesso non c'è, e un pulsante che non fa
+       niente è peggio di un pulsante che non c'è.
+
+       Il pulsante «Condividi» in fondo alla pagina resta, ma fa un'altra
+       cosa: manda tutti i formati insieme. Mandarne sedici a Instagram non
+       ha senso, e quello era l'unico modo di condividere che c'era. */
+    if (SA_CONDIVIDERE_FILE) {
+      var manda = document.createElement('button');
+      manda.type = 'button';
+      manda.className = 'mini';
+      manda.textContent = 'Manda';
+      manda.title = 'Apri il foglio di condivisione con questa immagine';
+      manda.setAttribute('aria-label', 'Manda questa immagine a un\'app');
+      /* Si comincia a preparare il file quando il dito TOCCA, non quando
+         lascia: `navigator.share` vuole essere chiamato mentre il gesto
+         dell'utente è ancora valido — su Safari dura pochi secondi — e
+         generare un JPEG a piena risoluzione dentro il click brucia proprio
+         quella finestra. Al momento del rilascio il file è quasi sempre già
+         pronto, e la condivisione parte subito. */
+      manda.addEventListener('pointerdown', function () { preparaPerMandare(voce); });
+      manda.addEventListener('click', function () { mandaUna(voce, manda); });
+      mods.appendChild(manda);
+    }
     dx.appendChild(mods);
 
     var zr = document.createElement('div');
@@ -406,7 +454,15 @@ var FORMATI = (function () {
     disegnaTutte();
     aggiornaEtichette();
     zipBtn.textContent = voci.length > 1 ? 'Scarica tutto (' + voci.length + ')' : 'Scarica';
-    mostra(condividiBtn, !!navigator.canShare);
+    /* Il pulsante che manda TUTTI i formati insieme compariva ovunque
+       esistesse `navigator.canShare` — che esiste anche dove i file non
+       passano, per esempio su un computer da tavolo: si premeva e usciva
+       «questo dispositivo non sa condividere i file». Ora compare dove
+       serve. */
+    mostra(condividiBtn, SA_CONDIVIDERE_FILE);
+    // la spiegazione di «Manda» compare dove «Manda» c'è
+    var nota = document.getElementById('mandaNota');
+    if (nota) nota.hidden = !SA_CONDIVIDERE_FILE;
   }
 
   // --- Trascinamento ----------------------------------------------------------
@@ -557,6 +613,67 @@ var FORMATI = (function () {
     a.href = url; a.download = nome;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  }
+
+  /* Il file già pronto per ciascun formato, con la firma dello stato con cui
+     è stato fatto: se chi guarda sposta il ritaglio o cambia sfondo, quella
+     copia non vale più e si rifà. Senza la firma si manderebbe l'immagine di
+     prima — con la faccia di quella giusta. */
+  var pronti = {};
+
+  function firmaDi(voce) {
+    var m = misuraUscita(voce);
+    var st = statoDi(voce.chiave);
+    return m.w + 'x' + m.h + '|' + st.modo + '|' + st.ruota + '|' + st.sfondo + '|' +
+           Math.round(st.x * 1000) + ',' + Math.round(st.y * 1000) + ',' +
+           Math.round(st.zoom * 100) + '|' + tipoUscita()[0];
+  }
+
+  function preparaPerMandare(voce) {
+    var firma = firmaDi(voce);
+    var p = pronti[voce.chiave];
+    if (p && p.firma === firma) return p.promessa;
+    var promessa = generaBlob(voce).then(function (f) {
+      return new File([f.blob], f.nome, { type: f.blob.type });
+    });
+    pronti[voce.chiave] = { firma: firma, promessa: promessa, file: null };
+    promessa.then(function (file) {
+      if (pronti[voce.chiave] && pronti[voce.chiave].firma === firma) {
+        pronti[voce.chiave].file = file;
+      }
+    }, function () { delete pronti[voce.chiave]; });
+    return promessa;
+  }
+
+  async function mandaUna(voce, bottone) {
+    var firma = firmaDi(voce);
+    var p = pronti[voce.chiave];
+
+    /* Se il file è già pronto — e lo è quasi sempre, perché la preparazione
+       comincia quando il dito tocca — si condivide SUBITO, senza aspettare
+       niente: è l'unico modo perché Safari lo consideri ancora parte del
+       gesto. */
+    if (p && p.firma === firma && p.file) {
+      try { await navigator.share({ files: [p.file] }); }
+      catch (e) { /* annullato da chi guarda: non è un errore */ }
+      return;
+    }
+
+    // Non era pronto: si aspetta, e se il browser rifiuta perché il gesto è
+    // scaduto glielo si dice in modo che il secondo tocco funzioni davvero.
+    var testoPrima = bottone.textContent;
+    bottone.textContent = 'preparo…';
+    try {
+      var file = await preparaPerMandare(voce);
+      await navigator.share({ files: [file] });
+    } catch (e) {
+      if (e && e.name === 'NotAllowedError') {
+        avvisa('la foto è pronta: tocca «Manda» di nuovo');
+      } else if (e && e.name !== 'AbortError') {
+        avvisa('non sono riuscito a mandarla');
+      }
+    }
+    bottone.textContent = testoPrima;
   }
 
   async function scaricaUna(voce) {

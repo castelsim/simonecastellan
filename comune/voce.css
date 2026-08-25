@@ -146,7 +146,15 @@
      BPM e il pulsante che copia i millisecondi in Ritardo diffusori — si
      toccano per copiare un numero, e sbagliarli copia il numero sbagliato */
   .cell,
-  .haas {
+  .haas,
+  /* I comandi piccoli dentro le anteprime di «Posso pubblicarlo?» e
+     «Estrai un fotogramma» — Riempi, Adatta, Ruota, Azzera, Scarica, Manda.
+     Misuravano 30-32 px di altezza, e nessuno se n'era accorto perché
+     compaiono solo DOPO che si è caricato un file: la regressione apre le
+     pagine e non carica niente, quindi quella parte non l'ha mai vista.
+     Stessa famiglia del crash di /comprimi-video/, trovato il 23/08: le prove
+     si fermavano prima del gesto che rompe. */
+  .mini {
     min-height: 44px;
   }
 

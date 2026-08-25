@@ -86,9 +86,26 @@
 
       <div class="azioni">
         <button type="button" id="zipBtn" class="btn btn-primary">Scarica tutto</button>
-        <button type="button" id="condividiBtn" class="btn btn-secondary hidden">Condividi</button>
+        <button type="button" id="condividiBtn" class="btn btn-secondary hidden">Condividi tutte</button>
         <button type="button" id="centraBtn" class="btn btn-ghost">Rimetti al centro</button>
       </div>
+
+      <!-- Cosa fa «Manda», e cosa NON può fare.
+           La domanda che l'ha fatto nascere era: «premo e mi si apre Facebook
+           col post e la foto già dentro». Non si può, e non è un limite di
+           questa pagina: un sito non può scegliere l'app di destinazione — lo
+           vietano i browser, perché una pagina che potesse aprire un'app con
+           dentro un file lo farebbe senza che nessuno se ne accorga. Facebook,
+           poi, dal web accetta solo un indirizzo, e l'immagine la prende dai
+           meta tag della pagina condivisa: perché ci arrivasse questa foto,
+           dovrebbe prima essere pubblicata online da qualche parte — cioè
+           esattamente quello che qui non succede.
+           Quello che si può fare è a un tocco di distanza, e lo dice la riga
+           qui sotto. -->
+      <p class="manda-nota" id="mandaNota" hidden>Sotto ogni formato c'è <b>Manda</b>: apre il
+        foglio di condivisione del telefono con quella sola immagine. Scegli l'app e si apre
+        con la foto già dentro, pronta per il testo. L'app la scegli tu: una pagina web non
+        può aprirla da sé.</p>
 
       <details class="avanzate">
         <summary>Formato dei file</summary>
