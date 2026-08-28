@@ -27,8 +27,44 @@
   <meta name="description" content="Curriculum di Simone Castellan: tecnico del suono, ripresa e mix, audio immersivo, docenza di elettroacustica. Scaricabile in PDF.">
   <meta name="author" content="Simone Castellan">
   <link rel="canonical" href="https://simonecastellan.com/cv/">
-  <link rel="alternate" hreflang="it" href="https://simonecastellan.com/cv/">
-  <link rel="alternate" hreflang="en" href="https://simonecastellan.com/en/profile/">
+  <!-- Questa pagina non RIDEFINISCE la persona: la richiama, con l'@id della
+       home. Le proprietà di merito (premi, titoli, scuole) stanno in /profilo/
+       e in un posto solo, o i motori le sommano invece di sostituirle. Qui c'è
+       lo stub, che serve a dire «questa pagina parla di quella persona» — senza
+       stub, un `mainEntity` che punta a un @id assente da questa pagina non
+       veicola niente. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "ProfilePage",
+        "@id": "https://simonecastellan.com/cv/#page",
+        "url": "https://simonecastellan.com/cv/",
+        "name": "Curriculum di Simone Castellan",
+        "inLanguage": "it",
+        "isPartOf": { "@id": "https://simonecastellan.com/#website" },
+        "mainEntity": { "@id": "https://simonecastellan.com/#person" }
+      },
+      {
+        "@type": "Person",
+        "@id": "https://simonecastellan.com/#person",
+        "name": "Simone Castellan",
+        "url": "https://simonecastellan.com/",
+        "jobTitle": "Sound engineer",
+        "mainEntityOfPage": "https://simonecastellan.com/profilo/"
+      }
+    ]
+  }
+  </script>
+  <!-- Niente hreflang qui (26/08/2026). L'annotazione delle lingue vale solo
+       se è RECIPROCA: questa pagina dichiarava «la versione inglese è
+       /en/profile/», ma /en/profile/ dichiara che la sua versione italiana è
+       /profilo/, non questa. Un'annotazione a senso unico Google la scarta —
+       e scartandola butta via l'intero gruppo, compresa la coppia buona
+       /profilo/ ↔ /en/profile/, che invece si rimandano davvero.
+       Il link «English» in pagina resta: quello è navigazione, non
+       un'annotazione per i motori. -->
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <meta name="theme-color" content="#ffffff">
   <meta property="og:type" content="profile">

@@ -18,31 +18,44 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="google-site-verification" content="mKCM2Ga7GOlr9kqlOPLvC3_v7kF12Yrlz3uZmfp35TE" />
-  <title>Simone Castellan — Tecnologia applicata al suono</title>
-  <meta name="description" content="Tecnologia applicata al suono: strumenti di misura e di lavoro che girano nel browser. I progetti — Crastel Studio, StagePlot, Tools — e il profilo tecnico.">
+  <!-- Il title comincia col nome — è la query che deve vincere — e prosegue
+       con le due parole che dicono il mestiere. «Tecnologia applicata al
+       suono» descriveva bene il campo ma non è una cosa che qualcuno cerca,
+       e soprattutto non distingueva da un professore di ingegneria elettrica
+       che si chiama come lui. -->
+  <title>Simone Castellan — Sound engineer e musica elettronica</title>
+  <!-- La descrizione promette quello che la pagina dice davvero: prima
+       prometteva «i progetti — Crastel Studio, StagePlot, Tools» e quei nomi
+       in pagina non c'erano. -->
+  <meta name="description" content="Sound engineer e compositore elettroacustico: registrazione, mix, mastering, audio dal vivo, Dolby Atmos. A Cassola (VI). Strumenti audio gratuiti nel browser.">
   <meta name="author" content="Simone Castellan">
   <meta name="copyright" content="© 2026 Simone Castellan — simonecastellan.com">
   <meta name="rights" content="Codice e design originali di Simone Castellan. Riproduzione integrale non autorizzata. Firma: SCASTELLAN·AVA·2026">
   <link rel="canonical" href="https://simonecastellan.com/">
-  <link rel="alternate" hreflang="it" href="https://simonecastellan.com/">
-  <link rel="alternate" hreflang="en" href="https://simonecastellan.com/en/profile/">
-  <link rel="alternate" hreflang="x-default" href="https://simonecastellan.com/">
+  <!-- Niente hreflang qui (26/08/2026). L'annotazione delle lingue vale solo
+       se è RECIPROCA: questa pagina dichiarava «la versione inglese è
+       /en/profile/», ma /en/profile/ dichiara che la sua versione italiana è
+       /profilo/, non questa. Un'annotazione a senso unico Google la scarta —
+       e scartandola butta via l'intero gruppo, compresa la coppia buona
+       /profilo/ ↔ /en/profile/, che invece si rimandano davvero.
+       Il link «English» in pagina resta: quello è navigazione, non
+       un'annotazione per i motori. -->
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <meta name="theme-color" content="#ffffff">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="it_IT">
   <meta property="og:site_name" content="Simone Castellan">
-  <meta property="og:title" content="Simone Castellan">
-  <meta property="og:description" content="Un profilo dinamico leggibile dall'intelligenza artificiale: chiedi a ChatGPT, Claude, Grok o Perplexity chi è Simone Castellan e come potreste creare valore insieme.">
+  <meta property="og:title" content="Simone Castellan — Sound engineer">
+  <meta property="og:description" content="Registrazione, mix e mastering, audio dal vivo, composizione elettroacustica. E strumenti audio gratuiti che girano nel browser.">
   <meta property="og:url" content="https://simonecastellan.com/">
   <meta property="og:image" content="https://simonecastellan.com/og-image.png?v=2">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Simone Castellan — tecnologia applicata al suono">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Simone Castellan">
-  <meta name="twitter:description" content="Un profilo dinamico leggibile dall'intelligenza artificiale: chiedi a ChatGPT, Claude, Grok o Perplexity chi è Simone Castellan e come potreste creare valore insieme.">
+  <meta name="twitter:title" content="Simone Castellan — Sound engineer">
+  <meta name="twitter:description" content="Registrazione, mix e mastering, audio dal vivo, composizione elettroacustica. E strumenti audio gratuiti che girano nel browser.">
   <meta name="twitter:image" content="https://simonecastellan.com/og-image.png?v=2">
   <!--
     ── PERCHÉ QUI IL NODO Person È CORTO (22/08/2026) ─────────────────────
@@ -125,9 +138,16 @@
       font-size:clamp(32px,6.2vw,44px); font-weight:500; color:#1a1a1a;
       letter-spacing:-.9px; line-height:1.06;
     }
+    /* La seconda riga dell'intestazione. Dal 26/08/2026 vive DENTRO l'<h1>,
+       quindi ogni proprietà che prima ereditava dal <p> va dichiarata qui:
+       senza, si prenderebbe quelle del titolo — 44 px, peso 500,
+       letter-spacing −0,9 — e la pagina cambierebbe faccia. `display:block`
+       perché uno <span> è in riga e il titolo diventerebbe una riga sola. */
     .lead{
+      display:block;
       max-width:560px; margin:19px auto 0; color:#3c4043;
-      font-size:clamp(17px,2.4vw,19px); line-height:1.5;
+      font-size:clamp(17px,2.4vw,19px); font-weight:400; letter-spacing:normal;
+      line-height:1.5;
     }
     /* Scuola, studio e Dolby Atmos: il posizionamento, in 14 px di grigio.
        I due link stanno dentro la frase — non è un elenco di link. */
@@ -157,6 +177,53 @@
        dipende da un testo che c'è o non c'è — l'occhiello è già uscito una
        volta, e con lui se n'erano andati anche i suoi 12 px. */
     .sviluppo{margin-top:36px}
+    /* ── IL NOME DEL PROGETTO: C'È PER CHI LEGGE, NON PER CHI GUARDA ──────
+       Simone aveva chiesto di togliere i nomi dai riquadri (15/08/2026), e
+       quella scelta resta: l'aspetto non cambia di un pixel.
+
+       Ma i nomi devono ESSERE testo. Fino al 26/08 «Crastel», «StagePlot»,
+       «Tools» e «AVA Sound» vivevano solo dentro `data-p` (le statistiche) e
+       `aria-label`: per un motore di ricerca non esistevano, e la meta
+       description della home prometteva «i progetti — Crastel Studio,
+       StagePlot, Tools» che la pagina non nominava da nessuna parte. Su un
+       sito che deve far capire CHI è Simone, i nomi delle cose che ha
+       costruito sono metà del lavoro.
+
+       Perciò il nome sta nel testo ma è tolto dalla vista: non con
+       `display:none`, che lo toglie anche a chi usa un lettore di schermo e
+       che i motori trattano con sospetto, ma con il ritaglio a un pixel —
+       la tecnica standard per «leggibile, non visibile». Dice la stessa cosa
+       che dice l'aria-label: nessuno legge una versione diversa da quella che
+       vede. */
+    /* ── «IN BREVE»: il testo che mancava, dove non disturba ──────────────
+       Piccolo, grigio, in fondo, con una riga di stacco sopra: la pagina è e
+       resta quella minimale che Simone ha scelto. Allineato a sinistra e con
+       una misura di riga corta, perché tre capoversi centrati non si leggono.
+       Il grigio è #5f6368: misurato 7,0:1 su bianco, ben oltre il 4,5:1
+       richiesto — «discreto» non vuol dire illeggibile. */
+    .inbreve{
+      max-width:620px; margin:48px auto 0; padding-top:26px;
+      border-top:1px solid #eef0f2;
+      text-align:left; font-size:14px; line-height:1.7; color:#5f6368;
+    }
+    .inbreve h2{
+      font:600 11px ui-monospace,SFMono-Regular,Menlo,monospace;
+      letter-spacing:.14em; text-transform:uppercase; color:#68716d;
+      margin:20px 0 6px;
+    }
+    .inbreve h2:first-child{margin-top:0}
+    .inbreve p{margin:0}
+    .inbreve strong{color:#3c4043; font-weight:600}
+    .inbreve a{color:#5f6368; text-decoration:underline; text-underline-offset:2px}
+    .inbreve a:hover{color:#1a1a1a}
+    @media (max-width:620px){
+      .inbreve{margin-top:38px; font-size:13.5px}
+    }
+    .p-nome{
+      position:absolute; width:1px; height:1px;
+      padding:0; margin:-1px; overflow:hidden;
+      clip:rect(0 0 0 0); white-space:nowrap; border:0;
+    }
     .sviluppo-occhiello{
       font:500 11px ui-monospace,SFMono-Regular,Menlo,monospace;
       letter-spacing:.16em; text-transform:uppercase; color:#0a7d72;
@@ -303,9 +370,25 @@
   </nav>
 
   <main>
-    <!-- Il nome sta nell'<h1> statico: è quello che resta a chi non esegue JavaScript. -->
-    <h1>Simone Castellan</h1>
-    <p class="lead">Tecnologia applicata al suono.</p>
+    <!-- ── L'INTESTAZIONE, E PERCHÉ IL MESTIERE STA DENTRO L'H1 ─────────────
+         Il nome sta nell'<h1> statico: è quello che resta a chi non esegue
+         JavaScript, ed è la prima cosa che un motore legge.
+
+         Dal 26/08/2026 l'<h1> non è più il solo nome. Misurato in Search
+         Console: Google conosceva UNA pagina di questo sito e cinque clic in
+         tre mesi, e di questa pagina aveva 87 parole — di cui metà erano
+         avvisi tecnici («i pulsanti richiedono JavaScript»). Cercando il
+         dominio esatto il sito non usciva, e la descrizione che il motore
+         restituiva veniva da una versione di anni fa. Un <h1> col solo nome,
+         su un sito che nessuno linka, non dice a nessuno DI QUALE Simone
+         Castellan si tratti — e ce n'è un altro, professore di ingegneria
+         elettrica, che occupa i risultati.
+
+         L'aspetto NON cambia: la seconda riga è sempre la stessa, con lo
+         stesso colore e lo stesso peso. È solo passata dentro l'<h1>, dove
+         conta. Chi guarda vede due righe come prima; chi legge il codice
+         trova un titolo che dice nome e mestiere insieme. -->
+    <h1>Simone Castellan<span class="lead">Sound engineer e tecnologie applicate al suono</span></h1>
 
     <!-- I tre progetti, vicini e coordinati: si devono leggere come un
          ecosistema solo, non come tre link capitati lì. Sono la cosa che
@@ -328,7 +411,7 @@
       <div class="progetti">
         <a class="progetto" href="https://crastelstudio.com" target="_blank" rel="noopener"
            data-p="Crastel" aria-label="Crastelstudio.com, musica per immagini — si apre in una nuova scheda">
-          <span class="p-cosa">musica per immagini</span>
+          <span class="p-nome">Crastel</span><span class="p-cosa">musica per immagini</span>
         </a>
         <a class="progetto" href="https://stageplot.it/" target="_blank" rel="noopener"
            data-p="StagePlot" aria-label="StagePlot.it, il tuo palco in scala — si apre in una nuova scheda">
@@ -336,11 +419,11 @@
                disegno qualsiasi, e stava già in due punti del sito («disegnare
                stage plot in scala reale» nel profilo, «stage plot in scala» in
                /tools/). Era uscito dalla home nella riscrittura del 15/08. -->
-          <span class="p-cosa">il tuo palco in scala</span>
+          <span class="p-nome">StagePlot</span><span class="p-cosa">il tuo palco in scala</span>
         </a>
         <a class="progetto" href="/tools/" data-p="Tools"
            aria-label="Tools, strumenti utili in locale">
-          <span class="p-cosa">strumenti utili in locale</span>
+          <span class="p-nome">Tools</span><span class="p-cosa">strumenti utili in locale</span>
         </a>
         <!-- AVA Sound Live Music: è l'unico dei quattro che non è un progetto
              suo ma il posto dove lavora (responsabile della sala). Sta qui
@@ -348,7 +431,7 @@
              per esteso resta nell'aria-label come per gli altri. -->
         <a class="progetto" href="https://www.avasoundlivemusic.eu/" target="_blank" rel="noopener"
            data-p="AVA" aria-label="AVA Sound Live Music, studio di registrazione — si apre in una nuova scheda">
-          <span class="p-cosa">studio di registrazione</span>
+          <span class="p-nome">AVA Sound</span><span class="p-cosa">studio di registrazione</span>
         </a>
       </div>
     </section>
@@ -377,6 +460,46 @@
     <!-- «Tienimi presente» è uscito da qui per scelta di Simone (15/08/2026):
          due modi di scrivere sono una scelta, tre sono un elenco. La pagina
          resta viva e la raggiunge /tools/ («Se ne manca uno, dimmelo»). -->
+
+    <!-- ══ IN BREVE ══════════════════════════════════════════════════════
+         Aggiunto il 26/08/2026, e non è riempitivo per i motori: è la
+         risposta a un dato misurato in Search Console. Google conosceva UNA
+         pagina di questo sito, con 87 parole di cui metà avvisi tecnici, e
+         cinque clic in tre mesi. Cercando il nome escono due omonimi
+         accademici — un professore di ingegneria elettrica a Trieste su
+         tutti — perché di questo Simone Castellan la rete non ha abbastanza
+         testo per capire di chi si parli.
+
+         Sta IN FONDO e in grigio piccolo apposta: la pagina resta quella che
+         Simone ha scelto — nome, mestiere, quattro progetti, un pulsante.
+         Chi arriva vede la stessa cosa di prima. Chi legge fino in fondo, o
+         chi legge il codice, trova le parole che mancavano.
+
+         Le frasi sono scritte per una persona, non per un motore: nessun
+         elenco di parole chiave, nessuna ripetizione del nome. Ogni fatto qui
+         dentro è già scritto in /profilo/ o in /cv/ — questa è una sintesi,
+         non una fonte nuova. -->
+    <section class="inbreve" aria-label="Chi è Simone Castellan">
+      <h2>Chi è</h2>
+      <p>Simone Castellan è un <strong>sound engineer</strong> e compositore di musica
+        elettroacustica. Lavora sulla catena completa del suono, dal microfono al master:
+        ripresa multitraccia, editing, mix e mastering per discografia, televisione e
+        broadcast, e dal 2019 è responsabile operativo di una sala di mix Dolby Atmos 7.1.4
+        certificata. Vive e lavora a Cassola, in provincia di Vicenza.</p>
+
+      <h2>Cosa fa</h2>
+      <p>Registrazione e produzione musicale in Pro Tools, audio dal vivo e sonorizzazione di
+        eventi, composizione ed elettronica in tempo reale, musica per immagini. Insegna
+        elettroacustica alla Civica Scuola di Musica «Claudio Abbado» di Milano. Scrive
+        <a href="/tools/">strumenti audio che girano nel browser</a> — misura acustica,
+        taratura di impianti, conversione — e li lascia gratuiti.</p>
+
+      <h2>Dove approfondire</h2>
+      <p><a href="/profilo/">Il profilo completo di Simone Castellan</a> raccoglie i crediti
+        discografici con i codici dei supporti, le opere elettroacustiche e i riconoscimenti;
+        il <a href="/cv/">curriculum in una pagina</a> si scarica anche in PDF.
+        <span lang="en"><a href="/en/profile/" hreflang="en">Read the profile in English</a></span>.</p>
+    </section>
 
 
 

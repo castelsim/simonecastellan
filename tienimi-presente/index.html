@@ -13,11 +13,23 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "ContactPage",
-    "url": "https://simonecastellan.com/tienimi-presente/",
-    "name": "Tienimi presente — Simone Castellan",
-    "inLanguage": "it",
-    "about": { "@id": "https://simonecastellan.com/#person" }
+    "@graph": [
+      {
+      "@type": "ContactPage",
+      "url": "https://simonecastellan.com/tienimi-presente/",
+      "name": "Tienimi presente — Simone Castellan",
+      "inLanguage": "it",
+      "about": { "@id": "https://simonecastellan.com/#person" }
+      },
+      {
+        "@type": "Person",
+        "@id": "https://simonecastellan.com/#person",
+        "name": "Simone Castellan",
+        "url": "https://simonecastellan.com/",
+        "jobTitle": "Sound engineer",
+        "mainEntityOfPage": "https://simonecastellan.com/profilo/"
+      }
+    ]
   }
   </script>
   <style>
@@ -87,7 +99,7 @@
   </div>
 
   <div class="tp" id="grazie">
-    <h1>Ricevuto, grazie.</h1>
+    <p class="ok-titolo">Ricevuto, grazie.</p>
     <p class="sub">Se hai lasciato un contatto, Simone ti risponde appena può.<br>Altrimenti: torna quando vuoi.</p>
   </div>
 

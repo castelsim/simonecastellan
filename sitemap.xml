@@ -3,7 +3,7 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://simonecastellan.com/</loc>
-    <lastmod>2026-08-15</lastmod>
+    <lastmod>2026-08-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="it" href="https://simonecastellan.com/"/>
@@ -12,7 +12,7 @@
   </url>
   <url>
     <loc>https://simonecastellan.com/profilo/</loc>
-    <lastmod>2026-08-15</lastmod>
+    <lastmod>2026-08-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="it" href="https://simonecastellan.com/profilo/"/>
@@ -20,7 +20,7 @@
   </url>
   <url>
     <loc>https://simonecastellan.com/en/profile/</loc>
-    <lastmod>2026-08-15</lastmod>
+    <lastmod>2026-08-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://simonecastellan.com/en/profile/"/>
@@ -52,7 +52,7 @@
   </url>
   <url>
     <loc>https://simonecastellan.com/bpm/</loc>
-    <lastmod>2026-08-15</lastmod>
+    <lastmod>2026-08-23</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -64,31 +64,31 @@
   </url>
   <url>
     <loc>https://simonecastellan.com/tonalita/</loc>
-    <lastmod>2026-08-15</lastmod>
+    <lastmod>2026-08-23</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://simonecastellan.com/qrcode/</loc>
-    <lastmod>2026-08-15</lastmod>
+    <lastmod>2026-08-23</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://simonecastellan.com/tools/</loc>
-    <lastmod>2026-08-15</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://simonecastellan.com/comprimi-immagini/</loc>
-    <lastmod>2026-08-12</lastmod>
+    <lastmod>2026-08-23</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://simonecastellan.com/posso-pubblicarlo/</loc>
-    <lastmod>2026-08-14</lastmod>
+    <lastmod>2026-08-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -100,7 +100,7 @@
   </url>
   <url>
     <loc>https://simonecastellan.com/comprimi-pdf/</loc>
-    <lastmod>2026-08-14</lastmod>
+    <lastmod>2026-08-23</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -130,7 +130,7 @@
   </url>
   <url>
     <loc>https://simonecastellan.com/conta-caratteri/</loc>
-    <lastmod>2026-08-12</lastmod>
+    <lastmod>2026-08-23</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>

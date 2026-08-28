@@ -1,6 +1,18 @@
 User-agent: *
 Allow: /
 
+# Quello che non è una pagina non va scansionato. Verificato il 26/08/2026:
+# README.md, ops/allinea-sitemap.py e ops/note-profilo.md rispondevano 200 e
+# finivano nel giro di scansione. Non fanno danno se indicizzati, ma occupano
+# il tempo che un motore dedica a questo sito — e questo sito ha un problema
+# di scansione, non di abbondanza.
+Disallow: /ops/
+Disallow: /README.md
+Disallow: /tools/banco.html
+Disallow: /tools/regressione.html
+Disallow: /tools/casi/
+Disallow: /tools/varianti-tastiera.html
+
 # Assistenti AI e crawler esplicitamente benvenuti
 User-agent: GPTBot
 Allow: /
