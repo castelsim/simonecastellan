@@ -206,6 +206,47 @@
       border-top:1px solid #eef0f2;
       text-align:left; font-size:14px; line-height:1.7; color:#5f6368;
     }
+
+    /* ── LA PAGINA STA FERMA, IL TESTO SCORRE ─────────────────────────────
+       Scelta di Simone (28/08/2026): la landing resta una schermata sola, e
+       lo scorrimento è solo del blocco in fondo.
+
+       Non costa niente ai motori — ed è la differenza con il blocco
+       richiudibile che avevamo scartato: là il testo era `display:none`
+       finché non si apriva, qui è disegnato, sta nella pagina e si legge.
+       Un contenitore che scorre non nasconde niente a nessuno.
+
+       Vale SOLO dove c'è spazio per farlo. Sotto una certa altezza —
+       telefoni bassi, finestre schiacciate, la tastiera che si apre — un
+       riquadro che scorre dentro una pagina che non scorre lascerebbe due
+       righe visibili e il resto in un tunnel. Lì la pagina torna a scorrere
+       normalmente, che è il comportamento che non lascia mai nessuno fuori.
+       La soglia è sull'ALTEZZA della finestra, non sulla larghezza: un
+       portatile con lo schermo basso ha lo stesso problema di un telefono. */
+    @media (min-height:760px) and (min-width:620px){
+      html,body{height:100%; overflow:hidden}
+      body{min-height:0}
+      /* `min-height:0` su un elemento flex è la riga che permette ai figli di
+         restringersi sotto il loro contenuto: senza, il blocco si allarga e
+         spinge fuori la pagina invece di scorrere al proprio interno. */
+      main{min-height:0; overflow:hidden}
+      .inbreve{
+        overflow-y:auto;
+        min-height:0;
+        flex:0 1 auto;
+        width:100%;
+        /* lo spazio per l'ultima riga, che altrimenti resta incollata al bordo */
+        padding-bottom:8px;
+        /* si scorre col dito o col trackpad senza trascinare la pagina */
+        overscroll-behavior:contain;
+      }
+      /* Una sfumatura in fondo dice che sotto c'è dell'altro: senza, il testo
+         tagliato a metà riga sembra un difetto invece che un invito. */
+      .inbreve{
+        -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);
+        mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);
+      }
+    }
     .inbreve h2{
       font:600 11px ui-monospace,SFMono-Regular,Menlo,monospace;
       letter-spacing:.14em; text-transform:uppercase; color:#68716d;
