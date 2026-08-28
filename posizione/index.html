@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>La mia posizione</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#EDF0E9">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Posizione">
+<link rel="apple-touch-icon" href="icona-180.png">
+<style>
+:root{
+  --carta:#EDF0E9;
+  --inchiostro:#1B2621;
+  --isoipsa:#B08154;
+  --segnale:#C1452E;
+  --acqua:#3F7D8C;
+  --tenue:#6E7A72;
+  --reticolo:rgba(27,38,33,.09);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{
+  height:100dvh;
+  overflow-y:auto;
+  background:var(--carta);
+  color:var(--inchiostro);
+  font:400 17px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  padding:max(16px,env(safe-area-inset-top)) 18px max(18px,env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;gap:14px;
+  background-image:linear-gradient(var(--reticolo) 1px,transparent 1px),linear-gradient(90deg,var(--reticolo) 1px,transparent 1px);
+  background-size:28px 28px;
+  -webkit-user-select:none;user-select:none;
+}
+.testata{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.occhiello{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tenue);font-weight:600}
+h1{font-size:23px;font-weight:700;letter-spacing:-.015em}
+
+/* --- il cerchio d'incertezza: la firma --- */
+.quadrante{
+  position:relative;aspect-ratio:1;flex:0 1 260px;min-height:104px;width:auto;max-width:100%;margin:0 auto;
+  display:grid;place-items:center;
+}
+.alone,.bordo{
+  position:absolute;border-radius:50%;
+  transition:width .9s cubic-bezier(.16,1,.3,1),height .9s cubic-bezier(.16,1,.3,1),opacity .5s;
+}
+.alone{background:var(--isoipsa);opacity:.13;width:0;height:0}
+.bordo{border:1.5px dashed var(--isoipsa);opacity:.55;width:0;height:0}
+.quadrante.attivo .alone{opacity:.17}
+.trigonometrico{position:relative;width:34px;height:34px;opacity:0;transition:opacity .4s .5s}
+.quadrante.attivo .trigonometrico{opacity:1}
+.trigonometrico svg{width:100%;height:100%;display:block}
+.cerca .bordo{width:82%!important;height:82%!important;opacity:.5;animation:respiro 1.5s ease-in-out infinite}
+@keyframes respiro{0%,100%{transform:scale(.72);opacity:.25}50%{transform:scale(1);opacity:.6}}
+.attesa{position:absolute;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--tenue);font-weight:600}
+
+/* --- lettura --- */
+.lettura{text-align:center;flex:0 0 auto;min-height:104px;display:flex;flex-direction:column;justify-content:center;gap:3px}
+.raggio{font-size:15px;color:var(--inchiostro);font-weight:600}
+.raggio b{color:var(--isoipsa)}
+.coord{
+  font:600 28px/1.12 ui-monospace,"SF Mono",Menlo,monospace;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums;
+}
+.asse{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--tenue);font-weight:600;margin-bottom:9px}
+.quando{font-size:13px;color:var(--tenue);margin-top:9px;font-variant-numeric:tabular-nums}
+.avviso{
+  background:var(--segnale);color:#fff;border-radius:11px;padding:11px 14px;
+  font-size:14px;font-weight:600;line-height:1.35;margin-top:4px;
+}
+.errore{background:var(--segnale);color:#fff;border-radius:11px;padding:13px 15px;font-size:15px;line-height:1.4}
+.vuoto{color:var(--tenue);font-size:15px;max-width:26ch;margin:0 auto;line-height:1.5}
+
+/* --- comandi --- */
+.comandi{margin-top:auto;flex:0 0 auto;padding-top:12px;display:flex;flex-direction:column;gap:11px}
+button,a.tasto{
+  font:inherit;border:none;border-radius:15px;width:100%;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  text-decoration:none;cursor:pointer;
+  transition:transform .12s,background .2s;
+}
+button:active,a.tasto:active{transform:scale(.975)}
+.rileva{
+  background:var(--inchiostro);color:var(--carta);
+  min-height:62px;font-size:17px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+}
+.rileva[disabled]{opacity:.45}
+.copia{
+  background:var(--isoipsa);color:#fff;min-height:54px;
+  font-size:16px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+}
+.copia.fatto{background:var(--acqua)}
+.mappe{display:flex;gap:11px}
+a.tasto{
+  background:transparent;border:1.5px solid rgba(27,38,33,.22);color:var(--inchiostro);
+  min-height:48px;font-size:15px;font-weight:600;flex:1;
+}
+[hidden]{display:none!important}
+.riservatezza{text-align:center;font-size:11px;color:var(--tenue);line-height:1.35;margin-top:1px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header class="testata">
+  <div>
+    <div class="occhiello">Punto di rilevamento</div>
+    <h1>La mia posizione</h1>
+  </div>
+</header>
+
+<div class="quadrante" id="quadrante">
+  <div class="alone" id="alone"></div>
+  <div class="bordo" id="bordo"></div>
+  <div class="trigonometrico">
+    <svg viewBox="0 0 34 34" aria-hidden="true">
+      <path d="M17 3 L31.7 29 L2.3 29 Z" fill="none" stroke="#1B2621" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="17" cy="21.5" r="3.4" fill="#C1452E"/>
+    </svg>
+  </div>
+  <div class="attesa" id="attesa">In attesa</div>
+</div>
+
+<section class="lettura" id="lettura" aria-live="polite">
+  <p class="vuoto">Tocca «Rileva posizione» per leggere le coordinate dal GPS del telefono.</p>
+</section>
+
+<div class="comandi">
+  <button class="rileva" id="rileva">Rileva posizione</button>
+  <button class="copia" id="copia" hidden>Copia per Claude</button>
+  <div class="mappe" hidden id="mappe">
+    <a class="tasto" id="gmaps" href="#" target="_blank" rel="noopener">Google Maps</a>
+    <a class="tasto" id="amaps" href="#" target="_blank" rel="noopener">Apple Maps</a>
+  </div>
+  <p class="riservatezza">La posizione resta su questo telefono. Non viene inviata a nessun server.</p>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let ultima = null;
+
+const fmtData = d => d.toLocaleString('it-IT',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+
+// Il raggio disegnato cresce col logaritmo della precisione:
+// 5 m resta un punto, 500 m riempie il quadrante.
+function raggioVisivo(metri){
+  const p = Math.min(1, Math.log10(Math.max(metri,3)/3) / Math.log10(500/3));
+  return 14 + p * 72;               // percentuale del lato
+}
+
+function mostra(pos){
+  const c = pos.coords;
+  const quando = new Date(pos.timestamp);
+  const lat = c.latitude, lon = c.longitude;
+  const prec = Math.round(c.accuracy);
+  ultima = {lat, lon, prec, quando};
+
+  const r = raggioVisivo(c.accuracy);
+  $('alone').style.width = $('alone').style.height = r + '%';
+  $('bordo').style.width = $('bordo').style.height = r + '%';
+  $('quadrante').classList.remove('cerca');
+  $('quadrante').classList.add('attivo');
+  $('attesa').hidden = true;
+
+  $('lettura').innerHTML = `
+    <p class="raggio">Posizione stimata entro un raggio di <b>${prec} metri</b></p>
+    <div style="margin-top:14px">
+      <div class="coord">${lat.toFixed(7)}</div>
+      <div class="asse">Latitudine nord</div>
+      <div class="coord">${lon.toFixed(7)}</div>
+      <div class="asse">Longitudine est</div>
+    </div>
+    <div class="quando">Rilevata il ${fmtData(quando)}</div>
+    ${prec > 30 ? '<p class="avviso">Segnale poco preciso: spostati all’aperto e riprova</p>' : ''}
+  `;
+
+  $('gmaps').href = `https://www.google.com/maps?q=${lat},${lon}`;
+  $('amaps').href = `https://maps.apple.com/?ll=${lat},${lon}&q=La%20mia%20posizione`;
+  $('mappe').hidden = false;
+  $('copia').hidden = false;
+  $('copia').textContent = 'Copia per Claude';
+  $('copia').classList.remove('fatto');
+}
+
+function errore(e){
+  $('quadrante').classList.remove('cerca','attivo');
+  $('attesa').hidden = false;
+  $('attesa').textContent = 'Nessun segnale';
+  const motivi = {
+    1:'Permesso negato. Vai in Impostazioni › Safari › Posizione e consenti l’accesso, poi riprova.',
+    2:'Il telefono non riesce a determinare la posizione. Spostati all’aperto e riprova.',
+    3:'Tempo scaduto: nessuna risposta entro 15 secondi. Riprova all’aperto.'
+  };
+  $('lettura').innerHTML = `<p class="errore">${motivi[e.code] || e.message}</p>`;
+}
+
+$('rileva').addEventListener('click', () => {
+  if (!navigator.geolocation){
+    $('lettura').innerHTML = '<p class="errore">Questo browser non espone la posizione. Apri la pagina in Safari.</p>';
+    return;
+  }
+  $('rileva').disabled = true;
+  $('rileva').textContent = 'Rilevo…';
+  $('quadrante').classList.add('cerca');
+  $('quadrante').classList.remove('attivo');
+  $('attesa').hidden = false;
+  $('attesa').textContent = 'Cerco il segnale';
+  $('lettura').innerHTML = '<p class="vuoto">Tieni il telefono fermo, meglio se all’aperto.</p>';
+
+  navigator.geolocation.getCurrentPosition(
+    pos => { mostra(pos); libera(); },
+    err => { errore(err); libera(); },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+  );
+
+  function libera(){
+    $('rileva').disabled = false;
+    $('rileva').textContent = 'Rileva di nuovo';
+  }
+});
+
+$('copia').addEventListener('click', async () => {
+  if (!ultima) return;
+  const {lat, lon, prec, quando} = ultima;
+  const testo =
+`La mia posizione attuale:
+Latitudine: ${lat.toFixed(7)}
+Longitudine: ${lon.toFixed(7)}
+Precisione stimata: ±${prec} metri
+Rilevata il: ${fmtData(quando)}
+Google Maps: https://www.google.com/maps?q=${lat},${lon}`;
+
+  try {
+    await navigator.clipboard.writeText(testo);
+  } catch {
+    const t = document.createElement('textarea');
+    t.value = testo; t.style.position='fixed'; t.style.opacity='0';
+    document.body.appendChild(t); t.select();
+    document.execCommand('copy'); t.remove();
+  }
+  $('copia').textContent = 'Copiato';
+  $('copia').classList.add('fatto');
+  setTimeout(() => {
+    $('copia').textContent = 'Copia per Claude';
+    $('copia').classList.remove('fatto');
+  }, 2200);
+});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>

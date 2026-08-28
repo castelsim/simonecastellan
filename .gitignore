@@ -8,6 +8,7 @@ simone_castellan_modificato.pdf
 *.png
 !og-image.png
 !apple-touch-icon.png
+!posizione/icona-*.png
 !live-production-os/assets/stageplot-preview.png
 .DS_Store
 stato attuale/
