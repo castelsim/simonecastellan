@@ -53,13 +53,25 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "ProfilePage",
-    "@id": "https://simonecastellan.com/en/profile/#page",
-    "url": "https://simonecastellan.com/en/profile/",
-    "name": "Simone Castellan — profile, credits and works",
-    "inLanguage": "en",
-    "dateModified": "2026-08-22",
-    "mainEntity": { "@id": "https://simonecastellan.com/#person" }
+    "@graph": [
+      {
+      "@type": "ProfilePage",
+      "@id": "https://simonecastellan.com/en/profile/#page",
+      "url": "https://simonecastellan.com/en/profile/",
+      "name": "Simone Castellan — profile, credits and works",
+      "inLanguage": "en",
+      "dateModified": "2026-08-22",
+      "mainEntity": { "@id": "https://simonecastellan.com/#person" }
+      },
+      {
+        "@type": "Person",
+        "@id": "https://simonecastellan.com/#person",
+        "name": "Simone Castellan",
+        "url": "https://simonecastellan.com/",
+        "jobTitle": "Sound engineer",
+        "mainEntityOfPage": "https://simonecastellan.com/profilo/"
+      }
+    ]
   }
   </script>
   <style>

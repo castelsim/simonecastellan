@@ -124,9 +124,25 @@ def controlla_profilo_non_incorporato(home):
     if "PPLX_URL" in home or "perplexity.ai/search?q=%" in home:
         errore("in index.html è tornata una copia incorporata del profilo: "
                "la home deve passare solo il link a /profilo")
-    if len(home) > 40000:
-        errore(f"index.html è cresciuto a {len(home)} byte: probabile ritorno di contenuto "
-               f"che dovrebbe stare in /profilo o in llms.txt")
+    # ⚠️ Si misura il TESTO, non i byte del file (corretto il 26/08/2026).
+    # La soglia stava sui byte, e i byte di questo progetto crescono soprattutto
+    # per i commenti: il controllo scattava aggiungendo una spiegazione nel
+    # sorgente, cioè proprio la cosa che qui si vuole incoraggiare. Quello che
+    # deve restare piccolo è quanto la home DICE, non quanto pesa.
+    #
+    # La soglia: una sintesi di chi è Simone ci sta (il 26/08 ne sono state
+    # aggiunte 247 parole, misurate in Search Console come necessarie — Google
+    # conosceva una pagina sola con 87 parole). Il profilo intero, che ne ha
+    # 4.300, no: quello ha il suo posto in /profilo/, e duplicarlo qui
+    # significherebbe due pagine che si fanno concorrenza sulla stessa persona.
+    testo_home = re.sub(r"<!--.*?-->", " ", home, flags=re.S)
+    testo_home = re.sub(r"<(script|style).*?</\1>", " ", testo_home, flags=re.S | re.I)
+    parole_home = len(re.sub(r"<[^>]+>", " ", testo_home).split())
+    if parole_home > 450:
+        errore(f"la home è arrivata a {parole_home} parole di testo: probabile ritorno di "
+               f"contenuto che dovrebbe stare in /profilo/ o in llms.txt")
+    else:
+        print(f"  home: {parole_home} parole di testo indicizzabile")
 
 
 def controlla_perplexity_spento(home):
