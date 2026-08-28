@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Varianti del blocco «In breve» della home</title>
+<!--
+  Pagina di confronto, non una pagina del sito. Serve a scegliere COME si
+  presenta il testo aggiunto in fondo alla home il 26/08/2026.
+
+  Quello che NON è negoziabile, e perché: il testo deve stare SULLA HOME.
+  Misurato in Search Console, Google conosceva una pagina sola di questo sito
+  e di quella pagina aveva 87 parole, metà delle quali avvisi tecnici. Le 248
+  parole di adesso sono ciò che dice a un motore — e a una persona — di quale
+  Simone Castellan si tratti, visto che i risultati del nome oggi sono di un
+  professore di ingegneria elettrica di Trieste.
+  Spostarle su un'altra pagina, o toglierle, riporta la home a com'era.
+
+  Quello che è negoziabile: tutto il resto. Sotto ci sono cinque forme, dalla
+  più esplicita alla più nascosta, ognuna con il suo costo dichiarato.
+-->
+<style>
+  :root{ --ink:#1a1a1a; --testo:#3c4043; --mut:#5f6368; --faint:#68716d;
+         --line:#eef0f2; --teal:#0a7d72 }
+  *{ box-sizing:border-box }
+  body{ margin:0; padding:26px 18px 70px; background:#fff; color:var(--ink);
+        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+        line-height:1.55 }
+  h1{ font-size:22px; font-weight:600; margin:0 0 6px }
+  .intro{ color:var(--mut); font-size:14px; max-width:760px; margin:0 0 8px }
+  .intro b{ color:var(--ink) }
+  .avviso{ max-width:760px; margin:0 0 28px; padding:12px 14px; font-size:13.5px;
+           background:#f7faf9; border:1px solid #e3e8e6; border-radius:10px; color:var(--mut) }
+  .griglia{ display:flex; flex-wrap:wrap; gap:26px; align-items:flex-start }
+  .var{ width:430px; border:1px solid #e3e8e6; border-radius:14px; padding:18px }
+  .var > h2{ font-size:15px; margin:0 0 2px; font-weight:600 }
+  .costo{ font-size:12.5px; color:var(--mut); margin:0 0 16px; min-height:48px }
+  .costo b{ color:var(--ink) }
+  .misure{ margin-top:14px; padding-top:12px; border-top:1px dashed #e3e8e6;
+           font-size:11.5px; color:var(--mut); font-family:ui-monospace,Menlo,monospace;
+           white-space:pre-line }
+  .si{ color:var(--teal); font-weight:600 }
+  .no{ color:#b3261e; font-weight:600 }
+
+  /* il pezzo di home, uguale in tutte le varianti */
+  .finta-home{ border-top:1px solid var(--line); padding-top:8px; margin-top:4px }
+  .finta-home .sopra{ text-align:center; color:#c8ccd0; font-size:11px; padding:6px 0 14px;
+                      font-family:ui-monospace,Menlo,monospace; letter-spacing:.08em }
+
+  /* ── A · com'è adesso ─────────────────────────────────────────────────── */
+  .A{ max-width:620px; margin:0 auto; padding-top:26px; border-top:1px solid var(--line);
+      text-align:left; font-size:14px; line-height:1.7; color:var(--mut) }
+  .A h3{ font:600 11px ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em;
+         text-transform:uppercase; color:var(--faint); margin:20px 0 6px }
+  .A h3:first-child{ margin-top:0 }
+  .A p{ margin:0 }
+  .A strong{ color:var(--testo); font-weight:600 }
+  .A a{ color:var(--mut); text-decoration:underline; text-underline-offset:2px }
+
+  /* ── B · un capoverso solo ────────────────────────────────────────────── */
+  .B{ max-width:620px; margin:0 auto; padding-top:24px; border-top:1px solid var(--line);
+      text-align:left; font-size:13.5px; line-height:1.75; color:var(--mut) }
+  .B p{ margin:0 0 10px }
+  .B p:last-child{ margin-bottom:0 }
+  .B strong{ color:var(--testo); font-weight:600 }
+  .B a{ color:var(--mut); text-decoration:underline; text-underline-offset:2px }
+
+  /* ── C · due colonne ──────────────────────────────────────────────────── */
+  .C{ max-width:660px; margin:0 auto; padding-top:24px; border-top:1px solid var(--line);
+      text-align:left; font-size:13px; line-height:1.65; color:var(--mut);
+      display:grid; grid-template-columns:1fr 1fr; gap:22px }
+  .C h3{ font:600 10.5px ui-monospace,Menlo,monospace; letter-spacing:.13em;
+         text-transform:uppercase; color:var(--faint); margin:0 0 5px }
+  .C p{ margin:0 }
+  .C .lungo{ grid-column:1 / -1 }
+  .C strong{ color:var(--testo); font-weight:600 }
+  .C a{ color:var(--mut); text-decoration:underline; text-underline-offset:2px }
+
+  /* ── D · nota in coda ─────────────────────────────────────────────────── */
+  .D{ max-width:640px; margin:0 auto; padding-top:20px; border-top:1px solid var(--line);
+      text-align:left; font-size:12.5px; line-height:1.7; color:#6e7774 }
+  .D p{ margin:0 0 8px }
+  .D strong{ color:var(--mut); font-weight:600 }
+  .D a{ color:#6e7774; text-decoration:underline; text-underline-offset:2px }
+
+  /* ── E · richiudibile ─────────────────────────────────────────────────── */
+  .E{ max-width:620px; margin:0 auto; padding-top:22px; border-top:1px solid var(--line);
+      text-align:left; font-size:13.5px; line-height:1.7; color:var(--mut) }
+  .E summary{ cursor:pointer; font-size:13px; color:var(--faint); list-style:revert }
+  .E p{ margin:12px 0 0 }
+  .E strong{ color:var(--testo); font-weight:600 }
+  .E a{ color:var(--mut); text-decoration:underline; text-underline-offset:2px }
+</style>
+</head>
+<body>
+
+<h1>Il blocco in fondo alla home</h1>
+<p class="intro">Cinque forme per lo stesso testo. Ogni riquadro è largo quanto la colonna
+  della home e mostra anche la riga che lo precede, così si vede lo stacco.</p>
+<p class="avviso"><b>Quello che non si può spostare, e perché.</b> Il testo deve restare
+  <b>sulla home</b>: Google conosceva una pagina sola di questo sito, e di quella aveva
+  87 parole — metà avvisi tecnici. Sono queste righe che dicono a un motore di quale Simone
+  Castellan si tratti, visto che oggi il nome porta a un professore di ingegneria elettrica.
+  Metterle altrove riporta la home a com'era. Come appaiono, invece, si sceglie.</p>
+
+<div class="griglia">
+
+  <div class="var">
+    <h2>A · Com'è adesso</h2>
+    <p class="costo">Tre titoletti e tre capoversi. <b>Nessun costo:</b> i titoletti sono
+      <code>h2</code> veri, che dicono a un motore come è organizzata la pagina.</p>
+    <div class="finta-home"><div class="sopra">· · ·  contatti  · · ·</div>
+      <div class="A">
+        <h3>Chi è</h3>
+        <p>Simone Castellan è un <strong>sound engineer</strong> e compositore di musica
+          elettroacustica. Lavora sulla catena completa del suono, dal microfono al master:
+          ripresa multitraccia, editing, mix e mastering per discografia, televisione e
+          broadcast, e dal 2019 è responsabile operativo di una sala di mix Dolby Atmos 7.1.4
+          certificata. Vive e lavora a Cassola, in provincia di Vicenza.</p>
+        <h3>Cosa fa</h3>
+        <p>Registrazione e produzione musicale in Pro Tools, audio dal vivo e sonorizzazione
+          di eventi, composizione ed elettronica in tempo reale, musica per immagini. Insegna
+          elettroacustica alla Civica Scuola di Musica «Claudio Abbado» di Milano. Scrive
+          <a href="#">strumenti audio che girano nel browser</a> e li lascia gratuiti.</p>
+        <h3>Dove approfondire</h3>
+        <p><a href="#">Il profilo completo</a> raccoglie i crediti discografici;
+          il <a href="#">curriculum</a> si scarica in PDF.</p>
+      </div>
+    </div>
+    <div class="misure" id="mA"></div>
+  </div>
+
+  <div class="var">
+    <h2>B · Un discorso solo</h2>
+    <p class="costo">Niente titoletti: tre capoversi che si leggono di fila, come una
+      presentazione. <b>Costo piccolo:</b> spariscono i tre <code>h2</code>; il testo resta
+      tutto, e i titoletti non sono indispensabili su una pagina così corta.</p>
+    <div class="finta-home"><div class="sopra">· · ·  contatti  · · ·</div>
+      <div class="B">
+        <p>Simone Castellan è un <strong>sound engineer</strong> e compositore di musica
+          elettroacustica. Lavora sulla catena completa del suono, dal microfono al master:
+          ripresa multitraccia, editing, mix e mastering per discografia, televisione e
+          broadcast, e dal 2019 è responsabile operativo di una sala di mix Dolby Atmos 7.1.4
+          certificata. Vive e lavora a Cassola, in provincia di Vicenza.</p>
+        <p>Registrazione e produzione musicale in Pro Tools, audio dal vivo e sonorizzazione
+          di eventi, composizione ed elettronica in tempo reale, musica per immagini. Insegna
+          elettroacustica alla Civica Scuola di Musica «Claudio Abbado» di Milano. Scrive
+          <a href="#">strumenti audio che girano nel browser</a> e li lascia gratuiti.</p>
+        <p><a href="#">Il profilo completo</a> raccoglie i crediti discografici;
+          il <a href="#">curriculum</a> si scarica in PDF.</p>
+      </div>
+    </div>
+    <div class="misure" id="mB"></div>
+  </div>
+
+  <div class="var">
+    <h2>C · Due colonne</h2>
+    <p class="costo">Lo stesso testo, metà dell'altezza: «Chi è» e «Cosa fa» affiancati.
+      <b>Nessun costo per i motori</b>, ma su telefono torna comunque in colonna — quindi
+      guadagna solo chi guarda da computer.</p>
+    <div class="finta-home"><div class="sopra">· · ·  contatti  · · ·</div>
+      <div class="C">
+        <div><h3>Chi è</h3>
+          <p>Simone Castellan è un <strong>sound engineer</strong> e compositore di musica
+            elettroacustica. Dal microfono al master: ripresa, editing, mix e mastering per
+            discografia, televisione e broadcast. Dal 2019 in una sala Dolby Atmos 7.1.4.</p></div>
+        <div><h3>Cosa fa</h3>
+          <p>Registrazione in Pro Tools, audio dal vivo, composizione ed elettronica in tempo
+            reale, musica per immagini. Insegna elettroacustica alla Civica di Milano, e scrive
+            <a href="#">strumenti audio per il browser</a>.</p></div>
+        <div class="lungo"><h3>Dove approfondire</h3>
+          <p><a href="#">Il profilo completo</a> raccoglie i crediti discografici;
+            il <a href="#">curriculum</a> si scarica in PDF.</p></div>
+      </div>
+    </div>
+    <div class="misure" id="mC"></div>
+  </div>
+
+  <div class="var">
+    <h2>D · Nota in coda</h2>
+    <p class="costo">Più piccolo e più chiaro: sembra una nota, non una sezione.
+      <b>Costo:</b> è la più discreta possibile <i>restando leggibile</i>. Il primo grigio che avevo scelto dava 3,90:1 — sotto la soglia di 4,5 — e la misura qui sotto l'ha bocciato: questo è il più tenue che passa.</p>
+    <div class="finta-home"><div class="sopra">· · ·  contatti  · · ·</div>
+      <div class="D">
+        <p>Simone Castellan è un <strong>sound engineer</strong> e compositore di musica
+          elettroacustica: ripresa, mix e mastering per discografia, televisione e broadcast,
+          audio dal vivo, composizione e musica per immagini. Dal 2019 lavora in una sala di
+          mix Dolby Atmos 7.1.4 certificata; insegna elettroacustica alla Civica di Milano.
+          Vive a Cassola, in provincia di Vicenza.</p>
+        <p><a href="#">Profilo completo</a> · <a href="#">Curriculum</a> ·
+          <a href="#">Strumenti</a></p>
+      </div>
+    </div>
+    <div class="misure" id="mD"></div>
+  </div>
+
+  <div class="var">
+    <h2>E · Richiudibile</h2>
+    <p class="costo"><b>Costo vero, ed è il motivo per cui non la consiglio:</b> il testo
+      c'è nel codice e Google lo legge, ma a un contenuto che si apre solo con un clic dà
+      meno peso di uno visibile. È la variante che rischia di annullare il lavoro appena
+      fatto.</p>
+    <div class="finta-home"><div class="sopra">· · ·  contatti  · · ·</div>
+      <details class="E">
+        <summary>Chi è Simone Castellan</summary>
+        <p>Simone Castellan è un <strong>sound engineer</strong> e compositore di musica
+          elettroacustica. Dal microfono al master: ripresa multitraccia, editing, mix e
+          mastering per discografia, televisione e broadcast. Dal 2019 responsabile operativo
+          di una sala Dolby Atmos 7.1.4. Insegna elettroacustica alla Civica di Milano.</p>
+        <p><a href="#">Profilo completo</a> · <a href="#">Curriculum</a></p>
+      </details>
+    </div>
+    <div class="misure" id="mE"></div>
+  </div>
+
+</div>
+
+<script>
+/* Le misure che contano per decidere: quanto testo resta, quanta pagina occupa,
+   e se il grigio scelto si legge davvero. Il contrasto si calcola, non si
+   giudica a occhio. */
+function luminanza(hex){
+  var c = hex.replace('#','');
+  var v = [0,2,4].map(function(i){ return parseInt(c.substr(i,2),16)/255; })
+    .map(function(x){ return x <= 0.04045 ? x/12.92 : Math.pow((x+0.055)/1.055, 2.4); });
+  return 0.2126*v[0] + 0.7152*v[1] + 0.0722*v[2];
+}
+function contrasto(a,b){
+  var la = luminanza(a), lb = luminanza(b);
+  var alto = Math.max(la,lb), basso = Math.min(la,lb);
+  return (alto+0.05)/(basso+0.05);
+}
+function rgbToHex(rgb){
+  var m = rgb.match(/\d+/g);
+  return '#' + m.slice(0,3).map(function(n){ return ('0'+(+n).toString(16)).slice(-2); }).join('');
+}
+[['A','.A'],['B','.B'],['C','.C'],['D','.D'],['E','.E']].forEach(function(par){
+  var el = document.querySelector(par[1]);
+  var testo = el.innerText.trim();
+  var parole = testo.split(/\s+/).filter(Boolean).length;
+  var alto = Math.round(el.getBoundingClientRect().height);
+  var cs = getComputedStyle(el.querySelector('p') || el);
+  var col = rgbToHex(cs.color);
+  var dim = parseFloat(cs.fontSize);
+  var r = contrasto(col, '#ffffff');
+  var soglia = dim >= 18 ? 3 : 4.5;
+  var ok = r >= soglia;
+  document.getElementById('m' + par[0]).innerHTML =
+    parole + ' parole · alto ' + alto + ' px\n' +
+    'testo ' + dim + ' px in ' + col + ' → contrasto ' + r.toFixed(2) + ':1 ' +
+    '<span class="' + (ok ? 'si' : 'no') + '">' + (ok ? '✓' : '✗ sotto ' + soglia) + '</span>';
+});
+</script>
+</body>
+</html>
