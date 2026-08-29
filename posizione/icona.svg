@@ -6,11 +6,11 @@
     <rect x="0" y="382" width="512" height="3"/><rect x="126" y="0" width="3" height="512"/>
     <rect x="254" y="0" width="3" height="512"/><rect x="382" y="0" width="3" height="512"/>
   </g>
-  <!-- alone d'incertezza -->
-  <circle cx="256" cy="268" r="152" fill="#E3DFD2"/>
-  <!-- triangolo trigonometrico: pieno scuro + pieno carta all'interno -->
-  <path d="M256 104 L404 360 L108 360 Z" fill="#1B2621"/>
-  <path d="M256 168 L348 328 L164 328 Z" fill="#E3DFD2"/>
-  <!-- punto quotato -->
-  <circle cx="256" cy="288" r="34" fill="#C1452E"/>
+  <!-- l'ombra sul terreno: dice che la goccia sta in piedi sul punto -->
+  <ellipse cx="256" cy="424" rx="86" ry="26" fill="#DAD6C6"/>
+  <!-- la goccia -->
+  <path d="M256 72 a130 130 0 0 0 -130 130 c0 92 130 222 130 222 s130 -130 130 -222 A130 130 0 0 0 256 72 Z" fill="#1B2621"/>
+  <circle cx="256" cy="202" r="50" fill="#EDF0E9"/>
+  <!-- il punto quotato, l'unico rosso della tavolozza -->
+  <circle cx="256" cy="202" r="23" fill="#C1452E"/>
 </svg>
