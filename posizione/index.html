@@ -134,6 +134,8 @@ h1{font-size:23px;font-weight:700;letter-spacing:-.015em}
 .voce[open] > summary{color:var(--acqua)}
 .voce[open] > summary .val{display:none}
 .voce > *:last-child{margin-bottom:14px}
+.voce textarea{min-height:60px}
+.voce .campo{margin-top:14px}
 
 /* --- comandi --- */
 /* anche sui singoli comandi, non solo sulla radice: il valore calcolato non
@@ -245,17 +247,21 @@ a.tasto{
   <details class="voce" id="pMezzo">
     <summary><span class="et">Come ti muovi</span><span class="val" id="valMezzo">come capita</span></summary>
     <div class="chips fila" id="mezzi" role="group" aria-label="Come ti muovi"></div>
+    <label class="campo" for="liberoMezzo">Ti muovi in un altro modo? Scrivilo qui.</label>
+    <textarea id="liberoMezzo" rows="2" placeholder="In monopattino. In taxi. Col camper, mi serve dove parcheggiare."></textarea>
   </details>
 
   <details class="voce" id="pCosa">
     <summary><span class="et">Cosa cerchi</span><span class="val" id="valCosa">niente in particolare</span></summary>
     <div class="chips fila" id="categorie" role="group" aria-label="Cosa cerchi"></div>
+    <label class="campo" for="liberoCosa">Cerchi altro? Scrivilo qui.</label>
+    <textarea id="liberoCosa" rows="2" placeholder="Un benzinaio aperto. Un parco per i bambini. Un bancomat."></textarea>
   </details>
 
   <details class="voce" id="dettagli">
     <summary><span class="et">Serve altro?</span><span class="val" id="valAltro">niente</span></summary>
     <label class="campo" for="libero">Scrivilo qui: finisce nel prompt insieme al resto.</label>
-    <textarea id="libero" rows="3" placeholder="Senza glutine. Siamo in quattro con un bambino. Oppure: cerco un benzinaio aperto."></textarea>
+    <textarea id="libero" rows="3" placeholder="Senza glutine. Siamo in quattro con un bambino. Abbiamo un'ora."></textarea>
   </details>
 
   <details class="voce" id="vedi">
@@ -323,7 +329,7 @@ const CATEGORIE = [
 
 /* ─── stato: la posizione NON viene mai salvata ────────────────────────── */
 let ultima = null;
-const stato = {mezzo:null, categoria:null, libero:''};
+const stato = {mezzo:null, categoria:null, liberoMezzo:'', liberoCosa:'', libero:''};
 const CHIAVE = 'posizione.scelte';
 
 /* Si ricordano solo le scelte, mai le coordinate né il testo libero: quello
@@ -390,9 +396,15 @@ function componi(){
   const righe = [
     `Sono qui: ${lat.toFixed(6)}, ${lon.toFixed(6)} (coordinate GPS, precisione circa ${prec} metri, rilevate il ${fmtData(quando)}).`
   ];
+  const perMezzo = stato.liberoMezzo.trim();
+  const perCosa  = stato.liberoCosa.trim();
+  const libero   = stato.libero.trim();
+
   if (m) righe.push(m.frase);
+  // «anche» ha senso solo se qualcosa è già stato detto col tasto
+  if (perMezzo) righe.push(m ? `Su come mi sposto, in più: ${perMezzo}` : `Mi muovo così: ${perMezzo}`);
   if (c) righe.push(`Cerco ${c.cerca}.`);
-  const libero = stato.libero.trim();
+  if (perCosa) righe.push(c ? `Cerco anche: ${perCosa}` : `Cerco: ${perCosa}`);
   if (libero) righe.push(`Altri dettagli: ${libero}`);
 
   righe.push('');
@@ -403,9 +415,9 @@ function componi(){
     // il più vicino aperto adesso. Perciò la richiesta può essere della categoria.
     righe.push(c.chiedi || ROSA);
     righe.push(c.regole);
-  } else if (libero){
-    // Nessun obiettivo fra i cinque, ma qualcosa scritto a mano: la domanda è
-    // già nel testo, sarebbe assurdo rimandarla «alle prossime domande».
+  } else if (perCosa || libero){
+    // Nessun obiettivo fra i cinque, ma qualcosa scritto a mano in uno dei
+    // campi: la domanda è già lì, sarebbe assurdo rimandarla «alle prossime».
     righe.push(ROSA);
     righe.push('Dimmi anche gli orari di oggi e, se ha senso, quanto costa.');
   } else {
@@ -417,7 +429,9 @@ function componi(){
 }
 
 function aggiorna(){
-  $('libero') && (stato.libero = $('libero').value);
+  stato.liberoMezzo = $('liberoMezzo').value;
+  stato.liberoCosa  = $('liberoCosa').value;
+  stato.libero      = $('libero').value;
   const testo = componi();
   const b = $('copia');
 
@@ -425,10 +439,19 @@ function aggiorna(){
   // che cosa contengono, altrimenti bisogna aprirle tutte per sapere a che punto si è.
   const m = MEZZI.find(x => x.id === stato.mezzo);
   const c = CATEGORIE.find(x => x.id === stato.categoria);
-  const libero = stato.libero.trim();
-  $('valMezzo').textContent = m ? m.nome : 'come capita';
-  $('valCosa').textContent  = c ? c.nome : 'niente in particolare';
-  $('valAltro').textContent = libero ? (libero.length > 34 ? libero.slice(0,33) + '…' : libero) : 'niente';
+  const breve = t => t.length > 30 ? t.slice(0,29) + '…' : t;
+  // Scritto e scelto possono coesistere: il titolo mostra l'uno, l'altro o
+  // tutti e due, perché chiuso deve dire tutto quello che c'è dentro.
+  const riassunto = (scelto, scritto, quandoNiente) => {
+    const t = scritto.trim();
+    if (scelto && t) return breve(scelto + ' + ' + t);
+    if (scelto) return scelto;
+    if (t) return breve(t);
+    return quandoNiente;
+  };
+  $('valMezzo').textContent = riassunto(m && m.nome, stato.liberoMezzo, 'come capita');
+  $('valCosa').textContent  = riassunto(c && c.nome, stato.liberoCosa, 'niente in particolare');
+  $('valAltro').textContent = riassunto(null, stato.libero, 'niente');
 
   $('anteprima').textContent = testo || 'Manca la posizione: tocca «Rileva posizione».';
 
@@ -539,7 +562,7 @@ $('copia').addEventListener('click', async () => {
   }, 2600);
 });
 
-$('libero').addEventListener('input', aggiorna);
+['liberoMezzo','liberoCosa','libero'].forEach(id => $(id).addEventListener('input', aggiorna));
 
 rileggi();
 disegnaMezzi();
