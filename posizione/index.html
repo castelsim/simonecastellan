@@ -2,9 +2,10 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
-<title>La mia posizione</title>
-  <link rel="canonical" href="https://simonecastellan.com/posizione/" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prompt con la tua posizione — per ChatGPT e Claude</title>
+<meta name="description" content="Strumento gratuito: prende le coordinate GPS del telefono e scrive il prompt da incollare in ChatGPT o Claude per farsi consigliare posti vicini. Tutto resta sul telefono.">
+<link rel="canonical" href="https://simonecastellan.com/posizione/" />
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#EDF0E9">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -15,35 +16,42 @@
 :root{
   --carta:#EDF0E9;
   --inchiostro:#1B2621;
-  --isoipsa:#B08154;
+  --isoipsa:#B08154;      /* solo decorazione: cerchio e alone */
+  --bruno-testo:#8C6039;  /* lo stesso bruno, scurito quanto basta a portare testo */
   --segnale:#C1452E;
-  --acqua:#3F7D8C;
-  --tenue:#6E7A72;
+  --acqua:#3A727F;
+  --tenue:#616C65;
   --reticolo:rgba(27,38,33,.09);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{min-height:100%}
+html{background:var(--carta)}
 body{
-  height:100dvh;
-  overflow-y:auto;
+  min-height:100dvh;
   background:var(--carta);
   color:var(--inchiostro);
   font:400 17px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
-  padding:max(16px,env(safe-area-inset-top)) 18px max(18px,env(safe-area-inset-bottom));
-  display:flex;flex-direction:column;gap:14px;
+  padding:max(16px,env(safe-area-inset-top)) 18px 0;
+  display:flex;flex-direction:column;gap:16px;
   background-image:linear-gradient(var(--reticolo) 1px,transparent 1px),linear-gradient(90deg,var(--reticolo) 1px,transparent 1px);
   background-size:28px 28px;
   -webkit-user-select:none;user-select:none;
+  max-width:560px;margin:0 auto;
 }
+textarea,pre,.coord{-webkit-user-select:text;user-select:text}
 .testata{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .occhiello{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tenue);font-weight:600}
 h1{font-size:23px;font-weight:700;letter-spacing:-.015em}
+.sottotitolo{font-size:15px;color:var(--tenue);line-height:1.4;margin-top:6px}
 
 /* --- il cerchio d'incertezza: la firma --- */
 .quadrante{
-  position:relative;aspect-ratio:1;flex:0 1 260px;min-height:104px;width:auto;max-width:100%;margin:0 auto;
+  position:relative;aspect-ratio:1;width:172px;margin:0 auto;
   display:grid;place-items:center;
+  transition:width .6s cubic-bezier(.16,1,.3,1);
 }
+/* preso il punto, il cerchio si ritira: sotto ci sono le scelte da fare */
+.quadrante.attivo{width:118px}
 .alone,.bordo{
   position:absolute;border-radius:50%;
   transition:width .9s cubic-bezier(.16,1,.3,1),height .9s cubic-bezier(.16,1,.3,1),opacity .5s;
@@ -59,24 +67,32 @@ h1{font-size:23px;font-weight:700;letter-spacing:-.015em}
 .attesa{position:absolute;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--tenue);font-weight:600}
 
 /* --- lettura --- */
-.lettura{text-align:center;flex:0 0 auto;min-height:104px;display:flex;flex-direction:column;justify-content:center;gap:3px}
-.raggio{font-size:15px;color:var(--inchiostro);font-weight:600}
-.raggio b{color:var(--isoipsa)}
+.lettura{text-align:center;display:flex;flex-direction:column;justify-content:center;gap:3px}
+.raggio{font-size:14px;color:var(--inchiostro);font-weight:600}
+.raggio b{color:var(--bruno-testo)}
 .coord{
-  font:600 28px/1.12 ui-monospace,"SF Mono",Menlo,monospace;
+  font:600 22px/1.2 ui-monospace,"SF Mono",Menlo,monospace;
   letter-spacing:-.02em;font-variant-numeric:tabular-nums;
 }
-.asse{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--tenue);font-weight:600;margin-bottom:9px}
-.quando{font-size:13px;color:var(--tenue);margin-top:9px;font-variant-numeric:tabular-nums}
+.asse{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--tenue);font-weight:600}
+.coppia{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.quando{font-size:12px;color:var(--tenue);margin-top:7px;font-variant-numeric:tabular-nums}
 .avviso{
   background:var(--segnale);color:#fff;border-radius:11px;padding:11px 14px;
-  font-size:14px;font-weight:600;line-height:1.35;margin-top:4px;
+  font-size:14px;font-weight:600;line-height:1.35;margin-top:8px;
 }
 .errore{background:var(--segnale);color:#fff;border-radius:11px;padding:13px 15px;font-size:15px;line-height:1.4}
-.vuoto{color:var(--tenue);font-size:15px;max-width:26ch;margin:0 auto;line-height:1.5}
+.vuoto{color:var(--tenue);font-size:15px;max-width:30ch;margin:0 auto;line-height:1.5}
+
+/* --- passi --- */
+.passo{border-top:1px solid rgba(27,38,33,.12);padding-top:15px}
+.passo h2{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tenue);font-weight:600;margin-bottom:11px}
+.passo h2 i{font-style:normal;color:var(--bruno-testo);margin-right:7px}
+.passo.primo{border-top:none;padding-top:0;display:flex;flex-direction:column;gap:14px}
+.passo.primo h2{margin-bottom:0}
+.chips{display:flex;flex-wrap:wrap;gap:9px}
 
 /* --- comandi --- */
-.comandi{margin-top:auto;flex:0 0 auto;padding-top:12px;display:flex;flex-direction:column;gap:11px}
 button,a.tasto{
   font:inherit;border:none;border-radius:15px;width:100%;
   display:flex;align-items:center;justify-content:center;gap:9px;
@@ -84,23 +100,63 @@ button,a.tasto{
   transition:transform .12s,background .2s;
 }
 button:active,a.tasto:active{transform:scale(.975)}
+button:focus-visible,a.tasto:focus-visible,summary:focus-visible{outline:2px solid var(--acqua);outline-offset:2px}
 .rileva{
   background:var(--inchiostro);color:var(--carta);
-  min-height:62px;font-size:17px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  min-height:56px;font-size:16px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
 }
 .rileva[disabled]{opacity:.45}
-.copia{
-  background:var(--isoipsa);color:#fff;min-height:54px;
-  font-size:16px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+.chip{
+  width:auto;min-height:44px;padding:0 15px;
+  border:1.5px solid rgba(27,38,33,.24);background:transparent;color:var(--inchiostro);
+  font-size:15px;font-weight:600;border-radius:13px;line-height:1.2;
 }
+.chip[aria-pressed="true"]{background:var(--inchiostro);color:var(--carta);border-color:var(--inchiostro)}
+.chip.tenue[aria-pressed="true"]{background:var(--bruno-testo);border-color:var(--bruno-testo)}
+details{margin-top:13px}
+summary{
+  list-style:none;cursor:pointer;min-height:44px;display:flex;align-items:center;gap:8px;
+  font-size:15px;font-weight:600;color:var(--acqua);
+}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'+';font-size:19px;font-weight:700;line-height:1}
+details[open] summary::after{content:'–'}
+label.campo{display:block;font-size:13px;color:var(--tenue);margin:12px 0 6px}
+textarea{
+  width:100%;min-height:76px;resize:vertical;
+  font:400 16px/1.4 inherit;color:var(--inchiostro);
+  background:rgba(255,255,255,.55);border:1.5px solid rgba(27,38,33,.22);border-radius:13px;
+  padding:11px 13px;
+}
+textarea:focus{outline:none;border-color:var(--acqua)}
+pre.anteprima{
+  white-space:pre-wrap;word-break:break-word;
+  font:400 13px/1.5 ui-monospace,"SF Mono",Menlo,monospace;
+  background:rgba(255,255,255,.55);border:1px solid rgba(27,38,33,.14);border-radius:13px;
+  padding:13px;margin-top:11px;color:var(--inchiostro);
+}
+/* Il tasto resta a portata di pollice mentre si scorre. Ci sta dentro solo lui:
+   una barra alta coprirebbe le scelte che stanno sotto. */
+.barra{
+  position:sticky;bottom:0;z-index:2;
+  padding:14px 0 max(14px,env(safe-area-inset-bottom));
+  background:linear-gradient(to bottom,rgba(237,240,233,0),var(--carta) 18px);
+}
+.copia{
+  background:var(--bruno-testo);color:#fff;min-height:56px;
+  font-size:16px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+}
+.copia[disabled]{background:transparent;color:var(--tenue);border:1.5px solid rgba(27,38,33,.2);cursor:default;text-transform:none;letter-spacing:0;font-weight:600}
 .copia.fatto{background:var(--acqua)}
-.mappe{display:flex;gap:11px}
+.doppia{display:flex;gap:10px}
 a.tasto{
   background:transparent;border:1.5px solid rgba(27,38,33,.22);color:var(--inchiostro);
   min-height:48px;font-size:15px;font-weight:600;flex:1;
 }
 [hidden]{display:none!important}
-.riservatezza{text-align:center;font-size:11px;color:var(--tenue);line-height:1.35;margin-top:1px}
+.riservatezza{text-align:center;font-size:11px;color:var(--tenue);line-height:1.4}
+.piede{border-top:1px solid rgba(27,38,33,.12);padding:14px 0 max(18px,env(safe-area-inset-bottom));font-size:13px;color:var(--tenue);line-height:1.5}
+.piede a{color:var(--acqua)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -109,10 +165,13 @@ a.tasto{
 <header class="testata">
   <div>
     <div class="occhiello">Punto di rilevamento</div>
-    <h1>La mia posizione</h1>
+    <h1>Dove sono, in un prompt</h1>
+    <p class="sottotitolo">ChatGPT e Claude non sanno dove sei. Questa pagina legge il GPS del telefono e scrive il testo da incollare.</p>
   </div>
 </header>
 
+<section class="passo primo">
+  <h2><i>1</i>Dove sei</h2>
 <div class="quadrante" id="quadrante">
   <div class="alone" id="alone"></div>
   <div class="bordo" id="bordo"></div>
@@ -126,25 +185,264 @@ a.tasto{
 </div>
 
 <section class="lettura" id="lettura" aria-live="polite">
-  <p class="vuoto">Tocca «Rileva posizione» per leggere le coordinate dal GPS del telefono.</p>
+  <p class="vuoto">Tocca «Rileva posizione»: le coordinate restano su questo telefono.</p>
 </section>
 
-<div class="comandi">
-  <button class="rileva" id="rileva">Rileva posizione</button>
-  <button class="copia" id="copia" hidden>Copia per Claude</button>
-  <div class="mappe" hidden id="mappe">
-    <a class="tasto" id="gmaps" href="#" target="_blank" rel="noopener">Google Maps</a>
-    <a class="tasto" id="amaps" href="#" target="_blank" rel="noopener">Apple Maps</a>
-  </div>
-  <p class="riservatezza">La posizione resta su questo telefono. Non viene inviata a nessun server.</p>
+<button class="rileva" id="rileva">Rileva posizione</button>
+</section>
+
+<section class="passo">
+  <h2><i>2</i>Come ti muovi</h2>
+  <div class="chips" id="mezzi" role="group" aria-label="Come ti muovi"></div>
+</section>
+
+<section class="passo">
+  <h2><i>3</i>Cosa cerchi</h2>
+  <div class="chips" id="categorie" role="group" aria-label="Cosa cerchi"></div>
+
+  <details id="dettagli">
+    <summary>Aggiungi preferenze</summary>
+    <div id="preferenze" aria-live="polite">
+      <p class="vuoto" style="text-align:left;max-width:none;margin:12px 0 0">Scegli prima cosa cerchi: qui compaiono le preferenze giuste.</p>
+    </div>
+    <label class="campo" for="libero">Altre esigenze o dettagli</label>
+    <textarea id="libero" rows="3" placeholder="Siamo in quattro, uno è celiaco. Abbiamo un'ora."></textarea>
+  </details>
+
+  <details id="vedi">
+    <summary>Vedi il prompt</summary>
+    <pre class="anteprima" id="anteprima">Manca ancora qualcosa.</pre>
+  </details>
+</section>
+
+<div class="barra">
+  <button class="copia" id="copia" disabled>Manca la posizione</button>
 </div>
+
+<div class="doppia" hidden id="destinazioni">
+  <a class="tasto" href="https://chatgpt.com/" target="_blank" rel="noopener">Apri ChatGPT</a>
+  <a class="tasto" href="https://claude.ai/new" target="_blank" rel="noopener">Apri Claude</a>
+</div>
+<div class="doppia" hidden id="mappe">
+  <a class="tasto" id="gmaps" href="#" target="_blank" rel="noopener">Google Maps</a>
+  <a class="tasto" id="amaps" href="#" target="_blank" rel="noopener">Apple Maps</a>
+</div>
+<p class="riservatezza">La posizione resta su questo telefono. Non viene inviata a nessun server.</p>
+
+<footer class="piede">
+  Strumento gratuito di <a href="/">Simone Castellan</a> — <a href="/tools/">gli altri strumenti</a>.
+</footer>
 
 <script>
 const $ = id => document.getElementById(id);
+
+/* ─── i sei mezzi: ognuno detta il raggio che ha senso ─────────────────── */
+const MEZZI = [
+  {id:'piedi',   nome:'A piedi',       frase:'Mi muovo a piedi: proponimi solo posti entro circa 1,5 km, cioè una ventina di minuti di cammino.'},
+  {id:'bici',    nome:'In bici',       frase:'Mi muovo in bicicletta: proponimi posti entro circa 5 km, evitando strade a scorrimento veloce.'},
+  {id:'monop',   nome:'In monopattino',frase:'Mi muovo in monopattino: proponimi posti entro circa 4 km, su strade urbane.'},
+  {id:'auto',    nome:'In auto',       frase:'Mi muovo in auto: vanno bene posti entro circa 20 minuti di guida, e segnalami dove si parcheggia.'},
+  {id:'pubblici',nome:'Mezzi pubblici',frase:'Mi muovo con i mezzi pubblici: proponimi posti raggiungibili in circa 30 minuti fra bus, metro o treno, e dimmi quale linea prendere.'},
+  {id:'taxi',    nome:'In taxi',       frase:'Mi muovo in taxi: vanno bene posti entro circa 15 minuti di corsa.'}
+];
+
+/* ─── le undici cose che si cercano stando fuori casa ──────────────────── */
+const CATEGORIE = [
+  {id:'mangiare', nome:'Mangiare',
+   cerca:'un posto dove mangiare',
+   pref:['Pizza','Pesce','Cucina del posto','Vegetariano','Senza glutine','Spesa contenuta','Aperto adesso','Tavoli fuori'],
+   regole:'Per ogni locale dimmi il tipo di cucina, la fascia di prezzo, gli orari di oggi e se conviene prenotare.'},
+
+  {id:'bere', nome:'Bere qualcosa',
+   cerca:'un posto dove bere qualcosa',
+   pref:['Aperitivo','Birreria','Cocktail','Enoteca','All’aperto','Aperto fino a tardi','Con qualcosa da mangiare'],
+   regole:'Per ogni locale dimmi che cosa si beve, la fascia di prezzo, fino a che ora resta aperto oggi e se si mangia qualcosa.'},
+
+  {id:'caffe', nome:'Caffè o colazione',
+   cerca:'un bar per il caffè o la colazione',
+   pref:['Pasticceria','Colazione salata','Wi‑Fi e prese','Da asporto','Apre presto','Con tavolini'],
+   regole:'Per ogni bar dimmi a che ora apre oggi, che cosa fa di buono e se si può stare seduti a lavorare.'},
+
+  {id:'dormire', nome:'Dormire',
+   cerca:'un posto dove dormire stanotte',
+   pref:['Spesa contenuta','In centro','Con parcheggio','Colazione inclusa','Cancellazione gratuita','Una notte sola','Per famiglie'],
+   regole:'Per ogni struttura dimmi la fascia di prezzo a notte, la distanza da me e su quali siti conviene controllare la disponibilità. Non inventare prezzi precisi: dai un intervallo e di’ che va verificato.'},
+
+  {id:'spesa', nome:'Spesa e negozi',
+   cerca:'un negozio dove fare la spesa o comprare quello che mi serve',
+   pref:['Supermercato','Alimentari piccolo','Aperto adesso','Aperto la domenica','Ferramenta','Grande superficie'],
+   regole:'Per ogni negozio dimmi gli orari di oggi, che cosa ci trovo e se ha parcheggio.'},
+
+  {id:'salute', nome:'Farmacia o salute',
+   cerca:'una farmacia o un presidio sanitario',
+   pref:['Farmacia di turno','Aperta adesso','Aperta 24 ore','Pronto soccorso','Guardia medica','Veterinario'],
+   chiedi:'Dimmi le due o tre opzioni più vicine, partendo da quella aperta adesso. Per ognuna: nome, indirizzo e quanto dista da me.',
+   regole:'Per ognuna dimmi gli orari di oggi e il numero di telefono. Se è un’urgenza vera, ricordami che in Italia il numero unico è il 112. Non tirare a indovinare sui turni di guardia: di’ dove si controllano.'},
+
+  {id:'carburante', nome:'Benzina o ricarica',
+   cerca:'un distributore o una colonnina di ricarica',
+   pref:['Self service','Metano','GPL','Ricarica elettrica','Ricarica veloce','Aperto 24 ore'],
+   regole:'Per ogni punto dimmi il gestore, gli orari, e per le colonnine anche la potenza e la presa. Sui prezzi di’ solo l’ordine di grandezza e dove si verificano.'},
+
+  {id:'bambini', nome:'Con i bambini',
+   cerca:'qualcosa da fare o un posto adatto con i bambini',
+   pref:['Parco giochi','Al chiuso','Fasciatoio','Gratis','Sotto i 3 anni','Con il passeggino'],
+   regole:'Per ogni posto dimmi per che età va bene, se è al chiuso o all’aperto, quanto costa e se ci sono bagni e fasciatoio.'},
+
+  {id:'aperto', nome:'All’aria aperta',
+   cerca:'un posto all’aria aperta dove stare o camminare',
+   pref:['Passeggiata breve','Sentiero','Panorama','Ombra','Si può portare il cane','Accessibile'],
+   regole:'Per ogni posto dimmi quanto dura il giro, il dislivello se c’è, il fondo del percorso e se serve attrezzatura.'},
+
+  {id:'cultura', nome:'Cultura ed eventi',
+   cerca:'un museo, una mostra o un evento',
+   pref:['Museo','Mostra','Concerto','Stasera','Nel fine settimana','Gratis','Adatto ai bambini'],
+   regole:'Per ogni proposta dimmi orari, prezzo del biglietto e se serve prenotare. Sugli eventi in corso di’ esplicitamente che vanno verificati sul sito ufficiale, perché cambiano.'},
+
+  {id:'servizi', nome:'Servizi utili',
+   cerca:'un servizio pratico che mi serve adesso',
+   pref:['Bancomat','Ufficio postale','Wi‑Fi libero','Bagno pubblico','Parcheggio','Ritiro pacchi','Lavanderia'],
+   regole:'Per ogni servizio dimmi gli orari di oggi, se costa qualcosa e come ci si accede.'}
+];
+
+/* ─── stato: la posizione NON viene mai salvata ────────────────────────── */
 let ultima = null;
+const stato = {mezzo:null, categoria:null, pref:[], libero:''};
+const CHIAVE = 'posizione.preferenze';
 
-const fmtData = d => d.toLocaleString('it-IT',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+/* Si ricordano solo le scelte, mai le coordinate né il testo libero: quello
+   può contenere fatti personali e non ha motivo di sopravvivere alla sessione. */
+function ricorda(){
+  try{ localStorage.setItem(CHIAVE, JSON.stringify({mezzo:stato.mezzo, categoria:stato.categoria, pref:stato.pref})); }catch{}
+}
+function rileggi(){
+  try{
+    const v = JSON.parse(localStorage.getItem(CHIAVE) || '{}');
+    if (MEZZI.some(m => m.id === v.mezzo)) stato.mezzo = v.mezzo;
+    if (CATEGORIE.some(c => c.id === v.categoria)) stato.categoria = v.categoria;
+    const cat = CATEGORIE.find(c => c.id === stato.categoria);
+    if (cat && Array.isArray(v.pref)) stato.pref = v.pref.filter(p => cat.pref.includes(p));
+  }catch{}
+}
 
+/* ─── i chip ───────────────────────────────────────────────────────────── */
+function chip(testo, premuto, tenue){
+  const b = document.createElement('button');
+  b.className = tenue ? 'chip tenue' : 'chip';
+  b.type = 'button';
+  b.textContent = testo;
+  b.setAttribute('aria-pressed', premuto ? 'true' : 'false');
+  return b;
+}
+
+function disegnaMezzi(){
+  const box = $('mezzi');
+  box.innerHTML = '';
+  MEZZI.forEach(m => {
+    const b = chip(m.nome, stato.mezzo === m.id, false);
+    b.addEventListener('click', () => {
+      stato.mezzo = (stato.mezzo === m.id) ? null : m.id;
+      disegnaMezzi(); ricorda(); aggiorna();
+    });
+    box.appendChild(b);
+  });
+}
+
+function disegnaCategorie(){
+  const box = $('categorie');
+  box.innerHTML = '';
+  CATEGORIE.forEach(c => {
+    const b = chip(c.nome, stato.categoria === c.id, false);
+    b.addEventListener('click', () => {
+      if (stato.categoria === c.id){ stato.categoria = null; }
+      else { stato.categoria = c.id; }
+      stato.pref = [];                 // le preferenze appartengono alla categoria
+      disegnaCategorie(); disegnaPreferenze(); ricorda(); aggiorna();
+    });
+    box.appendChild(b);
+  });
+}
+
+function disegnaPreferenze(){
+  const box = $('preferenze');
+  const cat = CATEGORIE.find(c => c.id === stato.categoria);
+  box.innerHTML = '';
+  if (!cat){
+    const p = document.createElement('p');
+    p.className = 'vuoto';
+    p.style.cssText = 'text-align:left;max-width:none;margin:12px 0 0';
+    p.textContent = 'Scegli prima cosa cerchi: qui compaiono le preferenze giuste.';
+    box.appendChild(p);
+    return;
+  }
+  const chips = document.createElement('div');
+  chips.className = 'chips';
+  chips.style.marginTop = '12px';
+  chips.setAttribute('role','group');
+  chips.setAttribute('aria-label','Preferenze per ' + cat.nome.toLowerCase());
+  cat.pref.forEach(p => {
+    const b = chip(p, stato.pref.includes(p), true);
+    b.addEventListener('click', () => {
+      stato.pref = stato.pref.includes(p) ? stato.pref.filter(x => x !== p) : stato.pref.concat(p);
+      disegnaPreferenze(); ricorda(); aggiorna();
+    });
+    chips.appendChild(b);
+  });
+  box.appendChild(chips);
+}
+
+/* ─── il prompt ────────────────────────────────────────────────────────── */
+const fmtData = d => d.toLocaleString('it-IT',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+function componi(){
+  if (!ultima || !stato.mezzo || !stato.categoria) return null;
+  const m = MEZZI.find(x => x.id === stato.mezzo);
+  const c = CATEGORIE.find(x => x.id === stato.categoria);
+  const {lat, lon, prec, quando} = ultima;
+
+  const righe = [
+    `Sono qui: ${lat.toFixed(6)}, ${lon.toFixed(6)} (coordinate GPS, precisione circa ${prec} metri, rilevate il ${fmtData(quando)}).`,
+    m.frase,
+    `Cerco ${c.cerca}.`
+  ];
+  if (stato.pref.length) righe.push(`Preferenze: ${stato.pref.join(', ').toLowerCase()}.`);
+  const libero = stato.libero.trim();
+  if (libero) righe.push(`Altri dettagli: ${libero}`);
+
+  righe.push('');
+  righe.push('Parti dal riconoscere in che zona si trovano queste coordinate.');
+  // Quasi tutte le categorie vogliono una rosa di posti; la salute no, lì conta
+  // il più vicino aperto adesso. Perciò la richiesta può essere della categoria.
+  righe.push(c.chiedi || 'Dimmi da 3 a 5 posti reali, dal più vicino al più lontano. Per ognuno: nome, indirizzo, quanto dista da me e perché me lo consigli.');
+  righe.push(c.regole);
+  righe.push('Se non sei sicuro che un posto esista ancora o sia aperto, dillo invece di inventarlo.');
+
+  return righe.join('\n');
+}
+
+function aggiorna(){
+  $('libero') && (stato.libero = $('libero').value);
+  const testo = componi();
+  const b = $('copia');
+
+  $('anteprima').textContent = testo || (
+    !ultima ? 'Manca la posizione: tocca «Rileva posizione».'
+    : !stato.mezzo ? 'Manca come ti muovi.'
+    : 'Manca cosa cerchi.');
+
+  if (testo){
+    b.disabled = false;
+    if (!b.classList.contains('fatto')) b.textContent = 'Copia il prompt';
+  } else {
+    b.disabled = true;
+    b.classList.remove('fatto');
+    b.textContent = !ultima ? 'Manca la posizione'
+                  : !stato.mezzo ? 'Manca come ti muovi'
+                  : 'Manca cosa cerchi';
+  }
+}
+
+/* ─── GPS: identico a prima, il cerchio è la firma della pagina ────────── */
 // Il raggio disegnato cresce col logaritmo della precisione:
 // 5 m resta un punto, 500 m riempie il quadrante.
 function raggioVisivo(metri){
@@ -168,11 +466,9 @@ function mostra(pos){
 
   $('lettura').innerHTML = `
     <p class="raggio">Posizione stimata entro un raggio di <b>${prec} metri</b></p>
-    <div style="margin-top:14px">
-      <div class="coord">${lat.toFixed(7)}</div>
-      <div class="asse">Latitudine nord</div>
-      <div class="coord">${lon.toFixed(7)}</div>
-      <div class="asse">Longitudine est</div>
+    <div class="coppia">
+      <div><div class="coord">${lat.toFixed(6)}</div><div class="asse">Latitudine</div></div>
+      <div><div class="coord">${lon.toFixed(6)}</div><div class="asse">Longitudine</div></div>
     </div>
     <div class="quando">Rilevata il ${fmtData(quando)}</div>
     ${prec > 30 ? '<p class="avviso">Segnale poco preciso: spostati all’aperto e riprova</p>' : ''}
@@ -181,9 +477,8 @@ function mostra(pos){
   $('gmaps').href = `https://www.google.com/maps?q=${lat},${lon}`;
   $('amaps').href = `https://maps.apple.com/?ll=${lat},${lon}&q=La%20mia%20posizione`;
   $('mappe').hidden = false;
-  $('copia').hidden = false;
-  $('copia').textContent = 'Copia per Claude';
   $('copia').classList.remove('fatto');
+  aggiorna();
 }
 
 function errore(e){
@@ -196,11 +491,12 @@ function errore(e){
     3:'Tempo scaduto: nessuna risposta entro 15 secondi. Riprova all’aperto.'
   };
   $('lettura').innerHTML = `<p class="errore">${motivi[e.code] || e.message}</p>`;
+  aggiorna();
 }
 
 $('rileva').addEventListener('click', () => {
   if (!navigator.geolocation){
-    $('lettura').innerHTML = '<p class="errore">Questo browser non espone la posizione. Apri la pagina in Safari.</p>';
+    $('lettura').innerHTML = '<p class="errore">Questo browser non espone la posizione. Apri la pagina in Safari o Chrome.</p>';
     return;
   }
   $('rileva').disabled = true;
@@ -223,17 +519,10 @@ $('rileva').addEventListener('click', () => {
   }
 });
 
+/* ─── copia ────────────────────────────────────────────────────────────── */
 $('copia').addEventListener('click', async () => {
-  if (!ultima) return;
-  const {lat, lon, prec, quando} = ultima;
-  const testo =
-`La mia posizione attuale:
-Latitudine: ${lat.toFixed(7)}
-Longitudine: ${lon.toFixed(7)}
-Precisione stimata: ±${prec} metri
-Rilevata il: ${fmtData(quando)}
-Google Maps: https://www.google.com/maps?q=${lat},${lon}`;
-
+  const testo = componi();
+  if (!testo) return;
   try {
     await navigator.clipboard.writeText(testo);
   } catch {
@@ -242,13 +531,22 @@ Google Maps: https://www.google.com/maps?q=${lat},${lon}`;
     document.body.appendChild(t); t.select();
     document.execCommand('copy'); t.remove();
   }
-  $('copia').textContent = 'Copiato';
+  $('copia').textContent = 'Copiato: ora incollalo';
   $('copia').classList.add('fatto');
+  $('destinazioni').hidden = false;
   setTimeout(() => {
-    $('copia').textContent = 'Copia per Claude';
     $('copia').classList.remove('fatto');
-  }, 2200);
+    aggiorna();
+  }, 2600);
 });
+
+$('libero').addEventListener('input', aggiorna);
+
+rileggi();
+disegnaMezzi();
+disegnaCategorie();
+disegnaPreferenze();
+aggiorna();
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
