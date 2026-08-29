@@ -52,37 +52,33 @@ h1{font-size:23px;font-weight:700;letter-spacing:-.015em}
 .eco{display:block;font-size:15px;font-weight:400;line-height:1.4;letter-spacing:normal;color:var(--tenue);margin-top:6px}
 
 /* --- il cerchio d'incertezza: la firma --- */
+/* Il cerchio sta a fianco della lettura, sempre: grande e da solo in mezzo
+   alla pagina era solo carta sprecata, e il numero che disegna è già scritto
+   a parole qui accanto. */
 .quadrante{
-  position:relative;aspect-ratio:1;width:132px;margin:0 auto;
+  position:relative;aspect-ratio:1;width:76px;flex:0 0 76px;
   display:grid;place-items:center;
-  transition:width .6s cubic-bezier(.16,1,.3,1);
 }
-/* Finché non c'è il punto il cerchio è l'unica cosa in pagina e può stare
-   grande.  Letto il punto diventa la misura di un numero già scritto a parole
-   qui accanto: si rimpicciolisce e gli si mette a fianco, invece di tenersi
-   centotrenta pixel di carta per sé. */
-.rilevamento{display:flex;flex-direction:column;gap:14px}
-.rilevamento.preso{flex-direction:row;align-items:center;gap:15px}
-.rilevamento.preso .quadrante{width:76px;flex:0 0 76px;margin:0}
-.rilevamento.preso .segno{width:24px;height:24px}
-.rilevamento.preso .lettura{text-align:left;flex:1;min-width:0}
-.rilevamento.preso .coord{font-size:19px}
-.rilevamento.preso .coppia{margin-top:7px;gap:10px}
-.rilevamento.preso .quando{margin-top:5px}
-.rilevamento.preso .vuoto{margin:0;max-width:none}
+.rilevamento{display:flex;flex-direction:row;align-items:center;gap:15px}
+.rilevamento .segno{width:24px;height:24px}
+.rilevamento .lettura{text-align:left;flex:1;min-width:0}
+.rilevamento .coord{font-size:19px}
+.rilevamento .coppia{margin-top:7px;gap:10px}
+.rilevamento .quando{margin-top:5px}
+.rilevamento .vuoto{margin:0;max-width:none}
 .alone,.bordo{
   position:absolute;border-radius:50%;
   transition:width .9s cubic-bezier(.16,1,.3,1),height .9s cubic-bezier(.16,1,.3,1),opacity .5s;
 }
 .alone{background:var(--isoipsa);opacity:.13;width:0;height:0}
-.bordo{border:1.5px dashed var(--isoipsa);opacity:.55;width:0;height:0}
+.bordo{border:1.5px dashed var(--isoipsa);opacity:.42;width:64%;height:64%}
 .quadrante.attivo .alone{opacity:.17}
-.segno{position:relative;width:34px;height:34px;opacity:0;transition:opacity .4s .5s}
+.segno{position:relative;width:34px;height:34px;opacity:.3;transition:opacity .4s}
 .quadrante.attivo .segno{opacity:1}
+.cerca .segno{opacity:.3}
 .segno svg{width:100%;height:100%;display:block}
 .cerca .bordo{width:82%!important;height:82%!important;opacity:.5;animation:respiro 1.5s ease-in-out infinite}
 @keyframes respiro{0%,100%{transform:scale(.72);opacity:.25}50%{transform:scale(1);opacity:.6}}
-.attesa{position:absolute;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--tenue);font-weight:600}
 
 /* --- lettura --- */
 .lettura{text-align:center;display:flex;flex-direction:column;justify-content:center;gap:3px}
@@ -99,7 +95,7 @@ h1{font-size:23px;font-weight:700;letter-spacing:-.015em}
   background:var(--segnale);color:#fff;border-radius:11px;padding:11px 14px;
   font-size:14px;font-weight:600;line-height:1.35;margin-top:8px;
 }
-.rilevamento.preso .avviso{margin-top:7px;padding:8px 11px;font-size:13px}
+.rilevamento .avviso{margin-top:7px;padding:8px 11px;font-size:13px}
 .errore{background:var(--segnale);color:#fff;border-radius:11px;padding:13px 15px;font-size:15px;line-height:1.4}
 .vuoto{color:var(--tenue);font-size:15px;max-width:30ch;margin:0 auto;line-height:1.5}
 
@@ -111,6 +107,33 @@ h1{font-size:23px;font-weight:700;letter-spacing:-.015em}
 .passo.primo{border-top:none;padding-top:0;display:flex;flex-direction:column;gap:14px}
 .passo.primo h2{margin-bottom:0}
 .chips{display:flex;flex-wrap:wrap;gap:9px}
+/* I tasti stanno su una riga sola: se non ci stanno tutti si scorre col dito,
+   invece di riempire mezza schermata con tre file di pulsanti. */
+.chips.fila{
+  flex-wrap:nowrap;overflow-x:auto;padding:2px 18px 10px;margin:0 -18px;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+  /* il bordo destro sfuma: dice che la riga continua oltre lo schermo */
+  mask-image:linear-gradient(to right,#000 calc(100% - 34px),transparent);
+  -webkit-mask-image:linear-gradient(to right,#000 calc(100% - 34px),transparent);
+}
+.chips.fila::-webkit-scrollbar{display:none}
+.chips.fila .chip{flex:0 0 auto;scroll-snap-align:start}
+
+/* --- le scelte, tutte a scomparsa: chiuse dicono già che cosa contengono --- */
+.scelte{border-top:1px solid rgba(27,38,33,.12)}
+.voce{margin:0;border-bottom:1px solid rgba(27,38,33,.12)}
+.voce > summary{
+  min-height:52px;justify-content:space-between;gap:12px;
+  color:var(--inchiostro);font-weight:600;font-size:16px;
+}
+.voce > summary .val{
+  color:var(--tenue);font-weight:400;font-size:14px;text-align:right;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1;
+}
+.voce > summary::after{color:var(--acqua);margin-left:2px}
+.voce[open] > summary{color:var(--acqua)}
+.voce[open] > summary .val{display:none}
+.voce > *:last-child{margin-bottom:14px}
 
 /* --- comandi --- */
 /* anche sui singoli comandi, non solo sulla radice: il valore calcolato non
@@ -196,7 +219,6 @@ a.tasto{
 </header>
 
 <section class="passo primo">
-  <h2><i>1</i>Dove sei</h2>
 <div class="rilevamento" id="rilevamento">
   <div class="quadrante" id="quadrante">
     <div class="alone" id="alone"></div>
@@ -208,10 +230,10 @@ a.tasto{
         <circle cx="17" cy="13" r="1.9" fill="#C1452E"/>
       </svg>
     </div>
-    <div class="attesa" id="attesa">In attesa</div>
   </div>
 
   <section class="lettura" id="lettura" aria-live="polite">
+    <p class="raggio">In attesa</p>
     <p class="vuoto">Tocca «Rileva posizione»: le coordinate restano su questo telefono.</p>
   </section>
 </div>
@@ -219,26 +241,28 @@ a.tasto{
 <button class="rileva" id="rileva">Rileva posizione</button>
 </section>
 
-<section class="passo">
-  <h2><i>2</i>Come ti muovi <em>facoltativo</em></h2>
-  <div class="chips" id="mezzi" role="group" aria-label="Come ti muovi"></div>
-</section>
+<div class="scelte">
+  <details class="voce" id="pMezzo">
+    <summary><span class="et">Come ti muovi</span><span class="val" id="valMezzo">come capita</span></summary>
+    <div class="chips fila" id="mezzi" role="group" aria-label="Come ti muovi"></div>
+  </details>
 
-<section class="passo">
-  <h2><i>3</i>Cosa cerchi <em>facoltativo</em></h2>
-  <div class="chips" id="categorie" role="group" aria-label="Cosa cerchi"></div>
+  <details class="voce" id="pCosa">
+    <summary><span class="et">Cosa cerchi</span><span class="val" id="valCosa">niente in particolare</span></summary>
+    <div class="chips fila" id="categorie" role="group" aria-label="Cosa cerchi"></div>
+  </details>
 
-  <details id="dettagli">
-    <summary>Serve altro?</summary>
+  <details class="voce" id="dettagli">
+    <summary><span class="et">Serve altro?</span><span class="val" id="valAltro">niente</span></summary>
     <label class="campo" for="libero">Scrivilo qui: finisce nel prompt insieme al resto.</label>
     <textarea id="libero" rows="3" placeholder="Senza glutine. Siamo in quattro con un bambino. Oppure: cerco un benzinaio aperto."></textarea>
   </details>
 
-  <details id="vedi">
-    <summary>Vedi il prompt</summary>
+  <details class="voce" id="vedi">
+    <summary><span class="et">Vedi il prompt</span></summary>
     <pre class="anteprima" id="anteprima">Manca ancora qualcosa.</pre>
   </details>
-</section>
+</div>
 
 <div class="barra">
   <button class="copia" id="copia" disabled>Manca la posizione</button>
@@ -397,6 +421,15 @@ function aggiorna(){
   const testo = componi();
   const b = $('copia');
 
+  // Le voci sono chiuse quasi sempre: a destra del titolo devono dire da sole
+  // che cosa contengono, altrimenti bisogna aprirle tutte per sapere a che punto si è.
+  const m = MEZZI.find(x => x.id === stato.mezzo);
+  const c = CATEGORIE.find(x => x.id === stato.categoria);
+  const libero = stato.libero.trim();
+  $('valMezzo').textContent = m ? m.nome : 'come capita';
+  $('valCosa').textContent  = c ? c.nome : 'niente in particolare';
+  $('valAltro').textContent = libero ? (libero.length > 34 ? libero.slice(0,33) + '…' : libero) : 'niente';
+
   $('anteprima').textContent = testo || 'Manca la posizione: tocca «Rileva posizione».';
 
   if (testo){
@@ -430,9 +463,7 @@ function mostra(pos){
   $('bordo').style.width = $('bordo').style.height = r + '%';
   $('quadrante').classList.remove('cerca');
   $('quadrante').classList.add('attivo');
-  $('rilevamento').classList.add('preso');
   $('rileva').classList.add('secondario');
-  $('attesa').hidden = true;
 
   $('lettura').innerHTML = `
     <p class="raggio">Punto stimato entro <b>${prec} metri</b></p>
@@ -453,10 +484,7 @@ function mostra(pos){
 
 function errore(e){
   $('quadrante').classList.remove('cerca','attivo');
-  $('rilevamento').classList.remove('preso');
   $('rileva').classList.remove('secondario');
-  $('attesa').hidden = false;
-  $('attesa').textContent = 'Nessun segnale';
   const motivi = {
     1:'Permesso negato. Vai in Impostazioni › Safari › Posizione e consenti l’accesso, poi riprova.',
     2:'Il telefono non riesce a determinare la posizione. Spostati all’aperto e riprova.',
@@ -475,10 +503,8 @@ $('rileva').addEventListener('click', () => {
   $('rileva').textContent = 'Rilevo…';
   $('quadrante').classList.add('cerca');
   $('quadrante').classList.remove('attivo');
-  $('rilevamento').classList.remove('preso');
-  $('attesa').hidden = false;
-  $('attesa').textContent = 'Cerco il segnale';
-  $('lettura').innerHTML = '<p class="vuoto">Tieni il telefono fermo, meglio se all’aperto.</p>';
+  $('lettura').innerHTML = '<p class="raggio">Cerco il segnale</p>'
+    + '<p class="vuoto">Tieni il telefono fermo, meglio se all’aperto.</p>';
 
   navigator.geolocation.getCurrentPosition(
     pos => { mostra(pos); libera(); },
