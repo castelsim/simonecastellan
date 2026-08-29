@@ -107,11 +107,19 @@ h1{font-size:23px;font-weight:700;letter-spacing:-.015em}
 .passo.primo{border-top:none;padding-top:0;display:flex;flex-direction:column;gap:14px}
 .passo.primo h2{margin-bottom:0}
 .chips{display:flex;flex-wrap:wrap;gap:9px}
-/* I tasti si dispongono da soli sulla larghezza che c'è: su uno schermo
-   stretto vanno a capo, su uno largo stanno in fila. Niente scorrimento
-   laterale: un tasto fuori dallo schermo è un tasto che nessuno preme. */
-.chips.fila{flex-wrap:wrap;gap:8px}
-.chips.fila .chip{flex:0 1 auto;padding:0 13px;font-size:14.5px}
+/* Una riga sola, sempre: le celle si dividono la larghezza dello schermo in
+   parti uguali invece di andare a capo o di scorrere di lato. La scritta si
+   rimpicciolisce con la larghezza (clamp) e non va mai a capo; sotto i 44 px
+   di lato non si scende, perché è la misura di un dito. */
+.chips.fila{flex-wrap:nowrap;gap:5px}
+.chips.fila .chip{
+  flex:1 1 0;min-width:0;padding:0 3px;
+  min-height:44px;text-align:center;line-height:1.15;
+  font-size:clamp(11px,3.05vw,15px);
+  /* su uno schermo stretto la parola va a capo dentro la cella, spezzata con
+     il trattino: meglio «Far-macia» su due righe che «Farmaci…» tagliato. */
+  white-space:normal;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word;
+}
 
 /* --- le scelte, tutte a scomparsa: chiuse dicono già che cosa contengono --- */
 .scelte{border-top:1px solid rgba(27,38,33,.12)}
@@ -290,9 +298,9 @@ const $ = id => document.getElementById(id);
    scelte lette in un colpo d'occhio che sei da passare in rassegna. */
 const MEZZI = [
   {id:'piedi',   nome:'A piedi',       frase:'Mi muovo a piedi: proponimi solo posti entro circa 1,5 km, cioè una ventina di minuti di cammino.'},
-  {id:'bici',    nome:'In bici',       frase:'Mi muovo in bicicletta: proponimi posti entro circa 5 km, evitando strade a scorrimento veloce.'},
-  {id:'auto',    nome:'In auto',       frase:'Mi muovo in auto: vanno bene posti entro circa 20 minuti di guida, e segnalami dove si parcheggia.'},
-  {id:'pubblici',nome:'Mezzi pubblici',frase:'Mi muovo con i mezzi pubblici: proponimi posti raggiungibili in circa 30 minuti fra bus, metro o treno, e dimmi quale linea prendere.'}
+  {id:'bici',    nome:'Bici',       frase:'Mi muovo in bicicletta: proponimi posti entro circa 5 km, evitando strade a scorrimento veloce.'},
+  {id:'auto',    nome:'Auto',       frase:'Mi muovo in auto: vanno bene posti entro circa 20 minuti di guida, e segnalami dove si parcheggia.'},
+  {id:'pubblici',nome:'Bus e treno',frase:'Mi muovo con i mezzi pubblici: proponimi posti raggiungibili in circa 30 minuti fra bus, metro o treno, e dimmi quale linea prendere.'}
 ];
 
 /* ─── che cosa si cerca: le cinque cose per cui si tira fuori il telefono ──
@@ -303,7 +311,7 @@ const CATEGORIE = [
    cerca:'un posto dove mangiare',
    regole:'Per ogni locale dimmi il tipo di cucina, la fascia di prezzo, gli orari di oggi e se conviene prenotare.'},
 
-  {id:'bere', nome:'Bere o caffè',
+  {id:'bere', nome:'Bere',
    cerca:'un bar dove bere qualcosa',
    regole:'Per ogni locale dimmi che cosa si beve, la fascia di prezzo e fino a che ora resta aperto oggi.'},
 
@@ -316,7 +324,7 @@ const CATEGORIE = [
    chiedi:'Dimmi le due o tre opzioni più vicine, partendo da quella aperta adesso. Per ognuna: nome, indirizzo e quanto dista da me.',
    regole:'Per ognuna dimmi gli orari di oggi e il numero di telefono. Se è un’urgenza vera, ricordami che in Italia il numero unico è il 112. Non tirare a indovinare sui turni di guardia: di’ dove si controllano.'},
 
-  {id:'fare', nome:'Cosa fare',
+  {id:'fare', nome:'Da fare',
    cerca:'qualcosa da fare o da vedere qui intorno',
    regole:'Per ogni proposta dimmi di che si tratta, quanto tempo ci vuole, quanto costa e gli orari di oggi. Sugli eventi in corso di’ esplicitamente che vanno verificati sul sito ufficiale, perché cambiano.'}
 ];
