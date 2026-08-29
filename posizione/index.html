@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Prompt con la tua posizione — per ChatGPT e Claude</title>
-<meta name="description" content="Strumento gratuito: prende le coordinate GPS del telefono e scrive il prompt da incollare in ChatGPT o Claude per farsi consigliare posti vicini. Tutto resta sul telefono.">
+<meta name="description" content="Prende le coordinate GPS del telefono e scrive il prompt da incollare in ChatGPT o Claude per farsi consigliare posti vicini. Tutto resta sul telefono.">
 <link rel="canonical" href="https://simonecastellan.com/posizione/" />
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#EDF0E9">
@@ -42,7 +42,10 @@ textarea,pre,.coord{-webkit-user-select:text;user-select:text}
 .testata{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .occhiello{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tenue);font-weight:600}
 h1{font-size:23px;font-weight:700;letter-spacing:-.015em}
-.sottotitolo{font-size:15px;color:var(--tenue);line-height:1.4;margin-top:6px}
+/* dentro l'h1 erediterebbe 23px e il grassetto: va dichiarata proprietà per
+   proprietà, perché «font: … inherit» non è una scorciatoia valida e il
+   browser butta via tutta la riga. */
+.eco{display:block;font-size:15px;font-weight:400;line-height:1.4;letter-spacing:normal;color:var(--tenue);margin-top:6px}
 
 /* --- il cerchio d'incertezza: la firma --- */
 .quadrante{
@@ -88,6 +91,7 @@ h1{font-size:23px;font-weight:700;letter-spacing:-.015em}
 .passo{border-top:1px solid rgba(27,38,33,.12);padding-top:15px}
 .passo h2{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--tenue);font-weight:600;margin-bottom:11px}
 .passo h2 i{font-style:normal;color:var(--bruno-testo);margin-right:7px}
+.passo h2 em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:400;opacity:.72;margin-left:4px}
 .passo.primo{border-top:none;padding-top:0;display:flex;flex-direction:column;gap:14px}
 .passo.primo h2{margin-bottom:0}
 .chips{display:flex;flex-wrap:wrap;gap:9px}
@@ -165,8 +169,7 @@ a.tasto{
 <header class="testata">
   <div>
     <div class="occhiello">Punto di rilevamento</div>
-    <h1>Dove sono, in un prompt</h1>
-    <p class="sottotitolo">ChatGPT e Claude non sanno dove sei. Questa pagina legge il GPS del telefono e scrive il testo da incollare.</p>
+    <h1>Dove sono, in un prompt<span class="eco">ChatGPT e Claude non sanno dove sei: questa pagina legge il GPS del telefono e scrive il testo da incollare.</span></h1>
   </div>
 </header>
 
@@ -192,12 +195,12 @@ a.tasto{
 </section>
 
 <section class="passo">
-  <h2><i>2</i>Come ti muovi</h2>
+  <h2><i>2</i>Come ti muovi <em>facoltativo</em></h2>
   <div class="chips" id="mezzi" role="group" aria-label="Come ti muovi"></div>
 </section>
 
 <section class="passo">
-  <h2><i>3</i>Cosa cerchi</h2>
+  <h2><i>3</i>Cosa cerchi <em>facoltativo</em></h2>
   <div class="chips" id="categorie" role="group" aria-label="Cosa cerchi"></div>
 
   <details id="dettagli">
@@ -230,7 +233,7 @@ a.tasto{
 <p class="riservatezza">La posizione resta su questo telefono. Non viene inviata a nessun server.</p>
 
 <footer class="piede">
-  Strumento gratuito di <a href="/">Simone Castellan</a> — <a href="/tools/">gli altri strumenti</a>.
+  Strumento gratuito di <a href="https://simonecastellan.com/">Simone Castellan</a> — <a href="https://simonecastellan.com/tools/">gli altri strumenti</a>.
 </footer>
 
 <script>
@@ -394,27 +397,33 @@ function disegnaPreferenze(){
 /* ─── il prompt ────────────────────────────────────────────────────────── */
 const fmtData = d => d.toLocaleString('it-IT',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
 
+// Basta la posizione: mezzo e obiettivo sono in più, non obbligatori. Chi vuole
+// solo le coordinate da incollare le ha in due tocchi, come prima.
 function componi(){
-  if (!ultima || !stato.mezzo || !stato.categoria) return null;
+  if (!ultima) return null;
   const m = MEZZI.find(x => x.id === stato.mezzo);
   const c = CATEGORIE.find(x => x.id === stato.categoria);
   const {lat, lon, prec, quando} = ultima;
 
   const righe = [
-    `Sono qui: ${lat.toFixed(6)}, ${lon.toFixed(6)} (coordinate GPS, precisione circa ${prec} metri, rilevate il ${fmtData(quando)}).`,
-    m.frase,
-    `Cerco ${c.cerca}.`
+    `Sono qui: ${lat.toFixed(6)}, ${lon.toFixed(6)} (coordinate GPS, precisione circa ${prec} metri, rilevate il ${fmtData(quando)}).`
   ];
+  if (m) righe.push(m.frase);
+  if (c) righe.push(`Cerco ${c.cerca}.`);
   if (stato.pref.length) righe.push(`Preferenze: ${stato.pref.join(', ').toLowerCase()}.`);
   const libero = stato.libero.trim();
   if (libero) righe.push(`Altri dettagli: ${libero}`);
 
   righe.push('');
   righe.push('Parti dal riconoscere in che zona si trovano queste coordinate.');
-  // Quasi tutte le categorie vogliono una rosa di posti; la salute no, lì conta
-  // il più vicino aperto adesso. Perciò la richiesta può essere della categoria.
-  righe.push(c.chiedi || 'Dimmi da 3 a 5 posti reali, dal più vicino al più lontano. Per ognuno: nome, indirizzo, quanto dista da me e perché me lo consigli.');
-  righe.push(c.regole);
+  if (c){
+    // Quasi tutte le categorie vogliono una rosa di posti; la salute no, lì conta
+    // il più vicino aperto adesso. Perciò la richiesta può essere della categoria.
+    righe.push(c.chiedi || 'Dimmi da 3 a 5 posti reali, dal più vicino al più lontano. Per ognuno: nome, indirizzo, quanto dista da me e perché me lo consigli.');
+    righe.push(c.regole);
+  } else {
+    righe.push('Tienile presenti per rispondere alle mie prossime domande su cosa c’è qui intorno.');
+  }
   righe.push('Se non sei sicuro che un posto esista ancora o sia aperto, dillo invece di inventarlo.');
 
   return righe.join('\n');
@@ -425,20 +434,16 @@ function aggiorna(){
   const testo = componi();
   const b = $('copia');
 
-  $('anteprima').textContent = testo || (
-    !ultima ? 'Manca la posizione: tocca «Rileva posizione».'
-    : !stato.mezzo ? 'Manca come ti muovi.'
-    : 'Manca cosa cerchi.');
+  $('anteprima').textContent = testo || 'Manca la posizione: tocca «Rileva posizione».';
 
   if (testo){
     b.disabled = false;
-    if (!b.classList.contains('fatto')) b.textContent = 'Copia il prompt';
+    // Con un obiettivo scelto è un prompt; senza, è la posizione da incollare.
+    if (!b.classList.contains('fatto')) b.textContent = stato.categoria ? 'Copia il prompt' : 'Copia la posizione';
   } else {
     b.disabled = true;
     b.classList.remove('fatto');
-    b.textContent = !ultima ? 'Manca la posizione'
-                  : !stato.mezzo ? 'Manca come ti muovi'
-                  : 'Manca cosa cerchi';
+    b.textContent = 'Manca la posizione';
   }
 }
 
