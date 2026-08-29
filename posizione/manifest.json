@@ -1,7 +1,7 @@
 {
-  "name": "La mia posizione",
+  "name": "Dove sono, in un prompt",
   "short_name": "Posizione",
-  "description": "Legge le coordinate GPS del telefono e le prepara per Claude. Niente lascia il dispositivo.",
+  "description": "Legge le coordinate GPS del telefono e scrive il prompt da incollare in ChatGPT o Claude per farsi consigliare posti vicini. Niente lascia il dispositivo.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
