@@ -107,17 +107,11 @@ h1{font-size:23px;font-weight:700;letter-spacing:-.015em}
 .passo.primo{border-top:none;padding-top:0;display:flex;flex-direction:column;gap:14px}
 .passo.primo h2{margin-bottom:0}
 .chips{display:flex;flex-wrap:wrap;gap:9px}
-/* I tasti stanno su una riga sola: se non ci stanno tutti si scorre col dito,
-   invece di riempire mezza schermata con tre file di pulsanti. */
-.chips.fila{
-  flex-wrap:nowrap;overflow-x:auto;padding:2px 18px 10px;margin:0 -18px;
-  scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
-  /* il bordo destro sfuma: dice che la riga continua oltre lo schermo */
-  mask-image:linear-gradient(to right,#000 calc(100% - 34px),transparent);
-  -webkit-mask-image:linear-gradient(to right,#000 calc(100% - 34px),transparent);
-}
-.chips.fila::-webkit-scrollbar{display:none}
-.chips.fila .chip{flex:0 0 auto;scroll-snap-align:start}
+/* I tasti si dispongono da soli sulla larghezza che c'è: su uno schermo
+   stretto vanno a capo, su uno largo stanno in fila. Niente scorrimento
+   laterale: un tasto fuori dallo schermo è un tasto che nessuno preme. */
+.chips.fila{flex-wrap:wrap;gap:8px}
+.chips.fila .chip{flex:0 1 auto;padding:0 13px;font-size:14.5px}
 
 /* --- le scelte, tutte a scomparsa: chiuse dicono già che cosa contengono --- */
 .scelte{border-top:1px solid rgba(27,38,33,.12)}
@@ -568,6 +562,24 @@ rileggi();
 disegnaMezzi();
 disegnaCategorie();
 aggiorna();
+
+/* Su iPhone il doppio tocco ingrandisce ancora la pagina anche con
+   «touch-action: manipulation»: Safari lo decide prima, sul viewport. L'unico
+   modo che non tocca il pinch è annullare il secondo tocco ravvicinato.
+   Due precauzioni: nei campi di testo non si interviene (là il doppio tocco
+   seleziona la parola), e su un comando il tocco viene inoltrato a mano,
+   perché premere due tasti in mezzo secondo deve continuare a funzionare. */
+let ultimoTocco = 0;
+document.addEventListener('touchend', e => {
+  const ora = Date.now();
+  const dentroCampo = e.target.closest('textarea, input');
+  if (!dentroCampo && ora - ultimoTocco < 320){
+    e.preventDefault();
+    const comando = e.target.closest('button, summary, a');
+    if (comando) comando.click();
+  }
+  ultimoTocco = ora;
+}, {passive:false});
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
