@@ -49,12 +49,23 @@ h1{font-size:23px;font-weight:700;letter-spacing:-.015em}
 
 /* --- il cerchio d'incertezza: la firma --- */
 .quadrante{
-  position:relative;aspect-ratio:1;width:172px;margin:0 auto;
+  position:relative;aspect-ratio:1;width:132px;margin:0 auto;
   display:grid;place-items:center;
   transition:width .6s cubic-bezier(.16,1,.3,1);
 }
-/* preso il punto, il cerchio si ritira: sotto ci sono le scelte da fare */
-.quadrante.attivo{width:118px}
+/* Finché non c'è il punto il cerchio è l'unica cosa in pagina e può stare
+   grande.  Letto il punto diventa la misura di un numero già scritto a parole
+   qui accanto: si rimpicciolisce e gli si mette a fianco, invece di tenersi
+   centotrenta pixel di carta per sé. */
+.rilevamento{display:flex;flex-direction:column;gap:14px}
+.rilevamento.preso{flex-direction:row;align-items:center;gap:15px}
+.rilevamento.preso .quadrante{width:76px;flex:0 0 76px;margin:0}
+.rilevamento.preso .trigonometrico{width:24px;height:24px}
+.rilevamento.preso .lettura{text-align:left;flex:1;min-width:0}
+.rilevamento.preso .coord{font-size:19px}
+.rilevamento.preso .coppia{margin-top:7px;gap:10px}
+.rilevamento.preso .quando{margin-top:5px}
+.rilevamento.preso .vuoto{margin:0;max-width:none}
 .alone,.bordo{
   position:absolute;border-radius:50%;
   transition:width .9s cubic-bezier(.16,1,.3,1),height .9s cubic-bezier(.16,1,.3,1),opacity .5s;
@@ -84,6 +95,7 @@ h1{font-size:23px;font-weight:700;letter-spacing:-.015em}
   background:var(--segnale);color:#fff;border-radius:11px;padding:11px 14px;
   font-size:14px;font-weight:600;line-height:1.35;margin-top:8px;
 }
+.rilevamento.preso .avviso{margin-top:7px;padding:8px 11px;font-size:13px}
 .errore{background:var(--segnale);color:#fff;border-radius:11px;padding:13px 15px;font-size:15px;line-height:1.4}
 .vuoto{color:var(--tenue);font-size:15px;max-width:30ch;margin:0 auto;line-height:1.5}
 
@@ -110,6 +122,10 @@ button:focus-visible,a.tasto:focus-visible,summary:focus-visible{outline:2px sol
   min-height:56px;font-size:16px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
 }
 .rileva[disabled]{opacity:.45}
+/* preso il punto il gesto principale è copiare, non rilevare di nuovo:
+   il tasto si fa da parte invece di restare il blocco più scuro in pagina. */
+.rileva.secondario{background:transparent;color:var(--inchiostro);border:1.5px solid rgba(27,38,33,.22);
+  min-height:46px;font-size:14px;font-weight:600;letter-spacing:.05em}
 .chip{
   width:auto;min-height:44px;padding:0 15px;
   border:1.5px solid rgba(27,38,33,.24);background:transparent;color:var(--inchiostro);
@@ -175,21 +191,23 @@ a.tasto{
 
 <section class="passo primo">
   <h2><i>1</i>Dove sei</h2>
-<div class="quadrante" id="quadrante">
-  <div class="alone" id="alone"></div>
-  <div class="bordo" id="bordo"></div>
-  <div class="trigonometrico">
-    <svg viewBox="0 0 34 34" aria-hidden="true">
-      <path d="M17 3 L31.7 29 L2.3 29 Z" fill="none" stroke="#1B2621" stroke-width="2" stroke-linejoin="round"/>
-      <circle cx="17" cy="21.5" r="3.4" fill="#C1452E"/>
-    </svg>
+<div class="rilevamento" id="rilevamento">
+  <div class="quadrante" id="quadrante">
+    <div class="alone" id="alone"></div>
+    <div class="bordo" id="bordo"></div>
+    <div class="trigonometrico">
+      <svg viewBox="0 0 34 34" aria-hidden="true">
+        <path d="M17 3 L31.7 29 L2.3 29 Z" fill="none" stroke="#1B2621" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="17" cy="21.5" r="3.4" fill="#C1452E"/>
+      </svg>
+    </div>
+    <div class="attesa" id="attesa">In attesa</div>
   </div>
-  <div class="attesa" id="attesa">In attesa</div>
-</div>
 
-<section class="lettura" id="lettura" aria-live="polite">
-  <p class="vuoto">Tocca «Rileva posizione»: le coordinate restano su questo telefono.</p>
-</section>
+  <section class="lettura" id="lettura" aria-live="polite">
+    <p class="vuoto">Tocca «Rileva posizione»: le coordinate restano su questo telefono.</p>
+  </section>
+</div>
 
 <button class="rileva" id="rileva">Rileva posizione</button>
 </section>
@@ -395,7 +413,8 @@ function disegnaPreferenze(){
 }
 
 /* ─── il prompt ────────────────────────────────────────────────────────── */
-const fmtData = d => d.toLocaleString('it-IT',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+const fmtData  = d => d.toLocaleString('it-IT',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+const fmtBreve = d => d.toLocaleString('it-IT',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
 
 // Basta la posizione: mezzo e obiettivo sono in più, non obbligatori. Chi vuole
 // solo le coordinate da incollare le ha in due tocchi, come prima.
@@ -467,15 +486,17 @@ function mostra(pos){
   $('bordo').style.width = $('bordo').style.height = r + '%';
   $('quadrante').classList.remove('cerca');
   $('quadrante').classList.add('attivo');
+  $('rilevamento').classList.add('preso');
+  $('rileva').classList.add('secondario');
   $('attesa').hidden = true;
 
   $('lettura').innerHTML = `
-    <p class="raggio">Posizione stimata entro un raggio di <b>${prec} metri</b></p>
+    <p class="raggio">Punto stimato entro <b>${prec} metri</b></p>
     <div class="coppia">
       <div><div class="coord">${lat.toFixed(6)}</div><div class="asse">Latitudine</div></div>
       <div><div class="coord">${lon.toFixed(6)}</div><div class="asse">Longitudine</div></div>
     </div>
-    <div class="quando">Rilevata il ${fmtData(quando)}</div>
+    <div class="quando">Rilevata il ${fmtBreve(quando)}</div>
     ${prec > 30 ? '<p class="avviso">Segnale poco preciso: spostati all’aperto e riprova</p>' : ''}
   `;
 
@@ -488,6 +509,8 @@ function mostra(pos){
 
 function errore(e){
   $('quadrante').classList.remove('cerca','attivo');
+  $('rilevamento').classList.remove('preso');
+  $('rileva').classList.remove('secondario');
   $('attesa').hidden = false;
   $('attesa').textContent = 'Nessun segnale';
   const motivi = {
@@ -508,6 +531,7 @@ $('rileva').addEventListener('click', () => {
   $('rileva').textContent = 'Rilevo…';
   $('quadrante').classList.add('cerca');
   $('quadrante').classList.remove('attivo');
+  $('rilevamento').classList.remove('preso');
   $('attesa').hidden = false;
   $('attesa').textContent = 'Cerco il segnale';
   $('lettura').innerHTML = '<p class="vuoto">Tieni il telefono fermo, meglio se all’aperto.</p>';
