@@ -25,7 +25,11 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{min-height:100%}
-html{background:var(--carta)}
+/* Due tocchi rapidi su iPhone ingrandivano la pagina: qui non serve a
+   niente e sposta i tasti sotto il dito. «manipulation» spegne solo il
+   doppio tap: scorrimento e pinch per ingrandire restano. Non si usa
+   user-scalable=no, che toglierebbe anche il pinch a chi ci vede poco. */
+html{background:var(--carta);touch-action:manipulation}
 body{
   min-height:100dvh;
   background:var(--carta);
@@ -109,6 +113,9 @@ h1{font-size:23px;font-weight:700;letter-spacing:-.015em}
 .chips{display:flex;flex-wrap:wrap;gap:9px}
 
 /* --- comandi --- */
+/* anche sui singoli comandi, non solo sulla radice: il valore calcolato non
+   si eredita e su iOS conviene dirlo dove il dito tocca davvero. */
+button,a,summary,label{touch-action:manipulation}
 button,a.tasto{
   font:inherit;border:none;border-radius:15px;width:100%;
   display:flex;align-items:center;justify-content:center;gap:9px;
@@ -132,7 +139,6 @@ button:focus-visible,a.tasto:focus-visible,summary:focus-visible{outline:2px sol
   font-size:15px;font-weight:600;border-radius:13px;line-height:1.2;
 }
 .chip[aria-pressed="true"]{background:var(--inchiostro);color:var(--carta);border-color:var(--inchiostro)}
-.chip.tenue[aria-pressed="true"]{background:var(--bruno-testo);border-color:var(--bruno-testo)}
 details{margin-top:13px}
 summary{
   list-style:none;cursor:pointer;min-height:44px;display:flex;align-items:center;gap:8px;
@@ -223,12 +229,9 @@ a.tasto{
   <div class="chips" id="categorie" role="group" aria-label="Cosa cerchi"></div>
 
   <details id="dettagli">
-    <summary>Aggiungi preferenze</summary>
-    <div id="preferenze" aria-live="polite">
-      <p class="vuoto" style="text-align:left;max-width:none;margin:12px 0 0">Scegli prima cosa cerchi: qui compaiono le preferenze giuste.</p>
-    </div>
-    <label class="campo" for="libero">Altre esigenze o dettagli</label>
-    <textarea id="libero" rows="3" placeholder="Siamo in quattro, uno è celiaco. Abbiamo un'ora."></textarea>
+    <summary>Serve altro?</summary>
+    <label class="campo" for="libero">Scrivilo qui: finisce nel prompt insieme al resto.</label>
+    <textarea id="libero" rows="3" placeholder="Senza glutine. Siamo in quattro con un bambino. Oppure: cerco un benzinaio aperto."></textarea>
   </details>
 
   <details id="vedi">
@@ -258,99 +261,64 @@ a.tasto{
 <script>
 const $ = id => document.getElementById(id);
 
-/* ─── i sei mezzi: ognuno detta il raggio che ha senso ─────────────────── */
+/* ─── come ci si muove: i quattro modi che coprono quasi tutti i casi ─────
+   Chi va in monopattino o in taxi lo scrive nel campo libero: meglio quattro
+   scelte lette in un colpo d'occhio che sei da passare in rassegna. */
 const MEZZI = [
   {id:'piedi',   nome:'A piedi',       frase:'Mi muovo a piedi: proponimi solo posti entro circa 1,5 km, cioè una ventina di minuti di cammino.'},
   {id:'bici',    nome:'In bici',       frase:'Mi muovo in bicicletta: proponimi posti entro circa 5 km, evitando strade a scorrimento veloce.'},
-  {id:'monop',   nome:'In monopattino',frase:'Mi muovo in monopattino: proponimi posti entro circa 4 km, su strade urbane.'},
   {id:'auto',    nome:'In auto',       frase:'Mi muovo in auto: vanno bene posti entro circa 20 minuti di guida, e segnalami dove si parcheggia.'},
-  {id:'pubblici',nome:'Mezzi pubblici',frase:'Mi muovo con i mezzi pubblici: proponimi posti raggiungibili in circa 30 minuti fra bus, metro o treno, e dimmi quale linea prendere.'},
-  {id:'taxi',    nome:'In taxi',       frase:'Mi muovo in taxi: vanno bene posti entro circa 15 minuti di corsa.'}
+  {id:'pubblici',nome:'Mezzi pubblici',frase:'Mi muovo con i mezzi pubblici: proponimi posti raggiungibili in circa 30 minuti fra bus, metro o treno, e dimmi quale linea prendere.'}
 ];
 
-/* ─── le undici cose che si cercano stando fuori casa ──────────────────── */
+/* ─── che cosa si cerca: le cinque cose per cui si tira fuori il telefono ──
+   Tutto il resto — un benzinaio, la posta, un negozio aperto — si scrive nel
+   campo libero, e finisce nel prompt come tutto il resto. */
 const CATEGORIE = [
   {id:'mangiare', nome:'Mangiare',
    cerca:'un posto dove mangiare',
-   pref:['Pizza','Pesce','Cucina del posto','Vegetariano','Senza glutine','Spesa contenuta','Aperto adesso','Tavoli fuori'],
    regole:'Per ogni locale dimmi il tipo di cucina, la fascia di prezzo, gli orari di oggi e se conviene prenotare.'},
 
-  {id:'bere', nome:'Bere qualcosa',
-   cerca:'un posto dove bere qualcosa',
-   pref:['Aperitivo','Birreria','Cocktail','Enoteca','All’aperto','Aperto fino a tardi','Con qualcosa da mangiare'],
-   regole:'Per ogni locale dimmi che cosa si beve, la fascia di prezzo, fino a che ora resta aperto oggi e se si mangia qualcosa.'},
-
-  {id:'caffe', nome:'Caffè o colazione',
-   cerca:'un bar per il caffè o la colazione',
-   pref:['Pasticceria','Colazione salata','Wi‑Fi e prese','Da asporto','Apre presto','Con tavolini'],
-   regole:'Per ogni bar dimmi a che ora apre oggi, che cosa fa di buono e se si può stare seduti a lavorare.'},
+  {id:'bere', nome:'Bere o caffè',
+   cerca:'un bar dove bere qualcosa',
+   regole:'Per ogni locale dimmi che cosa si beve, la fascia di prezzo e fino a che ora resta aperto oggi.'},
 
   {id:'dormire', nome:'Dormire',
    cerca:'un posto dove dormire stanotte',
-   pref:['Spesa contenuta','In centro','Con parcheggio','Colazione inclusa','Cancellazione gratuita','Una notte sola','Per famiglie'],
    regole:'Per ogni struttura dimmi la fascia di prezzo a notte, la distanza da me e su quali siti conviene controllare la disponibilità. Non inventare prezzi precisi: dai un intervallo e di’ che va verificato.'},
 
-  {id:'spesa', nome:'Spesa e negozi',
-   cerca:'un negozio dove fare la spesa o comprare quello che mi serve',
-   pref:['Supermercato','Alimentari piccolo','Aperto adesso','Aperto la domenica','Ferramenta','Grande superficie'],
-   regole:'Per ogni negozio dimmi gli orari di oggi, che cosa ci trovo e se ha parcheggio.'},
-
-  {id:'salute', nome:'Farmacia o salute',
+  {id:'salute', nome:'Farmacia',
    cerca:'una farmacia o un presidio sanitario',
-   pref:['Farmacia di turno','Aperta adesso','Aperta 24 ore','Pronto soccorso','Guardia medica','Veterinario'],
    chiedi:'Dimmi le due o tre opzioni più vicine, partendo da quella aperta adesso. Per ognuna: nome, indirizzo e quanto dista da me.',
    regole:'Per ognuna dimmi gli orari di oggi e il numero di telefono. Se è un’urgenza vera, ricordami che in Italia il numero unico è il 112. Non tirare a indovinare sui turni di guardia: di’ dove si controllano.'},
 
-  {id:'carburante', nome:'Benzina o ricarica',
-   cerca:'un distributore o una colonnina di ricarica',
-   pref:['Self service','Metano','GPL','Ricarica elettrica','Ricarica veloce','Aperto 24 ore'],
-   regole:'Per ogni punto dimmi il gestore, gli orari, e per le colonnine anche la potenza e la presa. Sui prezzi di’ solo l’ordine di grandezza e dove si verificano.'},
-
-  {id:'bambini', nome:'Con i bambini',
-   cerca:'qualcosa da fare o un posto adatto con i bambini',
-   pref:['Parco giochi','Al chiuso','Fasciatoio','Gratis','Sotto i 3 anni','Con il passeggino'],
-   regole:'Per ogni posto dimmi per che età va bene, se è al chiuso o all’aperto, quanto costa e se ci sono bagni e fasciatoio.'},
-
-  {id:'aperto', nome:'All’aria aperta',
-   cerca:'un posto all’aria aperta dove stare o camminare',
-   pref:['Passeggiata breve','Sentiero','Panorama','Ombra','Si può portare il cane','Accessibile'],
-   regole:'Per ogni posto dimmi quanto dura il giro, il dislivello se c’è, il fondo del percorso e se serve attrezzatura.'},
-
-  {id:'cultura', nome:'Cultura ed eventi',
-   cerca:'un museo, una mostra o un evento',
-   pref:['Museo','Mostra','Concerto','Stasera','Nel fine settimana','Gratis','Adatto ai bambini'],
-   regole:'Per ogni proposta dimmi orari, prezzo del biglietto e se serve prenotare. Sugli eventi in corso di’ esplicitamente che vanno verificati sul sito ufficiale, perché cambiano.'},
-
-  {id:'servizi', nome:'Servizi utili',
-   cerca:'un servizio pratico che mi serve adesso',
-   pref:['Bancomat','Ufficio postale','Wi‑Fi libero','Bagno pubblico','Parcheggio','Ritiro pacchi','Lavanderia'],
-   regole:'Per ogni servizio dimmi gli orari di oggi, se costa qualcosa e come ci si accede.'}
+  {id:'fare', nome:'Cosa fare',
+   cerca:'qualcosa da fare o da vedere qui intorno',
+   regole:'Per ogni proposta dimmi di che si tratta, quanto tempo ci vuole, quanto costa e gli orari di oggi. Sugli eventi in corso di’ esplicitamente che vanno verificati sul sito ufficiale, perché cambiano.'}
 ];
 
 /* ─── stato: la posizione NON viene mai salvata ────────────────────────── */
 let ultima = null;
-const stato = {mezzo:null, categoria:null, pref:[], libero:''};
-const CHIAVE = 'posizione.preferenze';
+const stato = {mezzo:null, categoria:null, libero:''};
+const CHIAVE = 'posizione.scelte';
 
 /* Si ricordano solo le scelte, mai le coordinate né il testo libero: quello
    può contenere fatti personali e non ha motivo di sopravvivere alla sessione. */
 function ricorda(){
-  try{ localStorage.setItem(CHIAVE, JSON.stringify({mezzo:stato.mezzo, categoria:stato.categoria, pref:stato.pref})); }catch{}
+  try{ localStorage.setItem(CHIAVE, JSON.stringify({mezzo:stato.mezzo, categoria:stato.categoria})); }catch{}
 }
 function rileggi(){
   try{
     const v = JSON.parse(localStorage.getItem(CHIAVE) || '{}');
     if (MEZZI.some(m => m.id === v.mezzo)) stato.mezzo = v.mezzo;
     if (CATEGORIE.some(c => c.id === v.categoria)) stato.categoria = v.categoria;
-    const cat = CATEGORIE.find(c => c.id === stato.categoria);
-    if (cat && Array.isArray(v.pref)) stato.pref = v.pref.filter(p => cat.pref.includes(p));
   }catch{}
 }
 
 /* ─── i chip ───────────────────────────────────────────────────────────── */
-function chip(testo, premuto, tenue){
+function chip(testo, premuto){
   const b = document.createElement('button');
-  b.className = tenue ? 'chip tenue' : 'chip';
+  b.className = 'chip';
   b.type = 'button';
   b.textContent = testo;
   b.setAttribute('aria-pressed', premuto ? 'true' : 'false');
@@ -361,7 +329,7 @@ function disegnaMezzi(){
   const box = $('mezzi');
   box.innerHTML = '';
   MEZZI.forEach(m => {
-    const b = chip(m.nome, stato.mezzo === m.id, false);
+    const b = chip(m.nome, stato.mezzo === m.id);
     b.addEventListener('click', () => {
       stato.mezzo = (stato.mezzo === m.id) ? null : m.id;
       disegnaMezzi(); ricorda(); aggiorna();
@@ -374,43 +342,13 @@ function disegnaCategorie(){
   const box = $('categorie');
   box.innerHTML = '';
   CATEGORIE.forEach(c => {
-    const b = chip(c.nome, stato.categoria === c.id, false);
+    const b = chip(c.nome, stato.categoria === c.id);
     b.addEventListener('click', () => {
-      if (stato.categoria === c.id){ stato.categoria = null; }
-      else { stato.categoria = c.id; }
-      stato.pref = [];                 // le preferenze appartengono alla categoria
-      disegnaCategorie(); disegnaPreferenze(); ricorda(); aggiorna();
+      stato.categoria = (stato.categoria === c.id) ? null : c.id;
+      disegnaCategorie(); ricorda(); aggiorna();
     });
     box.appendChild(b);
   });
-}
-
-function disegnaPreferenze(){
-  const box = $('preferenze');
-  const cat = CATEGORIE.find(c => c.id === stato.categoria);
-  box.innerHTML = '';
-  if (!cat){
-    const p = document.createElement('p');
-    p.className = 'vuoto';
-    p.style.cssText = 'text-align:left;max-width:none;margin:12px 0 0';
-    p.textContent = 'Scegli prima cosa cerchi: qui compaiono le preferenze giuste.';
-    box.appendChild(p);
-    return;
-  }
-  const chips = document.createElement('div');
-  chips.className = 'chips';
-  chips.style.marginTop = '12px';
-  chips.setAttribute('role','group');
-  chips.setAttribute('aria-label','Preferenze per ' + cat.nome.toLowerCase());
-  cat.pref.forEach(p => {
-    const b = chip(p, stato.pref.includes(p), true);
-    b.addEventListener('click', () => {
-      stato.pref = stato.pref.includes(p) ? stato.pref.filter(x => x !== p) : stato.pref.concat(p);
-      disegnaPreferenze(); ricorda(); aggiorna();
-    });
-    chips.appendChild(b);
-  });
-  box.appendChild(chips);
 }
 
 /* ─── il prompt ────────────────────────────────────────────────────────── */
@@ -430,17 +368,22 @@ function componi(){
   ];
   if (m) righe.push(m.frase);
   if (c) righe.push(`Cerco ${c.cerca}.`);
-  if (stato.pref.length) righe.push(`Preferenze: ${stato.pref.join(', ').toLowerCase()}.`);
   const libero = stato.libero.trim();
   if (libero) righe.push(`Altri dettagli: ${libero}`);
 
   righe.push('');
   righe.push('Parti dal riconoscere in che zona si trovano queste coordinate.');
+  const ROSA = 'Dimmi da 3 a 5 posti reali, dal più vicino al più lontano. Per ognuno: nome, indirizzo, quanto dista da me e perché me lo consigli.';
   if (c){
     // Quasi tutte le categorie vogliono una rosa di posti; la salute no, lì conta
     // il più vicino aperto adesso. Perciò la richiesta può essere della categoria.
-    righe.push(c.chiedi || 'Dimmi da 3 a 5 posti reali, dal più vicino al più lontano. Per ognuno: nome, indirizzo, quanto dista da me e perché me lo consigli.');
+    righe.push(c.chiedi || ROSA);
     righe.push(c.regole);
+  } else if (libero){
+    // Nessun obiettivo fra i cinque, ma qualcosa scritto a mano: la domanda è
+    // già nel testo, sarebbe assurdo rimandarla «alle prossime domande».
+    righe.push(ROSA);
+    righe.push('Dimmi anche gli orari di oggi e, se ha senso, quanto costa.');
   } else {
     righe.push('Tienile presenti per rispondere alle mie prossime domande su cosa c’è qui intorno.');
   }
@@ -575,7 +518,6 @@ $('libero').addEventListener('input', aggiorna);
 rileggi();
 disegnaMezzi();
 disegnaCategorie();
-disegnaPreferenze();
 aggiorna();
 
 if ('serviceWorker' in navigator) {
