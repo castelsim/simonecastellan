@@ -57,12 +57,6 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://simonecastellan.com/trasporta-accordi/</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://simonecastellan.com/tonalita/</loc>
     <lastmod>2026-08-23</lastmod>
     <changefreq>yearly</changefreq>
@@ -123,12 +117,6 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://simonecastellan.com/link-utm/</loc>
-    <lastmod>2026-08-14</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://simonecastellan.com/conta-caratteri/</loc>
     <lastmod>2026-08-23</lastmod>
     <changefreq>yearly</changefreq>
@@ -143,24 +131,6 @@
   <url>
     <loc>https://simonecastellan.com/posizione/</loc>
     <lastmod>2026-08-28</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://simonecastellan.com/da-comunicato-a-post/</loc>
-    <lastmod>2026-08-13</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://simonecastellan.com/semplifica-testo/</loc>
-    <lastmod>2026-08-13</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://simonecastellan.com/alt-text/</loc>
-    <lastmod>2026-08-13</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>

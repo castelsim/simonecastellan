@@ -41,15 +41,18 @@ FRASI_DA_NON_METTERE_NEL_PROMPT = ("ignora l'errore", "non dire mai")
 # sitemap, intestazioni) e tenerne tre copie significa dimenticarne una.
 TOOL = ["tara-impianto", "audio-mp3", "bpm", "tonalita", "qrcode", "posso-pubblicarlo", "fotogramma",
         "comprimi-immagini", "comprimi-pdf", "comprimi-video",
-        "rumore-rosa", "ritardo-diffusori", "link-utm", "conta-caratteri", "link-whatsapp",
-        "da-comunicato-a-post", "semplifica-testo", "alt-text", "trasporta-accordi",
+        "rumore-rosa", "ritardo-diffusori", "conta-caratteri", "link-whatsapp",
         "posizione"]
 
 # Strumenti tolti dalla vetrina ma ancora vivi: la pagina funziona per chi ha il
 # link, non compare in /tools/ né nella sitemap né nelle ricerche.  Restano qui
 # perché la voce comune vale anche per loro — e perché se una cella tornasse in
 # vetrina per distrazione, qualcuno deve accorgersene.
-NASCOSTI = ["metriche-social", "bando-in-chiaro"]
+NASCOSTI = ["metriche-social", "bando-in-chiaro",
+            # 30/08/2026, decisi da Simone guardando le aperture vere: in tre mesi
+            # nessuno che non fosse lui li ha aperti, e non dicono il mestiere.
+            "link-utm", "alt-text", "semplifica-testo", "da-comunicato-a-post",
+            "trasporta-accordi"]
 
 # Google mostra ~155-160 caratteri di descrizione: oltre, taglia a metà frase.
 MAX_DESCRIZIONE = 160
