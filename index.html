@@ -97,8 +97,8 @@
         "url": "https://simonecastellan.com/",
         "mainEntityOfPage": "https://simonecastellan.com/profilo/",
         "image": "https://simonecastellan.com/og-image.png",
-        "jobTitle": "Tecnologia applicata al suono",
-        "description": "Tecnologia applicata al suono: misura, elaborazione del segnale e strumenti che girano nel browser. Progetti: Crastel Studio, StagePlot, Tools.",
+        "jobTitle": "Sound engineer",
+        "description": "Sound engineer: registrazione, mix stereo e Dolby Atmos, mastering e audio dal vivo per produzioni musicali, televisive ed eventi. A Cassola, in provincia di Vicenza.",
         "knowsLanguage": ["it", "en"],
         "address": { "@type": "PostalAddress", "addressRegion": "Veneto", "addressCountry": "IT" },
         "knowsAbout": ["Elaborazione del segnale audio", "Misura acustica", "Web Audio API", "Elettroacustica", "Sound design", "Mix", "Mastering", "Dolby Atmos", "Sviluppo di strumenti web", "Pro Tools"],
@@ -207,6 +207,81 @@
       text-align:left; font-size:14px; line-height:1.7; color:#5f6368;
     }
 
+    /* Dove, da quando, per chi: sotto il titolo, in grigio, senza competere. */
+    .dove{
+      max-width:600px; margin:14px auto 0;
+      font-size:14px; line-height:1.55; color:#5f6368;
+    }
+
+    /* ── LA FASCIA DELLE CREDENZIALI ──────────────────────────────────────
+       Tre voci in riga su schermo largo, che vanno a capo sul telefono. Non è
+       una tabella e non ha bordi: tre fatti uno accanto all'altro, il fatto in
+       scuro e la precisazione in grigio sotto. */
+    .credenziali{
+      list-style:none; padding:0;
+      margin:22px auto 0; max-width:620px;
+      display:flex; flex-wrap:wrap; justify-content:center; gap:10px 30px;
+    }
+    .credenziali li{font-size:13px; line-height:1.35}
+    .credenziali b{display:block; font-weight:600; color:#0f1614; font-size:13.5px}
+    .credenziali span{display:block; color:#5f6368; margin-top:1px}
+    @media (max-width:620px){
+      .credenziali{gap:9px 20px; margin-top:18px}
+      .credenziali li{font-size:12.5px}
+    }
+
+    /* ── L'AZIONE PRINCIPALE ──────────────────────────────────────────────
+       Il pulsante pieno e scuro è uno solo in tutta la pagina: se ce ne fossero
+       due, nessuno dei due sarebbe il principale. Quello di ChatGPT resta
+       chiaro, come i riquadri dei progetti. */
+    .cta{
+      display:inline-flex; align-items:center; justify-content:center;
+      min-height:52px; padding:0 26px; margin-top:32px;
+      background:#0f1614; color:#fff; border-radius:26px;
+      font-size:15.5px; font-weight:600; letter-spacing:.01em;
+      text-decoration:none;
+      transition:background .18s, transform .12s;
+    }
+    .cta:hover{background:#1f2a26}
+    .cta:active{transform:scale(.985)}
+    .cta:focus-visible{outline:2px solid #0a7d72; outline-offset:3px}
+
+    /* ── COSA SI PUÒ CHIEDERE ─────────────────────────────────────────────
+       Tre aree, allineate a sinistra come il testo lungo: sono da leggere,
+       non da guardare. */
+    .servizi{max-width:620px; margin:0 auto; text-align:left}
+    .servizi > h2{
+      margin:0 0 16px;
+      font:500 11px ui-monospace,SFMono-Regular,Menlo,monospace;
+      letter-spacing:.16em; text-transform:uppercase; color:#0a7d72;
+    }
+    .servizi .tre{display:grid; grid-template-columns:1fr; gap:18px}
+    @media (min-width:720px){ .servizi .tre{grid-template-columns:repeat(3,1fr); gap:22px} }
+    .servizi h3{margin:0 0 5px; font-size:14px; font-weight:600; color:#0f1614; line-height:1.3}
+    .servizi p{margin:0; font-size:13.5px; line-height:1.6; color:#5f6368}
+    .servizi a{color:#5f6368; text-decoration:underline; text-underline-offset:2px}
+    .servizi a:hover{color:#1a1a1a}
+    .servizi-piede{margin-top:18px; font-size:13px; color:#5f6368}
+
+    /* La domanda in fondo: discreta, ma con il link in evidenza. */
+    .cta-finale{
+      max-width:620px; margin:30px auto 0; padding-top:22px;
+      border-top:1px solid #eef0f2;
+      text-align:left; font-size:14px; line-height:1.6; color:#5f6368;
+    }
+    .cta-finale a{color:#0f1614; font-weight:600; text-decoration:underline; text-underline-offset:3px}
+    .cta-finale a:hover{color:#0a7d72}
+
+    /* Il gruppo che sta sotto la prima schermata: servizi, chi è, la domanda
+       finale. Serve un contenitore solo perché è LUI a scorrere quando la
+       pagina sta ferma — vedi la regola più sotto. */
+    .sotto{
+      max-width:620px; margin:44px auto 0; padding-top:26px;
+      border-top:1px solid #eef0f2;
+    }
+    .sotto .inbreve{margin-top:34px; padding-top:0; border-top:none}
+    @media (max-width:620px){ .sotto{margin-top:38px} }
+
     /* ── LA PAGINA STA FERMA, IL TESTO SCORRE ─────────────────────────────
        Scelta di Simone (28/08/2026): la landing resta una schermata sola, e
        lo scorrimento è solo del blocco in fondo.
@@ -223,14 +298,26 @@
        normalmente, che è il comportamento che non lascia mai nessuno fuori.
        La soglia è sull'ALTEZZA della finestra, non sulla larghezza: un
        portatile con lo schermo basso ha lo stesso problema di un telefono. */
-    @media (min-height:760px) and (min-width:620px){
+    /* SOGLIA ALZATA il 30/08/2026, da 760 px a 1000. La prima schermata adesso
+       porta anche la fascia delle credenziali e il pulsante di contatto: occupa
+       circa 660 px, e su una finestra da 900 al gruppo che scorre ne restavano
+       145 — una finestrella da due righe. Sopra i 1000 px lo spazio c'è
+       davvero; sotto, la pagina scorre come qualunque altra, che è il
+       comportamento che non lascia mai nessuno fuori. */
+    @media (min-height:1000px) and (min-width:620px){
       html,body{height:100%; overflow:hidden}
       body{min-height:0}
       /* `min-height:0` su un elemento flex è la riga che permette ai figli di
          restringersi sotto il loro contenuto: senza, il blocco si allarga e
          spinge fuori la pagina invece di scorrere al proprio interno. */
       main{min-height:0; overflow:hidden}
-      .inbreve{
+      /* Dal 30/08/2026 sotto la piega non c'è più solo il testo lungo, ma
+         anche i tre servizi e la domanda finale: a scorrere è il gruppo
+         intero. Niente `display:none` su quel contenuto — resta disegnato e
+         leggibile, come si era già deciso il 26/08 scartando il blocco
+         richiudibile: un contenitore che scorre non nasconde niente a nessuno,
+         una regola che lo toglie sì. */
+      .sotto{
         overflow-y:auto;
         min-height:0;
         flex:0 1 auto;
@@ -239,10 +326,8 @@
         padding-bottom:8px;
         /* si scorre col dito o col trackpad senza trascinare la pagina */
         overscroll-behavior:contain;
-      }
-      /* Una sfumatura in fondo dice che sotto c'è dell'altro: senza, il testo
-         tagliato a metà riga sembra un difetto invece che un invito. */
-      .inbreve{
+        /* Una sfumatura in fondo dice che sotto c'è dell'altro: senza, il
+           testo tagliato a metà riga sembra un difetto invece che un invito. */
         -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);
         mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);
       }
@@ -265,10 +350,13 @@
     @media (max-width:620px){
       .inbreve{margin-top:38px; font-size:13.5px}
     }
+    /* Il nome era nascosto ai soli motori dal 15/08/2026: sul riquadro si
+       leggeva «musica per immagini» e non si sapeva dove si finiva. Torna
+       visibile, sopra la riga che dice cosa fa: due livelli, il nome che si
+       riconosce e la cosa che si capisce. */
     .p-nome{
-      position:absolute; width:1px; height:1px;
-      padding:0; margin:-1px; overflow:hidden;
-      clip:rect(0 0 0 0); white-space:nowrap; border:0;
+      display:block; font-size:14px; font-weight:600; color:#0f1614;
+      letter-spacing:-.01em; line-height:1.25;
     }
     /* È un <h2> dal 26/08/2026, non più un <p>: per un motore questa è
        l'intestazione della sezione che ha sotto, e la home resta con una
@@ -305,9 +393,11 @@
        stirarsi per riempire la riga. */
     .progetti{display:flex; flex-wrap:wrap; justify-content:center; gap:9px}
     .progetto{
-      display:inline-flex; align-items:center; justify-content:center;
-      min-width:180px; padding:10px 18px;
-      border:1px solid #e0e5e3; border-radius:999px;
+      /* in colonna, da quando il nome è tornato visibile: in riga i due span
+         si leggevano attaccati — «Crastelmusica per immagini». */
+      display:inline-flex; flex-direction:column; align-items:center; justify-content:center;
+      min-width:180px; padding:9px 18px;
+      border:1px solid #e0e5e3; border-radius:16px;
       background:transparent; text-decoration:none; text-align:center;
       transition:border-color .15s ease, color .15s ease, transform .15s ease}
     .progetto:hover{border-color:#0a7d72}
@@ -319,13 +409,17 @@
        la soglia) a 16,9:1 sul fondo tenue. */
     /* Niente grassetto: era quello, su fondo pieno, a far leggere i riquadri
        come pulsanti di un'applicazione invece che come voci di un elenco. */
-    .p-cosa{font-size:13.5px; font-weight:400; color:#3c4043; line-height:1.35}
+    .p-cosa{display:block; font-size:12.5px; font-weight:400; color:#5f6368; line-height:1.3; margin-top:2px}
     .progetto:hover .p-cosa{color:#0f1614}
     /* Niente soglie a mano: con flex-wrap le pillole vanno a capo da sole
        quando non ci stanno, che è il motivo per cui esistono le pillole. */
     @media (max-width:620px){
       .progetti{gap:8px}
-      .progetto{padding:11px 16px}
+      /* Due per riga invece di quattro in colonna: da quando dentro il
+         riquadro ci sono due righe di testo, i 180 px di larghezza minima
+         mandavano ogni progetto su una riga sua e la prima schermata del
+         telefono se ne andava tutta in pulsanti. */
+      .progetto{padding:10px 12px; min-width:0; flex:1 1 calc(50% - 8px)}
     }
     /* Menu: identico a quello di /tools/, così le due pagine sono lo stesso sito.
        Nessuno sfondo e nessuna pillola — la pillola è la forma del pulsante
@@ -440,7 +534,32 @@
          stesso colore e lo stesso peso. È solo passata dentro l'<h1>, dove
          conta. Chi guarda vede due righe come prima; chi legge il codice
          trova un titolo che dice nome e mestiere insieme. -->
-    <h1>Simone Castellan<span class="lead">Sound engineer e tecnologie applicate al suono</span></h1>
+    <!-- La seconda riga diceva «tecnologie applicate al suono»: vero, ma non è un
+         servizio che qualcuno cerca. Adesso dice le tre cose che si comprano —
+         registrazione, mix (anche Atmos), audio live — e per chi. Ogni parola
+         corrisponde a un fatto in CARRIERA AFAM/FATTI_CONFERMATI.md. -->
+    <h1>Simone Castellan<span class="lead">Registrazione, mix Dolby&nbsp;Atmos e audio live per produzioni musicali, televisive ed eventi</span></h1>
+
+    <!-- Dove, da quando, per chi: le tre cose che un committente chiede prima
+         di scrivere. Niente aggettivi, solo fatti verificabili. -->
+    <p class="dove">Dal 2019 responsabile della sala di mix Dolby Atmos 7.1.4 certificata
+      di AVA Sound Live Music, a Castelfranco Veneto. Vive e lavora a Cassola,
+      in provincia di Vicenza.</p>
+
+    <!-- ── LA FASCIA DELLE CREDENZIALI ──────────────────────────────────────
+         Stavano tutte nel paragrafo in fondo, sotto la piega: chi guardava la
+         prima schermata non aveva un motivo per credere a niente. Qui ce ne
+         sono tre, scelte perché sono le sole verificabili da un estraneo e
+         perché dicono tre cose diverse (attrezzatura, committenti, titolo).
+
+         Il patto è quello di sempre: nessun numero che non stia in
+         FATTI_CONFERMATI.md. Fuori restano «70+ produzioni l'anno» e «provider
+         RAI», che sono autodichiarazioni senza attestazione firmata. -->
+    <ul class="credenziali" aria-label="In sintesi">
+      <li><b>Dolby Atmos 7.1.4</b><span>sala certificata, dal 2019</span></li>
+      <li><b>Inno d'Italia RAI</b><span>edizioni 2024, 2025 e 2026</span></li>
+      <li><b>Elettroacustica</b><span>docenza alla Civica di Milano</span></li>
+    </ul>
 
     <!-- I tre progetti, vicini e coordinati: si devono leggere come un
          ecosistema solo, non come tre link capitati lì. Sono la cosa che
@@ -459,7 +578,7 @@
            «musica per immagini» e non saprebbe che si apre un altro sito.
            Il data-p resta com'era, altrimenti le statistiche di prima e quelle
            di dopo non si potrebbero più confrontare. -->
-      <h2 class="sviluppo-occhiello">Principali progetti</h2>
+      <h2 class="sviluppo-occhiello">Progetti</h2>
       <div class="progetti">
         <a class="progetto" href="https://crastelstudio.com" target="_blank" rel="noopener"
            data-p="Crastel" aria-label="Crastelstudio.com, musica per immagini — si apre in una nuova scheda">
@@ -475,7 +594,7 @@
         </a>
         <a class="progetto" href="/tools/" data-p="Tools"
            aria-label="Tools, strumenti utili in locale">
-          <span class="p-nome">Tools</span><span class="p-cosa">strumenti utili in locale</span>
+          <span class="p-nome">Tools</span><span class="p-cosa">strumenti audio gratuiti</span>
         </a>
         <!-- AVA Sound Live Music: è l'unico dei quattro che non è un progetto
              suo ma il posto dove lavora (responsabile della sala). Sta qui
@@ -496,16 +615,31 @@
          che si offre è l'argomento, non lo strumento — che è già scritto sul
          pulsante sotto. È anche il senso che aveva l'originale inglese, «Ask
          more about Simone Castellan», perso nella riscrittura del 15/08. -->
-    <p class="askline">Chiedi di più su Simone</p>
+    <!-- ── L'AZIONE PRINCIPALE ──────────────────────────────────────────────
+         Fino al 30/08/2026 il pulsante più grande della pagina apriva ChatGPT:
+         portava fuori dal sito prima ancora che uno avesse capito con chi
+         aveva a che fare. Adesso il primo pulsante porta a una conversazione
+         con Simone, e la domanda all'AI resta lì sotto per chi la vuole.
+
+         L'indirizzo di WhatsApp è scritto nell'HTML e non costruito dallo
+         script: se il JavaScript non parte, il pulsante principale della
+         pagina deve funzionare lo stesso. Il JavaScript aggiunge solo il
+         conteggio del clic. -->
+    <a class="cta" id="ctaWa"
+       href="https://wa.me/393404579244?text=Ciao%20Simone%2C%20ti%20scrivo%20per%20un%20progetto."
+       target="_blank" rel="noopener">Parliamo del tuo progetto</a>
+
+    <p class="askline">Oppure chiedi a un'AI chi è Simone: il pulsante apre ChatGPT
+      con la domanda già scritta e il link al profilo.</p>
     <div class="pills" id="pills"></div>
     <noscript>
-      <p class="ns">I pulsanti richiedono JavaScript. Il profilo completo è leggibile qui:
+      <p class="ns">Il pulsante di ChatGPT richiede JavaScript. Il profilo completo è leggibile qui:
         <a href="/profilo/">simonecastellan.com/profilo</a></p>
     </noscript>
 
     <div class="contact">
-      Oppure scrivimi su
-      <a id="wa" href="#" target="_blank" rel="noopener" aria-label="Scrivi su WhatsApp — apri in una nuova scheda">WhatsApp</a>
+      Scrivimi anche su
+      <a id="wa" href="https://wa.me/393404579244?text=Ciao%20Simone" target="_blank" rel="noopener" aria-label="Scrivi su WhatsApp — apri in una nuova scheda">WhatsApp</a>
       ·
       <a id="email" href="mailto:castellansimone@gmail.com">Email</a>
     </div>
@@ -531,6 +665,36 @@
          elenco di parole chiave, nessuna ripetizione del nome. Ogni fatto qui
          dentro è già scritto in /profilo/ o in /cv/ — questa è una sintesi,
          non una fonte nuova. -->
+    <!-- Tutto quello che sta sotto la prima schermata, in un contenitore solo:
+         è lui a scorrere quando la pagina resta ferma (vedi il CSS di .sotto). -->
+    <div class="sotto">
+    <!-- ── COSA SI PUÒ CHIEDERE ─────────────────────────────────────────────
+         Tre aree, non un elenco di venti competenze: chi arriva ha un
+         problema solo e deve riconoscerlo in una riga. Le voci sono le stesse
+         che il profilo dettaglia — questa è la porta, non il catalogo. -->
+    <section class="servizi" aria-label="Cosa si può chiedere">
+      <h2>Cosa si può chiedere</h2>
+      <div class="tre">
+        <div>
+          <h3>Studio e post-produzione</h3>
+          <p>Ripresa multitraccia, editing, mix stereo e in Dolby Atmos, mastering
+            per discografia, televisione e broadcast.</p>
+        </div>
+        <div>
+          <h3>Audio dal vivo</h3>
+          <p>Direzione tecnica, registrazione multitraccia in concerto,
+            sonorizzazione di eventi, produzioni televisive.</p>
+        </div>
+        <div>
+          <h3>Musica per immagini ed elettronica</h3>
+          <p>Composizione, live electronics, installazioni e produzione
+            audiovisiva, da solo o con <a href="https://crastelstudio.com" target="_blank" rel="noopener">Crastel</a>.</p>
+        </div>
+      </div>
+      <p class="servizi-piede"><a href="/profilo/">I crediti completi stanno nel profilo</a>
+        — discografia con i codici dei supporti, opere elettroacustiche, riconoscimenti.</p>
+    </section>
+
     <section class="inbreve" aria-label="Chi è Simone Castellan">
       <!-- Tre capoversi che si leggono di fila, senza titoletti: scelta di
            Simone fra cinque forme viste nel browser (la pagina di confronto
@@ -555,7 +719,7 @@
         elettroacustica. Lavora sulla catena completa del suono, dal microfono al master:
         ripresa multitraccia, editing, mix e mastering per discografia, televisione e
         broadcast, e dal 2019 è responsabile operativo di una sala di mix Dolby Atmos 7.1.4
-        certificata. Vive e lavora a Cassola, in provincia di Vicenza.</p>
+        certificata a Castelfranco Veneto. Vive e lavora a Cassola, in provincia di Vicenza.</p>
 
       <p>Registrazione e produzione musicale in Pro Tools, audio dal vivo e sonorizzazione di
         eventi, composizione ed elettronica in tempo reale, musica per immagini. Insegna
@@ -570,6 +734,15 @@
     </section>
 
 
+
+    <!-- Chi legge fino a qui ha fatto la strada più lunga della pagina: è il
+         momento in cui una domanda diretta costa meno di un modulo. -->
+    <p class="cta-finale">
+      Hai una registrazione, un mix o un evento da produrre?
+      <a href="https://wa.me/393404579244?text=Ciao%20Simone%2C%20ti%20scrivo%20per%20un%20progetto."
+         target="_blank" rel="noopener" id="ctaFine">Parliamone su WhatsApp</a>.
+    </p>
+    </div><!-- /.sotto -->
 
   <!-- Il richiamo a Tools che stava qui è sparito: adesso Tools è uno dei tre
        bottoni della sezione Sviluppo, e ripeterlo in fondo lo faceva sembrare
@@ -713,6 +886,13 @@
       "?subject=" + encodeURIComponent("Ciao Simone — dal tuo sito") +
       "&body=" + encodeURIComponent("Ciao Simone,\n\nho visto il tuo sito e mi piacerebbe parlarti di una possibile collaborazione.\n\nDue righe su di me:\n");
 
+    /* I due pulsanti nuovi: un getElementById senza guardia su un id sparito
+       fermerebbe in silenzio tutto lo script da qui in giù — è già successo
+       con #tienimi, ed è la ragione della riga cancellata qui sotto. */
+    var ctaWa = document.getElementById("ctaWa");
+    if (ctaWa) ctaWa.addEventListener("click", function(){ track("click", "CTA WhatsApp"); });
+    var ctaFine = document.getElementById("ctaFine");
+    if (ctaFine) ctaFine.addEventListener("click", function(){ track("click", "CTA finale WhatsApp"); });
     document.getElementById("wa").addEventListener("click", function(){ track("click", "WhatsApp"); });
     document.getElementById("email").addEventListener("click", function(){ track("click", "Email"); });
     /* Qui c'era l'aggancio a #tienimi. Tolto insieme al link: senza questa riga
