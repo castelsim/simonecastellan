@@ -227,23 +227,6 @@
     .cta:active{transform:scale(.985)}
     .cta:focus-visible{outline:2px solid #0a7d72; outline-offset:3px}
 
-    /* ── COSA SI PUÒ CHIEDERE ─────────────────────────────────────────────
-       Tre aree, allineate a sinistra come il testo lungo: sono da leggere,
-       non da guardare. */
-    .servizi{max-width:620px; margin:0 auto; text-align:left}
-    .servizi > h2{
-      margin:0 0 16px;
-      font:500 11px ui-monospace,SFMono-Regular,Menlo,monospace;
-      letter-spacing:.16em; text-transform:uppercase; color:#0a7d72;
-    }
-    .servizi .tre{display:grid; grid-template-columns:1fr; gap:18px}
-    @media (min-width:720px){ .servizi .tre{grid-template-columns:repeat(3,1fr); gap:22px} }
-    .servizi h3{margin:0 0 5px; font-size:14px; font-weight:600; color:#0f1614; line-height:1.3}
-    .servizi p{margin:0; font-size:13.5px; line-height:1.6; color:#5f6368}
-    .servizi a{color:#5f6368; text-decoration:underline; text-underline-offset:2px}
-    .servizi a:hover{color:#1a1a1a}
-    .servizi-piede{margin-top:18px; font-size:13px; color:#5f6368}
-
     /* I crediti: righe, non riquadri. Il titolo in scuro perché è la cosa che
        si riconosce, l'anno accanto in piccolo, il ruolo sotto in grigio. */
     .crediti{max-width:620px; margin:34px auto 0; text-align:left}
@@ -269,7 +252,7 @@
     .cta-finale a{color:#0f1614; font-weight:600; text-decoration:underline; text-underline-offset:3px}
     .cta-finale a:hover{color:#0a7d72}
 
-    /* Il gruppo che sta sotto la prima schermata: servizi, chi è, la domanda
+    /* Il gruppo che sta sotto la prima schermata: crediti, chi è, la domanda
        finale. Serve un contenitore solo perché è LUI a scorrere quando la
        pagina sta ferma — vedi la regola più sotto. */
     .sotto{
@@ -309,7 +292,7 @@
          spinge fuori la pagina invece di scorrere al proprio interno. */
       main{min-height:0; overflow:hidden}
       /* Dal 30/08/2026 sotto la piega non c'è più solo il testo lungo, ma
-         anche i tre servizi e la domanda finale: a scorrere è il gruppo
+         anche i crediti e la domanda finale: a scorrere è il gruppo
          intero. Niente `display:none` su quel contenuto — resta disegnato e
          leggibile, come si era già deciso il 26/08 scartando il blocco
          richiudibile: un contenitore che scorre non nasconde niente a nessuno,
@@ -672,31 +655,6 @@
     <!-- Tutto quello che sta sotto la prima schermata, in un contenitore solo:
          è lui a scorrere quando la pagina resta ferma (vedi il CSS di .sotto). -->
     <div class="sotto">
-    <!-- ── COSA SI PUÒ CHIEDERE ─────────────────────────────────────────────
-         Tre aree, non un elenco di venti competenze: chi arriva ha un
-         problema solo e deve riconoscerlo in una riga. Le voci sono le stesse
-         che il profilo dettaglia — questa è la porta, non il catalogo. -->
-    <section class="servizi" aria-label="Cosa si può chiedere">
-      <h2>Cosa si può chiedere</h2>
-      <div class="tre">
-        <div>
-          <h3>Studio e post-produzione</h3>
-          <p>Ripresa multitraccia, editing, mix stereo e in Dolby Atmos, mastering
-            per discografia, televisione e broadcast.</p>
-        </div>
-        <div>
-          <h3>Audio dal vivo</h3>
-          <p>Direzione tecnica, registrazione multitraccia in concerto,
-            sonorizzazione di eventi, produzioni televisive.</p>
-        </div>
-        <div>
-          <h3>Musica per immagini ed elettronica</h3>
-          <p>Composizione, live electronics, installazioni e produzione
-            audiovisiva, da solo o con <a href="https://crastelstudio.com" target="_blank" rel="noopener">Crastel</a>.</p>
-        </div>
-      </div>
-    </section>
-
     <!-- ── ALCUNI CREDITI ───────────────────────────────────────────────────
          Cinque righe, tutte controllabili da fuori: quattro hanno un codice di
          supporto in /cv/, e sul primo il nome è stampato sulla copertina
@@ -748,12 +706,16 @@
            contenuto che si apre con un clic i motori danno meno peso di uno
            visibile, e qui è proprio il testo che serviva. -->
       <p>Simone Castellan è un <strong>sound engineer</strong> e compositore di musica
-        elettroacustica. Lavora sulla catena completa del suono, dal microfono al master, e dal 2019 è
-        responsabile operativo di una sala di mix Dolby Atmos 7.1.4 certificata a
-        Castelfranco Veneto. Vive e lavora a Cassola, in provincia di Vicenza.</p>
+        elettroacustica. Lavora sulla catena completa del suono, dal microfono al master:
+        ripresa multitraccia, editing, mix stereo e in Dolby Atmos, mastering per
+        discografia, televisione e broadcast. Dal 2019 è responsabile operativo di una
+        sala di mix Dolby Atmos 7.1.4 certificata a Castelfranco Veneto. Vive e lavora a Cassola, in provincia di Vicenza.</p>
 
-      <p>Insegna
-        elettroacustica alla Civica Scuola di Musica «Claudio Abbado» di Milano. Scrive
+      <p>Dal vivo: direzione tecnica, registrazione multitraccia in concerto,
+        sonorizzazione di eventi e produzioni televisive. E composizione, live
+        electronics, installazioni e produzione audiovisiva, da solo o con
+        <a href="https://crastelstudio.com" target="_blank" rel="noopener">Crastel</a>.
+        Insegna elettroacustica alla Civica Scuola di Musica «Claudio Abbado» di Milano. Scrive
         <a href="/tools/">strumenti audio che girano nel browser</a> — misura acustica,
         taratura di impianti, conversione — e li lascia gratuiti.</p>
 
