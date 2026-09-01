@@ -641,11 +641,13 @@
         <a href="/profilo/">simonecastellan.com/profilo</a></p>
     </noscript>
 
+    <!-- Qui c'era anche WhatsApp, ed era la stessa strada del pulsante sopra:
+         due volte lo stesso contatto nella stessa schermata. Resta l'email,
+         che è l'unico modo che il pulsante non copre — e per chi scrive da un
+         computer, spesso è quello che preferisce. -->
     <div class="contact">
-      Scrivimi anche su
-      <a id="wa" href="https://wa.me/393404579244?text=Ciao%20Simone" target="_blank" rel="noopener" aria-label="Scrivi su WhatsApp — apri in una nuova scheda">WhatsApp</a>
-      ·
-      <a id="email" href="mailto:castellansimone@gmail.com">Email</a>
+      Preferisci scrivere?
+      <a id="email" href="mailto:castellansimone@gmail.com">Mandami una mail</a>
     </div>
     <!-- «Tienimi presente» è uscito da qui per scelta di Simone (15/08/2026):
          due modi di scrivere sono una scelta, tre sono un elenco. La pagina
@@ -907,9 +909,6 @@
       pills.appendChild(a);
     });
 
-    document.getElementById("wa").href =
-      "https://wa.me/393404579244?text=" + encodeURIComponent("Ciao Simone");
-
     document.getElementById("email").href =
       "mailto:castellansimone@gmail.com" +
       "?subject=" + encodeURIComponent("Ciao Simone — dal tuo sito") +
@@ -922,7 +921,6 @@
     if (ctaWa) ctaWa.addEventListener("click", function(){ track("click", "CTA WhatsApp"); });
     var ctaFine = document.getElementById("ctaFine");
     if (ctaFine) ctaFine.addEventListener("click", function(){ track("click", "CTA finale WhatsApp"); });
-    document.getElementById("wa").addEventListener("click", function(){ track("click", "WhatsApp"); });
     document.getElementById("email").addEventListener("click", function(){ track("click", "Email"); });
     /* Qui c'era l'aggancio a #tienimi. Tolto insieme al link: senza questa riga
        cancellata, getElementById avrebbe restituito null e il punto avrebbe
