@@ -257,6 +257,22 @@
     .servizi a:hover{color:#1a1a1a}
     .servizi-piede{margin-top:18px; font-size:13px; color:#5f6368}
 
+    /* I crediti: righe, non riquadri. Il titolo in scuro perché è la cosa che
+       si riconosce, l'anno accanto in piccolo, il ruolo sotto in grigio. */
+    .crediti{max-width:620px; margin:34px auto 0; text-align:left}
+    .crediti > h2{
+      margin:0 0 14px;
+      font:500 11px ui-monospace,SFMono-Regular,Menlo,monospace;
+      letter-spacing:.16em; text-transform:uppercase; color:#0a7d72;
+    }
+    .crediti ul{list-style:none; padding:0; margin:0}
+    .crediti li{margin-bottom:13px}
+    .crediti li:last-child{margin-bottom:0}
+    .crediti b{font-size:14px; font-weight:600; color:#0f1614}
+    .crediti i{font-style:normal; font-size:12px; color:#5f6368; margin-left:6px;
+      font-variant-numeric:tabular-nums; white-space:nowrap}
+    .crediti span{display:block; margin-top:2px; font-size:13px; line-height:1.55; color:#5f6368}
+
     /* La domanda in fondo: discreta, ma con il link in evidenza. */
     .cta-finale{
       max-width:620px; margin:30px auto 0; padding-top:22px;
@@ -545,7 +561,7 @@
          RAI», che sono autodichiarazioni senza attestazione firmata. -->
     <ul class="credenziali" aria-label="In sintesi">
       <li><b>Dolby Atmos 7.1.4</b><span>sala certificata AVA, dal 2019</span></li>
-      <li><b>Inno d'Italia RAI</b><span>2024, 2025, 2026</span></li>
+      <li><b>Griminelli plays Morricone</b><span>registrazione, Sony Music</span></li>
       <li><b>Elettroacustica</b><span>docenza alla Civica di Milano</span></li>
     </ul>
 
@@ -683,6 +699,33 @@
         — discografia con i codici dei supporti, opere elettroacustiche, riconoscimenti.</p>
     </section>
 
+    <!-- ── ALCUNI CREDITI ───────────────────────────────────────────────────
+         Cinque righe, tutte controllabili da fuori: quattro hanno un codice di
+         supporto in /cv/, e sul primo il nome è stampato sulla copertina
+         («Recording by Simone Castellan»). Le formule sono quelle letterali
+         dei crediti — «Musical Assistance [Studio, Orchestra]» si scrive così
+         perché così sta stampato, non perché suoni meglio.
+
+         Niente immagini: non ne abbiamo di utilizzabili, e cinque riquadri
+         vuoti direbbero meno di cinque righe piene. -->
+    <section class="crediti" aria-label="Alcuni crediti">
+      <h2>Alcuni crediti</h2>
+      <ul>
+        <li><b>Griminelli plays Morricone</b> <i>2021</i>
+          <span>Registrazione ed editing dell’orchestra — Andrea Griminelli, direzione
+            Diego Basso, con Sting, Zucchero e Nek · Sony Music</span></li>
+        <li><b>La Geografia del Buio</b> <i>2021</i>
+          <span>Musical Assistance [Studio, Orchestra] — Michele Bravi · Virgin, Universal</span></li>
+        <li><b>Antonio Vivaldi — Lost Concertos for Anna Maria</b> <i>2020</i>
+          <span>Tecnico del suono e assistente alla registrazione — Federico Maria
+            Sardelli · note 1 music, Heidelberg</span></li>
+        <li><b>Donnafugata</b> <i>2021</i>
+          <span>Colonna sonora: co-autore di quattro brani, sound design · La Valigetta</span></li>
+        <li><b>Inno d’Italia per la Festa della Repubblica</b> <i>2024 · 2025 · 2026</i>
+          <span>Sonorizzazione e finalizzazione — RAI, per il tramite di AVA Sound Live Music</span></li>
+      </ul>
+    </section>
+
     <section class="inbreve" aria-label="Chi è Simone Castellan">
       <!-- Tre capoversi che si leggono di fila, senza titoletti: scelta di
            Simone fra cinque forme viste nel browser (la pagina di confronto
@@ -704,13 +747,11 @@
            contenuto che si apre con un clic i motori danno meno peso di uno
            visibile, e qui è proprio il testo che serviva. -->
       <p>Simone Castellan è un <strong>sound engineer</strong> e compositore di musica
-        elettroacustica. Lavora sulla catena completa del suono, dal microfono al master:
-        ripresa multitraccia, editing, mix e mastering per discografia, televisione e
-        broadcast, e dal 2019 è responsabile operativo di una sala di mix Dolby Atmos 7.1.4
-        certificata a Castelfranco Veneto. Vive e lavora a Cassola, in provincia di Vicenza.</p>
+        elettroacustica. Lavora sulla catena completa del suono, dal microfono al master, e dal 2019 è
+        responsabile operativo di una sala di mix Dolby Atmos 7.1.4 certificata a
+        Castelfranco Veneto. Vive e lavora a Cassola, in provincia di Vicenza.</p>
 
-      <p>Registrazione e produzione musicale in Pro Tools, audio dal vivo e sonorizzazione di
-        eventi, composizione ed elettronica in tempo reale, musica per immagini. Insegna
+      <p>Insegna
         elettroacustica alla Civica Scuola di Musica «Claudio Abbado» di Milano. Scrive
         <a href="/tools/">strumenti audio che girano nel browser</a> — misura acustica,
         taratura di impianti, conversione — e li lascia gratuiti.</p>
