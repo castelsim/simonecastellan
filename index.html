@@ -213,8 +213,10 @@
        scuro e la precisazione in grigio sotto. */
     .credenziali{
       list-style:none; padding:0;
-      margin:22px auto 0; max-width:620px;
-      display:flex; flex-wrap:wrap; justify-content:center; gap:10px 30px;
+      /* più larga della colonna del testo: le quattro voci ci stanno in fila,
+         e una riga da uno sola in fondo sembra un errore di impaginazione. */
+      margin:22px auto 0; max-width:730px;
+      display:flex; flex-wrap:wrap; justify-content:center; gap:10px 26px;
     }
     .credenziali li{font-size:13px; line-height:1.35}
     .credenziali b{display:block; font-weight:600; color:#0f1614; font-size:13.5px}
@@ -559,10 +561,15 @@
          Il patto è quello di sempre: nessun numero che non stia in
          FATTI_CONFERMATI.md. Fuori restano «70+ produzioni l'anno» e «provider
          RAI», che sono autodichiarazioni senza attestazione firmata. -->
+    <!-- Quattro nomi, non quattro frasi: in cima sta quello che si riconosce
+         senza spiegazioni — la rete, l'etichetta, il luogo — e sotto, in una
+         riga, che cosa ci si è fatto. Il dettaglio vero sta nei crediti più in
+         basso: qui serve solo il motivo per continuare a leggere. -->
     <ul class="credenziali" aria-label="In sintesi">
-      <li><b>Dolby Atmos 7.1.4</b><span>sala certificata AVA, dal 2019</span></li>
-      <li><b>Griminelli plays Morricone</b><span>registrazione, Sony Music</span></li>
-      <li><b>Elettroacustica</b><span>docenza alla Civica di Milano</span></li>
+      <li><b>Rai 1</b><span>Arena di Verona, in diretta</span></li>
+      <li><b>Sony Music</b><span>Griminelli plays Morricone</span></li>
+      <li><b>Netflix</b><span>colonna sonora originale</span></li>
+      <li><b>Dolby Atmos 7.1.4</b><span>sala certificata, dal 2019</span></li>
     </ul>
 
     <!-- I tre progetti, vicini e coordinati: si devono leggere come un
@@ -697,8 +704,6 @@
             audiovisiva, da solo o con <a href="https://crastelstudio.com" target="_blank" rel="noopener">Crastel</a>.</p>
         </div>
       </div>
-      <p class="servizi-piede"><a href="/profilo/">I crediti completi stanno nel profilo</a>
-        — discografia con i codici dei supporti, opere elettroacustiche, riconoscimenti.</p>
     </section>
 
     <!-- ── ALCUNI CREDITI ───────────────────────────────────────────────────
@@ -713,18 +718,21 @@
     <section class="crediti" aria-label="Alcuni crediti">
       <h2>Alcuni crediti</h2>
       <ul>
+        <li><b>Arena di Verona, in diretta su Rai 1</b> <i>2021 · 2022</i>
+          <span>Registrazione delle sequenze per Andrea Bocelli (<em>Nessun dorma</em>),
+            Gianni Morandi (Inno di Mameli) e Mika (<em>Underwater</em>) — SEAT e TIM
+            Music Awards</span></li>
         <li><b>Griminelli plays Morricone</b> <i>2021</i>
           <span>Registrazione ed editing dell’orchestra — Andrea Griminelli, direzione
             Diego Basso, con Sting, Zucchero e Nek · Sony Music</span></li>
+        <li><b>EVO — serie Netflix «Running for My Truth»</b> <i>2023</i>
+          <span>Compositore originale del brano · editore Sounzone</span></li>
         <li><b>La Geografia del Buio</b> <i>2021</i>
           <span>Musical Assistance [Studio, Orchestra] — Michele Bravi · Virgin, Universal</span></li>
-        <li><b>Antonio Vivaldi — Lost Concertos for Anna Maria</b> <i>2020</i>
-          <span>Tecnico del suono e assistente alla registrazione — Federico Maria
-            Sardelli · note 1 music, Heidelberg</span></li>
-        <li><b>Donnafugata</b> <i>2021</i>
-          <span>Colonna sonora: co-autore di quattro brani, sound design · La Valigetta</span></li>
         <li><b>Inno d’Italia per la Festa della Repubblica</b> <i>2024 · 2025 · 2026</i>
-          <span>Sonorizzazione e finalizzazione — RAI, per il tramite di AVA Sound Live Music</span></li>
+          <span>Ripresa, editing e finalizzazione per la trasmissione RAI</span></li>
+        <li><b>Antonio Vivaldi — Lost Concertos for Anna Maria</b> <i>2020</i>
+          <span>Tecnico del suono — Federico Maria Sardelli</span></li>
       </ul>
     </section>
 
@@ -758,9 +766,8 @@
         <a href="/tools/">strumenti audio che girano nel browser</a> — misura acustica,
         taratura di impianti, conversione — e li lascia gratuiti.</p>
 
-      <p><a href="/profilo/">Il profilo completo di Simone Castellan</a> raccoglie i crediti
-        discografici con i codici dei supporti, le opere elettroacustiche e i riconoscimenti;
-        il <a href="/cv/">curriculum in una pagina</a> si scarica anche in PDF.
+      <p><a href="/profilo/">Il profilo completo di Simone Castellan</a> raccoglie tutti i crediti
+        con i codici dei supporti, le opere e i riconoscimenti; il <a href="/cv/">curriculum in una pagina</a> si scarica anche in PDF.
         <span lang="en"><a href="/en/profile/" hreflang="en">Read the profile in English</a></span>.</p>
     </section>
 
