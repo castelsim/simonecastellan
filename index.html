@@ -162,6 +162,10 @@
        invece che come l'apertura di quello che viene dopo. Misurato, non
        dedotto: i due margini NON collassano (13 + 32 fanno 45, non 32), quindi
        si azzera quello di .pills invece di fidarsi che vinca il più grande. */
+    /* La misura dei due pulsanti di contatto, scritta una volta sola: quando
+       stava in tre posti, tre regole diverse la facevano divergere sul
+       telefono senza che nessuno se ne accorgesse. */
+    :root{--largo-tasto:230px}
     .askline{margin-top:36px; margin-bottom:12px; font-size:13px; color:#68716d}
 
     /* ————— I tre progetti —————
@@ -207,28 +211,13 @@
       text-align:left; font-size:14px; line-height:1.7; color:#5f6368;
     }
 
-    /* ── I NOMI ───────────────────────────────────────────────────────────
-       Una riga sola, piccola e grigia: sono riferimenti, non un cartellone.
-       Il punto di separazione è più chiaro dei nomi, così l'occhio legge le
-       parole e non i puntini. */
-    .nomi{
-      margin:18px auto 0; max-width:640px;
-      font-size:12.5px; line-height:1.9; color:#5f6368;
-      letter-spacing:.01em;
-    }
-    .nomi span{color:#c8ccd0; margin:0 9px}
-    @media (max-width:620px){
-      .nomi{margin-top:14px; font-size:12px}
-      .nomi span{margin:0 7px}
-    }
-
     /* ── L'AZIONE PRINCIPALE ──────────────────────────────────────────────
        Il pulsante pieno e scuro è uno solo in tutta la pagina: se ce ne fossero
        due, nessuno dei due sarebbe il principale. Quello di ChatGPT resta
        chiaro, come i riquadri dei progetti. */
     .cta{
       display:inline-flex; align-items:center; justify-content:center;
-      min-height:52px; padding:0 26px; margin-top:32px;
+      min-height:52px; width:var(--largo-tasto); max-width:100%; padding:0 20px; margin-top:32px;
       background:#0f1614; color:#fff; border-radius:26px;
       font-size:15.5px; font-weight:600; letter-spacing:.01em;
       text-decoration:none;
@@ -447,9 +436,12 @@
        il suo margin-bottom, in un punto solo. */
     .pills{margin-top:0; display:flex; flex-wrap:wrap; gap:12px; justify-content:center}
     .pill{
-      display:inline-flex; align-items:center; gap:9px;
-      background:#f1f3f4; border:none; border-radius:999px;
-      padding:11px 17px; text-decoration:none; cursor:pointer;
+      /* stessa altezza e stessa larghezza del pulsante scuro qui sopra:
+         due strade offerte insieme, non due cose capitate lì. */
+      display:inline-flex; align-items:center; justify-content:center; gap:9px;
+      min-height:52px; width:var(--largo-tasto); max-width:100%;
+      background:#f1f3f4; border:none; border-radius:26px;
+      padding:0 20px; text-decoration:none; cursor:pointer;
       transition:background .15s ease;
     }
     .pill:hover{background:#e6e8ea}
@@ -489,7 +481,9 @@
         content:""; position:absolute; left:50%; top:50%;
         width:calc(100% + 14px); min-width:44px; height:44px;
         transform:translate(-50%,-50%)}
-      .pills a, .pills button{min-height:44px}
+      /* 44 px è il minimo per un dito, ma qui il vicino ne ha 52: si tiene
+         la misura più grande, che li rispetta tutti e due. */
+      .pills a, .pills button{min-height:52px}
       /* Le pillole dei progetti misuravano 41 px di altezza: tre in meno di
          quanto ne vuole un dito. Trovato misurando — a occhio la differenza
          fra 41 e 44 non si vede, ed è esattamente per questo che va misurata. */
@@ -500,7 +494,10 @@
     .escape a{color:#1a1a1a; font-weight:600; text-decoration:underline}
     @media (max-width:680px){
       .pills{flex-direction:column; align-items:center; width:100%}
-      .pill{width:240px; max-width:82%; justify-content:center}
+      /* la larghezza è quella del pulsante scuro, dichiarata una volta sola in
+         --largo-tasto: due misure diverse per due pulsanti affiancati sono un
+         disallineamento che si vede a colpo d'occhio. */
+      .pill, .cta{width:var(--largo-tasto); max-width:82%; justify-content:center}
     }
     @media (max-width:460px){ .pill .name{font-size:15px} }
   </style>
@@ -557,15 +554,14 @@
          Il patto è quello di sempre: nessun numero che non stia in
          FATTI_CONFERMATI.md. Fuori restano «70+ produzioni l'anno» e «provider
          RAI», che sono autodichiarazioni senza attestazione firmata. -->
-    <!-- Solo i nomi, in fila e in grigio piccolo. Prima erano quattro blocchi
-         col nome in grassetto e la spiegazione sotto: leggevano come un
-         cartellone. Scritti così sono un elenco di riferimenti, che chi li
-         riconosce nota e chi non li riconosce scavalca senza inciampare —
-         e per ognuno, più in basso, c'è la riga che dice che cosa ci si è
-         fatto davvero. -->
-    <p class="nomi" aria-label="Committenti ed editori">
-      RAI<span>·</span>Netflix<span>·</span>Sony Music<span>·</span>Universal<span>·</span>Arena di Verona<span>·</span>Civica di Milano
-    </p>
+    <!-- Qui c'è stata, per mezza giornata, una riga di nomi — RAI, Netflix,
+         Sony, Universal, Arena di Verona, Civica di Milano — prima come quattro
+         blocchi in grassetto e poi in grigio piccolo. È uscita per scelta di
+         Simone (01/09/2026): un elenco di marchi sotto il nome, per quanto
+         discreto, chiede di essere creduto prima di aver detto qualcosa. Gli
+         stessi nomi stanno nei crediti trenta centimetri più sotto, ognuno
+         attaccato al lavoro che gli corrisponde — dove non sono un'insegna
+         ma una cosa verificabile. -->
 
     <!-- I tre progetti, vicini e coordinati: si devono leggere come un
          ecosistema solo, non come tre link capitati lì. Sono la cosa che
