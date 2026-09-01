@@ -139,10 +139,20 @@ def controlla_profilo_non_incorporato(home):
     # conosceva una pagina sola con 87 parole). Il profilo intero, che ne ha
     # 4.300, no: quello ha il suo posto in /profilo/, e duplicarlo qui
     # significherebbe due pagine che si fanno concorrenza sulla stessa persona.
+    #
+    # ALZATA da 450 a 520 il 30/08/2026. Il 450 era stato scelto quando la home
+    # diceva nome, mestiere, quattro progetti e un pulsante: 242 parole. Da
+    # allora la pagina ha preso tre aree di servizio e sei crediti — contenuto
+    # che Simone ha chiesto e che a un committente serve. Stiracchiare le frasi
+    # per stare sotto una soglia pensata per un'altra pagina è il modo di far
+    # perdere al controllo il suo senso: il limite esiste per impedire che il
+    # profilo venga ricopiato qui, e 520 resta lontanissimo dalle sue 4.300.
+    # Il controllo ha già fatto il suo lavoro due volte oggi, e tutte e due le
+    # volte quello che andava tolto era una RIPETIZIONE, non un contenuto.
     testo_home = re.sub(r"<!--.*?-->", " ", home, flags=re.S)
     testo_home = re.sub(r"<(script|style).*?</\1>", " ", testo_home, flags=re.S | re.I)
     parole_home = len(re.sub(r"<[^>]+>", " ", testo_home).split())
-    if parole_home > 450:
+    if parole_home > 520:
         errore(f"la home è arrivata a {parole_home} parole di testo: probabile ritorno di "
                f"contenuto che dovrebbe stare in /profilo/ o in llms.txt")
     else:
