@@ -343,6 +343,55 @@ def controlla_nascosti():
               f"pagina ancora viva")
 
 
+def controlla_opere_dichiarate():
+    """Le opere nel JSON-LD del profilo devono essere anche SCRITTE nella pagina,
+    col loro codice.
+
+    Aggiunto il 01/09/2026 insieme ai nodi delle opere. Il rischio è preciso e
+    non teorico: un dato strutturato è una cosa che un catalogo segue per
+    verificare: se dichiara un codice che la pagina non mostra — o peggio un
+    codice sbagliato — chi lo segue arriva a un'altra opera, e il credito
+    diventa una smentita invece che una prova. Il patto è che ogni opera
+    dichiarata sia leggibile anche da un essere umano sulla stessa pagina.
+
+    Restano fuori dal JSON-LD, di proposito, «Griminelli plays Morricone» (due
+    EAN diversi in circolazione, da risolvere sulla copertina) e «Simphony» (il
+    titolo circola in due grafie): un identificatore incerto in un dato
+    strutturato è peggio di un dato che manca."""
+    pagina = leggi("profilo/index.html")
+    blocchi = re.findall(r'<script type="application/ld\+json">(.*?)</script>', pagina, re.S)
+    if not blocchi:
+        return errore("profilo/index.html: manca il blocco JSON-LD")
+    grafo = json.loads(blocchi[0]).get("@graph", [])
+
+    # il testo che un lettore vede: via commenti, script e marcatori
+    vis = re.sub(r"<!--.*?-->", " ", pagina, flags=re.S)
+    vis = re.sub(r"<(script|style).*?</\1>", " ", vis, flags=re.S | re.I)
+    vis = re.sub(r"<[^>]+>", " ", vis)
+    vis = re.sub(r"\s+", " ", vis)
+
+    opere = [n for n in grafo if n.get("@type") in ("MusicAlbum", "MusicComposition", "MusicRecording")]
+    for n in opere:
+        nome = n.get("name", "")
+        # basta la prima parte del titolo: sulla pagina può essere spezzato
+        # fra il titolo e il contesto, e il trattino lungo non sempre coincide
+        chiave = nome.split("—")[0].strip()
+        if chiave and chiave.lower() not in vis.lower():
+            errore(f"profilo: l'opera «{nome}» è dichiarata nel JSON-LD ma non si legge "
+                   f"nella pagina: un dato strutturato senza il fatto visibile è una "
+                   f"promessa che nessuno può controllare")
+        codice = n.get("gtin13") or n.get("catalogNumber") or n.get("iswcCode")
+        if codice and codice not in vis:
+            errore(f"profilo: il codice «{codice}» di «{nome}» è dichiarato nel JSON-LD ma "
+                   f"non compare nella pagina: chi lo segue non può confrontarlo con niente")
+        if "contributor" not in n and "composer" not in n:
+            errore(f"profilo: «{nome}» non è collegata a Simone (né contributor né composer): "
+                   f"un'opera scollegata non dice di chi è il credito")
+    if opere:
+        print(f"  opere dichiarate: {len(opere)}, tutte scritte in pagina col loro codice "
+              f"e collegate alla persona")
+
+
 def controlla_rimandi():
     """Uno strumento che si trasferisce lascia una pagina che rimanda, non un 404:
     i link e i segnalibri di prima devono continuare ad arrivare da qualche parte.
@@ -878,6 +927,7 @@ def main():
     controlla_intestazioni_tool()
     controlla_intestazioni_altre_pagine()
     controlla_nascosti()
+    controlla_opere_dichiarate()
     controlla_rimandi()
     controlla_sitemap()
     controlla_json_ld()
