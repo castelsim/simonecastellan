@@ -1,0 +1,245 @@
+<!doctype html>
+<!--
+  ══════════════════════════════════════════════════════════════════════
+  simonecastellan.com/paga — © 2026 Simone Castellan.
+
+  A COSA SERVE
+  A farsi pagare senza dettare l'IBAN al telefono. Il QR stampato porta
+  qui; qui c'è un tasto solo.
+
+  PERCHÉ NON APRE L'APP DELLA BANCA
+  Perché non si può. La fotocamera del telefono apre solo indirizzi web:
+  un QR con dentro i dati di un bonifico glielo mostra come testo e basta.
+  E in Italia non esiste un link che apra Intesa, Unicredit o chiunque
+  altro col bonifico già compilato — ogni banca fa da sé, nessuna lo
+  documenta. Quindi la catena più corta che funziona DAVVERO è:
+  fotocamera → questa pagina → «Copia» → incolla nell'app.
+  Il QR SEPA in fondo compila tutto per davvero, ma va inquadrato da
+  dentro l'app della banca, ed è il passaggio che un anziano non trova:
+  per questo sta in fondo e non in cima.
+
+  SCELTE FATTE PER CHI HA SETTANT'ANNI
+  · Nessun webfont. Un font che non carica lascia la pagina illeggibile
+    proprio a chi non saprebbe cosa fare; quelli di sistema ci sono sempre.
+  · Nessun tema scuro. Una sola resa, nera su bianco, la più leggibile.
+  · Un'azione sola sopra la piega. Tutto il resto viene dopo.
+  · Bersagli da 68 px, non 44: il minimo di Apple è il minimo per una mano
+    ferma.
+  · L'IBAN è scritto a gruppi di quattro, perché chi lo ricopia a mano
+    perde il segno su una fila di ventisette caratteri.
+  ══════════════════════════════════════════════════════════════════════
+-->
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Fuori dalle ricerche: è una pagina che si raggiunge col QR o col link,
+     non una che deve competere su Google. -->
+<meta name="robots" content="noindex, nofollow">
+<title>Pagare Simone Castellan</title>
+<meta name="description" content="I dati per fare un bonifico a Simone Castellan: IBAN, intestatario e QR SEPA.">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<style>
+  :root{
+    --carta:#fbfaf7; --pannello:#ffffff; --inchiostro:#14110e; --tenue:#57514a;
+    --riga:#d9d3c9; --verde:#0f6b3f; --verde-scuro:#0a4f2e;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--carta); color:var(--inchiostro);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:19px; line-height:1.55;
+  }
+  .foglio{max-width:600px; margin:0 auto; padding:28px 20px 64px}
+
+  h1{font-size:clamp(28px,7vw,38px); line-height:1.2; margin:8px 0 4px; letter-spacing:-0.02em}
+  .occhiello{font-size:15px; letter-spacing:.16em; text-transform:uppercase; color:var(--tenue); font-weight:600; margin:0}
+  .sottotitolo{font-size:20px; color:var(--tenue); margin:0 0 28px}
+
+  .scheda{background:var(--pannello); border:2px solid var(--riga); border-radius:14px; padding:22px; margin-bottom:24px}
+  .etichetta{font-size:15px; letter-spacing:.12em; text-transform:uppercase; color:var(--tenue); font-weight:700; margin:0 0 6px}
+  .nome{font-size:clamp(22px,5.5vw,27px); font-weight:700; margin:0 0 22px}
+
+  /* Monospaziato: in un IBAN la differenza fra 0 e O, fra 1 e l, deve vedersi. */
+  .iban{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:clamp(21px,5.6vw,27px); font-weight:700; line-height:1.5;
+    margin:0; word-spacing:.22em; user-select:all; -webkit-user-select:all;
+  }
+  /* Su un telefono l'IBAN non ci sta in una riga, e andando a capo da solo
+     lasciava «811» orfano in fondo — esattamente il punto in cui chi ricopia
+     perde il segno. Meglio due righe scelte da noi, piene e prevedibili. */
+  .iban span{display:block}
+
+  .copia{
+    display:none; align-items:center; justify-content:center; gap:12px;
+    width:100%; min-height:68px; margin-top:20px; padding:0 20px;
+    background:var(--verde); color:#fff; border:none; border-radius:11px;
+    font-size:22px; font-weight:700; font-family:inherit; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  /* Senza JavaScript il tasto non copierebbe nulla: meglio non mostrarlo
+     affatto che mostrarne uno che non risponde. L'IBAN resta selezionabile. */
+  .js .copia{display:flex}
+  .copia:active{background:var(--verde-scuro)}
+  .copia:focus-visible{outline:4px solid #14110e; outline-offset:3px}
+  .copia svg{width:26px; height:26px; flex:none; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round}
+
+  .passi{margin:0; padding:0; list-style:none; counter-reset:p}
+  .passi li{counter-increment:p; position:relative; padding:0 0 20px 54px; font-size:19px}
+  .passi li::before{
+    content:counter(p); position:absolute; left:0; top:-1px;
+    width:38px; height:38px; border-radius:50%; background:var(--inchiostro); color:var(--carta);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:19px;
+  }
+  .passi li:last-child{padding-bottom:0}
+
+  h2{font-size:22px; margin:0 0 14px; letter-spacing:-0.01em}
+  .minore{border-color:#e6e1d8; background:transparent}
+  .qr{width:min(260px,72%); height:auto; margin:16px auto 0; display:block; background:#fff; border:1px solid var(--riga); border-radius:8px; padding:10px}
+  .nota{font-size:17px; color:var(--tenue); margin:14px 0 0}
+  .righe{font-size:17px; margin:16px 0 0; border-top:1px solid var(--riga); padding-top:14px}
+  .righe div{display:flex; justify-content:space-between; gap:16px; padding:5px 0}
+  .righe span:first-child{color:var(--tenue)}
+  /* L'IBAN unito è una parola di 27 caratteri che il browser non sa spezzare:
+     su uno schermo stretto usciva dalla scheda e faceva scorrere tutta la
+     pagina di lato. `anywhere` gli dà il permesso di andare a capo. */
+  .righe span:last-child{font-weight:600; text-align:right; font-family:ui-monospace,Menlo,monospace; overflow-wrap:anywhere}
+  /* Sotto i 400 px l'etichetta e il valore non ci stanno più affiancati:
+     vanno uno sotto l'altro, così il numero ha tutta la riga per sé. */
+  @media (max-width:399px){
+    .righe div{flex-direction:column; gap:0}
+    .righe span:last-child{text-align:left}
+  }
+
+  footer{margin-top:36px; font-size:16px; color:var(--tenue); text-align:center}
+  footer a{color:var(--tenue)}
+
+  /* A 320 px — iPhone SE di prima serie, che è ancora in mano a qualcuno, e
+     spesso proprio a chi deve usare questa pagina — l'IBAN sbordava e finiva
+     su tre righe. La risposta NON è rimpicciolire il testo: si toglie spazio
+     ai margini e all'aria fra i gruppi di cifre, e i 21 px restano. */
+  @media (max-width:359px){
+    .foglio{padding-left:14px; padding-right:14px}
+    .scheda{padding:16px}
+    .iban{word-spacing:.12em}
+    .passi li{padding-left:48px}
+  }
+
+  @media print{
+    body{background:#fff; font-size:15pt}
+    .copia,footer{display:none !important}
+    .scheda{break-inside:avoid; border-color:#000}
+  }
+</style>
+</head>
+<body>
+<script>document.documentElement.className='js'</script>
+<main class="foglio">
+
+  <p class="occhiello">Bonifico</p>
+  <h1>Pagare Simone Castellan</h1>
+  <p class="sottotitolo">Copia l'IBAN, poi incollalo nell'app della tua banca.</p>
+
+  <section class="scheda">
+    <p class="etichetta">Intestatario</p>
+    <p class="nome">Simone Castellan</p>
+
+    <p class="etichetta">IBAN</p>
+    <p class="iban" id="iban"><span>IT89 V036 7401 6000</span><span>0061 9536 811</span></p>
+
+    <button class="copia" id="copia" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15V5.5A2.5 2.5 0 0 1 7.5 3H15"/></svg>
+      <span id="testoCopia">Copia l'IBAN</span>
+    </button>
+    <p class="nota" id="esito" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="scheda">
+    <h2>Come si fa</h2>
+    <ol class="passi">
+      <li>Tocca il tasto verde qui sopra. L'IBAN è copiato.</li>
+      <li>Apri l'app della tua banca e scegli <strong>Bonifico</strong>.</li>
+      <li>Nel campo dell'IBAN tieni il dito premuto e scegli <strong>Incolla</strong>.</li>
+      <li>Scrivi l'importo e conferma. L'intestatario è <strong>Simone Castellan</strong>.</li>
+    </ol>
+  </section>
+
+  <section class="scheda minore">
+    <h2>Se la tua banca legge i codici QR</h2>
+    <p class="nota">Alcune app hanno l'icona di un QR nella pagina del bonifico. Aprila e inquadra questo: compila tutto da sola, tranne l'importo.</p>
+    <img class="qr" src="qr-sepa.svg" alt="Codice QR con i dati del bonifico, da inquadrare dall'app della banca" width="540" height="540">
+    <div class="righe">
+      <div><span>IBAN</span><span>IT89V0367401600000619536811</span></div>
+      <div><span>BIC</span><span>TRBKITMMXXX</span></div>
+      <div><span>Banca</span><span>Trade Republic</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <a href="/">simonecastellan.com</a>
+  </footer>
+</main>
+
+<script>
+(function(){
+  var IBAN = 'IT89V0367401600000619536811';   // senza spazi: è così che lo vuole ogni app
+  var tasto = document.getElementById('copia');
+  var testo = document.getElementById('testoCopia');
+  var esito = document.getElementById('esito');
+
+  function riuscito(){
+    testo.textContent = 'IBAN copiato';
+    esito.textContent = 'Ora incollalo nell’app della tua banca.';
+    tasto.style.background = '#0a4f2e';
+    setTimeout(function(){
+      testo.textContent = 'Copia l’IBAN';
+      tasto.style.background = '';
+      esito.textContent = '';
+    }, 5000);
+  }
+
+  // Secondo tentativo. `execCommand` è deprecato ma è l'unico che funziona
+  // dove l'API moderna non c'è o viene negata: Safari fuori da https, permesso
+  // rifiutato, telefoni vecchi. Su una pagina il cui unico scopo è copiare un
+  // IBAN, un deprecato che funziona batte uno standard che si arrende.
+  function copiaAllaVecchia(){
+    var area = document.createElement('textarea');
+    area.value = IBAN;
+    area.setAttribute('readonly', '');
+    // Fuori dallo schermo ma non display:none, altrimenti non è selezionabile.
+    area.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+    document.body.appendChild(area);
+    area.select();
+    area.setSelectionRange(0, IBAN.length);   // iOS ignora select() da solo
+    var fatto = false;
+    try { fatto = document.execCommand('copy'); } catch (e) { fatto = false; }
+    document.body.removeChild(area);
+    return fatto;
+  }
+
+  // Ultima spiaggia: si seleziona l'IBAN a video, così «Copia» del menu di
+  // sistema è a un tocco. Meglio di un messaggio d'errore che lascia fermi.
+  function selezionaEspiega(){
+    var nodo = document.getElementById('iban');
+    var r = document.createRange(); r.selectNodeContents(nodo);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    esito.textContent = 'Tieni premuto sull’IBAN qui sopra e scegli «Copia».';
+  }
+
+  function ripiego(){
+    if (copiaAllaVecchia()) { riuscito(); } else { selezionaEspiega(); }
+  }
+
+  tasto.addEventListener('click', function(){
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(IBAN).then(riuscito, ripiego);
+    } else {
+      ripiego();
+    }
+  });
+})();
+</script>
+</body>
+</html>
