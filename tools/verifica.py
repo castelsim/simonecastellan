@@ -392,6 +392,68 @@ def controlla_opere_dichiarate():
               f"e collegate alla persona")
 
 
+def controlla_ascolti():
+    """Ogni «Ascolta su Spotify» deve puntare all'opera che gli sta accanto.
+
+    Aggiunto il 07/09/2026 insieme ai tre link d'ascolto. Il rischio non è
+    teorico: di «La Geografia del Buio» e di «Lost Concertos for Anna Maria»
+    su Spotify esistono due album omonimi, e su Subito un ID sbagliato dà 200
+    su un annuncio qualsiasi — lo stesso vale qui. Un link che si apre e
+    mostra il disco sbagliato è peggio di nessun link: al posto di una prova,
+    il visitatore trova una smentita, e nessun errore glielo segnala.
+
+    Offline non si può interrogare Spotify, e allora si controlla quello che
+    si può: che il titolo scritto nel credito compaia nell'etichetta del link
+    (così un copia-incolla fra due righe si vede), e che gli stessi ID stiano
+    anche nel «sameAs» del profilo. Se le due pagine divergono, una delle due
+    sta mentendo e la guardia non sa quale: le blocca entrambe."""
+    home = leggi("index.html")
+    profilo = leggi("profilo/index.html")
+
+    voci = re.findall(r"<li><b>(.*?)</b>(.*?)</li>", home, re.S)
+    trovati = []
+    for titolo, corpo in voci:
+        if "open.spotify.com" not in corpo:
+            continue
+        titolo = re.sub(r"<[^>]+>", "", titolo).strip()
+        m = re.search(r'href="https://open\.spotify\.com/album/([A-Za-z0-9]+)"', corpo)
+        if not m:
+            errore(f"crediti: «{titolo}» ha un link Spotify che non è un album")
+            continue
+        idsp = m.group(1)
+        trovati.append((titolo, idsp))
+        if len(idsp) != 22:
+            errore(f"crediti: l'ID Spotify di «{titolo}» non ha la forma di un ID "
+                   f"({idsp}): un indirizzo storpiato apre una pagina d'errore")
+        etichetta = re.search(r'aria-label="([^"]*)"', corpo)
+        if not etichetta:
+            errore(f"crediti: il link d'ascolto di «{titolo}» non dice dove porta "
+                   f"a chi usa uno screen reader")
+        else:
+            # la prima parola del titolo basta: sulla pagina il titolo può
+            # essere più lungo dell'etichetta o viceversa
+            chiave = titolo.split("—")[0].split(",")[0].strip()
+            if chiave and chiave.lower() not in etichetta.group(1).lower():
+                errore(f"crediti: il link accanto a «{titolo}» è etichettato "
+                       f"«{etichetta.group(1)}»: il link e il credito parlano di "
+                       f"due opere diverse, e una delle due è sbagliata")
+        if 'rel="noopener"' not in corpo:
+            errore(f"crediti: il link d'ascolto di «{titolo}» apre una scheda "
+                   f"senza rel=noopener")
+
+    if not trovati:
+        return
+
+    nel_profilo = set(re.findall(r'"sameAs": "https://open\.spotify\.com/album/([A-Za-z0-9]+)"',
+                                 profilo))
+    for titolo, idsp in trovati:
+        if idsp not in nel_profilo:
+            errore(f"crediti: l'album di «{titolo}» ({idsp}) si ascolta dalla home ma "
+                   f"il profilo non lo dichiara in sameAs: due pagine che indicano "
+                   f"opere diverse con lo stesso nome")
+    print(f"  ascolti: {len(trovati)} link, ognuno con l'opera che dice di essere")
+
+
 def controlla_rimandi():
     """Uno strumento che si trasferisce lascia una pagina che rimanda, non un 404:
     i link e i segnalibri di prima devono continuare ad arrivare da qualche parte.
@@ -928,6 +990,7 @@ def main():
     controlla_intestazioni_altre_pagine()
     controlla_nascosti()
     controlla_opere_dichiarate()
+    controlla_ascolti()
     controlla_rimandi()
     controlla_sitemap()
     controlla_json_ld()
