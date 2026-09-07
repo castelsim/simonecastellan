@@ -242,6 +242,25 @@
     .crediti i{font-style:normal; font-size:12px; color:#5f6368; margin-left:6px;
       font-variant-numeric:tabular-nums; white-space:nowrap}
     .crediti span{display:block; margin-top:2px; font-size:13px; line-height:1.55; color:#5f6368}
+    /* «Ascolta su Spotify» dice dove porta: un'etichetta generica costringerebbe
+       a cliccare per scoprirlo. Sta sotto al ruolo, non sopra: prima si legge
+       che cosa ha fatto Simone, poi si va a sentire. */
+    .crediti .ascolta{
+      position:relative; display:inline-flex; align-items:center; gap:5px;
+      margin-top:5px; font-size:12.5px; color:#0a7d72; text-decoration:none;
+      border-bottom:1px solid rgba(10,125,114,.38);
+    }
+    .crediti .ascolta::after{content:"\2197"; font-size:10.5px; line-height:1}
+    .crediti .ascolta:hover{border-bottom-color:#0a7d72}
+    .crediti .ascolta:focus-visible{outline:2px solid #0a7d72; outline-offset:3px; border-radius:2px}
+    @media (max-width:620px), (pointer:coarse){
+      /* il bersaglio arriva a 44 px senza spostare di un pixel la sottolineatura:
+         alzando il link, la riga si staccherebbe dal credito che descrive. */
+      .crediti .ascolta::before{
+        content:""; position:absolute; left:-4px; right:-4px;
+        top:50%; transform:translateY(-50%); height:44px;
+      }
+    }
 
     /* La domanda in fondo: discreta, ma con il link in evidenza. */
     .cta-finale{
@@ -668,20 +687,28 @@
       <h2>Alcuni crediti</h2>
       <ul>
         <li><b>Arena di Verona, in diretta su Rai 1</b> <i>2021 · 2022</i>
-          <span>Registrazione delle sequenze per Andrea Bocelli (<em>Nessun dorma</em>),
-            Gianni Morandi (Inno di Mameli) e Mika (<em>Underwater</em>) — SEAT e TIM
-            Music Awards</span></li>
+          <span>Registrazione delle sequenze per Andrea Bocelli (<em>Nessun dorma</em>,
+            SEAT Music Awards 2021) e Mika (<em>Underwater</em>, TIM Music Awards
+            2022)</span></li>
         <li><b>Griminelli plays Morricone</b> <i>2021</i>
           <span>Registrazione ed editing dell’orchestra — Andrea Griminelli, direzione
-            Diego Basso, con Sting, Zucchero e Nek · Sony Music</span></li>
+            Diego Basso, con Sting, Zucchero e Nek · distribuzione Sony Music</span>
+          <a class="ascolta" href="https://open.spotify.com/album/4xjuXCGpPebDFLYcquDnso" target="_blank" rel="noopener"
+             aria-label="Ascolta «Griminelli plays Morricone» su Spotify">Ascolta su Spotify</a></li>
         <li><b>EVO — serie Netflix «Running for My Truth»</b> <i>2023</i>
           <span>Compositore originale del brano · editore Sounzone</span></li>
         <li><b>La Geografia del Buio</b> <i>2021</i>
-          <span>Musical Assistance [Studio, Orchestra] — Michele Bravi · Virgin, Universal</span></li>
-        <li><b>Inno d’Italia per la Festa della Repubblica</b> <i>2024 · 2025 · 2026</i>
-          <span>Ripresa, editing e finalizzazione per la trasmissione RAI</span></li>
+          <span>Musical Assistance [Studio, Orchestra] — Michele Bravi · Virgin, Universal</span>
+          <a class="ascolta" href="https://open.spotify.com/album/0SFjLCLRbtMaVaMGuF0PUQ" target="_blank" rel="noopener"
+             aria-label="Ascolta «La Geografia del Buio» su Spotify">Ascolta su Spotify</a></li>
+        <li><b>Inno d’Italia in diretta Rai</b> <i>2022 · 2024 · 2025 · 2026</i>
+          <span>Il 2 giugno 2022 all’Arena di Verona, tecnico di registrazione per
+            l’interpretazione di Gianni Morandi; dal 2024 ripresa, editing e
+            finalizzazione per la trasmissione della Festa della Repubblica</span></li>
         <li><b>Antonio Vivaldi — Lost Concertos for Anna Maria</b> <i>2020</i>
-          <span>Tecnico del suono — Federico Maria Sardelli</span></li>
+          <span>Tecnico del suono — Federico Maria Sardelli</span>
+          <a class="ascolta" href="https://open.spotify.com/album/77jBsBvHeJXkc336mDpPef" target="_blank" rel="noopener"
+             aria-label="Ascolta «Antonio Vivaldi — Lost Concertos for Anna Maria» su Spotify">Ascolta su Spotify</a></li>
       </ul>
     </section>
 
