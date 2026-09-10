@@ -164,6 +164,12 @@
       li, .credito{ break-inside:avoid }
       a[href^="http"]::after{ content:" (" attr(href) ")"; font-size:8pt; color:#555 }
     }
+    a:focus-visible, button:focus-visible, summary:focus-visible{
+      outline:2px solid #1a1a1a; outline-offset:3px; border-radius:6px}
+    /* Chi ha chiesto al sistema meno movimento lo ha chiesto per un motivo:
+       vertigini, emicrania, o solo fastidio. Le transizioni qui sono decorative,
+       si spengono senza perdere niente. */
+    @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
   </style>
 </head>
 <body>
@@ -175,7 +181,7 @@
 <main>
   <header>
     <h1>Simone Castellan</h1>
-    <p class="qualifica">Technology applied to sound — recording and mixing, immersive audio,
+    <p class="qualifica">Sound engineer — recording and mixing, immersive audio,
       electroacoustic composition, tools for production.</p>
     <p class="dove">Cassola (Vicenza), Italy · works across Italy and abroad</p>
     <p class="lingua"><a href="/profilo/" hreflang="it" lang="it">Leggi in italiano</a> ·
@@ -769,7 +775,7 @@
     <a href="/tienimi-presente/" hreflang="it" lang="it">Keep me in mind</a> ·
     <a href="/privacy/">Privacy</a><br>
     simonecastellan.com · © 2026 · page updated on
-    <time datetime="2026-08-15">15 August 2026</time>
+    <time datetime="2026-09-10">10 September 2026</time>
   </footer>
 </main>
 <script src="/track.js"></script>

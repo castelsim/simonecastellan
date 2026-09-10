@@ -355,6 +355,12 @@
       li, .credito{ break-inside:avoid }
       a[href^="http"]::after{ content:" (" attr(href) ")"; font-size:8pt; color:#555 }
     }
+    a:focus-visible, button:focus-visible, summary:focus-visible{
+      outline:2px solid #1a1a1a; outline-offset:3px; border-radius:6px}
+    /* Chi ha chiesto al sistema meno movimento lo ha chiesto per un motivo:
+       vertigini, emicrania, o solo fastidio. Le transizioni qui sono decorative,
+       si spengono senza perdere niente. */
+    @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
   </style>
 </head>
 <body>
@@ -980,7 +986,7 @@
     <a href="/tienimi-presente/">Tienimi presente</a> ·
     <a href="/privacy/">Privacy</a><br>
     simonecastellan.com · © 2026 · pagina aggiornata il
-    <time datetime="2026-08-22">22 agosto 2026</time>
+    <time datetime="2026-09-10">10 settembre 2026</time>
   </footer>
 </main>
 <script src="/track.js"></script>

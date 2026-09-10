@@ -194,6 +194,12 @@
          chi legge non ha modo di sapere dove portava. */
       a[href^="http"]::after{ content:" (" attr(href) ")"; font-size:8.5pt; color:#555 }
     }
+    a:focus-visible, button:focus-visible, summary:focus-visible{
+      outline:2px solid #1a1a1a; outline-offset:3px; border-radius:6px}
+    /* Chi ha chiesto al sistema meno movimento lo ha chiesto per un motivo:
+       vertigini, emicrania, o solo fastidio. Le transizioni qui sono decorative,
+       si spengono senza perdere niente. */
+    @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
   </style>
 </head>
 <body>

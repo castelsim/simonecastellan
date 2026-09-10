@@ -78,6 +78,10 @@ h1 {
   transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
 }
 .cerca input:focus { background: #fff; border-color: var(--line-soft); box-shadow: 0 0 0 4px #f4f5f6; }
+/* `outline: none` qui sopra ha la stessa specificità della regola globale del
+   fuoco ed è dichiarato dopo: la spegneva. L'alone che restava era 1,09:1 su
+   bianco, cioè niente. Questa regola è più specifica e vince. */
+.cerca input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .cerca input::placeholder { color: var(--faint); }
 .cerca input::-webkit-search-cancel-button { -webkit-appearance: none; }
 .lente { position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
@@ -89,6 +93,12 @@ h1 {
   display: none; align-items: center; justify-content: center;
 }
 .pulisci:hover { background: #eceef0; color: var(--ink); }
+/* Il cerchietto resta 30 px perché dentro il campo non ce ne stanno 44, ma
+   l'area che risponde al dito arriva a 44: misurata, non stimata. */
+@media (max-width: 620px), (pointer: coarse) {
+  .pulisci::after { content: ""; position: absolute; left: 50%; top: 50%;
+    width: 44px; height: 44px; transform: translate(-50%, -50%); }
+}
 body.ha-testo .pulisci { display: flex; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 7px; justify-content: flex-end; flex: 1; }
