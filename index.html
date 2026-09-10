@@ -131,6 +131,10 @@
     main{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
       padding:24px}
     a:focus-visible{outline:2px solid #1a1a1a; outline-offset:3px; border-radius:6px}
+    /* Chi ha chiesto al sistema meno movimento lo ha chiesto per un motivo:
+       vertigini, emicrania, o solo fastidio. Le transizioni qui sono decorative,
+       si spengono senza perdere niente. */
+    @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
     /* Il nome è la prima cosa; sotto, due righe che dicono il mestiere.
        Prima il sito non lo diceva affatto: chi non premeva il pulsante se ne
        andava senza sapere di cosa si occupa Simone. */
@@ -232,7 +236,7 @@
     .crediti{max-width:620px; margin:34px auto 0; text-align:left}
     .crediti > h2{
       margin:0 0 14px;
-      font:500 11px ui-monospace,SFMono-Regular,Menlo,monospace;
+      font:500 12px ui-monospace,SFMono-Regular,Menlo,monospace;
       letter-spacing:.16em; text-transform:uppercase; color:#0a7d72;
     }
     .crediti ul{list-style:none; padding:0; margin:0}
@@ -303,36 +307,15 @@
        145 — una finestrella da due righe. Sopra i 1000 px lo spazio c'è
        davvero; sotto, la pagina scorre come qualunque altra, che è il
        comportamento che non lascia mai nessuno fuori. */
-    @media (min-height:1000px) and (min-width:620px){
-      html,body{height:100%; overflow:hidden}
-      body{min-height:0}
-      /* `min-height:0` su un elemento flex è la riga che permette ai figli di
-         restringersi sotto il loro contenuto: senza, il blocco si allarga e
-         spinge fuori la pagina invece di scorrere al proprio interno. */
-      main{min-height:0; overflow:hidden}
-      /* Dal 30/08/2026 sotto la piega non c'è più solo il testo lungo, ma
-         anche i crediti e la domanda finale: a scorrere è il gruppo
-         intero. Niente `display:none` su quel contenuto — resta disegnato e
-         leggibile, come si era già deciso il 26/08 scartando il blocco
-         richiudibile: un contenitore che scorre non nasconde niente a nessuno,
-         una regola che lo toglie sì. */
-      .sotto{
-        overflow-y:auto;
-        min-height:0;
-        flex:0 1 auto;
-        width:100%;
-        /* lo spazio per l'ultima riga, che altrimenti resta incollata al bordo */
-        padding-bottom:8px;
-        /* si scorre col dito o col trackpad senza trascinare la pagina */
-        overscroll-behavior:contain;
-        /* Una sfumatura in fondo dice che sotto c'è dell'altro: senza, il
-           testo tagliato a metà riga sembra un difetto invece che un invito. */
-        -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);
-        mask-image:linear-gradient(to bottom,#000 calc(100% - 22px),transparent);
-      }
-    }
+    /* Qui c'era una regola che su finestre alte più di 1000 px bloccava lo
+       scorrimento della pagina (`html,body{overflow:hidden}`) e faceva scorrere
+       il solo blocco `.sotto`: la home stava in una schermata. Tolta il
+       10/09/2026 perché su 1440×1100 la rotella al centro dello schermo non
+       muoveva niente — quel punto sta sopra il riquadro che scorre — e restavano
+       543 px di crediti dentro un contenitore che nessuno sa di dover grattare.
+       Era l'unica pagina del sito che non scorreva come le altre. */
     .inbreve h2{
-      font:600 11px ui-monospace,SFMono-Regular,Menlo,monospace;
+      font:600 12px ui-monospace,SFMono-Regular,Menlo,monospace;
       letter-spacing:.14em; text-transform:uppercase; color:#68716d;
       margin:20px 0 6px;
     }
@@ -364,7 +347,7 @@
        o si prenderebbe quelli che il browser dà agli <h2>. */
     .sviluppo-occhiello{
       margin:0 0 12px;
-      font:500 11px ui-monospace,SFMono-Regular,Menlo,monospace;
+      font:500 12px ui-monospace,SFMono-Regular,Menlo,monospace;
       letter-spacing:.16em; text-transform:uppercase; color:#0a7d72;
       margin-bottom:12px}
     /* Riquadri PIENI e centrati, non contornati e a sinistra (15/08/2026).
@@ -471,8 +454,17 @@
        Cresce l'area, non il testo: sui link scritti in riga si allarga con uno
        pseudo-elemento invisibile, così l'impaginazione non si muove di un
        pixel. Vale solo dove si tocca. */
+    /* Anche col mouse un bersaglio ha un minimo: 24 px per lato. Le voci del
+       menu e del piede stanno su una riga sola e distano meno di 24 px l'una
+       dall'altra, quindi non vale l'eccezione per i bersagli distanziati.
+       Nessuna di queste regole sposta il testo: cresce solo l'area. */
+    .nav a, .contact a, .credit a{position:relative; display:inline-block}
+    .nav a::after, .contact a::after, .credit a::after{
+      content:""; position:absolute; left:50%; top:50%;
+      width:calc(100% + 8px); min-width:24px; height:24px;
+      transform:translate(-50%,-50%)}
+
     @media (max-width:620px), (pointer:coarse){
-      .nav a, .contact a, .credit a{position:relative; display:inline-block}
       /* Sei pixel per lato non bastavano sulle voci corte: «EN» è largo 17 px
          di testo, l'area arrivava a 29 e la regola dei 44 restava disattesa in
          larghezza mentre in altezza era rispettata. Il minimo è dichiarato,
@@ -506,7 +498,7 @@
 </head>
 <body>
   <div class="escape" id="escape" role="note">
-    Sei in un browser interno: i pulsanti non possono aprire le app.
+    Per scrivermi con un tocco, apri questa pagina nel browser.
     <a id="escape-link" href="#">Apri questa pagina nel browser</a>
     <span id="escape-hint"> (oppure menu ⋯ → «Apri nel browser»)</span>
   </div>
@@ -605,8 +597,8 @@
              perché a chi cerca una sala serve sapere dove andare, e il nome
              per esteso resta nell'aria-label come per gli altri. -->
         <a class="progetto" href="https://www.avasoundlivemusic.eu/" target="_blank" rel="noopener"
-           data-p="AVA" aria-label="AVA Sound Live Music, studio di registrazione — si apre in una nuova scheda">
-          <span class="p-nome">AVA Sound</span><span class="p-cosa">studio di registrazione</span>
+           data-p="AVA" aria-label="AVA Sound Live Music, la sala di mix di cui sono responsabile — si apre in una nuova scheda">
+          <span class="p-nome">AVA Sound</span><span class="p-cosa">la sala di cui sono responsabile</span>
         </a>
       </div>
     </section>
@@ -631,10 +623,10 @@
          conteggio del clic. -->
     <a class="cta" id="ctaWa"
        href="https://wa.me/393404579244?text=Ciao%20Simone%2C%20ti%20scrivo%20dal%20tuo%20sito."
-       target="_blank" rel="noopener">Contattami</a>
+       target="_blank" rel="noopener"
+       aria-label="Contattami su WhatsApp — si apre in una nuova scheda">Contattami</a>
 
-    <p class="askline">Oppure chiedi a un'AI chi è Simone: il pulsante apre ChatGPT
-      con la domanda già scritta e il link al profilo.</p>
+    <p class="askline">Preferisci farti raccontare chi sono? La domanda è già pronta.</p>
     <div class="pills" id="pills"></div>
     <noscript>
       <p class="ns">Il pulsante di ChatGPT richiede JavaScript. Il profilo completo è leggibile qui:
@@ -683,11 +675,11 @@
 
          Niente immagini: non ne abbiamo di utilizzabili, e cinque riquadri
          vuoti direbbero meno di cinque righe piene. -->
-    <section class="crediti" aria-label="Alcuni crediti">
-      <h2>Alcuni crediti</h2>
+    <section class="crediti" aria-label="Dove si sente il mio lavoro">
+      <h2>Dove si sente il mio lavoro</h2>
       <ul>
         <li><b>Arena di Verona, in diretta su Rai 1</b> <i>2021 · 2022</i>
-          <span>Registrazione delle sequenze per Andrea Bocelli (<em>Nessun dorma</em>,
+          <span>Registrazione delle basi musicali per Andrea Bocelli (<em>Nessun dorma</em>,
             SEAT Music Awards 2021) e Mika (<em>Underwater</em>, TIM Music Awards
             2022)</span></li>
         <li><b>Griminelli plays Morricone</b> <i>2021</i>
@@ -698,7 +690,7 @@
         <li><b>EVO — serie Netflix «Running for My Truth»</b> <i>2023</i>
           <span>Compositore originale del brano · editore Sounzone</span></li>
         <li><b>La Geografia del Buio</b> <i>2021</i>
-          <span>Musical Assistance [Studio, Orchestra] — Michele Bravi · Virgin, Universal</span>
+          <span>Assistente musicale in studio e con l’orchestra — Michele Bravi · Virgin, Universal</span>
           <a class="ascolta" href="https://open.spotify.com/album/0SFjLCLRbtMaVaMGuF0PUQ" target="_blank" rel="noopener"
              aria-label="Ascolta «La Geografia del Buio» su Spotify">Ascolta su Spotify</a></li>
         <li><b>Inno d’Italia in diretta Rai</b> <i>2022 · 2024 · 2025 · 2026</i>
@@ -830,7 +822,7 @@
     // chiede login prima di rispondere. Restano definiti qui sotto, pronti, ma non visibili.
 
     var AIS = [
-      { name:"ChatGPT", logo:"chatgpt", directApp:true, href:function(){ return "https://chatgpt.com/?q="  + q; } },
+      { name:"ChatGPT", etichetta:"Chiedi a ChatGPT", logo:"chatgpt", directApp:true, href:function(){ return "https://chatgpt.com/?q="  + q; } },
       { name:"Claude",  logo:"claude",                  href:function(){ return "https://claude.ai/new?q=" + q; } },
       { name:"Grok",    logo:"grok",                    href:function(){ return "https://grok.com/?q="     + q; } }
     ];
@@ -887,7 +879,7 @@
       a.href = ai.href(); a.rel = "noopener";
       a.target = IS_MOBILE ? "_self" : "_blank";   // mobile stessa scheda (universal link → app); desktop nuova scheda
       a.setAttribute("aria-label", "Chiedi a " + ai.name + (IS_MOBILE ? " — apri l'app (prompt copiato)" : " — apri in una nuova scheda"));
-      a.innerHTML = '<span class="logo" aria-hidden="true">'+(LOGOS[ai.logo]||'')+'</span><span class="name">'+ai.name+'</span>'+ARROW;
+      a.innerHTML = '<span class="logo" aria-hidden="true">'+(LOGOS[ai.logo]||'')+'</span><span class="name">'+(ai.etichetta||ai.name)+'</span>'+ARROW;
       a.addEventListener("click", function(){
         track("click", ai.name);
         if (IS_MOBILE) copyText(PROMPT);          // riserva: se l'app non riceve il prefill basta incollare

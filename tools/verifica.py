@@ -392,6 +392,117 @@ def controlla_opere_dichiarate():
               f"e collegate alla persona")
 
 
+def controlla_etichetta_assistente(home):
+    """Sul pulsante dell'assistente deve esserci un'AZIONE, non un marchio.
+
+    Aggiunto il 10/09/2026. Fino a quel giorno sul pulsante c'era scritto
+    «ChatGPT» e basta: il nome di un prodotto. Chi non lo usa — cioè buona
+    parte delle persone a cui questo sito serve — non poteva sapere che cosa
+    succede premendolo, e la spiegazione stava due righe più su in una frase
+    da ventidue parole.
+
+    La guardia esiste per un motivo tecnico preciso: l'etichetta si legge con
+    `ai.etichetta || ai.name`, e un `||` non fallisce mai. Se un domani il
+    campo viene rinominato o cancellato, il pulsante torna a dire «ChatGPT»
+    senza che niente si rompa e senza che nessuno se ne accorga. Un ripiego
+    silenzioso è peggio di un errore: l'errore lo vedi."""
+    if 'id="pills"' not in home:
+        return  # il pulsante non c'è più: non è questa la guardia che deve dirlo
+    if 'ai.etichetta' not in home:
+        return errore("home: il pulsante dell'assistente non usa più «ai.etichetta», "
+                      "quindi mostra il nome del prodotto invece dell'azione")
+    m = re.search(r'etichetta:"([^"]+)"', home)
+    if not m:
+        return errore("home: nessuna etichetta dichiarata per l'assistente — con il "
+                      "ripiego `|| ai.name` il pulsante torna a dire solo il marchio, "
+                      "in silenzio")
+    testo = m.group(1)
+    if not re.match(r"^(Chiedi|Scopri|Fatti|Domanda)", testo):
+        errore(f"home: l'etichetta del pulsante è «{testo}»: dice il nome di un "
+               f"prodotto, non che cosa fa. Deve cominciare con un verbo")
+    print(f"  pulsante dell'assistente: «{testo}» — un'azione, non un marchio")
+
+
+def controlla_date_dichiarate():
+    """«Pagina aggiornata il …» deve essere vera.
+
+    Aggiunto il 10/09/2026, dopo aver trovato il difetto due volte nella stessa
+    pagina: /profilo/ dichiarava il 22 agosto ed era stato riscritto il 1°, il 2
+    e il 7 settembre; /en/profile/ dichiarava il 15 agosto ed era stato toccato
+    il 28. Nessun controllo poteva vederlo, perché la pagina resta valida: una
+    data scritta a mano è vera un giorno e poi mente per mesi.
+
+    Non è un vezzo. Quella riga è l'unica cosa che dice a un lettore — e a un
+    motore — se sta guardando materiale fresco, e llms.txt dichiara che le tre
+    fonti «dicono le stesse cose»: se le date divergono, quella promessa non è
+    più verificabile da fuori.
+
+    Due casi, perché il difetto si vede in due momenti diversi:
+      · file già committato → la data dichiarata non può essere più VECCHIA
+        dell'ultimo commit che ha toccato quel file;
+      · file con modifiche non committate → lo stiamo riscrivendo adesso, e
+        allora la data dichiarata deve essere quella di oggi.
+    Senza il secondo caso la guardia se ne accorgerebbe solo al giro dopo, cioè
+    quando la pagina è già pubblicata con la data sbagliata."""
+    import datetime
+    import subprocess
+
+    pagine = ["profilo/index.html", "en/profile/index.html"]
+    oggi = datetime.date.today().isoformat()
+    radice = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    controllate = 0
+
+    for rel in pagine:
+        testo = leggi(rel)
+        m = re.search(r'<time datetime="(\d{4}-\d{2}-\d{2})"', testo)
+        if not m:
+            errore(f"{rel}: non dichiara più la data di aggiornamento, e quella riga "
+                   f"è l'unico modo che ha un lettore di sapere se è materiale fresco")
+            continue
+        dichiarata = m.group(1)
+
+        # la data scritta in chiaro accanto al tag deve dire lo stesso giorno:
+        # sono due copie dello stesso fatto, e una delle due può restare indietro
+        vis = re.search(r'<time datetime="' + dichiarata + r'">([^<]+)</time>', testo)
+        if vis:
+            anno_visibile = re.search(r"(\d{4})", vis.group(1))
+            if anno_visibile and anno_visibile.group(1) != dichiarata[:4]:
+                errore(f"{rel}: il tag dice {dichiarata} ma il lettore vede "
+                       f"«{vis.group(1).strip()}»")
+
+        try:
+            sporco = subprocess.run(["git", "status", "--porcelain", "--", rel],
+                                    cwd=radice, capture_output=True, text=True, timeout=20)
+            ultimo = subprocess.run(["git", "log", "-1", "--format=%ad", "--date=short", "--", rel],
+                                    cwd=radice, capture_output=True, text=True, timeout=20)
+        except Exception as e:
+            AVVISI.append(f"date dichiarate: git non interrogabile ({e}), controllo saltato")
+            return
+
+        if sporco.returncode != 0 or ultimo.returncode != 0:
+            AVVISI.append("date dichiarate: git non ha risposto, controllo saltato")
+            return
+
+        controllate += 1
+        modificata_adesso = bool(sporco.stdout.strip())
+        commit = ultimo.stdout.strip()
+
+        if modificata_adesso:
+            if dichiarata != oggi:
+                errore(f"{rel}: la stai riscrivendo adesso ma dichiara ancora "
+                       f"«aggiornata il {dichiarata}». La data va portata a {oggi}, "
+                       f"o va pubblicata una pagina che mente sulla propria età")
+        elif commit and dichiarata < commit:
+            errore(f"{rel}: dichiara «aggiornata il {dichiarata}» ma l'ultima modifica "
+                   f"del file è del {commit}. Chi legge crede di guardare materiale "
+                   f"più vecchio di quello che è, e llms.txt promette che le fonti "
+                   f"sono allineate")
+
+    if controllate:
+        print(f"  date dichiarate: {controllate} pagine, ognuna coerente col proprio "
+              f"ultimo cambiamento")
+
+
 def controlla_ascolti():
     """Ogni «Ascolta su Spotify» deve puntare all'opera che gli sta accanto.
 
@@ -991,6 +1102,8 @@ def main():
     controlla_nascosti()
     controlla_opere_dichiarate()
     controlla_ascolti()
+    controlla_etichetta_assistente(home)
+    controlla_date_dichiarate()
     controlla_rimandi()
     controlla_sitemap()
     controlla_json_ld()
