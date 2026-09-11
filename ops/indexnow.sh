@@ -46,6 +46,7 @@ PAGINE=(
   "/"
   "/cv/"
   "/en/profile/"
+  "/en/"
   "/tools/"
   "/llms.txt"
 )

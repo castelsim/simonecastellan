@@ -194,7 +194,11 @@ def controlla_collegamenti_interni():
     attese = {
         "/profilo/": ["index.html", "cv/index.html", "en/profile/index.html"],
         "/cv/": ["index.html", "profilo/index.html", "en/profile/index.html"],
-        "/en/profile/": ["index.html", "profilo/index.html", "cv/index.html"],
+        "/en/profile/": ["index.html", "profilo/index.html", "cv/index.html", "en/index.html"],
+        # Dall'11/09/2026 la porta inglese è /en/, non l'archivio da 4.500 parole:
+        # se la home smette di linkarla, chi non legge l'italiano torna a
+        # sbattere contro il profilo lungo.
+        "/en/": ["index.html", "en/profile/index.html"],
         "/privacy/": ["index.html", "profilo/index.html", "cv/index.html"],
         "/tienimi-presente/": ["index.html", "profilo/index.html"],
         # Dal 09/08/2026 gli strumenti stanno tutti in /tools/ e la home ci arriva
@@ -470,6 +474,15 @@ def controlla_date_dichiarate():
                 errore(f"{rel}: il tag dice {dichiarata} ma il lettore vede "
                        f"«{vis.group(1).strip()}»")
 
+        # Terza copia dello stesso fatto: il `dateModified` dei dati strutturati.
+        # L'11/09/2026 stava al 22/08 in tutte e due le lingue mentre la riga in
+        # pagina era già stata corretta — cioè il lettore vedeva una data e i
+        # motori ne leggevano un'altra.
+        dm = re.search(r'"dateModified":\s*"(\d{4}-\d{2}-\d{2})"', testo)
+        if dm and dm.group(1) != dichiarata:
+            errore(f"{rel}: in pagina «aggiornata il {dichiarata}», nei dati strutturati "
+                   f"dateModified {dm.group(1)} — il lettore e il motore leggono due date")
+
         try:
             sporco = subprocess.run(["git", "status", "--porcelain", "--", rel],
                                     cwd=radice, capture_output=True, text=True, timeout=20)
@@ -518,38 +531,52 @@ def controlla_ascolti():
     (così un copia-incolla fra due righe si vede), e che gli stessi ID stiano
     anche nel «sameAs» del profilo. Se le due pagine divergono, una delle due
     sta mentendo e la guardia non sa quale: le blocca entrambe."""
-    home = leggi("index.html")
     profilo = leggi("profilo/index.html")
-
-    voci = re.findall(r"<li><b>(.*?)</b>(.*?)</li>", home, re.S)
+    # Dall'11/09/2026 i crediti con l'ascolto stanno anche nella presentazione
+    # inglese: stessi dischi, stessi ID — e se una delle due pagine prende un
+    # album omonimo, deve fermarsi lei come si fermerebbe la home.
+    voci = []
+    for f in ("index.html", "en/index.html"):
+        if os.path.exists(os.path.join(ROOT, f)):
+            voci += [(f, t, c) for t, c in re.findall(r"<li><b>(.*?)</b>(.*?)</li>", leggi(f), re.S)]
     trovati = []
-    for titolo, corpo in voci:
+    for pagina, titolo, corpo in voci:
         if "open.spotify.com" not in corpo:
             continue
         titolo = re.sub(r"<[^>]+>", "", titolo).strip()
         m = re.search(r'href="https://open\.spotify\.com/album/([A-Za-z0-9]+)"', corpo)
         if not m:
-            errore(f"crediti: «{titolo}» ha un link Spotify che non è un album")
+            errore(f"{pagina}: «{titolo}» ha un link Spotify che non è un album")
             continue
         idsp = m.group(1)
-        trovati.append((titolo, idsp))
+        trovati.append((pagina, titolo, idsp))
         if len(idsp) != 22:
-            errore(f"crediti: l'ID Spotify di «{titolo}» non ha la forma di un ID "
+            errore(f"{pagina}: l'ID Spotify di «{titolo}» non ha la forma di un ID "
                    f"({idsp}): un indirizzo storpiato apre una pagina d'errore")
         etichetta = re.search(r'aria-label="([^"]*)"', corpo)
         if not etichetta:
-            errore(f"crediti: il link d'ascolto di «{titolo}» non dice dove porta "
+            errore(f"{pagina}: il link d'ascolto di «{titolo}» non dice dove porta "
                    f"a chi usa uno screen reader")
         else:
             # la prima parola del titolo basta: sulla pagina il titolo può
             # essere più lungo dell'etichetta o viceversa
             chiave = titolo.split("—")[0].split(",")[0].strip()
             if chiave and chiave.lower() not in etichetta.group(1).lower():
-                errore(f"crediti: il link accanto a «{titolo}» è etichettato "
+                errore(f"{pagina}: il link accanto a «{titolo}» è etichettato "
                        f"«{etichetta.group(1)}»: il link e il credito parlano di "
                        f"due opere diverse, e una delle due è sbagliata")
+        # WCAG 2.5.3, «label in name»: chi comanda il telefono a voce pronuncia
+        # quello che VEDE. Fino all'11/09/2026 l'etichetta era «Ascolta
+        # «Griminelli…» su Spotify» e il testo visibile «Ascolta su Spotify»: le
+        # parole c'erano, ma non in fila, e il comando vocale non trovava il link.
+        visibile = re.search(r'class="ascolta"[^>]*>([^<]+)</a>', corpo)
+        if etichetta and visibile:
+            if visibile.group(1).strip().lower() not in etichetta.group(1).lower():
+                errore(f"{pagina}: il link d'ascolto di «{titolo}» mostra «{visibile.group(1).strip()}» "
+                       f"ma l'etichetta accessibile non contiene quelle parole in fila: chi lo "
+                       f"comanda a voce non lo trova")
         if 'rel="noopener"' not in corpo:
-            errore(f"crediti: il link d'ascolto di «{titolo}» apre una scheda "
+            errore(f"{pagina}: il link d'ascolto di «{titolo}» apre una scheda "
                    f"senza rel=noopener")
 
     if not trovati:
@@ -557,9 +584,9 @@ def controlla_ascolti():
 
     nel_profilo = set(re.findall(r'"sameAs": "https://open\.spotify\.com/album/([A-Za-z0-9]+)"',
                                  profilo))
-    for titolo, idsp in trovati:
+    for pagina, titolo, idsp in trovati:
         if idsp not in nel_profilo:
-            errore(f"crediti: l'album di «{titolo}» ({idsp}) si ascolta dalla home ma "
+            errore(f"{pagina}: l'album di «{titolo}» ({idsp}) si ascolta da {pagina} ma "
                    f"il profilo non lo dichiara in sameAs: due pagine che indicano "
                    f"opere diverse con lo stesso nome")
     print(f"  ascolti: {len(trovati)} link, ognuno con l'opera che dice di essere")
@@ -587,7 +614,7 @@ def controlla_sitemap():
         percorso = os.path.join(ROOT, u, "index.html") if u else os.path.join(ROOT, "index.html")
         if not os.path.exists(percorso):
             errore(f"la sitemap elenca /{u} ma il file non esiste")
-    pubblicate = {"", "profilo/", "cv/", "en/profile/", "privacy/", "tienimi-presente/", "BDG2029/",
+    pubblicate = {"", "en/", "profilo/", "cv/", "en/profile/", "privacy/", "tienimi-presente/", "BDG2029/",
                   "tools/"} | {t + "/" for t in TOOL}
     mancanti = pubblicate - set(urls)
     if mancanti:
@@ -637,12 +664,15 @@ def trova_orfane(urls):
 # Le pagine che portano dati strutturati. Serve a due controlli — la validità
 # del JSON e l'unicità del nodo Person — e tenerne due copie significa che
 # prima o poi una pagina nuova entra in uno solo dei due elenchi.
-PAGINE_JSONLD = ("index.html", "profilo/index.html", "cv/index.html",
+PAGINE_JSONLD = ("index.html", "en/index.html", "profilo/index.html", "cv/index.html",
                  "en/profile/index.html", "tools/index.html")
 
 
 def controlla_json_ld():
     for f in PAGINE_JSONLD:
+        if not os.path.exists(os.path.join(ROOT, f)):
+            errore(f"{f} è fra le pagine coi dati strutturati ma non esiste")
+            continue
         for blocco in re.findall(r'<script type="application/ld\+json">(.*?)</script>', leggi(f), re.S):
             try:
                 json.loads(blocco)
@@ -652,11 +682,31 @@ def controlla_json_ld():
 
 
 def controlla_hreflang():
-    coppie = [("profilo/index.html", "https://simonecastellan.com/en/profile/"),
-              ("en/profile/index.html", "https://simonecastellan.com/profilo/")]
-    for f, atteso in coppie:
-        if atteso not in leggi(f):
-            errore(f"{f} non dichiara l'hreflang verso {atteso}")
+    """Ogni pagina dichiara la sua gemella nell'altra lingua, e la gemella ricambia.
+
+    Fino all'11/09/2026 la gemella inglese della home era /en/profile/, cioè un
+    archivio di 4.500 parole con il contatto al 98% dello scorrimento: Google
+    mandava lì chi cercava in inglese. Adesso le coppie sono due, una per
+    livello — presentazione con presentazione, archivio con archivio.
+
+    Si cerca la stringa ESATTA `hreflang="xx" href="…"`: l'indirizzo della home
+    da solo è un pezzo di ogni indirizzo del sito, e un controllo che lo cerca
+    nudo passa su qualsiasi pagina."""
+    S = "https://simonecastellan.com"
+    attese = {
+        "index.html":            [("it", S + "/"), ("en", S + "/en/")],
+        "en/index.html":         [("en", S + "/en/"), ("it", S + "/")],
+        "profilo/index.html":    [("it", S + "/profilo/"), ("en", S + "/en/profile/")],
+        "en/profile/index.html": [("en", S + "/en/profile/"), ("it", S + "/profilo/")],
+    }
+    for f, coppie in attese.items():
+        if not os.path.exists(os.path.join(ROOT, f)):
+            errore(f"{f} non esiste: la coppia di lingue è rotta")
+            continue
+        pagina = leggi(f)
+        for lingua, url in coppie:
+            if f'hreflang="{lingua}" href="{url}"' not in pagina:
+                errore(f"{f} non dichiara hreflang=\"{lingua}\" verso {url}")
 
 
 def controlla_versione_profilo(home):
@@ -679,7 +729,7 @@ def controlla_intestazioni_altre_pagine():
     Le pagine sono elencate a mano e non trovate frugando nelle cartelle: così
     aggiungerne una nuova obbliga a passare di qui, invece di lasciarla fuori
     dai controlli senza che nessuno se ne accorga."""
-    ALTRE = ["index.html", "tools/index.html", "profilo/index.html", "cv/index.html",
+    ALTRE = ["index.html", "en/index.html", "tools/index.html", "profilo/index.html", "cv/index.html",
              "privacy/index.html", "tienimi-presente/index.html",
              "en/profile/index.html", "bando-in-chiaro/index.html",
              "BDG2029/index.html"]
@@ -803,6 +853,21 @@ def controlla_formule_smentite():
         ("tenured", "in inglese afferma un posto permanente che non esiste"),
         ("graduatorie nazionali", "non esistono: le idoneità sono di singoli conservatori"),
         ("sony music (", "Sony è la distribuzione, l'editore è Fenix"),
+        # Stessa etichetta, due grafie, copiate identiche in tutte e cinque le
+        # fonti per mesi: una sola era giusta, e l'altra rendeva la scheda SIAE
+        # più difficile da ritrovare. Confermata da Simone l'11/09/2026.
+        ("soundzone", "l'editore si scrive Sounzone, senza la d"),
+        # Trovati l'11/09/2026 dal revisore della pagina inglese, e già pubblicati
+        # sulla home italiana. «Direzione tecnica» non ha fonte: il profilo dice
+        # «referente tecnico per le produzioni complete», il CV registra una sola
+        # direzione di produzione. In inglese diventava «technical direction»,
+        # cioè il ruolo di Technical Director.
+        ("direzione tecnica", "il profilo dice «referente tecnico», non direzione tecnica"),
+        ("technical direction", "si legge Technical Director: il ruolo è «technical point of contact»"),
+        # Il profilo dice di sé «il curriculum ne conta ventiquattro: qui stanno
+        # quelli con ruolo e codice verificabili». Non sono tutti.
+        ("tutti i crediti", "il profilo raccoglie i crediti verificabili, non tutti"),
+        ("every credit", "the profile lists the verifiable credits, not every one"),
     ]
     # «finalista» da solo è legittimo — a Seeyousound 2020 lo era davvero. Lo
     # diventa quando sta accanto al Premio Nazionale delle Arti, dove
@@ -817,7 +882,11 @@ def controlla_formule_smentite():
     # nel dato che i motori leggono per primo, mentre le altre tre fonti erano
     # già corrette da una settimana. Nessun controllo la guardava.
     for f in ("llms.txt", "profilo/index.html", "en/profile/index.html", "cv/index.html",
-              "index.html"):
+              "index.html", "en/index.html"):
+        # cv/dati.js resta fuori apposta: le sue note SPIEGANO le correzioni
+        # («in inglese: "course leader", mai "tenured"») con formule che le
+        # negazioni qui sotto non riconoscono. Provato l'11/09/2026: dentro,
+        # dava quattro errori, tutti su righe che vietano la formula.
         if not os.path.exists(os.path.join(ROOT, f)):
             continue
         righe = leggi(f).splitlines()
@@ -842,6 +911,16 @@ def controlla_formule_smentite():
             # arti». Provato rimettendo il commento spezzato: senza questa
             # riga il controllo passava verde senza guardare niente.
             coppia = re.sub(r"\s+", " ", basso + " " + dopo)
+            # Le formule di più parole si cercano ANCHE a cavallo del ritorno a
+            # capo. Il punto cieco era stato chiuso il 22/08/2026 solo per le
+            # coppie: l'11/09 «lists every / credit» spezzato su due righe passava
+            # indisturbato. Si segnala solo se la formula non sta già tutta in una
+            # delle due righe, altrimenti lo stesso difetto uscirebbe due volte.
+            dopo_pulito = re.sub(r"\s+", " ", dopo)
+            for formula, perche in VIETATE:
+                if (" " in formula and formula in coppia
+                        and formula not in basso and formula not in dopo_pulito):
+                    errore(f"{f}:{numero} usa «{formula}» spezzato a capo: {perche}")
             for parole, perche in COPPIE_VIETATE:
                 if all(x in coppia for x in parole):
                     errore(f"{f}:{numero} mette insieme {' + '.join(parole)}: {perche}")
@@ -871,7 +950,8 @@ def controlla_pagine_del_sistema():
     for pagina, perche in [
         ("/profilo/", "è la pagina che l'assistente deve leggere"),
         ("/llms.txt", "è il documento che gli assistenti leggono per convenzione"),
-        ("/en/profile/", "è il profilo per chi non parla italiano"),
+        ("/en/profile/", "è il profilo esteso per chi non parla italiano"),
+        ("/en/", "è la presentazione per chi non parla italiano"),
         ("/", "è il punto d'ingresso e porta il prompt"),
     ]:
         if f'"{pagina}"' not in elenco:
