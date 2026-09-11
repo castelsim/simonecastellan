@@ -396,6 +396,51 @@ def controlla_opere_dichiarate():
               f"e collegate alla persona")
 
 
+def controlla_lastmod_sitemap():
+    """Le date della sitemap non possono restare indietro rispetto alle pagine.
+
+    Aggiunto l'11/09/2026. `ops/allinea-sitemap.py` esiste dal 15/08, quando
+    tutte e 26 le date risultarono sbagliate — ma è uno script da lanciare a
+    mano, e nessuno lo lanciava: l'11/09 erano di nuovo sbagliate 21 su 24, con
+    home, profilo e profilo inglese fermi al 22/08 dopo tre settimane di
+    modifiche. Un lastmod vecchio dice ai motori «qui non è cambiato niente, non
+    passare», e la sitemap resta formalmente valida: nessun altro controllo può
+    vederlo.
+
+    Si guardano solo i file senza modifiche in corso: per quelli che si stanno
+    riscrivendo la data giusta la saprà il commit, e la guardia se ne accorge
+    al giro dopo."""
+    import subprocess
+    xml = leggi("sitemap.xml")
+    voci = re.findall(r"<loc>https://simonecastellan\.com/(.*?)</loc>\s*<lastmod>(\d{4}-\d{2}-\d{2})</lastmod>", xml)
+    radice = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    indietro, controllate = [], 0
+    for percorso, dichiarata in voci:
+        rel = (percorso + "index.html") if percorso.endswith("/") or percorso == "" else percorso
+        if not os.path.exists(os.path.join(ROOT, rel)):
+            continue
+        try:
+            sporco = subprocess.run(["git", "status", "--porcelain", "--", rel],
+                                    cwd=radice, capture_output=True, text=True, timeout=20)
+            ultimo = subprocess.run(["git", "log", "-1", "--format=%ad", "--date=short", "--", rel],
+                                    cwd=radice, capture_output=True, text=True, timeout=20)
+        except Exception as e:
+            AVVISI.append(f"lastmod della sitemap: git non interrogabile ({e}), controllo saltato")
+            return
+        if sporco.returncode or ultimo.returncode or sporco.stdout.strip():
+            continue
+        controllate += 1
+        commit = ultimo.stdout.strip()
+        if commit and dichiarata < commit:
+            indietro.append(f"/{percorso} ({dichiarata}, modificata il {commit})")
+    if indietro:
+        errore(f"sitemap: {len(indietro)} date indietro rispetto all'ultima modifica della "
+               f"pagina — {', '.join(indietro[:4])}{' …' if len(indietro) > 4 else ''}. "
+               f"Rimedio: python3 ops/allinea-sitemap.py --scrivi")
+    elif controllate:
+        print(f"  lastmod della sitemap: {controllate} date, nessuna indietro rispetto alla pagina")
+
+
 def controlla_etichetta_assistente(home):
     """Sul pulsante dell'assistente deve esserci un'AZIONE, non un marchio.
 
@@ -1183,6 +1228,7 @@ def main():
     controlla_opere_dichiarate()
     controlla_ascolti()
     controlla_etichetta_assistente(home)
+    controlla_lastmod_sitemap()
     controlla_date_dichiarate()
     controlla_rimandi()
     controlla_sitemap()
