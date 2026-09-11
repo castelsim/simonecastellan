@@ -291,11 +291,14 @@ var CVPDF = (function () {
     });
   }
 
-  function idoneita(st) {
+  /* Il PDF completo è quello dei bandi e porta la posizione in graduatoria;
+     quello pubblico porta `testoPubblico`, lo stesso della pagina /cv/. Il
+     decreto, in tutti e due. */
+  function idoneita(st, completo) {
     if (!CV.idoneita || !CV.idoneita.length) return;
     sezione(st, 'Idoneità da procedura pubblica');
     CV.idoneita.forEach(function (v) {
-      testo(st, v.testo, { corpo: 9, dopo: 0.6 });
+      testo(st, completo ? v.testo : (v.testoPubblico || v.testo), { corpo: 9, dopo: 0.6 });
       testo(st, v.fonte, { corpo: 8, colore: GRIGIO, dopo: 1.6 });
     });
   }
@@ -414,7 +417,7 @@ var CVPDF = (function () {
       istruzione(st);
       lingue(st);
       competenze(st);
-      idoneita(st);
+      idoneita(st, completo);
       premi(st);
       produzioni(st);
       if (completo) coda(st);

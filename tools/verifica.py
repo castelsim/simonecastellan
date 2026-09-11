@@ -852,6 +852,36 @@ def controlla_cv_allineato():
                    f"dati.js dice {attesi}, la pagina dice {nella_pagina}")
 
     # La qualifica che apre il CV
+    # Le idoneità hanno due testi dall'11/09/2026: `testo` per il PDF dei bandi
+    # (con la posizione in graduatoria, che una commissione deve trovare
+    # scritta) e `testoPubblico` per la pagina e il PDF pubblico. I pezzi che
+    # stanno solo nel primo sono elencati in `soloCompleto`, e qui si controlla
+    # che il confine tenga in tutte e due le direzioni: se sparissero dal testo
+    # dei bandi la candidatura perderebbe un dato, se tornassero nella pagina
+    # la scelta fatta sulla pagina pubblica sarebbe annullata senza che
+    # nessuno l'abbia deciso.
+    for voce in re.finditer(r"testo:\s*'([^']+)',\s*testoPubblico:\s*'([^']+)',\s*"
+                            r"soloCompleto:\s*\[([^\]]*)\]", dati):
+        completo, pubblico, lista = voce.groups()
+        for pezzo in re.findall(r"'([^']+)'", lista):
+            if pezzo not in completo:
+                errore(f"cv: «{pezzo}» dovrebbe stare nel testo per i bandi e non c'è: "
+                       f"il PDF completo perderebbe un dato che la commissione cerca")
+            if pezzo in pubblico:
+                errore(f"cv: «{pezzo}» è nel testo pubblico dell'idoneità, ma è segnato "
+                       f"come solo per i bandi")
+            if pezzo in pagina:
+                errore(f"cv: «{pezzo}» è tornato nella pagina /cv/: era stato tolto "
+                       f"dalla versione pubblica l'11/09/2026 e resta nel PDF dei bandi")
+    # Si cerca l'USO nel codice, a commenti tolti: il primo tentativo cercava la
+    # parola e la trovava nel commento che la spiega — passava anche col codice
+    # rimesso com'era prima. Stesso tranello del «noindex» del 12/08/2026.
+    codice_pdf = re.sub(r"/\*.*?\*/", " ", leggi("cv/pdf.js"), flags=re.S)
+    codice_pdf = re.sub(r"(?m)^\s*//.*$", " ", codice_pdf)
+    if "soloCompleto" in dati and "v.testoPubblico" not in codice_pdf:
+        errore("cv: dati.js distingue il testo pubblico ma pdf.js non lo usa più: "
+               "il PDF pubblico stamperebbe la versione per i bandi")
+
     q = re.search(r"qualifica:\s*'([^']+)'", dati)
     if q:
         # la pagina la può spezzare su più righe: si confrontano le parole
@@ -913,6 +943,16 @@ def controlla_formule_smentite():
         # quelli con ruolo e codice verificabili». Non sono tutti.
         ("tutti i crediti", "il profilo raccoglie i crediti verificabili, non tutti"),
         ("every credit", "the profile lists the verifiable credits, not every one"),
+        # Era la traduzione scelta per «titolare dell'insegnamento», per non
+        # scrivere «tenured». Ma in inglese britannico il course leader è chi
+        # dirige un corso di laurea intero: un gradino sopra un modulo da 2 CFA
+        # con incarico annuale. Tolto l'11/09/2026 su segnalazione del revisore.
+        ("course leader", "in inglese britannico dirige un corso di laurea: si scrive «teaches»"),
+        # Il PDF del curriculum è di quattro pagine, pubblico e completo — misurato
+        # l'11/09/2026 sul documento generato. Scritto accanto a «si scarica in
+        # PDF», «in una pagina» promette un foglio solo.
+        ("curriculum in una pagina", "il PDF è di quattro pagine: si scrive «curriculum»"),
+        ("one-page cv", "the PDF is four pages long: write «CV»"),
     ]
     # «finalista» da solo è legittimo — a Seeyousound 2020 lo era davvero. Lo
     # diventa quando sta accanto al Premio Nazionale delle Arti, dove
@@ -929,7 +969,7 @@ def controlla_formule_smentite():
     for f in ("llms.txt", "profilo/index.html", "en/profile/index.html", "cv/index.html",
               "index.html", "en/index.html"):
         # cv/dati.js resta fuori apposta: le sue note SPIEGANO le correzioni
-        # («in inglese: "course leader", mai "tenured"») con formule che le
+        # («in inglese: "teaches", mai "tenured"») con formule che le
         # negazioni qui sotto non riconoscono. Provato l'11/09/2026: dentro,
         # dava quattro errori, tutti su righe che vietano la formula.
         if not os.path.exists(os.path.join(ROOT, f)):
