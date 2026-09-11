@@ -72,7 +72,9 @@ const CV = {
          INSEGNAMENTO, che non è un posto di ruolo. La versione inglese del
          sito traduceva con «tenured post», che a una commissione straniera
          afferma esattamente il posto permanente che non c'è. In inglese:
-         «course leader», mai «tenured». */
+         «teaches» / «teacher of the module», mai «tenured» — e dall'11/09/2026
+         nemmeno «course leader», che in inglese britannico è chi dirige un
+         corso di laurea intero: un gradino sopra il vero. */
       nota: 'Titolare dell’insegnamento, non di un posto di ruolo: la distinzione va tenuta in tutte le lingue.',
       verificare: 'Le ore del 2022/23 sono 27 in una fonte e 18 in due altre. I protocolli di graduatoria 2024/25 e 2025/26 mancano: senza, quei due anni non si possono dichiarare come servizio a seguito di procedura selettiva pubblica.'
     },
@@ -313,13 +315,29 @@ const CV = {
   /* ── Idoneità da procedura pubblica ─────────────────────────────────────
      Il sito diceva «idoneo nelle graduatorie» e in inglese «2026 national
      lists»: allude a graduatorie nazionali che non esistono. I fatti veri
-     sono due, entrambi da decreto, ed entrambi sono risultati. */
+     sono due, entrambi da decreto, ed entrambi sono risultati.
+
+     Dall'11/09/2026 ogni voce ha DUE testi. `testo` va nel PDF completo, quello
+     dei bandi: lì una commissione controlla il decreto riga per riga, e la
+     posizione è un dato che deve trovare scritto. `testoPubblico` va nella
+     pagina /cv/ e nel PDF pubblico, che legge un datore di lavoro: «7 su 8» e
+     «40/100» sono numeri che un lettore che scorre interpreta come un giudizio,
+     e senza il contesto della procedura dicono meno del vero, non più.
+     Il decreto resta citato in tutte e due, quindi la posizione chiunque la
+     può controllare: niente è nascosto, niente è gonfiato.
+
+     `soloCompleto` elenca i pezzi che stanno SOLO nel testo per i bandi. Serve
+     alla guardia: devono esserci nel `testo` e mancare nella pagina. */
   idoneita: [
     { data: '14/01/2026',
       testo: 'Idoneo (posizione 7 su 8) nella procedura comparativa pubblica del Conservatorio «F. Venezze» di Rovigo per incarichi a docenti esterni, a.a. 2025/26 — settore artistico-disciplinare AFAM047 Tecnologie del suono e della multimedialità, campo COME/04.',
+      testoPubblico: 'Idoneo nella procedura comparativa pubblica del Conservatorio «F. Venezze» di Rovigo per incarichi a docenti esterni, a.a. 2025/26 — settore artistico-disciplinare AFAM047 Tecnologie del suono e della multimedialità, campo COME/04.',
+      soloCompleto: ['posizione 7 su 8'],
       fonte: 'D.D. n. 505, prot. 300/DC3 del 14/01/2026' },
     { data: '07/11/2023',
       testo: 'Inserito al n. 23 (punteggio 40/100) nella graduatoria di merito definitiva per COME/04 Elettroacustica del Conservatorio «G. Frescobaldi» di Ferrara, procedura per soli titoli, a.a. 2023/24–2025/26.',
+      testoPubblico: 'Inserito nella graduatoria di merito definitiva per COME/04 Elettroacustica del Conservatorio «G. Frescobaldi» di Ferrara, procedura per soli titoli, a.a. 2023/24–2025/26.',
+      soloCompleto: ['n. 23', '40/100'],
       fonte: 'Decreto n. 1891, prot. 9858/b14 del 07/11/2023' }
   ],
 
