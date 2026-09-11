@@ -523,10 +523,20 @@ def controlla_date_dichiarate():
         # L'11/09/2026 stava al 22/08 in tutte e due le lingue mentre la riga in
         # pagina era già stata corretta — cioè il lettore vedeva una data e i
         # motori ne leggevano un'altra.
-        dm = re.search(r'"dateModified":\s*"(\d{4}-\d{2}-\d{2})"', testo)
-        if dm and dm.group(1) != dichiarata:
-            errore(f"{rel}: in pagina «aggiornata il {dichiarata}», nei dati strutturati "
-                   f"dateModified {dm.group(1)} — il lettore e il motore leggono due date")
+        # E dev'essere una data CON ora e fuso: Search Console l'11/09/2026 segnalava
+        # «Valore datetime di dateModified non valido» su «2026-08-22». Attenzione
+        # all'espressione: la prima versione pretendeva le virgolette subito dopo
+        # il giorno, e con l'ora aggiunta avrebbe smesso di trovare il campo —
+        # cioè di controllarlo — senza dire niente.
+        dm = re.search(r'"dateModified":\s*"([^"]*)"', testo)
+        if dm:
+            valore = dm.group(1)
+            if not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?([+-]\d{2}:\d{2}|Z)", valore):
+                errore(f"{rel}: dateModified «{valore}» non ha ora e fuso: Google lo scarta "
+                       f"come datetime non valido (es. 2026-09-11T12:00:00+02:00)")
+            elif valore[:10] != dichiarata:
+                errore(f"{rel}: in pagina «aggiornata il {dichiarata}», nei dati strutturati "
+                       f"dateModified {valore[:10]} — il lettore e il motore leggono due date")
 
         try:
             sporco = subprocess.run(["git", "status", "--porcelain", "--", rel],
@@ -713,6 +723,21 @@ PAGINE_JSONLD = ("index.html", "en/index.html", "profilo/index.html", "cv/index.
                  "en/profile/index.html", "tools/index.html")
 
 
+def controlla_profilepage(nodo, f):
+    """Una ProfilePage deve dire DENTRO di sé che parla di una persona.
+
+    Search Console, 11/09/2026: «Tipo di oggetto non valido per campo
+    mainEntity», problema critico, pagina esclusa dai risultati avanzati. Il
+    mainEntity era un riferimento per sola @id alla persona definita nello
+    stesso grafo, e Google l'aveva letto come un Thing qualsiasi: il suo
+    validatore quel rimando non lo segue."""
+    me = nodo.get("mainEntity")
+    if not isinstance(me, dict) or me.get("@type") not in ("Person", "Organization") \
+            or not me.get("name"):
+        errore(f"{f}: la ProfilePage ha un mainEntity senza @type Person e name — "
+               f"Google lo legge come un Thing e toglie la pagina dai risultati avanzati")
+
+
 def controlla_json_ld():
     for f in PAGINE_JSONLD:
         if not os.path.exists(os.path.join(ROOT, f)):
@@ -720,10 +745,15 @@ def controlla_json_ld():
             continue
         for blocco in re.findall(r'<script type="application/ld\+json">(.*?)</script>', leggi(f), re.S):
             try:
-                json.loads(blocco)
+                dato = json.loads(blocco)
             except json.JSONDecodeError as e:
                 errore(f"JSON-LD non valido in {f}: {e}")
-    print("  JSON-LD: valido su tutte le pagine")
+                continue
+            nodi = dato.get("@graph", [dato]) if isinstance(dato, dict) else []
+            for nodo in nodi:
+                if isinstance(nodo, dict) and nodo.get("@type") == "ProfilePage":
+                    controlla_profilepage(nodo, f)
+    print("  JSON-LD: valido su tutte le pagine, e ogni ProfilePage dice di chi parla")
 
 
 def controlla_hreflang():
