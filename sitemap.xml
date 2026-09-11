@@ -3,16 +3,25 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://simonecastellan.com/</loc>
-    <lastmod>2026-08-22</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="it" href="https://simonecastellan.com/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://simonecastellan.com/en/profile/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simonecastellan.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://simonecastellan.com/"/>
+  </url>
+  <url>
+    <loc>https://simonecastellan.com/en/</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://simonecastellan.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://simonecastellan.com/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://simonecastellan.com/"/>
   </url>
   <url>
     <loc>https://simonecastellan.com/profilo/</loc>
-    <lastmod>2026-08-22</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="it" href="https://simonecastellan.com/profilo/"/>
@@ -20,7 +29,7 @@
   </url>
   <url>
     <loc>https://simonecastellan.com/en/profile/</loc>
-    <lastmod>2026-08-22</lastmod>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://simonecastellan.com/en/profile/"/>
@@ -28,13 +37,13 @@
   </url>
   <url>
     <loc>https://simonecastellan.com/cv/</loc>
-    <lastmod>2026-08-15</lastmod>
+    <lastmod>2026-09-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://simonecastellan.com/tienimi-presente/</loc>
-    <lastmod>2026-08-15</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -46,97 +55,97 @@
   </url>
   <url>
     <loc>https://simonecastellan.com/audio-mp3/</loc>
-    <lastmod>2026-08-14</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://simonecastellan.com/bpm/</loc>
-    <lastmod>2026-08-23</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://simonecastellan.com/tonalita/</loc>
-    <lastmod>2026-08-23</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://simonecastellan.com/qrcode/</loc>
-    <lastmod>2026-08-23</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://simonecastellan.com/tools/</loc>
-    <lastmod>2026-08-28</lastmod>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://simonecastellan.com/comprimi-immagini/</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://simonecastellan.com/posso-pubblicarlo/</loc>
-    <lastmod>2026-08-25</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://simonecastellan.com/fotogramma/</loc>
-    <lastmod>2026-08-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://simonecastellan.com/comprimi-pdf/</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://simonecastellan.com/tara-impianto/</loc>
-    <lastmod>2026-08-15</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://simonecastellan.com/rumore-rosa/</loc>
-    <lastmod>2026-08-15</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://simonecastellan.com/ritardo-diffusori/</loc>
-    <lastmod>2026-08-12</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://simonecastellan.com/conta-caratteri/</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://simonecastellan.com/link-whatsapp/</loc>
-    <lastmod>2026-08-14</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://simonecastellan.com/posizione/</loc>
     <lastmod>2026-08-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://simonecastellan.com/posso-pubblicarlo/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://simonecastellan.com/fotogramma/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://simonecastellan.com/comprimi-pdf/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://simonecastellan.com/tara-impianto/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://simonecastellan.com/rumore-rosa/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://simonecastellan.com/ritardo-diffusori/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://simonecastellan.com/conta-caratteri/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://simonecastellan.com/link-whatsapp/</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://simonecastellan.com/posizione/</loc>
+    <lastmod>2026-08-29</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://simonecastellan.com/comprimi-video/</loc>
-    <lastmod>2026-08-14</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
