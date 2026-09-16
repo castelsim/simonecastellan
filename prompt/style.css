@@ -1,8 +1,8 @@
-/* /prompt/ — undici schede, una per punto di vista. I colori e il titolo
-   vengono da /comune/voce.css, qui c'è solo l'impaginazione. */
+/* /prompt/ — colori, occhiello e titolo da /comune/voce.css.
+   Due impaginazioni: senza script l'elenco completo per categorie; con lo
+   script (html.js) categorie · elenco · dettaglio. */
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
-button { touch-action: manipulation; }
+button, select { font: inherit; touch-action: manipulation; }
 
 body {
   font-family: var(--font);
@@ -14,126 +14,169 @@ body {
   min-height: 100vh;
   padding: 44px max(20px, env(safe-area-inset-right)) calc(72px + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
 }
+.card { width: 100%; max-width: 1120px; }
+header { max-width: 760px; }
 
-.card { width: 100%; max-width: 640px; }
-header { margin-bottom: 8px; }
+/* La seconda riga del titolo è una frase da leggere: dal grigio decorativo
+   (3,0:1) a quello delle note (4,9:1). */
+.titolone .eco { color: var(--faint); }
+.apertura { max-width: 620px; margin-bottom: 22px; }
 
-.lbl {
-  display: block;
-  font: 500 11.5px var(--mono);
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--mut);
-  margin-bottom: 10px;
-}
+.vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.lbl { display: block; font: 500 11.5px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--mut); margin-bottom: 12px; }
+.ic { width: 20px; height: 20px; flex: none; color: var(--teal); }
 
-/* Il testo del prompt: monospaziato perché è un testo da incollare, non da
-   leggere come una pagina; va a capo da solo, niente scorrimento in orizzontale. */
-.testo {
-  font: 400 13px/1.6 var(--mono);
-  color: var(--ink);
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--raggio);
-  padding: 14px 16px;
-  margin-top: 10px;
-}
+/* ————— Il giro in quattro tempi ————— */
+.giro { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.giro li { background: var(--panel); border: 1px solid var(--line); border-radius: var(--raggio); padding: 12px; display: grid; gap: 2px; align-content: start; }
+.giro b { font-size: 14.5px; }
+.giro span { font-size: 13px; color: var(--mut); line-height: 1.35; }
+.giro li.tu { background: #fff; border-style: dashed; border-color: var(--line-forte); }
 
-/* Le due porte in cima: portano alle sezioni senza dover scorrere per capire
-   che la pagina ne ha due. */
-.indice { display: flex; gap: 8px; flex-wrap: wrap; margin: -12px 0 8px; }
-.indice a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 40px;
-  padding: 0 16px;
+/* ————— Cosa ti serve adesso ————— */
+.ingresso { margin: 36px 0 8px; }
+.ingresso ul { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.scelta {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  column-gap: 10px;
+  row-gap: 2px;
+  align-content: start;
+  padding: 12px 14px;
+  min-height: 64px;
   border: 1px solid var(--line-forte);
-  border-radius: 999px;
+  border-radius: var(--raggio-l);
   color: var(--ink);
   text-decoration: none;
-  font-size: 14px;
-  font-weight: 600;
+  transition: border-color .15s, box-shadow .15s;
 }
-.indice a:hover { border-color: var(--teal); color: var(--teal); }
-@media (max-width: 560px), (pointer: coarse) { .indice a { min-height: 44px; } }
+.scelta .ic { grid-row: span 2; margin-top: 1px; }
+.scelta b { font-size: 15px; line-height: 1.3; }
+.scelta span { font-size: 13px; color: var(--mut); line-height: 1.35; }
+.scelta:hover { border-color: var(--teal); box-shadow: 0 0 0 1px var(--teal); }
 
-.sezione { margin-top: 40px; scroll-margin-top: 16px; }
-.sez { font-size: 26px; font-weight: 800; letter-spacing: -.6px; }
-.sez-sotto { color: var(--mut); font-size: 15px; line-height: 1.5; margin: 4px 0 18px; }
+/* ————— Catalogo: senza script ————— */
+.catalogo { margin-top: 40px; }
+.categoria { margin-bottom: 40px; scroll-margin-top: 16px; }
+.cat-titolo { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 800; letter-spacing: -.5px; }
+.cat-titolo .ic { width: 24px; height: 24px; }
+.cat-sotto { color: var(--mut); font-size: 15px; margin: 2px 0 14px 34px; }
+.voci { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 
-.patto { margin-bottom: 18px; }
-.patto .testo { margin-top: 0; }
+/* ————— La scheda ————— */
+.voce { border: 1px solid var(--line); border-radius: var(--raggio-l); padding: 18px; scroll-margin-top: 16px; background: #fff; }
+.voce:target { border-color: var(--teal); box-shadow: 0 0 0 1px var(--teal); }
+.alias { display: block; scroll-margin-top: 16px; }
+.testa { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.nome { font-size: 22px; font-weight: 800; letter-spacing: -.4px; }
+.quando { color: var(--mut); font-size: 14.5px; line-height: 1.45; margin: 2px 0 14px; }
 
-.elenco { display: flex; flex-direction: column; gap: 14px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; font: 500 11.5px var(--mono); letter-spacing: .04em; padding: 4px 9px; border-radius: 999px; }
+.badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; }
+.badge.capisce { background: #e8f6f3; color: #075e56; }
+.badge.capisce::before { background: var(--teal-l); }
+.badge.agisce { background: #fdf0e1; color: #8a4b08; }
+.badge.agisce::before { background: #d97706; }
 
-.voce {
-  border: 1px solid var(--line);
-  border-radius: var(--raggio-l);
-  padding: 18px 18px 16px;
-}
-.nome { font-size: 19px; font-weight: 700; letter-spacing: -.3px; }
-.quando { color: var(--mut); font-size: 15px; line-height: 1.5; margin: 4px 0 10px; }
+.ancora { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; min-height: 32px; border-radius: 8px; color: var(--faint); font: 500 15px var(--mono); text-decoration: none; }
+.ancora:hover { color: var(--teal); background: var(--panel); }
 
-summary {
-  cursor: pointer;
-  color: var(--teal);
-  font-size: 14px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  width: max-content;
-  list-style: none;
-}
-summary::-webkit-details-marker { display: none; }
-summary::before { content: "▸"; margin-right: 6px; transition: transform .15s; }
-details[open] summary::before { transform: rotate(90deg); }
+/* Capisce → ti riferisce → poi ti chiede */
+.ciclo { list-style: none; border-left: 2px solid var(--line-forte); margin: 0 0 18px 6px; }
+.ciclo li { display: grid; gap: 1px; padding: 0 0 12px 18px; position: relative; }
+.ciclo li::before { content: ""; position: absolute; left: -7px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 2px solid var(--teal); }
+.ciclo .k { font: 500 11.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--mut); }
+.ciclo .v { font-size: 16px; line-height: 1.4; }
+.ciclo li.dom { padding-bottom: 0; }
+.ciclo li.dom::before { background: var(--teal); }
+.ciclo li.dom .v { font-weight: 650; color: var(--teal-scuro); font-size: 17px; }
 
-.btn {
-  appearance: none;
-  border: 1px solid var(--ink);
-  background: var(--ink);
-  color: #fff;
-  font: 600 14px var(--font);
-  border-radius: 999px;
-  padding: 10px 18px;
-  margin-top: 12px;
-  cursor: pointer;
-}
+/* Per chi agisce: cosa fa, dove si ferma */
+.passi { list-style: none; counter-reset: p; display: grid; gap: 8px; margin-bottom: 14px; }
+.passi li { counter-increment: p; position: relative; padding: 2px 0 0 36px; font-size: 15px; line-height: 1.45; min-height: 26px; }
+.passi li::before { content: counter(p); position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%; background: #d97706; color: #fff; font: 600 13px/26px var(--mono); text-align: center; }
+.identita { border: 1px solid var(--line); border-radius: var(--raggio); margin-bottom: 18px; }
+.identita > div { display: grid; grid-template-columns: 150px 1fr; gap: 12px; padding: 10px 14px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.4; }
+.identita > div:first-child { border-top: 0; }
+.identita dt { color: var(--mut); }
+.identita dd { font-weight: 550; }
+
+.azioni { display: flex; }
+.btn { appearance: none; border: 0; background: var(--ink); color: #fff; font-weight: 650; font-size: 15px; border-radius: 999px; min-height: 48px; padding: 0 24px; cursor: pointer; width: 100%; }
 .btn:hover { background: var(--teal-scuro); }
+.btn.fatto { background: var(--teal); }
 
-.hint {
-  color: var(--faint);
-  font-size: 13px;
-  line-height: 1.6;
-  margin-top: 26px;
-  text-align: center;
-}
+details.leggi { margin-top: 10px; border: 1px solid var(--line); border-radius: var(--raggio); padding: 0 14px; }
+summary { cursor: pointer; color: var(--teal); font-size: 14.5px; font-weight: 600; display: flex; align-items: center; gap: 8px; min-height: 44px; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: ""; border-left: 6px solid currentColor; border-top: 4.5px solid transparent; border-bottom: 4.5px solid transparent; transition: transform .15s; }
+details[open] > summary::before { transform: rotate(90deg); }
+summary .piu { color: var(--faint); font-weight: 400; }
 
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: calc(56px + env(safe-area-inset-bottom));
-  transform: translateX(-50%) translateY(8px);
-  background: var(--ink);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 9px 16px;
-  border-radius: 999px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .2s, transform .2s;
-}
+.testo { font: 400 12.5px/1.7 var(--mono); color: var(--ink); white-space: pre-wrap; overflow-wrap: break-word; background: var(--panel); border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; }
+.manuale { display: block; width: 100%; font: 400 12.5px/1.6 var(--mono); border: 2px solid var(--teal); border-radius: var(--raggio); padding: 10px 12px; margin-top: 8px; resize: vertical; }
+
+/* ————— Regole comuni ————— */
+.regole { background: var(--panel); border: 1px solid var(--line); border-radius: var(--raggio-l); padding: 16px 18px 6px; margin-top: 24px; max-width: 760px; }
+.regole-sintesi { font-size: 14.5px; line-height: 1.55; color: var(--mut); }
+.regole-sintesi b { color: var(--ink); font-weight: 650; }
+.regole .testo { background: #fff; }
+.nota { font-size: 12.5px; color: var(--faint); margin-top: 16px; max-width: 760px; }
+
+/* ————— Catalogo: con script ————— */
+.cat-nav[hidden] { display: none; }
+.cat-select { display: none; }
+.js .catalogo { display: grid; grid-template-columns: 230px 290px 1fr; gap: 20px; align-items: start; }
+.js .cat-corpo { display: none; }
+.js .cat-lista { list-style: none; display: grid; gap: 2px; position: sticky; top: 16px; }
+.js .cat-lista li.stacco { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 6px; }
+.cat-btn { width: 100%; text-align: left; border: 0; background: none; border-radius: var(--raggio); min-height: 44px; padding: 8px 10px; display: grid; grid-template-columns: 20px 1fr auto; gap: 10px; align-items: center; font-size: 14.5px; font-weight: 600; color: var(--ink); cursor: pointer; }
+.cat-btn .n { font: 500 12px var(--mono); color: var(--faint); }
+.cat-btn:hover { background: var(--panel); }
+.cat-btn[aria-current="true"] { background: var(--ink); color: #fff; }
+.cat-btn[aria-current="true"] .ic, .cat-btn[aria-current="true"] .n { color: #fff; }
+
+.cat-intro { font-size: 14px; color: var(--mut); margin: 12px 0 10px 2px; }
+.lista { list-style: none; display: grid; gap: 6px; }
+.voce-btn { width: 100%; text-align: left; background: #fff; border: 1px solid var(--line); border-radius: var(--raggio); padding: 12px 14px; display: grid; gap: 3px; min-height: 44px; cursor: pointer; color: var(--ink); }
+.voce-btn b { font-size: 15.5px; }
+.voce-btn span { font-size: 13px; color: var(--mut); line-height: 1.4; }
+.voce-btn:hover { border-color: var(--line-forte); }
+.voce-btn[aria-current="true"] { border-color: var(--teal); box-shadow: 0 0 0 1px var(--teal); background: #f2fbf9; }
+.dettaglio { position: sticky; top: 16px; scroll-margin-top: 16px; }
+.js .dettaglio .voce { padding: 22px; }
+.js .dettaglio .nome { font-size: 26px; }
+
+/* ————— Toast e piede ————— */
+.toast { position: fixed; left: 50%; bottom: calc(28px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(8px); width: max-content; max-width: calc(100vw - 32px); text-align: center; background: var(--ink); color: #fff; font-size: 13.5px; font-weight: 500; line-height: 1.4; padding: 10px 16px; border-radius: 18px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 10; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
 .site-footer { margin-top: 40px; text-align: center; font-size: 12px; color: var(--mut); }
 .site-footer a { color: var(--mut); text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 1px; }
 .site-footer a:hover { color: var(--ink); }
 
-@media (max-width: 520px) {
-  .voce { padding: 16px 14px 14px; }
-  .testo { font-size: 12.5px; padding: 12px; }
-  .btn { width: 100%; }
+/* ————— Schermi più stretti ————— */
+@media (max-width: 1000px) {
+  .ingresso ul { grid-template-columns: repeat(2, 1fr); }
+  .js .catalogo { grid-template-columns: 210px 1fr; }
+  .js .dettaglio { grid-column: 2; position: static; }
+}
+@media (max-width: 900px) {
+  .voci { grid-template-columns: 1fr; }
+  .js .catalogo { grid-template-columns: 1fr; gap: 0; }
+  .js .cat-lista { display: none; }
+  .js .cat-select { display: block; width: 100%; font-weight: 600; font-size: 16px; min-height: 48px; border: 1px solid var(--line-forte); border-radius: var(--raggio); padding: 0 12px; background: #fff; color: var(--ink); }
+  .js .dettaglio { grid-column: auto; position: static; margin: 8px 0 10px; }
+  .js .dettaglio .voce { padding: 16px; }
+}
+@media (max-width: 640px) {
+  .giro { grid-template-columns: 1fr 1fr; }
+  .ingresso ul { grid-template-columns: 1fr; }
+  .scelta { min-height: 0; }
+  .identita > div { grid-template-columns: 1fr; gap: 2px; }
+  .voce { padding: 16px; }
+  .nome, .js .dettaglio .nome { font-size: 22px; }
+}
+@media (max-width: 560px), (pointer: coarse) {
+  .ancora { min-width: 44px; min-height: 44px; }
 }

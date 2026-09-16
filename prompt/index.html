@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <title>Prompt — per far lavorare e verificare un agente AI</title>
-  <meta name="description" content="Prompt pronti per un agente AI che lavora a un progetto: lavorare in autonomia, riprendere, consegnare, e verificare sicurezza, bug, usabilità, test." />
+  <title>Prompt — capire un progetto prima di agire</title>
+  <meta name="description" content="Prompt da incollare all'agente AI che lavora al tuo progetto: capisce, ti riferisce e ti chiede cosa fare. Sicurezza, funzionamento, interfaccia e altro." />
   <meta name="theme-color" content="#ffffff" />
   <link rel="canonical" href="https://simonecastellan.com/prompt/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Prompt per far lavorare e verificare un agente AI" />
-  <meta property="og:description" content="Da copiare e incollare all'agente che lavora al progetto: per farlo andare avanti da solo, e per fargli controllare il lavoro da undici punti di vista." />
+  <meta property="og:title" content="Prompt per capire un progetto prima di agire" />
+  <meta property="og:description" content="L'agente AI capisce, ti riferisce e ti chiede cosa vuoi fare. Routine e controlli per categoria, da copiare e incollare." />
   <meta property="og:image" content="https://simonecastellan.com/og-image.png?v=2" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -27,318 +27,533 @@
 <body>
   <main class="card">
     <header>
-      <p class="occhiello">Agenti · Progetti · Deleghe</p>
-      <h1 class="titolone">Prompt.<br><span class="eco">Da incollare all'agente che lavora.</span></h1>
-      <p class="apertura">Le ore di abbonamento che non usi non tornano. Qui ci sono i prompt
-        per <b>farlo lavorare da solo</b>, riprendere e consegnare, e quelli per
-        <b>fargli verificare il progetto</b> da un punto di vista alla volta.</p>
-      <nav class="indice" aria-label="Sezioni">
-        <a href="#lavorare">Far lavorare</a><a href="#verificare">Far verificare</a>
-      </nav>
+      <p class="occhiello">Agenti · Progetti · Routine</p>
+      <h1 class="titolone">Prompt.<br><span class="eco">Prima capire, poi decidere.</span></h1>
+      <p class="apertura">Istruzioni da incollare all'agente AI che lavora al tuo progetto. Quasi tutte
+        <b>non toccano niente</b>: l'agente capisce, ti riferisce e ti chiede cosa vuoi fare.</p>
+
+      <ol class="giro" aria-label="Come funzionano">
+        <li><b>1 · Capisce</b><span>Legge e prova, senza toccare niente</span></li>
+        <li><b>2 · Ti riferisce</b><span>Cosa ha trovato, con le prove</span></li>
+        <li><b>3 · Ti chiede</b><span>«Quali vuoi che faccia?»</span></li>
+        <li class="tu"><b>4 · Decidi tu</b><span>Rispondi con i numeri delle azioni</span></li>
+      </ol>
     </header>
 
-    <!-- Questi prompt stanno in piedi da soli: non si incollano con le regole
-         della verifica, che vietano di modificare — il contrario di quello che
-         si chiede qui. -->
-    <section class="sezione" id="lavorare" aria-labelledby="titLavorare">
-      <h2 class="sez" id="titLavorare">Far lavorare</h2>
-      <p class="sez-sotto">Per delegare un lavoro e ritrovarlo fatto, con le scelte dichiarate.</p>
+    <!-- L'ingresso: per chi non sa da quale categoria partire. Sono link veri alle
+         schede, quindi portano al posto giusto anche senza JavaScript. -->
+    <nav class="ingresso" aria-labelledby="titIngresso">
+      <h2 class="lbl" id="titIngresso">Cosa ti serve adesso?</h2>
+      <ul><li><a class="scelta" href="#stato"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><polyline points="20 4 20 9 15 9"/></svg><b>Sapere a che punto sono</b><span>Stato, blocchi, prossimo passo</span></a></li><li><a class="scelta" href="#salute"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><polyline points="20 4 20 9 15 9"/></svg><b>Un controllo periodico</b><span>Automatismi, errori, scadenze</span></a></li><li><a class="scelta" href="#cambiato"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><polyline points="20 4 20 9 15 9"/></svg><b>Ho appena cambiato qualcosa</b><span>Cosa potrebbe essersi rotto</span></a></li><li><a class="scelta" href="#pubblicare"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><polyline points="20 4 20 9 15 9"/></svg><b>Sto per pubblicare</b><span>Cosa blocca, cosa può aspettare</span></a></li><li><a class="scelta" href="#migliorare"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><polyline points="20 4 20 9 15 9"/></svg><b>Capire cosa migliorare</b><span>Dove un&#x27;ora rende di più</span></a></li><li><a class="scelta" href="#cat-funzionamento"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="8 12.5 11 15.5 16.5 9"/></svg><b>Controllare un aspetto</b><span>Sicurezza, interfaccia, prestazioni…</span></a></li><li><a class="scelta" href="#controprova"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="4" x2="12" y2="20"/><line x1="5" y1="7" x2="19" y2="7"/><path d="M5 7l-3 6a3 3 0 0 0 6 0z"/><path d="M19 7l-3 6a3 3 0 0 0 6 0z"/><line x1="8" y1="20" x2="16" y2="20"/></svg><b>Ho una lista di problemi</b><span>Capire quali sono veri</span></a></li><li><a class="scelta" href="#cat-agire"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="7 4 19 12 7 20 7 4"/></svg><b>Ho deciso cosa fare</b><span>I prompt che agiscono</span></a></li></ul>
+    </nav>
 
-      <div class="elenco">
+    <!-- Il catalogo. I prompt stanno nel markup, non li costruisce il JavaScript:
+         si leggono senza script, li leggono motori e assistenti, e la skill /prompt
+         li estrae da qui (article.voce[id], h3.nome, pre.testo, #patto, data-agisce).
+         Con JavaScript la stessa pagina diventa categorie · elenco · dettaglio. -->
+    <div class="catalogo" id="catalogo">
+      <nav class="cat-nav" id="catNav" aria-label="Categorie" hidden></nav>
+      <div class="cat-corpo" id="catCorpo">
+      <section class="categoria" id="cat-routine" data-g="routine" aria-labelledby="t-routine">
+        <h2 class="cat-titolo" id="t-routine"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><polyline points="20 4 20 9 15 9"/></svg><span>Routine</span></h2>
+        <p class="cat-sotto">Da usare spesso, su qualunque progetto.</p>
+        <div class="voci">
+        <article class="voce" id="stato">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#stato" aria-label="Copia il link a Punto della situazione">#</a></div>
+          <h3 class="nome" id="n-stato">Punto della situazione</h3>
+          <p class="quando">Ogni volta che riapri un progetto.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">A che punto è il progetto e cosa lo blocca</span></li><li><span class="k">Ti riferisce</span><span class="v">Stato, differenze fra documenti e realtà, blocchi</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Da quale passo vuoi partire?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Punto della situazione, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Punto della situazione</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Fammi il punto della situazione su questo progetto.
 
-      <article class="voce" id="autonomia">
-        <h3 class="nome">In autonomia</h3>
-        <p class="quando">Quando la direzione è chiara e vuoi ritrovare il lavoro fatto, non una lista di domande.</p>
-        <details><summary>Leggi il prompt</summary>
-<pre class="testo">Procedi in autonomia su questo lavoro. La direzione la conosci; dove non è scritta, scegli tu con criterio.
+1. Ricostruisci lo stato da documenti, note, TODO e, se il progetto usa git, da ultimi commit, rami e modifiche non salvate.
+2. Confronta ciò che i documenti dicono con ciò che il progetto fa davvero: dove non combaciano?
+3. Individua cosa blocca l&#x27;avanzamento: decisioni mie, accessi, dati mancanti, parti rotte.
+4. Proponi i passi successivi possibili, il più utile per primo, con il perché.</pre>
+          </details>
+        </article>
+        <article class="voce" id="salute"><span id="automatismi" class="alias"></span>
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#salute" aria-label="Copia il link a Controllo di salute">#</a></div>
+          <h3 class="nome" id="n-salute">Controllo di salute</h3>
+          <p class="quando">Una volta a settimana, o quando non tocchi il progetto da un po&#x27;.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Se ciò che deve funzionare da solo funziona ancora</span></li><li><span class="k">Ti riferisce</span><span class="v">Una tabella: voce, stato, prova, rischio</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali problemi vuoi che sistemi?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Controllo di salute, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Controllo di salute</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Fai un controllo di salute di questo progetto, come una revisione periodica.
+
+1. Automatismi: cosa dovrebbe partire da solo (operazioni pianificate, backup, integrazione continua, notifiche) e la prova dell&#x27;ultima esecuzione. Non avviarli a mano.
+2. Errori: log e segnalazioni recenti, errori nuovi o ripetuti.
+3. Scadenze: token, certificati, chiavi, domini, abbonamenti.
+4. Dipendenze: aggiornamenti di sicurezza disponibili, versioni non più supportate.
+5. Crescita: file, rami o dati aumentati senza motivo. Solo da elencare.
+
+Riporta tutto in una tabella: voce, stato, prova, rischio.</pre>
+          </details>
+        </article>
+        <article class="voce" id="cambiato">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#cambiato" aria-label="Copia il link a Dopo una modifica">#</a></div>
+          <h3 class="nome" id="n-cambiato">Dopo una modifica</h3>
+          <p class="quando">Dopo un lavoro, tuo o dell&#x27;agente, prima di fidarti che vada tutto.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Cosa è cambiato e cosa potrebbe essersi rotto</span></li><li><span class="k">Ti riferisce</span><span class="v">Le modifiche, le parti a rischio, l&#x27;esito delle prove</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Vuoi che sistemi o approfondisca qualcosa?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Dopo una modifica, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Dopo una modifica</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Guarda cosa è cambiato di recente in questo progetto e cosa potrebbe essersi rotto.
+
+1. Ricostruisci le modifiche recenti: se il progetto usa git, dall&#x27;ultimo punto stabile; altrimenti da date dei file e documenti.
+2. Per ogni modifica: cosa fa, quali parti tocca, cosa dipende da quelle parti.
+3. Controlla le parti a rischio con prove mirate che non scrivano dati reali.
+4. Segnala ciò che è cambiato senza essere documentato.</pre>
+          </details>
+        </article>
+        <article class="voce" id="pubblicare">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#pubblicare" aria-label="Copia il link a Prima di pubblicare">#</a></div>
+          <h3 class="nome" id="n-pubblicare">Prima di pubblicare</h3>
+          <p class="quando">Prima di mettere online qualcosa o consegnarlo a qualcuno.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Cosa manca per pubblicare senza sorprese</span></li><li><span class="k">Ti riferisce</span><span class="v">Bloccanti, cose da sistemare presto, cose che possono aspettare</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Vuoi che sistemi i bloccanti?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Prima di pubblicare, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Prima di pubblicare</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Dimmi se questo progetto è pronto per essere pubblicato o consegnato.
+
+1. Percorri il percorso principale da capo, come farebbe una persona nuova.
+2. Cerca i bloccanti: errori, dati di prova rimasti, segreti esposti, testi provvisori, link rotti, parti incomplete.
+3. Controlla che quello che il progetto promette sia vero.
+4. Dividi ciò che trovi in tre gruppi: blocca la pubblicazione, da sistemare presto, può aspettare.</pre>
+          </details>
+        </article>
+        <article class="voce" id="migliorare">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#migliorare" aria-label="Copia il link a Cosa conviene migliorare">#</a></div>
+          <h3 class="nome" id="n-migliorare">Cosa conviene migliorare</h3>
+          <p class="quando">Quando hai tempo e non sai su cosa investirlo.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Dove un&#x27;ora di lavoro rende di più</span></li><li><span class="k">Ti riferisce</span><span class="v">Fino a sette idee, con beneficio e costo</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quale vuoi che approfondisca o avvii?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Cosa conviene migliorare, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Cosa conviene migliorare</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Dimmi dove conviene investire tempo su questo progetto.
+
+1. Capisci a cosa serve e chi lo usa, dai documenti e dal progetto stesso.
+2. Cerca le occasioni: cose che fanno perdere tempo, parti fragili, attriti per chi lo usa, lavoro manuale ripetuto, idee rimaste a metà nei documenti.
+3. Per ognuna stima beneficio e costo, e dì quanto sei sicuro della stima.
+4. Ordinale per beneficio rispetto al costo. Al massimo sette.</pre>
+          </details>
+        </article>
+        </div>
+      </section>
+      <section class="categoria" id="cat-funzionamento" data-g="funzionamento" aria-labelledby="t-funzionamento">
+        <h2 class="cat-titolo" id="t-funzionamento"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="8 12.5 11 15.5 16.5 9"/></svg><span>Funzionamento</span></h2>
+        <p class="cat-sotto">Fa quello che deve?</p>
+        <div class="voci">
+        <article class="voce" id="bug">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#bug" aria-label="Copia il link a Caccia ai bug">#</a></div>
+          <h3 class="nome" id="n-bug">Caccia ai bug</h3>
+          <p class="quando">Quando «sembra funzionare» ma nessuno ha provato i casi strani.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Dove il progetto si rompe fuori dal percorso previsto</span></li><li><span class="k">Ti riferisce</span><span class="v">Bug riprodotti con i passi, sospetti separati</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali bug vuoi che corregga?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Caccia ai bug, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Caccia ai bug</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Cerca i bug di questo progetto fuori dal percorso previsto.
+
+1. Prova i casi limite pertinenti: valori vuoti o enormi, caratteri speciali, zero e negativi, doppio clic, rete assente, sessione scaduta.
+2. Cerca gli errori muti: eccezioni ingoiate, operazioni che falliscono senza avvisare.
+3. Cerca i dati che si guastano: riferimenti a elementi cancellati, salvataggi a metà, fusi orari, arrotondamenti.
+
+Per ogni bug riprodotto scrivi i passi esatti; quelli non riprodotti vanno in «sospetti», con il motivo.</pre>
+          </details>
+        </article>
+        <article class="voce" id="funziona">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#funziona" aria-label="Copia il link a Fa quello che promette">#</a></div>
+          <h3 class="nome" id="n-funziona">Fa quello che promette</h3>
+          <p class="quando">Quando vuoi sapere se le funzioni promesse ci sono tutte e danno risultati giusti.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Se ogni funzione promessa c&#x27;è e dà il risultato giusto</span></li><li><span class="k">Ti riferisce</span><span class="v">Funzioni complete, a metà, sbagliate, con la prova</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali vuoi che completi o corregga?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Fa quello che promette, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Fa quello che promette</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Controlla se questo progetto fa quello che promette.
+
+1. Ricava le promesse: cosa dicono documenti, pagine, descrizioni e interfaccia che il progetto fa.
+2. Per ogni promessa percorri il caso reale con dati realistici, senza toccare dati veri.
+3. Classifica: funziona, funziona in parte (cosa manca), non funziona, non verificabile (cosa servirebbe).
+4. Segnala anche le funzioni presenti ma non dichiarate da nessuna parte.</pre>
+          </details>
+        </article>
+        </div>
+      </section>
+      <section class="categoria" id="cat-affidabilita" data-g="affidabilita" aria-labelledby="t-affidabilita">
+        <h2 class="cat-titolo" id="t-affidabilita"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/></svg><span>Affidabilità</span></h2>
+        <p class="cat-sotto">Regge quando qualcosa va storto?</p>
+        <div class="voci">
+        <article class="voce" id="errori">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#errori" aria-label="Copia il link a Quando qualcosa va storto">#</a></div>
+          <h3 class="nome" id="n-errori">Quando qualcosa va storto</h3>
+          <p class="quando">Per sapere se un guasto ti fa perdere lavoro o dati.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Cosa succede se un servizio cade, la rete manca o un dato è sbagliato</span></li><li><span class="k">Ti riferisce</span><span class="v">Punti fragili, dati a rischio, stato dei backup</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali protezioni vuoi che aggiunga?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Quando qualcosa va storto, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Quando qualcosa va storto</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Verifica come si comporta questo progetto quando qualcosa va storto.
+
+1. Individua da cosa dipende: servizi esterni, rete, database, file, altri programmi.
+2. Per ciascuno: cosa succede se non risponde, risponde tardi o risponde male? L&#x27;errore si vede, si recupera, o si perdono dati? Prova solo in locale o ragionando sul codice.
+3. Backup e ripristino: esistono, sono recenti, qualcuno ha mai provato a ripristinarli?
+4. Operazioni interrotte a metà: lasciano dati incoerenti?</pre>
+          </details>
+        </article>
+        </div>
+      </section>
+      <section class="categoria" id="cat-sicurezza" data-g="sicurezza" aria-labelledby="t-sicurezza">
+        <h2 class="cat-titolo" id="t-sicurezza"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Sicurezza e dati</span></h2>
+        <p class="cat-sotto">Chi può vedere e toccare cosa?</p>
+        <div class="voci">
+        <article class="voce" id="sicurezza">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#sicurezza" aria-label="Copia il link a Sicurezza">#</a></div>
+          <h3 class="nome" id="n-sicurezza">Sicurezza</h3>
+          <p class="quando">Prima di aprire il progetto ad altri, o dopo aver aggiunto accessi, dati o pagamenti.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Chi può vedere o toccare ciò che non dovrebbe</span></li><li><span class="k">Ti riferisce</span><span class="v">Rischi per gravità, ognuno con lo scenario d&#x27;attacco</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali rischi vuoi che chiuda, e in che ordine?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Sicurezza, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Sicurezza</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Fai una verifica di sicurezza di questo progetto, con gli occhi di chi cerca di entrare dove non dovrebbe.
+
+1. Mappa: quali dati tiene, chi può leggerli e scriverli, da dove entra l&#x27;input.
+2. Accessi: ogni operazione controlla chi la chiede sul server? Cambiando un identificativo si vedono i dati di un altro?
+3. Segreti: chiavi, token e password nel codice, nella cronologia, nei log, nel codice inviato al browser. Indica dove, senza riportarne il valore.
+4. Input e configurazione: iniezioni, caricamento di file, reindirizzamenti aperti, HTTPS, intestazioni, dipendenze vulnerabili.
+
+Per ogni rischio descrivi lo scenario d&#x27;attacco in una frase. Non tentare attacchi contro servizi pubblicati o di terzi.</pre>
+          </details>
+        </article>
+        <article class="voce" id="privacy">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#privacy" aria-label="Copia il link a Dati personali">#</a></div>
+          <h3 class="nome" id="n-privacy">Dati personali</h3>
+          <p class="quando">Se raccogli nomi, email, posizioni, statistiche o altri dati di persone.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Quali dati personali raccoglie, dove finiscono e per quanto</span></li><li><span class="k">Ti riferisce</span><span class="v">La mappa dei dati e le differenze con ciò che dichiari</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali correzioni vuoi che faccia?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Dati personali, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Dati personali</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Verifica come questo progetto tratta i dati personali. Non è una consulenza legale: segnala dove servirebbe un parere.
+
+1. Mappa i dati personali: quali raccoglie, anche indirettamente (indirizzi IP, statistiche, cookie, log), da dove, dove li salva, a chi li passa.
+2. Confronta con ciò che dichiarano informativa e banner: voci mancanti, promesse non mantenute.
+3. Conservazione: per quanto restano i dati, e se c&#x27;è un modo per cancellarli.
+4. Servizi di terzi: quali ricevono dati, e se sono dichiarati.</pre>
+          </details>
+        </article>
+        </div>
+      </section>
+      <section class="categoria" id="cat-interfaccia" data-g="interfaccia" aria-labelledby="t-interfaccia">
+        <h2 class="cat-titolo" id="t-interfaccia"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2"/><line x1="11" y1="17.5" x2="13" y2="17.5"/></svg><span>Interfaccia e fruibilità</span></h2>
+        <p class="cat-sotto">Chiunque riesce a usarlo, ovunque?</p>
+        <div class="voci">
+        <article class="voce" id="usabilita">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#usabilita" aria-label="Copia il link a Usabilità">#</a></div>
+          <h3 class="nome" id="n-usabilita">Usabilità</h3>
+          <p class="quando">Quando chi lo usa per la prima volta si perde.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Dove una persona nuova si blocca</span></li><li><span class="k">Ti riferisce</span><span class="v">Attriti, con il punto esatto e cosa si vede</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali attriti vuoi che risolva?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Usabilità, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Usabilità</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Usa questo progetto come chi lo vede per la prima volta e ha fretta. Se non puoi avviarlo, dillo e lavora su schermate e codice.
+
+1. Porta a termine i tre compiti principali e annota ogni punto in cui ti fermi a chiederti cosa fare.
+2. Ripeti su schermo da telefono e da computer.
+3. Guarda messaggi ed errori: dicono cosa è successo e cosa fare?
+4. Cerca trappole: azioni irreversibili senza conferma, lavoro perso, parole tecniche, passi di troppo.</pre>
+          </details>
+        </article>
+        <article class="voce" id="accessibilita">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#accessibilita" aria-label="Copia il link a Accessibilità">#</a></div>
+          <h3 class="nome" id="n-accessibilita">Accessibilità</h3>
+          <p class="quando">Quando vuoi che lo usi anche chi vede poco o non usa il mouse.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Chi resta escluso: vista, tastiera, tocco</span></li><li><span class="k">Ti riferisce</span><span class="v">Problemi con i valori misurati, requisiti separati dai consigli</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali vuoi che sistemi?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Accessibilità, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Accessibilità</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Verifica l&#x27;accessibilità dell&#x27;interfaccia. Tieni separati requisiti WCAG 2.2 AA, buone pratiche e suggerimenti.
+
+1. Contrasto: 4,5:1 per il testo normale, 3:1 per testo grande e componenti. Riporta i valori misurati.
+2. Tastiera: tutto si usa senza mouse, con il fuoco visibile.
+3. Nomi e annunci: testi alternativi, etichette, messaggi dinamici annunciati.
+4. Bersagli: almeno 24×24 px (requisito), 44×44 px per il tocco (buona pratica).
+
+Dove servirebbe una prova con lettore di schermo che non puoi fare, dillo.</pre>
+          </details>
+        </article>
+        <article class="voce" id="dispositivi">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#dispositivi" aria-label="Copia il link a Telefono e browser">#</a></div>
+          <h3 class="nome" id="n-dispositivi">Telefono e browser</h3>
+          <p class="quando">Quando lo usano su schermi e browser diversi dal tuo.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Se si legge e funziona su telefoni, tablet e browser diversi</span></li><li><span class="k">Ti riferisce</span><span class="v">Cosa si rompe, dove e su quale schermo</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali problemi vuoi che sistemi?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Telefono e browser, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Telefono e browser</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Verifica come si comporta questo progetto su schermi e browser diversi.
+
+1. Prova le pagine principali a 320, 390, 768 e 1280 px di larghezza: contenuti tagliati, scorrimento orizzontale, testi illeggibili, comandi troppo piccoli.
+2. Telefono in verticale e in orizzontale, con la tastiera aperta sui campi.
+3. Browser: se puoi, confronta Safari, Firefox e Chrome; se ne hai uno solo, dillo e segnala le parti del codice a rischio di compatibilità.
+4. Testo ingrandito dal sistema e modalità scura, se il progetto le prevede.</pre>
+          </details>
+        </article>
+        </div>
+      </section>
+      <section class="categoria" id="cat-prestazioni" data-g="prestazioni" aria-labelledby="t-prestazioni">
+        <h2 class="cat-titolo" id="t-prestazioni"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 3 5 14 11.5 14 10.5 21 19 10 12.5 10 13 3"/></svg><span>Prestazioni e costi</span></h2>
+        <p class="cat-sotto">Quanto è veloce, quanto consuma?</p>
+        <div class="voci">
+        <article class="voce" id="prestazioni">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#prestazioni" aria-label="Copia il link a Prestazioni">#</a></div>
+          <h3 class="nome" id="n-prestazioni">Prestazioni</h3>
+          <p class="quando">Quando qualcosa è lento e non sai cosa.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Cosa è lento, e quanto pesa per chi lo usa</span></li><li><span class="k">Ti riferisce</span><span class="v">Misure e interventi ordinati per convenienza</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali interventi vuoi che faccia?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Prestazioni, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Prestazioni</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Misura le prestazioni di questo progetto: misure, non impressioni.
+
+1. Prima apertura: peso, richieste, tempo prima che si possa usare.
+2. Operazioni principali con pochi e con molti dati: dove il tempo cresce più che in proporzione?
+3. Server e database: interrogazioni ripetute, dati caricati per intero quando ne serve una parte.
+
+Per ogni misura indica condizioni e attendibilità; per ogni problema l&#x27;effetto per chi usa il progetto, il guadagno stimato e il costo.</pre>
+          </details>
+        </article>
+        <article class="voce" id="costi">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#costi" aria-label="Copia il link a Consumi e costi">#</a></div>
+          <h3 class="nome" id="n-costi">Consumi e costi</h3>
+          <p class="quando">Quando paghi servizi o hosting e non sai quanto pesano.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Cosa consuma risorse e cosa costa</span></li><li><span class="k">Ti riferisce</span><span class="v">Voci di costo, limiti e sprechi, con i numeri disponibili</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali risparmi vuoi che applichi?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Consumi e costi, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Consumi e costi</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Capisci quanto consuma e quanto costa questo progetto.
+
+1. Elenca i servizi a pagamento o con limiti gratuiti: hosting, database, API, domini, strumenti.
+2. Per ognuno, il consumo attuale rispetto ai limiti, se riesci a vederlo; altrimenti dichiara che non è verificato.
+3. Cerca gli sprechi: chiamate ripetute, dati conservati senza motivo, risorse attive e inutilizzate.
+4. Stima cosa succede se l&#x27;uso raddoppia.</pre>
+          </details>
+        </article>
+        </div>
+      </section>
+      <section class="categoria" id="cat-manutenzione" data-g="manutenzione" aria-labelledby="t-manutenzione">
+        <h2 class="cat-titolo" id="t-manutenzione"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 6.5a4 4 0 0 0 5 5L12 19a2.1 2.1 0 0 1-3-3l7.5-7.5a4 4 0 0 0-2-2z"/></svg><span>Manutenzione</span></h2>
+        <p class="cat-sotto">Si può modificare senza paura?</p>
+        <div class="voci">
+        <article class="voce" id="test">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#test" aria-label="Copia il link a Test che valgono">#</a></div>
+          <h3 class="nome" id="n-test">Test che valgono</h3>
+          <p class="quando">Quando i test sono verdi ma i bug arrivano lo stesso.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Se i test fermerebbero davvero un guasto</span></li><li><span class="k">Ti riferisce</span><span class="v">Test deboli e funzioni senza protezione</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali test vuoi che aggiunga o rafforzi?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Test che valgono, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Test che valgono</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Valuta se i test di questo progetto proteggono davvero.
+
+1. Lanciali e riporta l&#x27;esito con il codice di uscita. Segnala quelli saltati o disattivati.
+2. Controlla che provino il progetto vero, con dati realistici.
+3. Per i cinque test più importanti descrivi un guasto plausibile che non li farebbe fallire. Se vuoi dimostrarlo, fallo solo in una copia isolata e poi eliminala; non toccare le modifiche non salvate.
+4. Elenca le funzioni importanti senza test, in ordine di danno.</pre>
+          </details>
+        </article>
+        <article class="voce" id="codice">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#codice" aria-label="Copia il link a Codice da riordinare">#</a></div>
+          <h3 class="nome" id="n-codice">Codice da riordinare</h3>
+          <p class="quando">Quando ogni modifica richiede più tempo del previsto.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Quali parti rendono difficile modificare il progetto</span></li><li><span class="k">Ti riferisce</span><span class="v">Punti critici, con il costo di lasciarli così</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quale riordino vuoi che faccia per primo?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Codice da riordinare, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Codice da riordinare</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Capisci quali parti di questo progetto rendono difficili le modifiche.
+
+1. Trova i punti critici: file o funzioni molto lunghi, logica duplicata, nomi che ingannano, codice morto, parti senza test.
+2. Dipendenze: librerie abbandonate, versioni vecchie, pacchetti usati per poco.
+3. Per ogni punto stima quanto costa lasciarlo così (tempo, rischio di errori) e quanto costa sistemarlo.
+4. Niente riscritture totali: proponi interventi piccoli, in ordine.</pre>
+          </details>
+        </article>
+        <article class="voce" id="documentazione">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#documentazione" aria-label="Copia il link a Si riparte senza memoria?">#</a></div>
+          <h3 class="nome" id="n-documentazione">Si riparte senza memoria?</h3>
+          <p class="quando">Quando qualcuno, o un agente nuovo, deve riprendere il progetto.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Se un estraneo riesce a capire, avviare e modificare il progetto</span></li><li><span class="k">Ti riferisce</span><span class="v">Cosa manca o è superato nei documenti</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali documenti vuoi che scriva o aggiorni?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Si riparte senza memoria?, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Si riparte senza memoria?</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Verifica se questo progetto si può riprendere senza la memoria di chi l&#x27;ha fatto.
+
+1. Fingi di arrivare adesso: dai soli documenti capisci a cosa serve, come si avvia, come si verifica, come si pubblica?
+2. Prova i comandi scritti nei documenti che non modificano dati: funzionano ancora?
+3. Segnala decisioni importanti non scritte, istruzioni superate, passaggi che stanno solo nella testa di qualcuno.
+4. Indica il minimo da scrivere perché la prossima persona parta in un&#x27;ora.</pre>
+          </details>
+        </article>
+        </div>
+      </section>
+      <section class="categoria" id="cat-contenuti" data-g="contenuti" aria-labelledby="t-contenuti">
+        <h2 class="cat-titolo" id="t-contenuti"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="7" x2="19" y2="7"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="17" x2="13" y2="17"/></svg><span>Contenuti e visibilità</span></h2>
+        <p class="cat-sotto">Dice il vero, e lo trovano?</p>
+        <div class="voci">
+        <article class="voce" id="testi">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#testi" aria-label="Copia il link a Testi e numeri">#</a></div>
+          <h3 class="nome" id="n-testi">Testi e numeri</h3>
+          <p class="quando">Quando ciò che il progetto afferma deve essere vero.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Se numeri, promesse e dati tecnici sono veri</span></li><li><span class="k">Ti riferisce</span><span class="v">Affermazioni con fonte, false o non verificate</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali testi vuoi che corregga?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Testi e numeri, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Testi e numeri</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Controlla che ciò che il progetto afferma sia vero e aggiornato.
+
+1. Elenca le affermazioni verificabili: numeri, promesse, limiti, dati tecnici, prezzi, date.
+2. Per ognuna cerca la fonte: il codice, una fonte primaria, un calcolo.
+3. Segnala le affermazioni false, superate, contraddittorie o senza fonte.
+
+Non inventare fonti: se non trovi conferma, scrivi «non verificato».</pre>
+          </details>
+        </article>
+        <article class="voce" id="visibilita">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#visibilita" aria-label="Copia il link a Visibilità">#</a></div>
+          <h3 class="nome" id="n-visibilita">Visibilità</h3>
+          <p class="quando">Quando un sito c&#x27;è ma non lo trova nessuno.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Quanto il sito è leggibile da Google e dagli assistenti AI</span></li><li><span class="k">Ti riferisce</span><span class="v">Problemi tecnici e suggerimenti, separati</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali interventi vuoi che faccia?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Visibilità, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Visibilità</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Verifica quanto questo sito è leggibile da motori di ricerca e assistenti AI. Nessun intervento garantisce indicizzazione: separa controlli tecnici e suggerimenti.
+
+1. Titoli, descrizioni, canonical, robots e sitemap coerenti.
+2. Pagine a cui non porta nessun link interno.
+3. Dati strutturati validi; contenuto leggibile senza JavaScript.
+4. Se hai accesso a Search Console, confronta con ciò che risulta indicizzato; altrimenti dichiaralo.</pre>
+          </details>
+        </article>
+        </div>
+      </section>
+      <section class="categoria" id="cat-decidere" data-g="decidere" aria-labelledby="t-decidere">
+        <h2 class="cat-titolo" id="t-decidere"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="4" x2="12" y2="20"/><line x1="5" y1="7" x2="19" y2="7"/><path d="M5 7l-3 6a3 3 0 0 0 6 0z"/><path d="M19 7l-3 6a3 3 0 0 0 6 0z"/><line x1="8" y1="20" x2="16" y2="20"/></svg><span>Prima di agire</span></h2>
+        <p class="cat-sotto">Per decidere bene cosa fare.</p>
+        <div class="voci">
+        <article class="voce" id="controprova">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#controprova" aria-label="Copia il link a Controprova">#</a></div>
+          <h3 class="nome" id="n-controprova">Controprova</h3>
+          <p class="quando">Dopo una verifica, prima di correggere.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Quali problemi segnalati sono veri</span></li><li><span class="k">Ti riferisce</span><span class="v">Un verdetto per ciascuno, con la prova</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali correzioni vuoi che faccia?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Controprova, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Controprova</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Qui sotto, o nella conversazione precedente, c&#x27;è un elenco di problemi. Valutali in modo neutrale, uno per uno.
+
+1. Riproduci ogni problema da capo, senza basarti sulla descrizione.
+2. Cerca anche le ragioni per cui potrebbe non esserlo.
+3. Dai un verdetto: CONFERMATO (dimostrato), PLAUSIBILE (credibile, spieghi perché), NON VERIFICABILE (cosa servirebbe), SMENTITO (solo con una prova: non riprodurlo non basta).
+4. Per i confermati proponi la correzione più piccola e un test che fallirebbe senza.</pre>
+          </details>
+        </article>
+        <article class="voce" id="piano">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#piano" aria-label="Copia il link a Come lo faresti">#</a></div>
+          <h3 class="nome" id="n-piano">Come lo faresti</h3>
+          <p class="quando">Prima di un lavoro grosso o delicato.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Come affrontare il lavoro senza sorprese</span></li><li><span class="k">Ti riferisce</span><span class="v">Domande, passi, rischi, cosa lasciare fuori</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Approvi il piano o cosa cambio?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Come lo faresti, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Come lo faresti</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Prima di toccare qualcosa, dimmi come faresti questo lavoro.
+
+1. Esplora ciò che serve: materiali coinvolti, documenti di stato, come il progetto risolve già problemi simili.
+2. Fammi le domande che cambiano il lavoro, al massimo cinque, ognuna con la risposta che daresti tu.
+3. Scrivi il piano in passi piccoli: cosa cambia, dove, come verificherai.
+4. Indica rischi, cosa è difficile da annullare, cosa richiede un mio intervento, cosa lasciare fuori.</pre>
+          </details>
+        </article>
+        </div>
+      </section>
+      <section class="categoria" id="cat-agire" data-g="agire" aria-labelledby="t-agire">
+        <h2 class="cat-titolo" id="t-agire"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="7 4 19 12 7 20 7 4"/></svg><span>Quando dici sì</span></h2>
+        <p class="cat-sotto">Questi agiscono: usali dopo aver scelto.</p>
+        <div class="voci">
+        <article class="voce" id="autonomia" data-agisce>
+          <div class="testa"><span class="badge agisce">Agisce sul progetto</span><a class="ancora" href="#autonomia" aria-label="Copia il link a Procedi">#</a></div>
+          <h3 class="nome" id="n-autonomia">Procedi</h3>
+          <p class="quando">Dopo aver scelto cosa fare.</p>
+          <ol class="passi"><li>Ti chiede subito accessi e decisioni che gli servono</li><li>Esegue ciò che hai scelto, annotando le sue scelte</li><li>Ti consegna un resoconto da rivedere</li></ol><dl class="identita"><div><dt>Modifica il progetto</dt><dd>Sì, i file del progetto</dd></div><div><dt>Si ferma</dt><dd>Prima di pubblicare, cancellare, spendere o toccare dati reali</dd></div><div><dt>Ti consegna</dt><dd>Resoconto: fatto, scelte, prove, cosa resta</dd></div></dl>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Procedi">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Procedi</span></summary>
+<pre class="testo">Procedi con le azioni che ho scelto; se non ho indicato numeri, con il lavoro di cui abbiamo parlato.
 
 PRIMA DI PARTIRE
-1. Dimmi SUBITO, in un unico messaggio, tutto quello che ti serve da me e che non puoi ottenere da solo: permessi, accessi, login, pagine da aprire in Chrome, file, dati, decisioni che spettano solo a me. Poi comincia da ciò che non dipende da quelle risposte, senza aspettarmi.
-2. Se non ti serve niente, non chiedere niente: parti.
+- Dimmi subito, in un solo messaggio, cosa ti serve da me: accessi, login, pagine da aprire nel browser, dati, decisioni. Poi comincia da ciò che non ne dipende.
+
+COSA PUOI FARE E COSA NO
+- Già autorizzato: modificare i file del progetto per questo lavoro, test e prove in locale, commit su un ramo di lavoro se il progetto usa git.
+- Da decidere con me: unire alla versione principale, pubblicare, toccare produzione o dati reali, cancellare, mandare messaggi, spendere.
+- Ciò che ho già autorizzato resta valido: non chiedermelo di nuovo.
 
 MENTRE LAVORI
-- Davanti a una scelta, decidi tu: preferisci la soluzione più semplice che risolve il problema, reversibile, coerente con quello che il progetto fa già. Annota la scelta e il perché in una riga, e vai avanti.
-- Non fermarti a chiedere conferma per cose che si possono cambiare dopo. Fermati solo prima di ciò che è irreversibile o esce verso l'esterno: cancellare dati, pubblicare, mandare messaggi, spendere soldi, toccare la produzione.
-- Se qualcosa ti blocca, prova un'altra strada. Se non va neanche quella, lascia quel pezzo documentato e prosegui con il resto.
-- Verifica mentre lavori: test, prove nel browser, misure. Non dare per fatto quello che non hai visto funzionare.
-- Resta nel perimetro: se trovi altro da sistemare, annotalo per il resoconto invece di allargare il lavoro.
+- Davanti a una scelta, preferisci la soluzione più semplice e reversibile; annotala in una riga.
+- Verifica mentre lavori. Resta nel perimetro delle azioni scelte.
 
-A LAVORO FINITO
-Il risultato lo valutiamo e lo modifichiamo insieme. Consegnami un resoconto breve:
-- cosa hai fatto e dove sta (file, ramo, link, schermate);
-- le scelte che hai preso da solo, con il perché: sono le prime che voglio rivedere;
-- come l'hai verificato, e cosa non hai potuto verificare;
-- cosa resta aperto e cosa devo decidere io.</pre>
-        </details>
-        <button type="button" class="btn copia">Copia il prompt</button>
-      </article>
-
-      <article class="voce" id="piano">
-        <h3 class="nome">Prima un piano</h3>
-        <p class="quando">Per un lavoro grosso o delicato, dove sbagliare direzione costa ore.</p>
-        <details><summary>Leggi il prompt</summary>
-<pre class="testo">Prima di scrivere codice voglio un piano che possa approvare in due minuti.
-
-1. Esplora quello che serve: il codice coinvolto, i documenti di stato, come il progetto risolve già problemi simili. Non modificare niente in questa fase.
-2. Fammi tutte le domande in un solo messaggio, al massimo cinque, solo quelle la cui risposta cambia davvero il lavoro. Per ognuna scrivi la risposta che daresti tu: se sono d'accordo mi basta dire «ok».
-3. Scrivi il piano in passi piccoli. Per ogni passo: cosa cambia, in quali file, e come verificherai che funziona.
-4. Indica i rischi: cosa può rompersi, cosa non si torna indietro facilmente, cosa richiede un mio intervento (accessi, pagine aperte in Chrome, dati).
-5. Proponi cosa lasciare fuori da questo giro.
-Poi fermati e aspetta il mio via. Con il via, lavora in autonomia fino in fondo e consegnami un resoconto con le scelte fatte strada facendo.</pre>
-        </details>
-        <button type="button" class="btn copia">Copia il prompt</button>
-      </article>
-
-      <article class="voce" id="lunga">
-        <h3 class="nome">Sessione lunga</h3>
-        <p class="quando">Quando lo lasci lavorare per ore senza di te: la notte, una trasferta, una giornata piena.</p>
-        <details><summary>Leggi il prompt</summary>
-<pre class="testo">Lavorerai a lungo senza di me. Non potrò risponderti per ore: organizzati perché al mio ritorno trovi lavoro utile e facile da valutare.
-
-1. Adesso, prima che me ne vada: dimmi in un messaggio tutto ciò che potrebbe bloccarti (permessi, accessi, pagine da aprire in Chrome, decisioni). Poi dividi il lavoro in tappe, ognuna con un risultato verificabile.
-2. Lavora su un ramo o una copia separata, mai direttamente sulla versione principale. Salva a ogni tappa conclusa (un commit con un messaggio chiaro), così ogni tappa si può valutare o scartare da sola.
-3. Tieni un diario in un file: per ogni tappa cosa hai fatto, le scelte prese e perché, come l'hai verificato. Scrivilo man mano, non alla fine.
-4. Quando serve una mia decisione, non fermarti: scegli l'opzione più prudente e reversibile, annotala nel diario come «da confermare» e prosegui.
-5. Non fare nulla di irreversibile o verso l'esterno: niente cancellazioni, pubblicazioni, invii, pagamenti, modifiche alla produzione. Preparali e lasciali pronti per me.
-6. Se una tappa si incastra, dopo due tentativi seri documentala e passa alla successiva.
-Al mio ritorno voglio in cima al diario: cosa è pronto, cosa è da confermare, cosa si è bloccato e perché.</pre>
-        </details>
-        <button type="button" class="btn copia">Copia il prompt</button>
-      </article>
-
-      <article class="voce" id="riprendi">
-        <h3 class="nome">Riprendi</h3>
-        <p class="quando">Dopo un'interruzione, una sessione nuova, o quando l'agente ha perso il filo.</p>
-        <details><summary>Leggi il prompt</summary>
+ALLA FINE
+Un resoconto breve: cosa hai fatto e dove sta, le scelte prese, come l&#x27;hai verificato, cosa resta da decidere.</pre>
+          </details>
+        </article>
+        <article class="voce" id="riprendi" data-agisce>
+          <div class="testa"><span class="badge agisce">Agisce sul progetto</span><a class="ancora" href="#riprendi" aria-label="Copia il link a Riprendi">#</a></div>
+          <h3 class="nome" id="n-riprendi">Riprendi</h3>
+          <p class="quando">Dopo un&#x27;interruzione o in una conversazione nuova.</p>
+          <ol class="passi"><li>Ricostruisce lo stato da documenti e modifiche</li><li>Controlla che il già fatto funzioni ancora</li><li>Riparte, o ti avvisa se qualcosa non torna</li></ol><dl class="identita"><div><dt>Modifica il progetto</dt><dd>Sì, dopo il controllo</dd></div><div><dt>Si ferma</dt><dd>Se lo stato non torna</dd></div><div><dt>Ti consegna</dt><dd>Riassunto dello stato, poi il lavoro che prosegue</dd></div></dl>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Riprendi">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Riprendi</span></summary>
 <pre class="testo">Riprendiamo un lavoro interrotto. Non fidarti della memoria della conversazione: ricostruisci lo stato dai fatti.
 
-1. Leggi i documenti di stato, il diario se c'è, gli ultimi commit, i rami aperti e le modifiche non salvate.
-2. Dimmi in poche righe: qual era l'obiettivo, cosa risulta fatto e verificato, cosa è a metà, cosa non torna (per esempio lavoro dato per fatto che nel codice non c'è).
-3. Controlla che quello che risulta fatto funzioni ancora: lancia i test o prova le parti principali.
-4. Se tutto è coerente, riparti da dove ci si era fermati e procedi in autonomia: scelte ragionate e annotate, stop solo prima di ciò che è irreversibile, resoconto finale. Se qualcosa non torna, dimmelo prima di andare avanti.
-Se ti servono permessi o pagine aperte in Chrome, chiedimeli subito, tutti insieme.</pre>
-        </details>
-        <button type="button" class="btn copia">Copia il prompt</button>
-      </article>
+1. Leggi documenti di stato, diario e, se c&#x27;è git, ultimi commit e modifiche non salvate. Le modifiche non salvate potrebbero essere mie: non toccarle.
+2. Riassumi: obiettivo, cosa è fatto e verificato, cosa è a metà, cosa non torna.
+3. Controlla con prove mirate le parti da cui dipende il prossimo passo.
+4. Se tutto torna, riparti con le autorizzazioni già date (modifiche, prove e commit su un ramo sì; unire, pubblicare, dati reali no). Se qualcosa non torna, chiedimi prima di proseguire.</pre>
+          </details>
+        </article>
+        <article class="voce" id="lunga" data-agisce>
+          <div class="testa"><span class="badge agisce">Agisce sul progetto</span><a class="ancora" href="#lunga" aria-label="Copia il link a Sessione lunga">#</a></div>
+          <h3 class="nome" id="n-lunga">Sessione lunga</h3>
+          <p class="quando">Quando il lavoro è lungo e per un po&#x27; non potrai rispondere.</p>
+          <ol class="passi"><li>Divide il lavoro in tappe verificabili</li><li>A ogni tappa salva lo stato in un diario</li><li>Davanti a un dubbio sceglie la strada prudente e la segna</li></ol><dl class="identita"><div><dt>Modifica il progetto</dt><dd>Sì, su un ramo di lavoro</dd></div><div><dt>Si ferma</dt><dd>Quando tutto dipende da te o serve un&#x27;azione non autorizzata</dd></div><div><dt>Ti consegna</dt><dd>Diario: pronto, da confermare, bloccato</dd></div></dl>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Sessione lunga">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Sessione lunga</span></summary>
+<pre class="testo">Questo lavoro è lungo e per un po&#x27; non potrò risponderti. Organizzalo perché, quando torno, trovi uno stato chiaro.
 
-      <article class="voce" id="consegna">
-        <h3 class="nome">Chiudi e consegna</h3>
-        <p class="quando">Quando il lavoro sembra finito: perché lo sia davvero, e perché la prossima volta si riparta in fretta.</p>
-        <details><summary>Leggi il prompt</summary>
+1. Prima che me ne vada, dimmi tutto ciò che potrebbe bloccarti. Se il tuo ambiente può interrompersi, dimmelo: questo prompt non ti tiene attivo.
+2. Dividi il lavoro in tappe con un risultato verificabile.
+3. A ogni tappa verificata aggiorna un diario nel progetto (fatto, scelte, prove, prossima tappa) e, se c&#x27;è git, fai un commit sul ramo di lavoro.
+4. Già autorizzato: modifiche, prove, commit sul ramo. Senza di me no: unire, pubblicare, dati reali, messaggi, spese.
+5. Davanti a un dubbio scegli la strada prudente e segna «da confermare». Fermati se tutto dipende da me o serve un&#x27;azione non autorizzata.
+
+In cima al diario: pronto, da confermare, bloccato, da dove ripartire.</pre>
+          </details>
+        </article>
+        <article class="voce" id="consegna" data-agisce>
+          <div class="testa"><span class="badge agisce">Agisce sul progetto</span><a class="ancora" href="#consegna" aria-label="Copia il link a Chiudi e consegna">#</a></div>
+          <h3 class="nome" id="n-consegna">Chiudi e consegna</h3>
+          <p class="quando">Quando il lavoro sembra finito.</p>
+          <ol class="passi"><li>Riverifica ciò che è cambiato, in proporzione al rischio</li><li>Pulisce solo il proprio materiale e salva</li><li>Aggiorna i documenti di stato</li></ol><dl class="identita"><div><dt>Modifica il progetto</dt><dd>Sì, pulizia e salvataggio</dd></div><div><dt>Si ferma</dt><dd>Prima di unire o pubblicare</dd></div><div><dt>Ti consegna</dt><dd>Resoconto finale con il prossimo passo</dd></div></dl>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Chiudi e consegna">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Chiudi e consegna</span></summary>
 <pre class="testo">Portiamo il lavoro a una chiusura pulita.
 
-1. Verifica tutto da capo, come se lo vedessi per la prima volta: test completi (riporta il codice di uscita, non solo l'ultima riga), prova delle funzioni toccate nel progetto vero, su telefono e computer se c'è un'interfaccia.
-2. Ripulisci: file temporanei, prove, codice commentato, messaggi di debug, cose lasciate a metà.
-3. Salva il lavoro con commit chiari. Se c'è un repository remoto, spingi il ramo, ma non unire alla versione principale e non pubblicare senza il mio via.
-4. Aggiorna i documenti di stato: cosa è cambiato, le decisioni prese e perché, cosa resta da fare. Se hai imparato qualcosa che eviterebbe un errore la prossima volta, scrivilo dove verrà letto.
-5. Consegnami il resoconto: cosa è pronto e dove sta, come l'hai verificato, cosa non hai potuto verificare, le scelte da rivedere insieme, e il prossimo passo con il comando esatto se serve.</pre>
-        </details>
-        <button type="button" class="btn copia">Copia il prompt</button>
-      </article>
-
+1. Verifica in proporzione a ciò che è cambiato: le parti toccate, quelle che ne dipendono e il percorso principale. Riporta gli esiti come sono.
+2. Ripulisci solo ciò che hai creato per questo lavoro.
+3. Se c&#x27;è git, salva con commit chiari sul ramo di lavoro. Unire e pubblicare restano decisioni mie, salvo autorizzazione già data.
+4. Aggiorna i documenti di stato.
+5. Consegnami il resoconto: cosa è pronto e dove, come l&#x27;hai verificato, cosa non hai potuto verificare, il prossimo passo.</pre>
+          </details>
+        </article>
+        </div>
+      </section>
       </div>
-    </section>
-
-    <section class="sezione" id="verificare" aria-labelledby="titVerificare">
-      <h2 class="sez" id="titVerificare">Far verificare</h2>
-      <p class="sez-sotto">Un punto di vista alla volta. L'agente legge, prova e riferisce con le prove: non modifica niente finché non scegli tu.</p>
-
-    <!-- Il patto sta scritto UNA volta, qui, e si incolla in coda a ogni prompt.
-         È la parte che conta di più: senza «sola lettura» l'agente corregge mentre
-         cerca, e senza «la prova per ogni problema» torna con dieci allarmi di cui
-         tre falsi, che poi tocca smentire uno per uno. -->
-    <div class="patto">
-      <p class="lbl">Le regole, in coda a ogni prompt di verifica</p>
-      <pre class="testo" id="patto">REGOLE DI QUESTA VERIFICA
-- Sola lettura. Non modificare file, non fare commit, non scrivere su database, non pubblicare, non mandare messaggi, non lanciare nulla che scriva file di stato o faccia partire notifiche. Puoi leggere codice, log e impostazioni di sistema, lanciare i test, avviare il progetto in locale e fare poche richieste in sola lettura ai servizi esterni.
-- Perimetro: il progetto e ciò da cui dipende per funzionare (servizi, macchina, backup). Quello che trovi fuori perimetro elencalo in fondo, senza approfondire.
-- Prima di cominciare leggi i documenti di stato del progetto (README, CLAUDE.md, file di stato o di decisioni) e riassumi in due righe cosa hai capito.
-- Per ogni problema scrivi: dove (file e riga, oppure la schermata), come si riproduce, cosa succede e cosa dovrebbe succedere, gravità (alta / media / bassa).
-- Distingui cosa hai PROVATO da cosa hai DEDOTTO leggendo il codice. Se non l'hai provato, dillo. Meglio tre problemi veri che dieci sospetti.
-- Non riportare come problema una scelta documentata come voluta: cita il documento e passa oltre. Un problema già noto ma mai risolto invece va riportato, dicendo da quando è noto.
-- Alla fine: una tabella ordinata per gravità e i tre interventi che faresti per primi, con il perché. Non correggere niente: aspetta che scelga io.</pre>
     </div>
 
-    <!-- I prompt stanno nel markup, non li costruisce il JavaScript: si leggono
-         anche senza script, e li legge chi arriva da un motore o da un assistente. -->
-    <div class="elenco" data-patto>
-
-      <article class="voce" id="stato">
-        <h3 class="nome">Dove siamo</h3>
-        <p class="quando">Quando riprendi un progetto fermo da giorni, o non sai da dove ripartire.</p>
-        <details><summary>Leggi il prompt</summary>
-<pre class="testo">Voglio sapere a che punto è questo progetto e qual è il passo successivo più utile.
-
-1. Ricostruisci lo stato: leggi i documenti di stato, gli ultimi commit, i rami aperti, le modifiche non salvate, i TODO nel codice.
-2. Confronta quello che i documenti dicono con quello che il codice fa davvero. Segnala dove non combaciano (funzioni date per fatte e non finite, decisioni scritte e poi non applicate, documenti rimasti indietro).
-3. Elenca cosa blocca l'avanzamento: cose che aspettano una mia decisione, un accesso, un dato che manca, un pezzo rotto.
-4. Proponi il prossimo passo: uno solo, il più utile, spiegando perché quello e non un altro. Poi al massimo altri due, in ordine.</pre>
-        </details>
-        <button type="button" class="btn copia">Copia il prompt</button>
-      </article>
-
-      <article class="voce" id="sicurezza">
-        <h3 class="nome">Sicurezza</h3>
-        <p class="quando">Prima di aprire il progetto ad altri, o dopo aver aggiunto accessi, dati o pagamenti.</p>
-        <details><summary>Leggi il prompt</summary>
-<pre class="testo">Fai una verifica di sicurezza di questo progetto, con gli occhi di chi vuole entrare dove non dovrebbe.
-
-1. Disegna la mappa: quali dati tiene, chi può leggerli, chi può scriverli, da dove entra l'input (form, URL, file caricati, API, webhook).
-2. Controlla gli accessi: ogni operazione verifica CHI la chiede, lato server e non solo nell'interfaccia? Un utente può vedere o toccare i dati di un altro cambiando un id? Le regole del database (per esempio RLS) coprono tutte le tabelle?
-3. Cerca segreti: chiavi, token e password nel codice, nella cronologia git, nei file pubblicati, nei log, nel codice che arriva al browser.
-4. Controlla l'input: iniezioni (SQL, HTML, comandi), caricamenti di file, redirect aperti, contenuti incorporabili da altri siti.
-5. Guarda la configurazione: HTTPS, intestazioni di sicurezza, CORS, dipendenze con vulnerabilità note.
-Per ogni problema descrivi lo scenario di attacco concreto, in una frase. Niente attacchi contro servizi in produzione: prova solo in locale o leggendo il codice.</pre>
-        </details>
-        <button type="button" class="btn copia">Copia il prompt</button>
-      </article>
-
-      <article class="voce" id="bug">
-        <h3 class="nome">Caccia ai bug</h3>
-        <p class="quando">Quando «sembra funzionare» ma nessuno ha provato i casi strani.</p>
-        <details><summary>Leggi il prompt</summary>
-<pre class="testo">Cerca i bug di questo progetto. Non quelli ovvi: quelli che si vedono solo fuori dal percorso felice.
-
-1. Individua le funzioni principali e per ognuna prova i casi limite: vuoto, enorme, caratteri strani ed emoji, numeri negativi o zero, doppio clic, rete lenta o assente, sessione scaduta, due schede aperte insieme.
-2. Cerca gli errori muti: catch che ingoiano l'errore, promesse senza gestione, operazioni che falliscono senza dirlo a nessuno, valori null che esplodono tre righe dopo.
-3. Cerca i dati che si guastano: riferimenti a cose cancellate, stati salvati a metà, fusi orari, arrotondamenti, conversioni di unità.
-4. Controlla i riferimenti che si perdono: id, classi o campi cercati dal codice che non esistono più.
-Per ogni bug dammi i passi esatti per riprodurlo. Se non riesci a riprodurlo, mettilo in una sezione a parte: «sospetti non confermati».</pre>
-        </details>
-        <button type="button" class="btn copia">Copia il prompt</button>
-      </article>
-
-      <article class="voce" id="usabilita">
-        <h3 class="nome">Usabilità</h3>
-        <p class="quando">Quando chi lo usa per la prima volta si perde, e tu non riesci più a vederlo.</p>
-        <details><summary>Leggi il prompt</summary>
-<pre class="testo">Usa questo progetto come lo userebbe una persona che lo vede per la prima volta e ha fretta. Avvialo e provalo davvero, non limitarti a leggere il codice.
-
-1. Scegli i tre compiti per cui esiste il progetto e portali a termine. Annota ogni momento in cui ti fermi a chiederti cosa fare.
-2. Fallo su schermo da telefono e su schermo da computer.
-3. Controlla i messaggi: dicono cosa è successo e cosa fare adesso? Gli errori si capiscono senza conoscere il codice?
-4. Cerca le trappole: azioni irreversibili senza conferma, lavoro perso chiudendo la pagina, pulsanti che sembrano disattivati e non lo sono (o il contrario), confini invisibili, parole tecniche dove basterebbe una parola normale.
-5. Conta i passi dei compiti principali: dove se ne può togliere uno?
-Per ogni attrito allega la schermata o descrivi con precisione dove sei e cosa vedi.</pre>
-        </details>
-        <button type="button" class="btn copia">Copia il prompt</button>
-      </article>
-
-      <article class="voce" id="accessibilita">
-        <h3 class="nome">Accessibilità</h3>
-        <p class="quando">Quando vuoi che lo usi anche chi non vede bene, non usa il mouse o ha il telefono in una mano.</p>
-        <details><summary>Leggi il prompt</summary>
-<pre class="testo">Verifica l'accessibilità dell'interfaccia di questo progetto, misurando dove si può misurare.
-
-1. Contrasto: testo normale almeno 4,5:1, testo grande almeno 3:1, anche sui fondi colorati e nei riquadri, non solo sul bianco. Riporta i valori misurati.
-2. Tastiera: si arriva a ogni comando con Tab, nell'ordine giusto, e si vede sempre dove si trova il fuoco? Le finestre si chiudono con Esc e restituiscono il fuoco?
-3. Bersagli: su telefono ogni cosa da toccare misura almeno 44×44 px. Elenca quelli più piccoli.
-4. Lettori di schermo: immagini con testo alternativo sensato, campi con etichetta, pulsanti con un nome, messaggi dinamici annunciati.
-5. Preferenze del sistema: movimento ridotto, contrasto aumentato, testo ingrandito al 200% senza che la pagina si rompa.</pre>
-        </details>
-        <button type="button" class="btn copia">Copia il prompt</button>
-      </article>
-
-      <article class="voce" id="prestazioni">
-        <h3 class="nome">Prestazioni</h3>
-        <p class="quando">Quando qualcosa è lento e non sai cosa, o quando i dati crescono.</p>
-        <details><summary>Leggi il prompt</summary>
-<pre class="testo">Misura le prestazioni di questo progetto. Voglio numeri, non impressioni.
-
-1. Primo caricamento: peso totale, numero di richieste, tempo prima che si possa usare. Cosa pesa di più, e serve subito?
-2. Le operazioni principali: misura quanto durano con pochi dati e con tanti (per esempio 10, 100, 1000 elementi). Dove il tempo cresce più che in proporzione?
-3. Lato server o database: query ripetute in un ciclo, indici mancanti, dati caricati interi quando ne serve una parte.
-4. Memoria e risorse: cosa cresce usando il progetto a lungo, cosa non viene mai liberato.
-Per ogni problema: la misura, il punto del codice responsabile e una stima di quanto si guadagnerebbe. Ignora i miglioramenti sotto il 10% se non sono gratis.</pre>
-        </details>
-        <button type="button" class="btn copia">Copia il prompt</button>
-      </article>
-
-      <article class="voce" id="test">
-        <h3 class="nome">Test che valgono</h3>
-        <p class="quando">Quando i test sono tutti verdi ma i bug arrivano lo stesso.</p>
-        <details><summary>Leggi il prompt</summary>
-<pre class="testo">Valuta se i test di questo progetto proteggono davvero, non solo se passano.
-
-1. Lanciali tutti e riporta il risultato con il codice di uscita, non solo l'ultima riga. Segnala i test saltati, disattivati o che in CI non girano.
-2. Controlla che provino il progetto vero: aprono l'app giusta? Usano dati realistici? Oppure verificano solo dei finti costruiti apposta?
-3. Scegli i cinque test più importanti e per ognuno descrivi un guasto plausibile che NON farebbe fallire il test. Se puoi, prova: introduci il guasto in una copia temporanea, lancia il test, poi ripristina tutto e verifica che la copia di lavoro sia tornata identica.
-4. Elenca le funzioni importanti senza nessun test, in ordine di danno se si rompono.
-Qui, e solo per il punto 3, puoi modificare file temporaneamente: tutto deve tornare com'era, e dimmelo esplicitamente.</pre>
-        </details>
-        <button type="button" class="btn copia">Copia il prompt</button>
-      </article>
-
-      <article class="voce" id="automatismi">
-        <h3 class="nome">Automatismi muti</h3>
-        <p class="quando">Quando qualcosa dovrebbe girare da solo e non sai più se gira.</p>
-        <details><summary>Leggi il prompt</summary>
-<pre class="testo">Verifica che gli automatismi di questo progetto girino davvero e che, se falliscono, qualcuno lo sappia.
-
-1. Trova tutto ciò che parte da solo: cron, job pianificati, LaunchAgent o servizi di sistema, workflow di CI, webhook, backup, pulizie dei dati, notifiche.
-2. Per ognuno cerca la prova che sia partito di recente: log, date dei file prodotti, righe nel database, esiti delle ultime esecuzioni. «È configurato» non basta.
-3. Chiediti cosa succede se fallisce: esce con errore? Qualcuno riceve un avviso? Oppure fallisce in silenzio e se ne accorge qualcuno settimane dopo?
-4. Controlla le scadenze in arrivo: token, certificati, chiavi, abbonamenti, domini.
-Chiudi con una tabella: automatismo, ultima esecuzione dimostrata, cosa succede se fallisce, rischio.</pre>
-        </details>
-        <button type="button" class="btn copia">Copia il prompt</button>
-      </article>
-
-      <article class="voce" id="testi">
-        <h3 class="nome">Testi e numeri</h3>
-        <p class="quando">Prima di pubblicare: quello che il progetto afferma deve essere vero.</p>
-        <details><summary>Leggi il prompt</summary>
-<pre class="testo">Controlla che ciò che questo progetto afferma sia vero e aggiornato: testi dell'interfaccia, pagine pubbliche, documentazione, dati tecnici, prezzi, date.
-
-1. Elenca le affermazioni verificabili: numeri, caratteristiche, limiti, promesse («gratis», «nessun dato online», «compatibile con»), dati tecnici di prodotti reali.
-2. Per ognuna cerca la fonte: il codice che la rende vera, una fonte primaria (manuale, scheda tecnica, documentazione ufficiale), un calcolo. Scrivi la fonte accanto.
-3. Segnala le affermazioni false, quelle non più vere, quelle che dicono cose diverse in due punti diversi e quelle senza fonte.
-4. Rileggi i testi con gli occhi di chi non conosce il progetto: parole tecniche non spiegate, frasi ambigue, errori di ortografia.
-Non inventare fonti: se non trovi una conferma, scrivi «non verificato».</pre>
-        </details>
-        <button type="button" class="btn copia">Copia il prompt</button>
-      </article>
-
-      <article class="voce" id="visibilita">
-        <h3 class="nome">Visibilità</h3>
-        <p class="quando">Quando un sito c'è ma non lo trova nessuno, né Google né gli assistenti AI.</p>
-        <details><summary>Leggi il prompt</summary>
-<pre class="testo">Verifica quanto questo sito si fa trovare da motori di ricerca e assistenti AI.
-
-1. Le basi: ogni pagina ha titolo e descrizione unici e di lunghezza giusta, canonical corretto, un solo h1. robots.txt e sitemap sono coerenti (nella sitemap solo pagine indicizzabili, e ci sono tutte). Date di aggiornamento vere.
-2. Pagine orfane: pagine che esistono ma a cui nessun link interno porta.
-3. Dati strutturati: validi, coerenti con il testo visibile, senza errori.
-4. Contenuto leggibile senza JavaScript: quello che conta sta nel markup o compare solo dopo l'esecuzione degli script?
-5. Le parole: con quali parole la gente cerca quello che il sito offre, e quelle parole compaiono nei titoli?
-6. Se puoi interrogare il sito pubblicato, confronta con quello che risulta indicizzato.
-Distingui cosa hai controllato sul sito pubblicato da cosa hai visto solo nei file.</pre>
-        </details>
-        <button type="button" class="btn copia">Copia il prompt</button>
-      </article>
-
-      <article class="voce" id="controprova">
-        <h3 class="nome">Controprova</h3>
-        <p class="quando">Dopo una delle verifiche qui sopra, prima di mettere mano alle correzioni.</p>
-        <details><summary>Leggi il prompt</summary>
-<pre class="testo">Qui sotto (o nella conversazione precedente) c'è l'elenco dei problemi trovati in una verifica. Il tuo compito è smontarlo: ogni segnalazione è falsa finché non la dimostri vera.
-
-1. Per ogni problema riproducilo da capo, senza fidarti della descrizione. Leggi il codice citato: esiste ancora? Fa davvero quello che la segnalazione dice?
-2. Cerca le ragioni per cui potrebbe non essere un problema: una protezione in un altro punto, una scelta documentata, un caso che nella pratica non capita.
-3. Dai un verdetto per ciascuno: CONFERMATO (riprodotto), PLAUSIBILE (non riprodotto ma credibile, e perché), FALSO (con la prova).
-4. Per i confermati ricalcola la gravità guardando il danno reale e quante persone lo incontrano.
-5. Proponi l'ordine degli interventi e per ciascuno la correzione più piccola che lo risolve, più il test che fallirebbe senza.</pre>
-        </details>
-        <button type="button" class="btn copia">Copia il prompt</button>
-      </article>
-
-    </div>
+    <!-- Le regole stanno scritte UNA volta e si copiano in coda a ogni prompt che
+         non agisce. Chiuse all'inizio: su telefono il testo intero occupa più di
+         una schermata. -->
+    <section class="regole" id="regole" aria-labelledby="titRegole">
+      <h2 class="lbl" id="titRegole">Le regole comuni</h2>
+      <p class="regole-sintesi"><b>Ogni prompt che non agisce si copia con queste regole in coda.</b>
+        In breve: non toccare il progetto né i dati reali, controllare gli effetti prima di eseguire,
+        separare ciò che è provato da ciò che è dedotto, chiudere con le azioni possibili e la domanda
+        «Quali vuoi che faccia?».</p>
+      <details class="regole-tutte"><summary>Leggi le regole complete</summary>
+<pre class="testo" id="patto">REGOLE: CAPIRE PRIMA DI AGIRE
+- Questa è una fase di comprensione: non modificare il progetto né i dati reali. Niente modifiche ai file, commit, scritture su database o servizi, pubblicazioni, messaggi, notifiche.
+- Puoi leggere codice, documenti, log e configurazione. Materiale temporaneo (appunti, script di prova, copie) solo in una cartella o in un ambiente isolato.
+- Prima di lanciare test, build o avvii, controlla cosa scrivono o toccano. Se toccano dati reali o hanno effetti fuori dal progetto, non eseguirli: dimmelo.
+- Leggi prima i documenti di stato del progetto. Se manca uno strumento o un accesso che serve, dillo invece di supporre.
+- Resta nel perimetro: il progetto e ciò da cui dipende per funzionare. Quello che trovi fuori, elencalo in fondo.
+- Separa ciò che hai OSSERVATO da ciò che DEDUCI. Meglio poche cose solide che molti sospetti. Una scelta documentata come voluta non è un problema in sé: segnalala solo se ne mostri una conseguenza concreta.
+- COME CHIUDERE. Prima un riassunto breve di ciò che hai capito. Poi le azioni possibili in un elenco numerato: per ognuna cosa faresti, cosa cambierebbe, il rischio e se si può annullare. Per ultima la domanda: «Quali vuoi che faccia?». Poi fermati e aspetta la mia risposta.</pre>
+      </details>
     </section>
 
-    <p class="hint">
-      Incolla il prompt nella sessione dell'agente che conosce già il progetto. I prompt di
-      verifica si copiano con le regole in coda. Dopo una verifica, prima di correggere,
-      la controprova.
-    </p>
+    <p class="nota">Le categorie seguono le caratteristiche di qualità del software della norma
+      ISO/IEC 25010, dette con parole di tutti i giorni, più contenuti e visibilità.</p>
   </main>
 
   <footer class="site-footer">
@@ -348,7 +563,6 @@ Distingui cosa hai controllato sul sito pubblicato da cosa hai visto solo nei fi
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="/comune/prompt.js"></script>
   <script src="/track.js"></script>
   <script src="script.js"></script>
 </body>
