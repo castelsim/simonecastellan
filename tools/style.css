@@ -129,8 +129,11 @@ body.ha-testo .pulisci { display: flex; }
    filtro non nasconderebbe niente (già successo altrove nel sito). */
 .cella[hidden] { display: none; }
 .cella img { width: 34px; height: 34px; border-radius: 9px; display: block; }
-.cella .p { font-size: 15px; color: var(--ink); line-height: 1.35; }
-.cella .n { font-size: 12px; color: var(--faint); }
+/* Dal 16/09/2026 la cella porta solo il nome dello strumento («Converti in
+   MP3»). Prima c'era sopra una frase sul problema («Mandare un audio senza
+   intasare la chat»): per Simone prolissa, e il nome da solo è già chiaro.
+   Le parole della frase sono passate in data-k, così la ricerca le trova. */
+.cella .n { font-size: 15px; color: var(--ink); line-height: 1.35; }
 
 /* ── Movimento ────────────────────────────────────────────────────────
    Le classi le mette il JavaScript dopo aver calcolato lo spostamento.
@@ -200,8 +203,7 @@ body.ha-testo .pulisci { display: flex; }
   .griglia { grid-template-columns: 1fr; gap: 0; }
   .cella { flex-direction: row; align-items: center; gap: 13px;
     border: 0; border-top: 1px solid var(--hair); border-radius: 12px; padding: 14px 6px; }
-  .cella .p { flex: 1; font-size: 15px; }
-  .cella .n { display: none; }   /* il nome dello strumento non aiuta chi cerca il problema */
+  .cella .n { flex: 1; font-size: 15px; }
   .nav { font-size: 12.5px; }
   .nav .sep { margin: 0 6px; }
 }
