@@ -150,11 +150,12 @@ Se ti servono permessi o pagine aperte in Chrome, chiedimeli subito, tutti insie
     <div class="patto">
       <p class="lbl">Le regole, in coda a ogni prompt di verifica</p>
       <pre class="testo" id="patto">REGOLE DI QUESTA VERIFICA
-- Sola lettura. Non modificare file, non fare commit, non scrivere su database, non pubblicare, non mandare messaggi. Puoi leggere il codice, lanciare i test e avviare il progetto in locale.
+- Sola lettura. Non modificare file, non fare commit, non scrivere su database, non pubblicare, non mandare messaggi, non lanciare nulla che scriva file di stato o faccia partire notifiche. Puoi leggere codice, log e impostazioni di sistema, lanciare i test, avviare il progetto in locale e fare poche richieste in sola lettura ai servizi esterni.
+- Perimetro: il progetto e ciò da cui dipende per funzionare (servizi, macchina, backup). Quello che trovi fuori perimetro elencalo in fondo, senza approfondire.
 - Prima di cominciare leggi i documenti di stato del progetto (README, CLAUDE.md, file di stato o di decisioni) e riassumi in due righe cosa hai capito.
 - Per ogni problema scrivi: dove (file e riga, oppure la schermata), come si riproduce, cosa succede e cosa dovrebbe succedere, gravità (alta / media / bassa).
 - Distingui cosa hai PROVATO da cosa hai DEDOTTO leggendo il codice. Se non l'hai provato, dillo. Meglio tre problemi veri che dieci sospetti.
-- Non riportare come problema una scelta già documentata: se un documento dice che è voluta, citalo e passa oltre.
+- Non riportare come problema una scelta documentata come voluta: cita il documento e passa oltre. Un problema già noto ma mai risolto invece va riportato, dicendo da quando è noto.
 - Alla fine: una tabella ordinata per gravità e i tre interventi che faresti per primi, con il perché. Non correggere niente: aspetta che scelga io.</pre>
     </div>
 
