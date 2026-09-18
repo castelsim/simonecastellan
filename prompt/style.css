@@ -130,13 +130,49 @@ summary .piu { color: var(--faint); font-weight: 400; }
   .js .catalogo { grid-template-columns: 210px 1fr; }
   .js .dettaglio { grid-column: 2; position: static; }
 }
+/* La barra «Indietro»: esiste solo nella vista a due livelli del telefono. */
+.barra-indietro { display: none; align-items: center; gap: 10px; margin-bottom: 10px; }
+.barra-indietro .indietro { border: 0; background: none; color: var(--teal); font-weight: 650; font-size: 15px; min-height: 44px; padding: 0 6px 0 0; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.barra-indietro .indietro::before { content: ""; width: 0; height: 0; border-right: 7px solid currentColor; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+.barra-indietro .dove { font: 500 11.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--mut); }
+
 @media (max-width: 900px) {
   .voci { grid-template-columns: 1fr; }
   .js .catalogo { grid-template-columns: 1fr; gap: 0; }
-  .js .cat-lista { display: none; }
-  .js .cat-select { display: block; width: 100%; font-weight: 600; font-size: 16px; min-height: 48px; border: 1px solid var(--line-forte); border-radius: var(--raggio); padding: 0 12px; background: #fff; color: var(--ink); }
   .js .dettaglio { grid-column: auto; position: static; margin: 8px 0 10px; }
-  .js .dettaglio .voce { padding: 16px; }
+  .js .dettaglio .voce { padding: 16px; border: 0; padding-left: 0; padding-right: 0; }
+
+  /* Le categorie diventano pastiglie che scorrono in orizzontale: con il menu a
+     tendina le undici categorie restavano nascoste e non si scopriva cosa c'era.
+     Sbordano di 20 px per lato, quanto il margine della pagina, così la fila
+     sembra continuare oltre il bordo. */
+  .js .cat-select { display: none; }
+  /* Senza «min-width: 0» la colonna si allarga quanto le undici pastiglie
+     (misurate: 2055 px) e a scorrere è la pagina intera, non la fila. */
+  .js .cat-nav { min-width: 0; }
+  .js .cat-lista {
+    min-width: 0;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    position: static;
+    margin: 0 -20px;
+    padding: 2px 20px 10px;
+  }
+  .js .cat-lista::-webkit-scrollbar { display: none; }
+  .js .cat-lista li.stacco { border: 0; margin: 0; padding: 0; }
+  .cat-btn { width: auto; white-space: nowrap; border: 1px solid var(--line-forte); border-radius: 999px; padding: 0 14px; gap: 8px; }
+
+  /* Due livelli: o l'elenco, o la scheda. Mai i due incastrati. */
+  .js .dettaglio { display: none; }
+  .js.scheda-aperta .dettaglio { display: block; }
+  .js.scheda-aperta .cat-nav,
+  .js.scheda-aperta .lista-col,
+  .js.scheda-aperta header,
+  .js.scheda-aperta .regole,
+  .js.scheda-aperta .nota { display: none; }
+  .scheda-aperta .barra-indietro { display: flex; }
 }
 @media (max-width: 640px) {
   .identita > div { grid-template-columns: 1fr; gap: 2px; }

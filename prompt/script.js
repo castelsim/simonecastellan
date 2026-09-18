@@ -160,7 +160,13 @@
   function apriCategoria(g, id) {
     gCorrente = g;
     tendina.value = g;
-    [].forEach.call(ul.querySelectorAll('.cat-btn'), function (b) { b.setAttribute('aria-current', b.dataset.g === g ? 'true' : 'false'); });
+    [].forEach.call(ul.querySelectorAll('.cat-btn'), function (b) {
+      var suo = b.dataset.g === g;
+      b.setAttribute('aria-current', suo ? 'true' : 'false');
+      // Nella fila che scorre la pastiglia scelta si porta in vista: altrimenti
+      // si sceglie una categoria e la si perde di lato.
+      if (suo && stretto.matches && b.scrollIntoView) b.scrollIntoView({ block: 'nearest', inline: 'center' });
+    });
     var s = sezioneDi(g);
     intro.textContent = s.querySelector('.cat-sotto').textContent;
     // Tutte le schede della categoria, anche quella che ora sta nel dettaglio.
@@ -184,19 +190,33 @@
     }
     scelta = v;
     dettaglio.appendChild(v);
+    dettaglio.insertBefore(barra, dettaglio.firstChild);
     [].forEach.call(lista.querySelectorAll('.voce-btn'), function (b) { b.setAttribute('aria-current', b.dataset.id === id ? 'true' : 'false'); });
     colloca();
   }
 
-  // Su telefono il dettaglio va sotto la voce scelta; su computer in colonna.
+  /* Su telefono la scheda non si infila più dentro l'elenco: si apre a tutta
+     pagina, con una barra «Indietro» che torna all'elenco. Prima la scheda
+     spingeva le altre voci sotto un blocco lungo e l'elenco spariva. */
   function colloca() {
-    if (!scelta) return;
-    if (stretto.matches) {
-      var b = lista.querySelector('[data-id="' + scelta.id + '"]');
-      if (b) b.parentNode.appendChild(dettaglio);
-    } else if (dettaglio.parentNode !== catalogo) {
-      colonna.after(dettaglio);
-    }
+    if (dettaglio.parentNode !== catalogo) colonna.after(dettaglio);
+    if (!stretto.matches) chiudiScheda(true);
+  }
+
+  var barra = document.createElement('div');
+  barra.className = 'barra-indietro';
+  barra.innerHTML = '<button type="button" class="indietro">Indietro<span class="vh"> all\'elenco</span></button><span class="dove"></span>';
+  dettaglio.appendChild(barra);
+
+  function apriScheda() {
+    if (!stretto.matches || !scelta) return;
+    barra.querySelector('.dove').textContent = scelta._sezione.querySelector('.cat-titolo span').textContent;
+    document.documentElement.classList.add('scheda-aperta');
+    window.scrollTo(0, 0);
+  }
+  function chiudiScheda(zitto) {
+    document.documentElement.classList.remove('scheda-aperta');
+    if (!zitto && gCorrente) history.replaceState(null, '', '#cat-' + gCorrente);
   }
 
   // Dove portare lo sguardo: il catalogo quando il dettaglio gli sta accanto,
@@ -232,20 +252,54 @@
     var a = t.closest && t.closest('.ancora');
     if (a) { e.preventDefault(); return copiaLink(a); }
     var c = t.closest && t.closest('.cat-btn');
-    if (c) { apriCategoria(c.dataset.g); history.replaceState(null, '', '#' + scelta.id); return; }
+    if (c) { cambiaCategoria(c.dataset.g); return; }
+    var ind = t.closest && t.closest('.indietro');
+    if (ind) { chiudiScheda(); return; }
     var vb = t.closest && t.closest('.voce-btn');
-    if (vb) { scegli(vb.dataset.id); history.replaceState(null, '', '#' + vb.dataset.id); if (window.track) track('click', 'Prompt:apri:' + vb.dataset.id); return; }
+    if (vb) {
+      scegli(vb.dataset.id);
+      if (stretto.matches) {
+        // Una tappa nella cronologia: il gesto «indietro» del telefono
+        // riporta all'elenco invece di uscire dalla pagina.
+        history.pushState(null, '', '#' + vb.dataset.id);
+        apriScheda();
+      } else {
+        history.replaceState(null, '', '#' + vb.dataset.id);
+      }
+      if (window.track) track('click', 'Prompt:apri:' + vb.dataset.id);
+    }
   });
-  tendina.addEventListener('change', function () { apriCategoria(tendina.value); history.replaceState(null, '', '#' + scelta.id); });
-  window.addEventListener('hashchange', function () { vaiA(location.hash, true); });
+
+  function cambiaCategoria(g) {
+    apriCategoria(g);
+    // Su telefono si resta sull'elenco: la scheda si apre solo se la tocchi.
+    history.replaceState(null, '', stretto.matches ? '#cat-' + g : '#' + scelta.id);
+    if (stretto.matches) chiudiScheda(true);
+  }
+
+  tendina.addEventListener('change', function () { cambiaCategoria(tendina.value); });
+  window.addEventListener('hashchange', function () {
+    var h = location.hash.replace(/^#/, '');
+    h = ALIAS[h] || h;
+    if (perId[h]) { vaiA(location.hash, !stretto.matches); apriScheda(); }
+    else { vaiA(location.hash, false); chiudiScheda(true); }
+  });
   if (stretto.addEventListener) stretto.addEventListener('change', colloca);
 
   // Arrivo: con un'ancora si apre quella scheda, altrimenti la prima routine.
   // Lo scorrimento aspetta il salto automatico del browser all'ancora, che
   // altrimenti arriverebbe dopo e porterebbe altrove.
   if (vaiA(location.hash, false)) {
-    window.addEventListener('load', function () { requestAnimationFrame(function () { mostraInVista(false); }); });
+    var eraScheda = !!perId[(ALIAS[location.hash.replace(/^#/, '')] || location.hash.replace(/^#/, ''))];
+    if (eraScheda) apriScheda();
+    window.addEventListener('load', function () {
+      requestAnimationFrame(function () {
+        if (stretto.matches && eraScheda) window.scrollTo(0, 0);
+        else mostraInVista(false);
+      });
+    });
   } else {
     apriCategoria(sezioni[0].dataset.g);
+    if (stretto.matches) history.replaceState(null, '', '#cat-' + sezioni[0].dataset.g);
   }
 })();
