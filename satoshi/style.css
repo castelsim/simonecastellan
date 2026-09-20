@@ -1,0 +1,207 @@
+/* Token condivisi dalle varianti di layout di /satoshi/. © 2026 Simone Castellan. */
+:root {
+  --carta: #ffffff; --inchiostro: #14161a; --testo: #3c4043;
+  --grigio: #5f6368; --tenue: #6b7075;   /* 4.7:1 su bianco: #80868b si fermava a 3.68 */ --traccia: #b9bec6;
+  --linea: #dadce0; --velo: #eef0f2; --pagina: #f6f7f8;
+  --serif: "Source Serif 4", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--ui); background: var(--carta); color: var(--testo);
+  -webkit-font-smoothing: antialiased; line-height: 1.6; max-width: 100vw; overflow-x: hidden; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--inchiostro); outline-offset: 3px; border-radius: 4px; }
+
+.nav { border-bottom: 1px solid var(--velo); padding: 13px 24px; text-align: center;
+  font-size: 13px; line-height: 1; }
+.nav a { color: var(--tenue); text-decoration: none; display: inline-block;
+  padding: 6px 6px; }  /* senza padding il bersaglio è 36x16: sotto i 24x24 minimi */
+.nav a:hover { color: var(--inchiostro); }
+.nav .sep { color: var(--linea); margin: 0 8px; }
+
+.testata { max-width: 660px; margin: 0 auto; padding: clamp(40px,7vh,74px) 24px clamp(24px,4vh,40px); }
+.arco { font-family: var(--mono); font-size: 12px; color: var(--tenue); display: block; margin-bottom: 18px; }
+.testata h1 { font-family: var(--serif); font-size: clamp(30px,5.4vw,46px); font-weight: 400;
+  color: var(--inchiostro); line-height: 1.1; letter-spacing: -.018em; text-wrap: balance; }
+.occhiello { font-family: var(--serif); font-size: clamp(16px,2vw,18.5px); line-height: 1.6;
+  color: var(--grigio); margin-top: 18px; max-width: 58ch; }
+.occhiello em { font-style: italic; color: var(--inchiostro); }
+.come { margin-top: 22px; font-size: 13px; color: var(--tenue); }
+/* Variante «metropolitana», seconda stesura.
+   Tre cose che mancavano: i nomi delle corsie che restano fermi, un righello
+   che dice a che anno sei, e sul telefono la mappa che gira in verticale. */
+
+/* ── barra sopra la mappa: legenda + zoom ──────────────────────────── */
+.barra { max-width: 1180px; margin: 0 auto; padding: 0 24px 14px;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.legenda { display: none; gap: 16px; flex-wrap: wrap; }  /* su desktop comandano i nomi laterali */
+.legenda button { background: none; border: 0; padding: 4px 0; cursor: pointer; text-align: left;
+  font-family: var(--ui); border-top: 2px solid var(--linea); transition: border-color .16s; }
+.legenda button b { display: block; font-size: 11.5px; font-weight: 600; color: var(--grigio);
+  transition: color .16s; white-space: nowrap; }
+.legenda button:hover b, .legenda button[aria-pressed="true"] b { color: var(--inchiostro); }
+.legenda button[aria-pressed="true"] { border-top-color: var(--inchiostro); }
+.comandi { display: flex; gap: 6px; }
+.int { font: 500 12px var(--ui); color: var(--grigio); background: none;
+  border: 1px solid var(--linea); border-radius: 999px; padding: 7px 14px; cursor: pointer;
+  white-space: nowrap; transition: border-color .16s, color .16s, background .16s; }
+.int:hover { border-color: var(--grigio); color: var(--inchiostro); }
+.int[aria-pressed="true"] { background: var(--inchiostro); border-color: var(--inchiostro); color: #fff; }
+
+/* ── la mappa ───────────────────────────────────────────────────────── */
+.mappa-guscio { position: relative; border-top: 1px solid var(--velo);
+  border-bottom: 1px solid var(--velo); background: linear-gradient(var(--carta), #fcfcfd); }
+.mappa { overflow-x: auto; overflow-y: hidden; cursor: grab; scrollbar-width: thin; }
+.mappa.trascino { cursor: grabbing; }
+.mappa svg { display: block; }
+
+/* i nomi delle corsie: fuori dallo scorrimento, sempre visibili */
+/* I nomi delle corsie: fermi in orizzontale, ma inseguono in verticale la propria
+   linea. Dove le linee convergono i nomi si sovrappongono, e ne resta uno solo. */
+.corsie-fisse { position: absolute; left: 0; top: 0; bottom: 0; z-index: 3; width: 162px;
+  /* fondo pieno fin quasi al bordo: con lo sfumato lungo, i nomi delle
+     stazioni che scorrono sotto restavano visibili a metà. */
+  background: linear-gradient(90deg, var(--carta) 0%, var(--carta) 91%, transparent 100%); }
+.corsie-fisse button { position: absolute; right: 16px; padding: 9px 0; border: 0;
+  background: none; cursor: pointer; text-align: right; white-space: nowrap;
+  font: 600 11.5px var(--ui); color: var(--grigio);
+  transform: translateY(-50%); transition: opacity .18s ease, color .16s ease; }
+.corsie-fisse button:hover { color: var(--inchiostro); }
+.corsie-fisse button[aria-pressed="true"] { color: var(--inchiostro); }
+.corsie-fisse button::after { content: ""; position: absolute; right: -11px; top: 50%;
+  width: 6px; height: 1.5px; background: var(--traccia); transform: translateY(-50%); }
+.corsie-fisse button[aria-pressed="true"]::after { background: var(--inchiostro); }
+.corsie-fisse button.svanita { opacity: 0; pointer-events: none; }
+.corsie-fisse button.unione { color: var(--inchiostro); font-size: 12.5px; }
+.corsie-fisse button.unione::after { background: var(--inchiostro); height: 3px; width: 8px; }
+
+.istruzioni { max-width: 1180px; margin: -6px auto 12px; padding: 0 24px;
+  font-size: 12.5px; color: var(--tenue); }
+
+.sfuma { position: absolute; top: 0; bottom: 0; width: 46px; pointer-events: none; z-index: 2; }
+.sfuma.dx { right: 0; background: linear-gradient(270deg, var(--carta), transparent); }
+
+/* righello: l'anno in cui ti trovi mentre scorri */
+.righello { position: absolute; bottom: 12px; right: 16px; z-index: 4; pointer-events: none;
+  font: 500 12px var(--mono); color: var(--inchiostro);
+  background: rgba(255,255,255,.9); border: 1px solid var(--velo); border-radius: 999px;
+  padding: 5px 12px; letter-spacing: -.02em; }
+
+/* barra di avanzamento sotto la mappa */
+.avanzamento { max-width: 1180px; margin: 0 auto; padding: 0 24px; height: 2px;
+  background: var(--velo); }
+.avanzamento i { display: block; height: 2px; background: var(--traccia); width: 0;
+  transition: width .1s linear; }
+
+/* ── linee e stazioni ───────────────────────────────────────────────── */
+.linea { fill: none; stroke: var(--traccia); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.linea-viva { stroke: var(--inchiostro); stroke-width: 3.4; }
+.stazione { cursor: pointer; }
+.stazione .presa { fill: transparent; }
+.stazione:focus-visible { outline: 2px solid var(--inchiostro); outline-offset: 2px; }
+.stazione .bolla { fill: var(--carta); stroke: var(--traccia); stroke-width: 2; transition: stroke .16s, fill .16s; }
+.stazione[data-tronco] .bolla { stroke: var(--inchiostro); }
+.stazione[data-cardine] .bolla { fill: var(--inchiostro); }
+.stazione:hover .bolla, .stazione:focus-visible .bolla { stroke: var(--inchiostro); }
+.stazione[aria-pressed="true"] .bolla { fill: var(--inchiostro); stroke: var(--inchiostro); }
+.stazione .nome { font: 400 12.5px var(--serif); fill: var(--grigio); transition: fill .16s; }
+.stazione:hover .nome, .stazione[aria-pressed="true"] .nome { fill: var(--inchiostro); }
+.stazione[data-tronco] .nome { font-weight: 600; fill: var(--inchiostro); }
+.stazione .anno { font: 400 10.5px var(--mono); fill: var(--tenue); }
+.mappa.filtra .stazione:not(.acceso) { opacity: .2; }
+.mappa.filtra .linea:not(.acceso) { opacity: .14; }
+
+/* ── il dettaglio sotto ─────────────────────────────────────────────── */
+.foglio { max-width: 1180px; margin: 0 auto; padding: 28px 24px 10px;
+  display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 34px; align-items: start; }
+.foglio .vuoto { font-family: var(--serif); font-size: 16px; color: var(--tenue); grid-column: 1 / -1; }
+.foglio .data { font-family: var(--mono); font-size: 12px; color: var(--grigio); display: block; margin-bottom: 10px; }
+.foglio h2 { font-family: var(--serif); font-size: clamp(22px,3vw,29px); font-weight: 600;
+  color: var(--inchiostro); line-height: 1.16; letter-spacing: -.016em; }
+.foglio .attore { font-size: 13px; color: var(--grigio); margin-top: 7px; display: block; }
+.foglio .corpo { font-family: var(--serif); font-size: 16.5px; line-height: 1.66; color: var(--testo); }
+.foglio .perche { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--velo);
+  font-size: 14px; line-height: 1.6; color: var(--grigio); }
+.foglio .perche b { display: block; font-size: 11px; color: var(--tenue); margin-bottom: 5px; }
+.foglio .fonte { display: inline-block; margin-top: 14px; font-size: 13px; color: var(--grigio);
+  text-decoration: none; border-bottom: 1px solid var(--linea); padding: 4px 0 5px; }
+.foglio .fonte:hover { color: var(--inchiostro); border-bottom-color: var(--inchiostro); }
+.foglio .passi { grid-column: 1 / -1; display: flex; gap: 8px; margin-top: 8px; }
+.foglio .passi button { font: 500 12.5px var(--ui); color: var(--grigio); background: none;
+  border: 1px solid var(--linea); border-radius: 8px; padding: 9px 16px; cursor: pointer; }
+.foglio .passi button:hover:not(:disabled) { border-color: var(--inchiostro); color: var(--inchiostro); }
+.foglio .passi button:disabled { opacity: .4; cursor: default; }
+
+/* ── sotto i 900 px la mappa gira: il tempo scende, i nomi inseguono dall'alto ── */
+@media (max-width: 900px) {
+  .mappa { overflow: visible; cursor: default; }
+  .mappa svg { width: 100%; height: auto; }
+  .mappa-guscio { border-bottom: 0; }
+  .sfuma, .avanzamento, .comandi, .istruzioni { display: none; }
+  .legenda { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px;
+    scrollbar-width: none; }
+  .legenda::-webkit-scrollbar { display: none; }
+  .barra { flex-direction: column; align-items: stretch; gap: 10px; }
+  .foglio { grid-template-columns: minmax(0,1fr); gap: 14px; }
+
+  /* la riga dei nomi resta attaccata in alto e i nomi scorrono in orizzontale,
+     ciascuno sopra la propria linea, finché non diventano uno solo */
+  .corsie-fisse { position: sticky; top: 0; left: auto; right: auto; bottom: auto;
+    width: 100%; height: 34px; z-index: 6;
+    background: linear-gradient(180deg, var(--carta) 0%, var(--carta) 74%, transparent 100%); }
+  .corsie-fisse button { top: 16px; right: auto; left: 0;
+    transform: translate(-50%, -50%); text-align: center; font-size: 10.5px; }
+  .corsie-fisse button::after { right: auto; left: 50%; top: auto; bottom: -7px;
+    width: 1.5px; height: 6px; transform: translateX(-50%); }
+  .corsie-fisse button[aria-pressed="true"]::after { width: 3px; height: 8px; }
+  .corsie-fisse button.unione { font-size: 12px; }
+
+  .righello { position: fixed; bottom: 74px; right: 12px; top: auto; z-index: 8; }
+}
+
+@media (prefers-reduced-motion: reduce) { .avanzamento i { transition: none; } }
+
+/* ── link di salto, per chi naviga da tastiera ──────────────────────── */
+.salta { position: absolute; left: -9999px; top: 0; z-index: 100;
+  background: var(--inchiostro); color: #fff; padding: 12px 18px; font-size: 13px;
+  text-decoration: none; border-radius: 0 0 6px 0; }
+.salta:focus { left: 0; }
+
+/* ── le sezioni di testo sotto la mappa ─────────────────────────────── */
+.sezione { max-width: 660px; margin: 0 auto; padding: clamp(50px, 8vh, 86px) 24px 0; }
+.sezione h2 { font-family: var(--serif); font-size: clamp(25px, 3.6vw, 33px); font-weight: 400;
+  color: var(--inchiostro); line-height: 1.16; letter-spacing: -.018em; }
+.sezione > p { font-family: var(--serif); font-size: 17px; line-height: 1.66;
+  color: var(--grigio); margin-top: 16px; }
+
+.schede { margin-top: 34px; display: grid; gap: 1px; background: var(--velo); }
+.scheda { background: var(--carta); padding: 26px 0; }
+.scheda:first-child { padding-top: 0; }
+.scheda h3 { font-family: var(--serif); font-size: 20px; font-weight: 600; color: var(--inchiostro);
+  letter-spacing: -.012em; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.scheda h3 span { font-family: var(--mono); font-size: 11.5px; font-weight: 400;
+  color: var(--tenue); letter-spacing: -.02em; }
+.scheda .cosa { font-size: 13.5px; color: var(--grigio); margin-top: 6px; }
+.bilancia { margin-top: 16px; display: grid; gap: 14px; }
+.bilancia div { font-size: 14.5px; line-height: 1.6; padding-left: 22px; position: relative; }
+.bilancia div::before { position: absolute; left: 0; top: 0; font-family: var(--mono);
+  font-size: 13px; color: var(--tenue); }
+.bilancia .pro::before { content: "+"; }
+.bilancia .contro::before { content: "\2212"; }
+.bilancia .pro { color: var(--testo); }
+.bilancia .contro { color: var(--grigio); }
+.scheda .fonte-s { display: inline-block; margin-top: 12px; font-size: 12.5px; color: var(--tenue);
+  text-decoration: none; border-bottom: 1px solid var(--linea); padding: 5px 0 5px; }
+.scheda .fonte-s:hover { color: var(--inchiostro); border-bottom-color: var(--inchiostro); }
+
+.chiuse { margin-top: 28px; display: grid; gap: 24px; }
+.chiusa { padding-left: 22px; border-left: 1px solid var(--linea); }
+.chiusa h3 { font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--grigio);
+  display: flex; align-items: baseline; gap: 10px; }
+.chiusa h3 span { font-family: var(--mono); font-size: 11.5px; font-weight: 400; color: var(--tenue); }
+.chiusa p { font-size: 14.5px; line-height: 1.62; color: var(--grigio); margin-top: 7px; }
+
+.piede { max-width: 660px; margin: clamp(60px, 9vh, 96px) auto 0; padding: 30px 24px 60px;
+  border-top: 1px solid var(--velo); font-size: 12.5px; color: var(--tenue); line-height: 1.75; }
+.piede a { color: var(--grigio); text-decoration: none; border-bottom: 1px solid var(--linea); }
+.piede a:hover { color: var(--inchiostro); }
