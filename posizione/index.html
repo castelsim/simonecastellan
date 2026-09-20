@@ -175,9 +175,14 @@ summary::-webkit-details-marker{display:none}
 summary::after{content:'+';font-size:19px;font-weight:700;line-height:1}
 details[open] summary::after{content:'–'}
 label.campo{display:block;font-size:13px;color:var(--tenue);margin:12px 0 6px}
+/* Proprietà per proprietà, come per .eco qui sopra. Fino al 17/09/2026 qui
+   c'era «font:400 16px/1.4 inherit»: forma non valida, il browser buttava via la
+   riga e i campi restavano a 13,3 px in monospaziato. Sotto i 16 px Safari su
+   iPhone ingrandisce la pagina appena si tocca il campo: era lo zoom
+   fastidioso segnalato da Simone. I 16 px sono la soglia, non vanno abbassati. */
 textarea{
   width:100%;min-height:76px;resize:vertical;
-  font:400 16px/1.4 inherit;color:var(--inchiostro);
+  font-family:inherit;font-size:16px;font-weight:400;line-height:1.4;color:var(--inchiostro);
   background:rgba(255,255,255,.55);border:1.5px solid rgba(27,38,33,.22);border-radius:13px;
   padding:11px 13px;
 }
