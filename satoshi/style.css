@@ -1,0 +1,323 @@
+/* ══════════════════════════════════════════════════════════════════════
+   simonecastellan.com/satoshi — © 2026 Simone Castellan.
+   Monocromatica come il resto del sito: l'accento non è una tinta,
+   è il peso dell'inchiostro. Le cinque tracce della preistoria sono
+   grigie e sottili; dal white paper in poi la linea è nera e piena.
+   ══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --carta: #ffffff;
+  --inchiostro: #14161a;   /* il nero del tronco: solo da Bitcoin in poi */
+  --testo: #3c4043;
+  --grigio: #5f6368;
+  --tenue: #80868b;
+  --traccia: #b9bec6;      /* le linee della preistoria */
+  --linea: #dadce0;
+  --velo: #eef0f2;
+  --pagina: #f6f7f8;
+
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  max-width: 100vw;
+  font-family: var(--ui);
+  background: var(--carta);
+  color: var(--testo);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--inchiostro); outline-offset: 3px; border-radius: 4px;
+}
+
+/* ── Menu del sito ──────────────────────────────────────────────────── */
+.nav {
+  border-bottom: 1px solid var(--velo);
+  padding: 19px 24px; text-align: center;
+  font-size: 13px; line-height: 1; letter-spacing: .1px;
+}
+.nav a { color: var(--tenue); text-decoration: none; transition: color .15s ease; }
+.nav a:hover, .nav a[aria-current="page"] { color: var(--inchiostro); }
+.nav .sep { color: var(--linea); margin: 0 8px; }
+/* StagePlot porta fuori dal sito: la freccia lo dice prima del clic.
+   Senza queste misure l'SVG non ha dimensione propria e invade la pagina. */
+.nav .out { white-space: nowrap; }
+.nav .out svg { width: 9px; height: 9px; margin-left: 3px; }
+
+/* ── Testata ────────────────────────────────────────────────────────── */
+.testata {
+  max-width: 660px; margin: 0 auto;
+  padding: clamp(48px, 9vh, 96px) 24px clamp(30px, 5vh, 52px);
+}
+.arco {
+  font-family: var(--mono); font-size: 12px; letter-spacing: .06em;
+  color: var(--tenue); display: block; margin-bottom: 20px;
+}
+.testata h1 {
+  font-family: var(--serif);
+  font-size: clamp(34px, 6.4vw, 56px);
+  font-weight: 400; color: var(--inchiostro);
+  line-height: 1.08; letter-spacing: -.018em; text-wrap: balance;
+}
+.occhiello {
+  font-family: var(--serif); font-size: clamp(17px, 2.2vw, 20px);
+  line-height: 1.62; color: var(--grigio); margin-top: 22px; max-width: 58ch;
+}
+.occhiello em { font-style: italic; color: var(--inchiostro); }
+
+.istruzione {
+  margin-top: 30px; font-size: 13.5px; color: var(--tenue);
+  display: flex; align-items: center; gap: 9px;
+}
+.istruzione svg { width: 15px; height: 15px; flex: none; stroke: var(--traccia); }
+
+/* ── Impianto a due colonne: albero + pannello ──────────────────────── */
+.impianto {
+  max-width: 1320px; margin: 0 auto; padding: 0 24px 40px;
+  display: grid; grid-template-columns: minmax(0, 1fr) 378px; gap: 44px;
+  align-items: start;
+}
+
+/* ── Le cinque tracce, in testa alle colonne ────────────────────────── */
+.tracce {
+  display: grid; gap: 10px;
+  padding-bottom: 20px; margin-bottom: 4px;
+  border-bottom: 1px solid var(--velo);
+}
+.tracce-riga { display: grid; gap: 10px; }
+.traccia-cap {
+  background: none; border: 0; padding: 8px 6px 10px; cursor: pointer;
+  text-align: left; font-family: var(--ui); color: var(--tenue);
+  border-top: 2px solid var(--linea);
+  transition: color .18s ease, border-color .18s ease;
+}
+.traccia-cap b {
+  display: block; font-size: 12.5px; font-weight: 600; color: var(--grigio);
+  letter-spacing: -.01em; line-height: 1.3; transition: color .18s ease;
+}
+.traccia-cap span { display: block; font-size: 11.5px; line-height: 1.45; margin-top: 4px; }
+.traccia-cap:hover b, .traccia-cap[aria-pressed="true"] b { color: var(--inchiostro); }
+.traccia-cap[aria-pressed="true"] { border-top-color: var(--inchiostro); }
+
+/* ── L'albero ───────────────────────────────────────────────────────── */
+.albero { position: relative; }
+/* L'SVG sta DENTRO la griglia: è la griglia il sistema di riferimento con cui
+   albero.js calcola i punti. Montandolo su .albero le linee risultavano
+   stirate e spostate in alto, dentro le intestazioni delle tracce. */
+.rami {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; overflow: visible; z-index: 0;
+}
+.nodo, .anno { position: relative; z-index: 1; }
+.rami path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.ramo      { stroke: var(--traccia); stroke-width: 1.5; }
+.ramo-vivo { stroke: var(--inchiostro); stroke-width: 2.5; }
+
+.griglia {
+  position: relative; display: grid; gap: 0;
+  grid-template-columns: 62px repeat(5, minmax(0, 1fr));
+}
+
+/* casella dell'anno, colonna di sinistra */
+.anno {
+  grid-column: 1; font-family: var(--mono); font-size: 12px; color: var(--tenue);
+  padding: 16px 14px 0 0; text-align: right; align-self: start; letter-spacing: -.02em;
+}
+.anno.cardine { color: var(--inchiostro); font-weight: 500; }
+
+/* ── I nodi ─────────────────────────────────────────────────────────── */
+.nodo {
+  position: relative; background: none; border: 0; cursor: pointer;
+  padding: 10px 8px 12px; text-align: left; font-family: var(--ui);
+  display: block; width: 100%; color: inherit;
+  transition: opacity .22s ease;
+}
+.nodo .segno {
+  width: 11px; height: 11px; display: block; margin-bottom: 7px;
+  border: 1.5px solid var(--traccia); background: var(--carta);
+  transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+.nodo[data-tipo="persona"] .segno,
+.nodo[data-tipo="idea"]    .segno { border-radius: 50%; }
+.nodo[data-tipo="evento"]  .segno { border-radius: 1px; transform: rotate(45deg); }
+
+.nodo .etichetta {
+  /* la linea scende dal centro del segno: senza questo rientro gli taglia le parole */
+  padding-left: 26px;
+  font-family: var(--serif); font-size: 15px; line-height: 1.26;
+  color: var(--grigio); letter-spacing: -.01em;
+  transition: color .18s ease;
+}
+.nodo .chi {
+  display: block; padding-left: 26px;
+  font-size: 11.5px; line-height: 1.4; color: var(--tenue);
+  margin-top: 4px; font-family: var(--ui);
+}
+.nodo:hover .segno { border-color: var(--inchiostro); }
+.nodo:hover .etichetta { color: var(--inchiostro); }
+.nodo[aria-pressed="true"] .segno { background: var(--inchiostro); border-color: var(--inchiostro); }
+.nodo[aria-pressed="true"] .etichetta { color: var(--inchiostro); font-weight: 600; }
+
+/* i nodi del tronco: da qui in poi è Bitcoin, e si vede */
+.nodo.tronco { grid-column: 2 / -1; padding-left: 0; }
+.nodo.tronco .etichetta, .nodo.tronco .chi { padding-left: 25px; }
+.nodo.tronco .segno { border-color: var(--inchiostro); width: 13px; height: 13px; }
+.nodo.tronco .etichetta { font-size: 17px; color: var(--inchiostro); }
+.nodo.tronco.cardine .segno { background: var(--inchiostro); }
+.nodo.tronco.cardine .etichetta { font-size: 19px; font-weight: 600; }
+
+/* la traccia spenta dal filtro */
+.albero.filtra .nodo:not(.acceso) { opacity: .26; }
+.albero.filtra .rami .ramo:not(.acceso) { opacity: .2; }
+
+/* ── Il pannello del nodo ───────────────────────────────────────────── */
+.pannello {
+  position: sticky; top: 24px; align-self: start;
+  border-left: 2px solid var(--inchiostro); padding: 4px 0 4px 24px;
+  min-height: 260px;
+}
+.pannello .vuoto {
+  font-family: var(--serif); font-size: 16px; line-height: 1.6; color: var(--tenue);
+  border-left: 0; padding-top: 10px;
+}
+.pannello-data {
+  font-family: var(--mono); font-size: 12px; color: var(--grigio);
+  letter-spacing: -.02em; display: block; margin-bottom: 12px;
+}
+.pannello h2 {
+  font-family: var(--serif); font-size: 25px; font-weight: 600; color: var(--inchiostro);
+  line-height: 1.18; letter-spacing: -.016em; text-wrap: balance;
+}
+.pannello .attore {
+  font-size: 13px; color: var(--grigio); margin-top: 8px; display: block;
+}
+.pannello .corpo {
+  font-family: var(--serif); font-size: 16.5px; line-height: 1.66;
+  color: var(--testo); margin-top: 18px;
+}
+.pannello .perche {
+  margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--velo);
+  font-size: 14px; line-height: 1.6; color: var(--grigio);
+}
+.pannello .perche b {
+  display: block; font-size: 11px; font-weight: 600; color: var(--tenue);
+  margin-bottom: 6px; letter-spacing: .02em;
+}
+.pannello .fonte {
+  display: inline-block; margin-top: 20px; font-size: 13px;
+  color: var(--grigio); text-decoration: none;
+  border-bottom: 1px solid var(--linea); padding-bottom: 2px;
+  transition: color .15s ease, border-color .15s ease;
+}
+.pannello .fonte:hover { color: var(--inchiostro); border-bottom-color: var(--inchiostro); }
+.pannello .chiudi { display: none; }
+
+/* ── Sezioni di testo sotto l'albero ────────────────────────────────── */
+.sezione { max-width: 660px; margin: 0 auto; padding: clamp(56px, 9vh, 92px) 24px 0; }
+.sezione h2 {
+  font-family: var(--serif); font-size: clamp(25px, 3.6vw, 33px); font-weight: 400;
+  color: var(--inchiostro); line-height: 1.16; letter-spacing: -.018em;
+}
+.sezione > p {
+  font-family: var(--serif); font-size: 17px; line-height: 1.66;
+  color: var(--grigio); margin-top: 16px;
+}
+
+.schede { margin-top: 36px; display: grid; gap: 1px; background: var(--velo); }
+.scheda { background: var(--carta); padding: 26px 0; }
+.scheda:first-child { padding-top: 0; }
+.scheda h3 {
+  font-family: var(--serif); font-size: 20px; font-weight: 600; color: var(--inchiostro);
+  letter-spacing: -.012em; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+}
+.scheda h3 span { font-family: var(--mono); font-size: 11.5px; font-weight: 400; color: var(--tenue); letter-spacing: -.02em; }
+.scheda .cosa { font-size: 13.5px; color: var(--grigio); margin-top: 6px; }
+.bilancia { margin-top: 16px; display: grid; gap: 14px; }
+.bilancia div { font-size: 14.5px; line-height: 1.6; padding-left: 22px; position: relative; }
+.bilancia div::before {
+  position: absolute; left: 0; top: 0; font-family: var(--mono); font-size: 13px; color: var(--tenue);
+}
+.bilancia .pro::before   { content: "+"; }
+.bilancia .contro::before { content: "−"; }
+.bilancia .pro    { color: var(--testo); }
+.bilancia .contro { color: var(--grigio); }
+.scheda .fonte-s {
+  display: inline-block; margin-top: 14px; font-size: 12.5px; color: var(--tenue);
+  text-decoration: none; border-bottom: 1px solid var(--linea); padding-bottom: 1px;
+}
+.scheda .fonte-s:hover { color: var(--inchiostro); border-bottom-color: var(--inchiostro); }
+
+.chiuse { margin-top: 30px; display: grid; gap: 24px; }
+.chiusa { padding-left: 22px; border-left: 1px solid var(--linea); }
+.chiusa h4 {
+  font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--grigio);
+  display: flex; align-items: baseline; gap: 10px;
+}
+.chiusa h4 span { font-family: var(--mono); font-size: 11.5px; font-weight: 400; color: var(--tenue); }
+.chiusa p { font-size: 14.5px; line-height: 1.62; color: var(--grigio); margin-top: 7px; }
+
+/* ── Piede ──────────────────────────────────────────────────────────── */
+.piede {
+  max-width: 660px; margin: clamp(64px, 10vh, 104px) auto 0; padding: 30px 24px 60px;
+  border-top: 1px solid var(--velo); font-size: 12.5px; color: var(--tenue); line-height: 1.75;
+}
+.piede a { color: var(--grigio); text-decoration: none; border-bottom: 1px solid var(--linea); }
+.piede a:hover { color: var(--inchiostro); }
+
+/* ── L'unica animazione: le linee si disegnano una volta sola ───────── */
+@media (prefers-reduced-motion: no-preference) {
+  .rami path.disegna { stroke-dasharray: var(--len); stroke-dashoffset: var(--len);
+    animation: tratto 1.5s cubic-bezier(.4,0,.2,1) forwards; }
+  .rami path.ramo-vivo.disegna { animation-delay: .75s; animation-duration: 1.1s; }
+  @keyframes tratto { to { stroke-dashoffset: 0; } }
+}
+
+/* ── Sotto i 1000 px: una colonna, pannello a foglio ────────────────── */
+@media (max-width: 1000px) {
+  .impianto { grid-template-columns: minmax(0, 1fr); gap: 0; padding-bottom: 0; }
+  .tracce-riga { grid-template-columns: repeat(2, 1fr) !important; }
+  .griglia { grid-template-columns: 58px minmax(0, 1fr); }
+  /* i nodi portano grid-column inline (colonna della traccia): senza !important
+     restano 6 colonne implicite e la pagina scorre in orizzontale. */
+  .nodo, .nodo.tronco { grid-column: 2 !important; }
+  .anno { grid-column: 1 !important; }
+  .nodo { padding: 9px 0 12px 16px; }
+
+  .pannello {
+    position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 40;
+    background: var(--carta); border-left: 0; border-top: 1px solid var(--linea);
+    box-shadow: 0 -10px 34px rgba(20,22,26,.13);
+    padding: 22px 24px calc(28px + env(safe-area-inset-bottom));
+    max-height: 76vh; overflow-y: auto; min-height: 0;
+    transform: translateY(101%); transition: transform .28s cubic-bezier(.32,.72,0,1);
+  }
+  .pannello.aperto { transform: translateY(0); }
+  .pannello .vuoto { display: none; }
+  .pannello .chiudi {
+    display: block; position: absolute; top: 14px; right: 16px;
+    background: var(--pagina); border: 0; border-radius: 50%; width: 32px; height: 32px;
+    cursor: pointer; color: var(--grigio); font-size: 19px; line-height: 1;
+  }
+  .pannello h2 { font-size: 22px; padding-right: 40px; }
+}
+
+@media (max-width: 560px) {
+  .tracce-riga { grid-template-columns: 1fr !important; }
+  .traccia-cap span { display: none; }
+  .traccia-cap { padding: 7px 4px 8px; }
+  .griglia { grid-template-columns: 50px minmax(0, 1fr); }
+  .anno { font-size: 11px; padding-right: 10px; }
+  .nodo .etichetta { font-size: 14.5px; }
+  .nodo.tronco .etichetta { font-size: 16px; }
+  .nodo.tronco.cardine .etichetta { font-size: 17px; }
+}
