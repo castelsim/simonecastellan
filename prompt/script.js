@@ -235,12 +235,6 @@
     if (c) { apriCategoria(c.dataset.g); history.replaceState(null, '', '#' + scelta.id); return; }
     var vb = t.closest && t.closest('.voce-btn');
     if (vb) { scegli(vb.dataset.id); history.replaceState(null, '', '#' + vb.dataset.id); if (window.track) track('click', 'Prompt:apri:' + vb.dataset.id); return; }
-    var s = t.closest && t.closest('.ingresso a');
-    if (s) {
-      e.preventDefault();
-      if (vaiA(s.getAttribute('href'), true)) history.replaceState(null, '', '#' + scelta.id);
-      if (window.track) track('click', 'Prompt:ingresso:' + s.getAttribute('href').slice(1));
-    }
   });
   tendina.addEventListener('change', function () { apriCategoria(tendina.value); history.replaceState(null, '', '#' + scelta.id); });
   window.addEventListener('hashchange', function () { vaiA(location.hash, true); });

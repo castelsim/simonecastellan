@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <title>Prompt — capire un progetto prima di agire</title>
-  <meta name="description" content="Prompt da incollare all'agente AI che lavora al tuo progetto: capisce, ti riferisce e ti chiede cosa fare. Sicurezza, funzionamento, interfaccia e altro." />
+  <meta name="description" content="Prompt da incollare all'agente AI: capisce, ti riferisce e ti chiede cosa fare. Progetti (sicurezza, bug, interfaccia) e file del computer." />
   <meta name="theme-color" content="#ffffff" />
   <link rel="canonical" href="https://simonecastellan.com/prompt/" />
 
@@ -31,21 +31,7 @@
       <h1 class="titolone">Prompt.<br><span class="eco">Prima capire, poi decidere.</span></h1>
       <p class="apertura">Istruzioni da incollare all'agente AI che lavora al tuo progetto. Quasi tutte
         <b>non toccano niente</b>: l'agente capisce, ti riferisce e ti chiede cosa vuoi fare.</p>
-
-      <ol class="giro" aria-label="Come funzionano">
-        <li><b>1 · Capisce</b><span>Legge e prova, senza toccare niente</span></li>
-        <li><b>2 · Ti riferisce</b><span>Cosa ha trovato, con le prove</span></li>
-        <li><b>3 · Ti chiede</b><span>«Quali vuoi che faccia?»</span></li>
-        <li class="tu"><b>4 · Decidi tu</b><span>Rispondi con i numeri delle azioni</span></li>
-      </ol>
     </header>
-
-    <!-- L'ingresso: per chi non sa da quale categoria partire. Sono link veri alle
-         schede, quindi portano al posto giusto anche senza JavaScript. -->
-    <nav class="ingresso" aria-labelledby="titIngresso">
-      <h2 class="lbl" id="titIngresso">Cosa ti serve adesso?</h2>
-      <ul><li><a class="scelta" href="#stato"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><polyline points="20 4 20 9 15 9"/></svg><b>Sapere a che punto sono</b><span>Stato, blocchi, prossimo passo</span></a></li><li><a class="scelta" href="#salute"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><polyline points="20 4 20 9 15 9"/></svg><b>Un controllo periodico</b><span>Automatismi, errori, scadenze</span></a></li><li><a class="scelta" href="#cambiato"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><polyline points="20 4 20 9 15 9"/></svg><b>Ho appena cambiato qualcosa</b><span>Cosa potrebbe essersi rotto</span></a></li><li><a class="scelta" href="#pubblicare"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><polyline points="20 4 20 9 15 9"/></svg><b>Sto per pubblicare</b><span>Cosa blocca, cosa può aspettare</span></a></li><li><a class="scelta" href="#migliorare"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><polyline points="20 4 20 9 15 9"/></svg><b>Capire cosa migliorare</b><span>Dove un&#x27;ora rende di più</span></a></li><li><a class="scelta" href="#cat-funzionamento"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="8 12.5 11 15.5 16.5 9"/></svg><b>Controllare un aspetto</b><span>Sicurezza, interfaccia, prestazioni…</span></a></li><li><a class="scelta" href="#controprova"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="4" x2="12" y2="20"/><line x1="5" y1="7" x2="19" y2="7"/><path d="M5 7l-3 6a3 3 0 0 0 6 0z"/><path d="M19 7l-3 6a3 3 0 0 0 6 0z"/><line x1="8" y1="20" x2="16" y2="20"/></svg><b>Ho una lista di problemi</b><span>Capire quali sono veri</span></a></li><li><a class="scelta" href="#cat-agire"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="7 4 19 12 7 20 7 4"/></svg><b>Ho deciso cosa fare</b><span>I prompt che agiscono</span></a></li></ul>
-    </nav>
 
     <!-- Il catalogo. I prompt stanno nel markup, non li costruisce il JavaScript:
          si leggono senza script, li leggono motori e assistenti, e la skill /prompt
@@ -414,6 +400,149 @@ Non inventare fonti: se non trovi conferma, scrivi «non verificato».</pre>
         </article>
         </div>
       </section>
+      <section class="categoria" id="cat-file" data-g="file" aria-labelledby="t-file">
+        <h2 class="cat-titolo" id="t-file"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>File e cartelle</span></h2>
+        <p class="cat-sotto">Il computer si ritrova?</p>
+        <div class="voci">
+        <article class="voce" id="spazio">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#spazio" aria-label="Copia il link a Dove va lo spazio">#</a></div>
+          <h3 class="nome" id="n-spazio">Dove va lo spazio</h3>
+          <p class="quando">Quando il disco è pieno e non sai di cosa.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Cosa occupa il disco e cosa è fermo da anni</span></li><li><span class="k">Ti riferisce</span><span class="v">Le voci più pesanti, con peso, data e a cosa servono</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Cosa vuoi archiviare o togliere?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Dove va lo spazio, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Dove va lo spazio</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Fammi capire come è occupato il disco di questo computer e cosa non serve più.
+
+1. Misura le cartelle principali della mia home (Scrivania, Documenti, Download, Immagini, Filmati, Musica, cartelle di lavoro): quanto pesano e quando sono state toccate l&#x27;ultima volta. Salta le cartelle di sistema, le librerie interne delle applicazioni, le cache e le cartelle di dipendenze; dimmi cosa hai escluso.
+2. Elenca le venti voci più pesanti con peso, ultima modifica e a cosa servono, per quello che capisci dai nomi e dal contenuto.
+3. Separa: roba viva, roba ferma da più di un anno, roba che si può ricreare (cache, esportazioni, copie di lavoro).
+4. Dove non capisci a cosa serve una cartella, dillo invece di indovinare.
+
+Non spostare, rinominare o cancellare niente.</pre>
+          </details>
+        </article>
+        <article class="voce" id="scrivania">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#scrivania" aria-label="Copia il link a Scrivania e Download">#</a></div>
+          <h3 class="nome" id="n-scrivania">Scrivania e Download</h3>
+          <p class="quando">Quando la scrivania non si vede più e i download sono un magazzino.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Cosa si è accumulato e a quale progetto appartiene</span></li><li><span class="k">Ti riferisce</span><span class="v">Un gruppo per argomento, con la destinazione proposta</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Approvi queste destinazioni?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Scrivania e Download, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Scrivania e Download</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Guarda cosa si è accumulato sulla Scrivania e nella cartella Download, e proponi dove va.
+
+1. Elenca i file con data, peso e tipo. Raggruppali per argomento o progetto, non per estensione.
+2. Per ogni gruppo proponi una destinazione fra le cartelle che uso già, dicendo perché. Se serve una cartella nuova, dillo.
+3. Tieni da parte i dubbi: file che non capisci, roba personale, cose scaricate per caso.
+4. Segnala ciò che si può buttare senza perdere niente (installatori già usati, doppioni scaricati, archivi già estratti).
+
+Non spostare né rinominare niente: prepara l&#x27;elenco delle destinazioni e fammelo approvare.</pre>
+          </details>
+        </article>
+        <article class="voce" id="doppioni">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#doppioni" aria-label="Copia il link a Doppioni e copie">#</a></div>
+          <h3 class="nome" id="n-doppioni">Doppioni e copie</h3>
+          <p class="quando">Quando esistono «copia 2», «finale» e «finale vero» della stessa cosa.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Quali file sono identici e quali sono versioni della stessa cosa</span></li><li><span class="k">Ti riferisce</span><span class="v">I gruppi, con quale terrei e quanto spazio si libera</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali gruppi vuoi ripulire?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Doppioni e copie, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Doppioni e copie</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Cerca i file doppi e le versioni multiple della stessa cosa.
+
+1. Prima i file identici per contenuto, non solo per nome, nelle cartelle che ti indico o nella mia home, escludendo sistema, cache e librerie delle applicazioni.
+2. Poi le famiglie di versioni: «copia», «copia 2», «finale», date diverse, esportazioni ripetute.
+3. Per ogni gruppo indica quale terresti e perché (più recente, in un percorso ordinato, richiamato da altri file), e quanto spazio si libera.
+4. Metti a parte i casi delicati: file dentro cartelle sincronizzate con la nuvola, dentro repository, o che potrebbero essere richiamati da un programma.
+
+Non cancellare e non spostare niente.</pre>
+          </details>
+        </article>
+        <article class="voce" id="nomi">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#nomi" aria-label="Copia il link a Nomi e struttura">#</a></div>
+          <h3 class="nome" id="n-nomi">Nomi e struttura</h3>
+          <p class="quando">Quando ogni cartella segue una logica diversa e non trovi più le cose.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Come sono organizzate oggi le cartelle e quali regole segui già</span></li><li><span class="k">Ti riferisce</span><span class="v">Le regole dedotte, con esempi, e dove non le segui</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Adotto questa convenzione? Da dove comincio?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Nomi e struttura, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Nomi e struttura</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Capisci come sono organizzate oggi le mie cartelle e proponi una regola che rispetti quello che già faccio.
+
+1. Guarda la struttura reale: come sono raggruppate le cartelle, che nomi hanno, quali schemi ricorrono (date, cliente, progetto, anno).
+2. Ricava le regole che seguo già, con esempi veri, e i punti dove non le seguo.
+3. Proponi una convenzione minima: nomi di file e cartelle, dove nasce una cosa nuova, dove finisce quando è chiusa. Poche regole, tutte applicabili a mano.
+4. Indica le cartelle che oggi si allontanano di più dalla regola e quanto costerebbe sistemarle.
+
+Non rinominare né spostare niente.</pre>
+          </details>
+        </article>
+        <article class="voce" id="archiviare">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#archiviare" aria-label="Copia il link a Roba finita">#</a></div>
+          <h3 class="nome" id="n-archiviare">Roba finita</h3>
+          <p class="quando">Quando le cartelle chiuse stanno ancora in mezzo a quelle vive.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Quali cartelle sono chiuse davvero e quali sembrano solo ferme</span></li><li><span class="k">Ti riferisce</span><span class="v">I candidati all&#x27;archivio, ognuno con la prova</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Quali archivio?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Roba finita, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Roba finita</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Trova cosa è finito e si può togliere di mezzo.
+
+1. Per ogni cartella di lavoro capisci se è viva, ferma o chiusa: ultima modifica, documenti di stato, scadenze passate, cose consegnate.
+2. Elenca i candidati all&#x27;archivio con la prova (date, note, stato) e cosa resterebbe da fare se non fosse chiusa davvero.
+3. Segnala quelle che sembrano ferme ma hanno una scadenza futura o un&#x27;azione pendente: quelle non si archiviano.
+4. Proponi dove archiviarle, rispettando le cartelle di archivio che uso già.
+
+Non spostare niente.</pre>
+          </details>
+        </article>
+        <article class="voce" id="copie">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#copie" aria-label="Copia il link a File senza copia">#</a></div>
+          <h3 class="nome" id="n-copie">File senza copia</h3>
+          <p class="quando">Quando non sai cosa perderesti se il computer sparisse oggi.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Quali file esistono in un posto solo</span></li><li><span class="k">Ti riferisce</span><span class="v">Cosa non ha copia, in ordine di danno se sparisse</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Cosa metto al sicuro, e dove?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt File senza copia, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> File senza copia</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Capisci quali dei miei file esistono in un posto solo.
+
+1. Individua i dati che non si possono ricreare: documenti, registrazioni, foto, progetti, archivi contabili, chiavi e credenziali. Delle credenziali segnala solo dove stanno: non aprirle e non riportarne il contenuto.
+2. Controlla quali copie esistono davvero: backup del sistema (quando è riuscito l&#x27;ultimo), cartelle sincronizzate con la nuvola, repository con copia remota. «È configurato» non basta: cerca la prova.
+3. Elenca ciò che non ha nessuna copia, in ordine di danno se sparisse.
+4. Per ogni voce proponi dove metterla al sicuro e quanto spazio occuperebbe.
+
+Non copiare né spostare file.</pre>
+          </details>
+        </article>
+        <article class="voce" id="media">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#media" aria-label="Copia il link a Foto, audio e video">#</a></div>
+          <h3 class="nome" id="n-media">Foto, audio e video</h3>
+          <p class="quando">Quando i file pesanti sono ovunque e non sai quali servono ancora.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Cosa è irripetibile e cosa si può ricreare</span></li><li><span class="k">Ti riferisce</span><span class="v">Peso, età e destino proposto per ogni gruppo</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Cosa comprimo o sposto?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Foto, audio e video, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Foto, audio e video</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Guarda quanto pesano i file multimediali e cosa si può alleggerire.
+
+1. Trova le cartelle con foto, registrazioni, sessioni audio, progetti video ed esportazioni; misura peso e date.
+2. Distingui gli originali irripetibili da ciò che si ricrea: render, esportazioni, bounce, cache dei programmi.
+3. Segnala le sproporzioni: video enormi per un uso che non li richiede, foto esportate più volte, registrazioni mai usate.
+4. Proponi cosa comprimere, cosa spostare su un disco esterno e cosa lasciare dov&#x27;è, con il guadagno stimato.
+
+Non convertire, non spostare, non cancellare.</pre>
+          </details>
+        </article>
+        <article class="voce" id="regola">
+          <div class="testa"><span class="badge capisce">Non tocca niente · ti chiede</span><a class="ancora" href="#regola" aria-label="Copia il link a Una regola che si ripete">#</a></div>
+          <h3 class="nome" id="n-regola">Una regola che si ripete</h3>
+          <p class="quando">Quando lo stesso smistamento lo rifai ogni settimana a mano.</p>
+          <ol class="ciclo"><li><span class="k">Capisce</span><span class="v">Quale sistemazione rifai sempre a mano</span></li><li><span class="k">Ti riferisce</span><span class="v">Da una a tre regole automatiche, con cosa può andare storto</span></li><li class="dom"><span class="k">Poi ti chiede</span><span class="v">«Attivo la regola?»</span></li></ol>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Una regola che si ripete, con le regole">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Una regola che si ripete</span> <span class="piu">+ regole comuni</span></summary>
+<pre class="testo">Aiutami a trasformare uno smistamento che faccio a mano in una regola che si ripete.
+
+1. Guarda dove si accumulano sempre le stesse cose e come le sistemo di solito, deducendolo dai nomi e dalla posizione dei file già sistemati.
+2. Proponi da una a tre regole automatiche: cosa guardare, con quale criterio, dove finisce il file, cosa fare in caso di dubbio.
+3. Per ognuna dimmi come si annulla, cosa può andare storto (file spostato per sbaglio, nomi simili, cartelle sincronizzate) e come me ne accorgerei.
+4. Indica come realizzarla con quello che ho già sul computer, e cosa servirebbe installare.
+
+Non attivare e non installare niente.</pre>
+          </details>
+        </article>
+        </div>
+      </section>
+
       <section class="categoria" id="cat-decidere" data-g="decidere" aria-labelledby="t-decidere">
         <h2 class="cat-titolo" id="t-decidere"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="4" x2="12" y2="20"/><line x1="5" y1="7" x2="19" y2="7"/><path d="M5 7l-3 6a3 3 0 0 0 6 0z"/><path d="M19 7l-3 6a3 3 0 0 0 6 0z"/><line x1="8" y1="20" x2="16" y2="20"/></svg><span>Prima di agire</span></h2>
         <p class="cat-sotto">Per decidere bene cosa fare.</p>
@@ -526,6 +655,30 @@ In cima al diario: pronto, da confermare, bloccato, da dove ripartire.</pre>
 3. Se c&#x27;è git, salva con commit chiari sul ramo di lavoro. Unire e pubblicare restano decisioni mie, salvo autorizzazione già data.
 4. Aggiorna i documenti di stato.
 5. Consegnami il resoconto: cosa è pronto e dove, come l&#x27;hai verificato, cosa non hai potuto verificare, il prossimo passo.</pre>
+          </details>
+        </article>
+        <article class="voce" id="sposta" data-agisce>
+          <div class="testa"><span class="badge agisce">Agisce sui tuoi file</span><a class="ancora" href="#sposta" aria-label="Copia il link a Sposta come deciso">#</a></div>
+          <h3 class="nome" id="n-sposta">Sposta come deciso</h3>
+          <p class="quando">Dopo aver approvato un elenco di spostamenti.</p>
+          <ol class="passi"><li>Ti ripete l&#x27;elenco esatto prima di toccare qualcosa</li><li>Sposta solo ciò che hai approvato, tenendo un registro</li><li>Niente cancellazioni: lo scarto va in una cartella a parte</li></ol><dl class="identita"><div><dt>Cosa tocca</dt><dd>Sposta i file approvati, non ne cancella nessuno</dd></div><div><dt>Si ferma</dt><dd>Prima di cancellare, di toccare cartelle sincronizzate o librerie di programmi</dd></div><div><dt>Ti consegna</dt><dd>Registro degli spostamenti e comando per annullare</dd></div></dl>
+          <div class="azioni"><button type="button" class="btn copia" aria-label="Copia il prompt Sposta come deciso">Copia il prompt</button></div>
+          <details class="leggi"><summary>Leggi il prompt<span class="vh"> Sposta come deciso</span></summary>
+<pre class="testo">Esegui gli spostamenti di file che ho approvato.
+
+PRIMA
+- Ripeti l&#x27;elenco esatto: da dove a dove, quanti file, quanto pesano. Se qualcosa è cambiato da quando l&#x27;abbiamo deciso, fermati e dimmelo.
+- Crea le cartelle di destinazione che mancano.
+
+MENTRE
+- Sposta un gruppo alla volta e verifica che i file siano arrivati.
+- Non sovrascrivere mai: se il nome esiste già, aggiungi un suffisso e segnalalo.
+- Niente cancellazioni: ciò che ho scartato va in una cartella `_DA_ELIMINARE` con la data, che svuoto io.
+- Non toccare cartelle sincronizzate con la nuvola, librerie di programmi (foto, musica, posta) e repository senza avvisarmi prima.
+- Tieni un registro riga per riga, con percorso di partenza e di arrivo.
+
+ALLA FINE
+Dimmi quanti file hai spostato, quanto spazio si è liberato, cosa hai saltato e perché, e dove sono il registro e la cartella `_DA_ELIMINARE`. In fondo al registro scrivi il comando che annulla tutto.</pre>
           </details>
         </article>
         </div>
