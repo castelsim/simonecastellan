@@ -288,6 +288,12 @@ di concorso.
   italiana della Cultura 2029: le transazioni sulla rete Bitcoin diventano luce e suono in
   diretta, dati da mempool.space.
 
+- **Le cinque strade che portano a Bitcoin** (https://simonecastellan.com/satoshi/) — mappa
+  cronologica interattiva 1976-2011: cinque filoni di ricerca indipendenti — chiave pubblica,
+  moneta anonima, marca temporale, prova di lavoro, crittografia come pratica politica — che
+  convergono nel white paper firmato Satoshi Nakamoto. Ventisette tappe, ognuna con la propria
+  fonte primaria, e cinque profili dei nomi che ricorrono nelle attribuzioni.
+
 Interessi dichiarati: tecnologia, AI e automazione applicate alla produzione; Bitcoin come
 tecnologia e cultura della decentralizzazione, non come speculazione.
 

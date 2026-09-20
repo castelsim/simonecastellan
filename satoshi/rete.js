@@ -15,7 +15,12 @@
   const ANCORA = 150;           // dove i nomi leggono la posizione della loro linea
 
   /* misure dei due orientamenti */
-  const ORIZZ = { inizio: 172, corsia0: 96, passoCorsia: 34, coda: 200, livelli: [-15, -34] };
+  /* Geometria misurata, non stimata. Il riquadro di un'etichetta è alto 17 px
+     (ascendenti + discendenti), il pallino ha raggio 5,5. Perché due livelli di
+     etichette non tocchino né il pallino della corsia sopra né l'altro livello,
+     servono 56 px di passo: con 34 i nomi finivano scritti sulla corsia sbagliata,
+     con 44 il testo copriva ancora il pallino del vicino e ne rubava il clic. */
+  const ORIZZ = { inizio: 214, corsia0: 96, passoCorsia: 56, coda: 200, livelli: [-14, -34] };
   const VERT  = { inizio: 54,  corsia0: 30, passoCorsia: 44, coda: 140, testo: 26 };
 
   const ordinati = NODI.map((n, i) => ({ ...n, _i: i }))
@@ -53,7 +58,10 @@
 
     const tConv = T(iConv), tUlt = T(ordinati.length - 1);
     let coda = misure.coda;
-    if (!V) coda = Math.max(200, mappa.clientWidth - (tUlt - tConv) - ANCORA + 90);
+    /* La coda serve a poter portare la convergenza fino al bordo dove i nomi
+       leggono la loro linea. In «Tutta la mappa» non si scorre: lì è solo vuoto. */
+    if (!V) coda = (modo === 'tutta') ? 120
+                 : Math.max(200, mappa.clientWidth - (tUlt - tConv) - ANCORA + 90);
     const lungo = tUlt + coda;
     const largo = misure.corsia0 + (TRACCE.length - 1) * misure.passoCorsia + (V ? 190 : 58);
 
@@ -92,8 +100,14 @@
     const fine = tUlt + (V ? 90 : 76);
     svg.appendChild(fai('path', {
       d: V ? `M ${tronco} ${tConv} L ${tronco} ${fine}` : `M ${tConv} ${tronco} L ${fine} ${tronco}`,
-      class: 'linea linea-viva', stroke: 'url(#sfumaFine)'
+      class: 'linea linea-viva', stroke: 'url(#sfumaFine)', 'data-tronco': '1'
     }));
+
+    /* Le aree di presa vanno tutte in un piano sotto i contenuti: disegnate
+       dentro i rispettivi gruppi, quella della stazione successiva finiva sopra
+       il testo della precedente e ne rubava il clic. */
+    const piano = fai('g', { class: 'prese' });
+    svg.appendChild(piano);
 
     /* le stazioni */
     let annoScritto = null;
@@ -107,9 +121,11 @@
       if (n.traccia === 'tronco') g.dataset.tronco = '1';
       if (n.cardine) g.dataset.cardine = '1';
 
-      g.appendChild(fai('rect', { class: 'presa',
+      const presa = fai('rect', { class: 'presa',
         x: V ? pt.x - 20 : pt.x - PASSO / 2, y: V ? pt.y - PASSO / 2 : pt.y - 46,
-        width: V ? w - pt.x + 20 : PASSO, height: V ? PASSO : 70 }));
+        width: V ? w - pt.x + 20 : PASSO, height: V ? PASSO : 70 });
+      presa.addEventListener('click', () => apri(i));
+      piano.appendChild(presa);
       g.appendChild(fai('circle', { class: 'bolla', cx: pt.x, cy: pt.y,
         r: n.cardine ? 7.5 : (n.traccia === 'tronco' ? 6 : 5.5) }));
 
@@ -132,6 +148,45 @@
       indice.set(n.id, { dato: n, nodo: g, t: T(i), i });
     });
     if (filtro) accendi(filtro);
+    /* dopo un ridisegno il pallino nero spariva mentre il pannello continuava
+       a mostrare quel nodo: DOM e stato divergevano */
+    if (scelto && indice.has(scelto)) indice.get(scelto).nodo.setAttribute('aria-pressed', 'true');
+    if (!V) sfoltisci();
+  }
+
+  /* A passo stretto le etichette lunghe si accavallano fra loro e sugli anni.
+     Si misura il testo davvero disegnato e si tengono solo quelle che stanno:
+     i nodi cardine hanno la precedenza, il resto resta comunque nel pannello
+     e nella sezione in chiaro più sotto. */
+  function sfoltisci() {
+    /* Anni e nomi vanno considerati insieme: l'anno di una corsia cade alla
+       stessa altezza dei nomi della corsia sotto, e si sovrapponevano. */
+    const tutti = [];
+    svg.querySelectorAll('.stazione .nome, .stazione .anno').forEach(t => {
+      t.classList.remove('nascosto');
+      const g = t.closest('.stazione');
+      tutti.push({ t, anno: t.classList.contains('anno'),
+                   cardine: g && g.dataset.cardine === '1' });
+    });
+    const righe = {};
+    tutti.forEach(v => {
+      const b = v.t.getBBox();
+      v.x0 = b.x; v.x1 = b.x + b.width;
+      const y = Math.round((b.y + b.height / 2) / 9) * 9;   /* fasce da 9 px */
+      (righe[y] = righe[y] || []).push(v);
+    });
+    Object.values(righe).forEach(riga => {
+      riga.sort((a, b) => a.x0 - b.x0);
+      const tenuti = [];
+      const prova = v => {
+        if (tenuti.some(k => v.x0 < k.x1 + 7 && k.x0 < v.x1 + 7)) v.t.classList.add('nascosto');
+        else tenuti.push(v);
+      };
+      /* prima i nodi cardine, poi gli anni, poi il resto */
+      riga.filter(v => v.cardine && !v.anno).forEach(prova);
+      riga.filter(v => v.anno).forEach(prova);
+      riga.filter(v => !v.cardine && !v.anno).forEach(prova);
+    });
   }
 
   function campiona(path, n = 240) {
@@ -234,8 +289,8 @@
   function adatta() {
     if (vert()) PASSO = 76;
     else if (modo === 'tutta') {
-      const utile = mappa.clientWidth - ORIZZ.inizio - 200;
-      PASSO = Math.max(52, Math.min(96, utile / (ordinati.length - 1)));
+      const utile = mappa.clientWidth - ORIZZ.inizio - 140;  /* inizio + coda reali */
+      PASSO = Math.max(44, Math.min(96, utile / (ordinati.length - 1)));
     } else PASSO = 112;
     disegna();
   }
@@ -253,7 +308,9 @@
     mappa.classList.add('filtra');
     indice.forEach(v => v.nodo.classList.toggle('acceso',
       v.dato.traccia === t || v.dato.traccia === 'tronco'));
-    svg.querySelectorAll('.linea').forEach(p => p.classList.toggle('acceso', p.dataset.traccia === t));
+    /* il tronco resta acceso con qualunque filtro: da lì in poi i filoni sono uno solo */
+    svg.querySelectorAll('.linea').forEach(p =>
+      p.classList.toggle('acceso', p.dataset.traccia === t || p.dataset.tronco === '1'));
   }
   function filtra(t) {
     const spegni = filtro === t;
@@ -277,7 +334,7 @@
   });
 
   /* ── dettaglio ────────────────────────────────────────────────────── */
-  function apri(i, fermo) {
+  function apri(i, fermo, torna) {
     const n = ordinati[i]; if (!n) return;
     const v = indice.get(n.id); if (!v) return;
     if (scelto) { const p = indice.get(scelto); if (p) p.nodo.setAttribute('aria-pressed', 'false'); }
@@ -300,14 +357,23 @@
     const pre = el('button', null, '← Prima'), pro = el('button', null, 'Dopo →');
     pre.type = pro.type = 'button';
     pre.disabled = i === 0; pro.disabled = i === ordinati.length - 1;
-    pre.addEventListener('click', () => apri(i - 1));
-    pro.addEventListener('click', () => apri(i + 1));
+    pre.addEventListener('click', () => apri(i - 1, false, 'pre'));
+    pro.addEventListener('click', () => apri(i + 1, false, 'pro'));
     passi.appendChild(pre); passi.appendChild(pro);
     foglio.appendChild(passi);
+    /* il pannello viene ricostruito da capo: senza questo il pulsante appena
+       premuto sparisce sotto le dita e il fuoco cade sul corpo del documento */
+    if (torna === 'pre' && !pre.disabled) pre.focus();
+    if (torna === 'pro' && !pro.disabled) pro.focus();
     history.replaceState(null, '', '#' + n.id);
 
-    if (!fermo && !vert() && mappa.scrollWidth > mappa.clientWidth) {
-      mappa.scrollTo({ left: Math.max(0, v.t - mappa.clientWidth / 2), behavior: 'smooth' });
+    /* Portare il lettore dove è comparso il testo. In verticale il pannello sta
+       sotto tutta la mappa: senza questo, toccare una stazione sembra non fare nulla. */
+    const dolce = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    if (!fermo) {
+      if (vert()) foglio.scrollIntoView({ behavior: dolce, block: 'start' });
+      else if (mappa.scrollWidth > mappa.clientWidth)
+        mappa.scrollTo({ left: Math.max(0, v.t - mappa.clientWidth / 2), behavior: dolce });
     }
   }
 
@@ -315,10 +381,15 @@
     const avanti = vert() ? 'ArrowDown' : 'ArrowRight';
     const indietro = vert() ? 'ArrowUp' : 'ArrowLeft';
     if (e.key !== avanti && e.key !== indietro) return;
-    if (apertoIdx < 0 && !document.activeElement.classList.contains('stazione')) return;
+    /* Solo mentre si sta davvero navigando la mappa o il pannello: prima bastava
+       aver aperto un nodo perché le frecce smettessero di scorrere la pagina. */
+    const dove = document.activeElement;
+    if (!dove || !dove.closest('.mappa-guscio, .foglio')) return;
     e.preventDefault();
-    const i = apertoIdx >= 0 ? apertoIdx
-            : ordinati.findIndex(n => n.id === document.activeElement.dataset.id);
+    const i = dove.dataset && dove.dataset.id
+            ? ordinati.findIndex(n => n.id === dove.dataset.id)
+            : apertoIdx;
+    if (i < 0) return;
     const k = i + (e.key === avanti ? 1 : -1);
     if (ordinati[k]) { apri(k); const v = indice.get(ordinati[k].id);
       if (v) v.nodo.focus({ preventScroll: true }); }
@@ -330,32 +401,18 @@
     if (vert() || e.target.closest('.stazione')) return;
     giu = true; x0 = e.clientX; s0 = mappa.scrollLeft; mappa.classList.add('trascino');
   });
-  addEventListener('pointerup', () => { giu = false; mappa.classList.remove('trascino'); });
-  addEventListener('pointermove', e => { if (giu) mappa.scrollLeft = s0 - (e.clientX - x0); });
+  const mollaLaPresa = () => { giu = false; mappa.classList.remove('trascino'); };
+  addEventListener('pointerup', mollaLaPresa);
+  addEventListener('pointercancel', mollaLaPresa);
+  addEventListener('blur', mollaLaPresa);
+  addEventListener('pointermove', e => {
+    if (!giu) return;
+    if (e.buttons === 0) { mollaLaPresa(); return; }   /* rilasciato fuori dalla finestra */
+    mappa.scrollLeft = s0 - (e.clientX - x0);
+  });
 
-  /* ── le schede in fondo: i nomi che ricorrono, e le piste chiuse ──── */
-  const box = document.querySelector('.schede');
-  CANDIDATI.forEach(k => {
-    const s = el('article', 'scheda');
-    const h = el('h3', null, k.nome); h.appendChild(el('span', null, k.vissuto));
-    s.appendChild(h);
-    s.appendChild(el('p', 'cosa', k.cosa));
-    const bil = el('div', 'bilancia');
-    bil.appendChild(el('div', 'pro', k.a_favore));
-    bil.appendChild(el('div', 'contro', k.contro));
-    s.appendChild(bil);
-    if (k.fonte) { const a = el('a', 'fonte-s', k.fonte.testo); a.href = k.fonte.url;
-      a.target = '_blank'; a.rel = 'noopener'; s.appendChild(a); }
-    box.appendChild(s);
-  });
-  const boxC = document.querySelector('.chiuse');
-  CHIUSE.forEach(k => {
-    const d = el('div', 'chiusa');
-    const h = el('h3', null, k.nome); h.appendChild(el('span', null, k.anno));
-    d.appendChild(h);
-    d.appendChild(el('p', null, k.testo));
-    boxC.appendChild(d);
-  });
+  /* Le schede e le attribuzioni ora sono scritte in index.html da
+     ops/prerender.mjs: non si generano più qui. */
 
   const parti = () => {
     adatta(); muoviNomi();
@@ -363,6 +420,7 @@
     const k = ordinati.findIndex(n => n.id === anc);
     if (k >= 0) setTimeout(() => apri(k), 200);
   };
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(parti);
-  else addEventListener('load', parti);
+  /* i font non devono poter trattenere la mappa: al più un secondo e mezzo */
+  const pronti = (document.fonts && document.fonts.ready) || Promise.resolve();
+  Promise.race([pronti, new Promise(r => setTimeout(r, 1500))]).then(parti);
 })();

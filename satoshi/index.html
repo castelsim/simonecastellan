@@ -8,9 +8,9 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Le cinque strade che portano a Bitcoin — 1976-2011</title>
-<meta name="description" content="Bitcoin non nasce da un'idea sola. Cinque filoni di ricerca indipendenti, dal 1976 al 2008, si chiudono in nove pagine firmate da un nome che non esiste. Una mappa interattiva, con le fonti.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Le cinque strade che portano a Bitcoin e a Satoshi Nakamoto</title>
+<meta name="description" content="Cinque filoni di ricerca, dal 1976 al 2008, si chiudono in nove pagine firmate Satoshi Nakamoto. La mappa delle strade che portano a Bitcoin, con le fonti.">
 <meta name="author" content="Simone Castellan">
 <meta name="copyright" content="© 2026 Simone Castellan — simonecastellan.com">
 <meta name="rights" content="Codice e design originali di Simone Castellan. Firma: SCASTELLAN·AVA·2026">
@@ -22,20 +22,24 @@
 <meta property="og:type" content="article">
 <meta property="og:locale" content="it_IT">
 <meta property="og:site_name" content="Simone Castellan">
-<meta property="og:title" content="Le cinque strade che portano a Bitcoin">
+<meta property="og:title" content="Le cinque strade che portano a Bitcoin e a Satoshi Nakamoto">
 <meta property="og:description" content="Dal 1976 al 2011: cinque filoni di ricerca indipendenti che convergono in nove pagine. Mappa interattiva con le fonti.">
 <meta property="og:url" content="https://simonecastellan.com/satoshi/">
 <meta property="og:image" content="https://simonecastellan.com/og-image.png?v=2">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Le cinque strade che portano a Bitcoin — mappa cronologica 1976-2011">
+<meta name="twitter:image:alt" content="Le cinque strade che portano a Bitcoin — mappa cronologica 1976-2011">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Le cinque strade che portano a Bitcoin">
+<meta name="twitter:title" content="Le cinque strade che portano a Bitcoin e a Satoshi Nakamoto">
 <meta name="twitter:description" content="Dal 1976 al 2011: cinque filoni di ricerca indipendenti che convergono in nove pagine.">
 <meta name="twitter:image" content="https://simonecastellan.com/og-image.png?v=2">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- non bloccante: con il <link> normale, una richiesta appesa lasciava la pagina vuota -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap"></noscript>
 <link rel="stylesheet" href="style.css">
 
 <script type="application/ld+json">
@@ -47,6 +51,9 @@
   "inLanguage": "it",
   "author":    { "@type": "Person", "name": "Simone Castellan", "url": "https://simonecastellan.com/" },
   "publisher": { "@type": "Person", "name": "Simone Castellan", "url": "https://simonecastellan.com/" },
+  "datePublished": "2026-09-20",
+  "dateModified": "2026-09-20",
+  "image": "https://simonecastellan.com/og-image.png",
   "mainEntityOfPage": "https://simonecastellan.com/satoshi/",
   "about": [
     { "@type": "Thing", "name": "Bitcoin" },
@@ -77,8 +84,8 @@
 <div class="barra">
   <div class="legenda" id="legenda" role="group" aria-label="Filtra per filone"></div>
   <div class="comandi">
-    <button type="button" id="tutta" class="int" aria-pressed="true">Tutta la mappa</button>
-    <button type="button" id="detta" class="int" aria-pressed="false">Dettaglio</button>
+    <button type="button" id="tutta" class="int" aria-pressed="true">Panoramica</button>
+    <button type="button" id="detta" class="int" aria-pressed="false">Ravvicinato</button>
   </div>
 </div>
 <p class="istruzioni">I nomi a sinistra seguono la loro linea. Dove le linee si uniscono, i nomi diventano uno solo.</p>
@@ -99,6 +106,225 @@
     <p class="vuoto">Ogni stazione è un pezzo che finirà dentro Bitcoin. Toccane una.</p>
   </aside>
 
+  <section class="sezione tappe-tutte">
+    <h2>Le ventisette tappe, in ordine</h2>
+    <p>
+      La stessa storia della mappa, da leggere di seguito. Ogni tappa porta la sua fonte:
+      dove esiste, il documento originale.
+    </p>
+    <div class="tappe">
+      <!-- TAPPE:inizio -->
+      <article class="tappa" id="t-diffie-hellman">
+        <p class="quando"><time>novembre 1976</time> · <span class="strada">La chiave pubblica</span></p>
+        <h3>Nuove direzioni in crittografia</h3>
+        <p class="chi">Whitfield Diffie e Martin Hellman</p>
+        <p class="dice">Fino a quel momento per scriversi in codice bisognava scambiarsi prima una chiave segreta, di persona o con un corriere. Diffie e Hellman dimostrano che due sconosciuti possono accordarsi su un segreto parlandosi a voce alta, davanti a tutti. È la crittografia a chiave pubblica: la base di ogni firma digitale, compresa quella che autorizza la spesa di un bitcoin.</p>
+        <p class="conta"><b>Perché conta</b> Senza firma digitale, chiunque potrebbe spendere il denaro di chiunque.</p>
+        <p class="dove"><a href="https://ee.stanford.edu/~hellman/publications/24.pdf" target="_blank" rel="noopener">Il paper originale (PDF)</a></p>
+      </article>
+      <article class="tappa" id="t-rsa">
+        <p class="quando"><time>aprile 1977</time> · <span class="strada">La chiave pubblica</span></p>
+        <h3>RSA, la firma che funziona</h3>
+        <p class="chi">Ron Rivest, Adi Shamir, Leonard Adleman</p>
+        <p class="dice">Diffie e Hellman avevano detto che si poteva fare. Tre ricercatori del MIT trovano come: un algoritmo pratico basato sulla difficoltà di scomporre numeri molto grandi. Da qui in poi la firma digitale non è più teoria, è un programma che gira.</p>
+        <p class="conta"><b>Perché conta</b> Bitcoin usa una firma a curva ellittica, discendente diretta di questa idea.</p>
+        <p class="dove"><a href="https://people.csail.mit.edu/rivest/Rsapaper.pdf" target="_blank" rel="noopener">Il paper originale (PDF)</a></p>
+      </article>
+      <article class="tappa" id="t-merkle">
+        <p class="quando"><time>1979</time> · <span class="strada">La chiave pubblica</span></p>
+        <h3>L’albero di Merkle</h3>
+        <p class="chi">Ralph Merkle</p>
+        <p class="dice">Un modo per riassumere migliaia di documenti in un unico codice corto, e poi dimostrare che un singolo documento sta dentro quel riassunto senza doverli rileggere tutti. Sembra un dettaglio contabile. È ciò che permette a un telefono di verificare una transazione senza scaricare l’intera catena.</p>
+        <p class="conta"><b>Perché conta</b> Ogni blocco di Bitcoin contiene la radice di un albero di Merkle.</p>
+        <p class="dove"><a href="https://www.ralphmerkle.com/papers/Thesis1979.pdf" target="_blank" rel="noopener">La tesi di Merkle (PDF)</a></p>
+      </article>
+      <article class="tappa" id="t-chaum-firme">
+        <p class="quando"><time>agosto 1982</time> · <span class="strada">La moneta anonima</span></p>
+        <h3>Le firme cieche</h3>
+        <p class="chi">David Chaum</p>
+        <p class="dice">Chaum inventa un modo per farsi firmare un documento da una banca senza che la banca possa leggerlo. Tradotto in denaro: la banca certifica che quella moneta è valida, ma non saprà mai dove finirà spesa. È il primo progetto serio di contante digitale, e nasce ventisei anni prima di Bitcoin.</p>
+        <p class="conta"><b>Perché conta</b> Il problema che Chaum pone — pagare senza essere schedati — è lo stesso che Bitcoin riprende.</p>
+        <p class="dove"><a href="https://chaum.com/wp-content/uploads/2022/01/Chaum-blind-signatures.pdf" target="_blank" rel="noopener">Blind signatures for untraceable payments</a></p>
+      </article>
+      <article class="tappa" id="t-digicash">
+        <p class="quando"><time>1989</time> · <span class="strada">La moneta anonima</span></p>
+        <h3>DigiCash, e un centro di troppo</h3>
+        <p class="chi">David Chaum, Amsterdam</p>
+        <p class="dice">Chaum fonda una società per vendere il suo contante digitale. La tecnologia funziona, alcune banche la provano, Microsoft si affaccia. Ma il sistema ha un cuore fragile: un’azienda che emette e garantisce. Quando l’azienda si ferma, si ferma la moneta.</p>
+        <p class="conta"><b>Perché conta</b> Il fallimento di DigiCash indica il problema da risolvere: togliere di mezzo l’emittente.</p>
+        <p class="dove"><a href="https://en.wikipedia.org/wiki/DigiCash" target="_blank" rel="noopener">DigiCash su Wikipedia</a></p>
+      </article>
+      <article class="tappa" id="t-haber-stornetta">
+        <p class="quando"><time>1991</time> · <span class="strada">La marca temporale</span></p>
+        <h3>Come datare un documento digitale</h3>
+        <p class="chi">Stuart Haber e W. Scott Stornetta</p>
+        <p class="dice">Un file si può retrodatare cambiando l’orologio del computer. I due ricercatori risolvono così: ogni documento viene legato al precedente in una catena, e la catena viene pubblicata dove tutti la vedono. Per falsificare una data bisognerebbe rifare ogni anello successivo. Questa è, alla lettera, una catena di blocchi.</p>
+        <p class="conta"><b>Perché conta</b> Il white paper li cita tre volte: sono i riferimenti più citati di tutto il documento.</p>
+        <p class="dove"><a href="https://link.springer.com/article/10.1007/BF00196791" target="_blank" rel="noopener">How to time-stamp a digital document</a></p>
+      </article>
+      <article class="tappa" id="t-pgp">
+        <p class="quando"><time>giugno 1991</time> · <span class="strada">Il codice come politica</span></p>
+        <h3>PGP finisce su internet</h3>
+        <p class="chi">Phil Zimmermann</p>
+        <p class="dice">Zimmermann pubblica gratuitamente un programma che dà a chiunque la crittografia forte, fino ad allora riservata a governi e grandi aziende. Il governo statunitense apre un’indagine: esportare crittografia forte equivaleva a esportare armi. L’indagine si chiuderà nel 1996 senza incriminazione.</p>
+        <p class="conta"><b>Perché conta</b> Stabilisce il precedente: il software si può pubblicare, e una volta pubblicato non si richiama.</p>
+        <p class="dove"><a href="https://www.philzimmermann.com/EN/essays/WhyIWrotePGP.html" target="_blank" rel="noopener">Il racconto di Zimmermann</a></p>
+      </article>
+      <article class="tappa" id="t-cypherpunk">
+        <p class="quando"><time>9 marzo 1993</time> · <span class="strada">Il codice come politica</span></p>
+        <h3>Il manifesto dei Cypherpunk</h3>
+        <p class="chi">Eric Hughes</p>
+        <p class="dice">Un gruppo di programmatori e matematici si scambia idee su una mailing list con una convinzione precisa: la privacy non si ottiene chiedendola per legge, si ottiene scrivendo il programma che la rende possibile. Da questa lista usciranno quasi tutti i nomi che contano in questa storia.</p>
+        <p class="conta"><b>Perché conta</b> Il white paper verrà pubblicato su una mailing list erede diretta di questa.</p>
+        <p class="dove"><a href="https://www.activism.net/cypherpunk/manifesto.html" target="_blank" rel="noopener">A Cypherpunk’s Manifesto</a></p>
+      </article>
+      <article class="tappa" id="t-crypto-wars">
+        <p class="quando"><time>1993 – 2000</time> · <span class="strada">Il codice come politica</span></p>
+        <h3>Le guerre della crittografia</h3>
+        <p class="dice">Per legge, negli Stati Uniti la crittografia forte era classificata come materiale bellico: esportarla richiedeva la stessa licenza di un’arma. Chi si oppone risponde per assurdo, stampando il codice su carta e su magliette — perché il materiale stampato era esplicitamente escluso dal divieto. La restrizione viene smantellata nel 2000.</p>
+        <p class="conta"><b>Perché conta</b> Senza quella battaglia, pubblicare un programma come Bitcoin nel 2009 sarebbe stato un reato.</p>
+        <p class="dove"><a href="https://en.wikipedia.org/wiki/Crypto_Wars" target="_blank" rel="noopener">Le Crypto Wars</a></p>
+      </article>
+      <article class="tappa" id="t-surety">
+        <p class="quando"><time>dal 1995</time> · <span class="strada">La marca temporale</span></p>
+        <h3>Una catena stampata sul giornale</h3>
+        <p class="chi">Surety Technologies</p>
+        <p class="dice">Haber e Stornetta fondano una società per vendere il loro servizio di datazione, e risolvono il problema di dove pubblicare la catena nel modo più solido possibile: una volta alla settimana comprano un annuncio economico sul New York Times e ci stampano dentro il riassunto di tutti i documenti registrati. Su carta, in migliaia di copie sparse per il mondo, impossibili da richiamare.</p>
+        <p class="conta"><b>Perché conta</b> Esce ogni settimana da allora: è la catena di blocchi più antica ancora in funzione, e sta sulla carta stampata.</p>
+        <p class="dove"><a href="https://www.vice.com/en/article/what-was-the-first-blockchain/" target="_blank" rel="noopener">La storia dell’annuncio sul Times</a></p>
+      </article>
+      <article class="tappa" id="t-hashcash">
+        <p class="quando"><time>marzo 1997</time> · <span class="strada">Il lavoro che costa</span></p>
+        <h3>Hashcash, il francobollo di calcolo</h3>
+        <p class="chi">Adam Back</p>
+        <p class="dice">Contro lo spam: prima di spedire un’email il computer deve risolvere un piccolo rompicapo. Per una persona che scrive dieci messaggi è impercettibile; per chi ne spara un milione diventa proibitivo. Il costo non è in denaro, è in elettricità e tempo. Si chiama prova di lavoro.</p>
+        <p class="conta"><b>Perché conta</b> È il meccanismo esatto con cui Bitcoin decide chi scrive il blocco successivo.</p>
+        <p class="dove"><a href="http://www.hashcash.org/hashcash.pdf" target="_blank" rel="noopener">Hashcash — il paper</a></p>
+      </article>
+      <article class="tappa" id="t-digicash-fine">
+        <p class="quando"><time>1998</time> · <span class="strada">La moneta anonima</span></p>
+        <h3>DigiCash chiude</h3>
+        <p class="dice">Bancarotta. La moneta digitale più avanzata del mondo smette di esistere perché smette di esistere la società che la firmava. La lezione resta scritta: finché c’è un centro, c’è un interruttore. E chi può spegnere, prima o poi spegne.</p>
+        <p class="conta"><b>Perché conta</b> Dieci anni dopo, il white paper si apre proprio rifiutando l’idea di una terza parte fidata.</p>
+        <p class="dove"><a href="https://en.wikipedia.org/wiki/DigiCash" target="_blank" rel="noopener">La storia di DigiCash</a></p>
+      </article>
+      <article class="tappa" id="t-b-money">
+        <p class="quando"><time>novembre 1998</time> · <span class="strada">Il lavoro che costa</span></p>
+        <h3>b-money</h3>
+        <p class="chi">Wei Dai</p>
+        <p class="dice">Una proposta di poche pagine su una mailing list: una moneta senza banca, dove tutti i partecipanti tengono una copia del registro e il denaro si crea risolvendo problemi di calcolo. C’è quasi tutto. Manca il modo di mettere d’accordo copie del registro che non coincidono.</p>
+        <p class="conta"><b>Perché conta</b> È la prima nota del white paper. La primissima.</p>
+        <p class="dove"><a href="http://www.weidai.com/bmoney.txt" target="_blank" rel="noopener">Il testo di b-money</a></p>
+      </article>
+      <article class="tappa" id="t-bit-gold">
+        <p class="quando"><time>1998</time> · <span class="strada">Il lavoro che costa</span></p>
+        <h3>Bit gold</h3>
+        <p class="chi">Nick Szabo</p>
+        <p class="dice">Nello stesso anno, indipendentemente, Szabo progetta qualcosa di molto simile: catene di prove di lavoro che si incastrano l’una nell’altra, creando una scarsità digitale paragonabile a quella dell’oro. Anche qui il nodo irrisolto è lo stesso: chi decide quale versione della storia è quella vera.</p>
+        <p class="conta"><b>Perché conta</b> Szabo resta tra i candidati più citati proprio per questa vicinanza di pensiero.</p>
+        <p class="dove"><a href="https://nakamotoinstitute.org/bit-gold/" target="_blank" rel="noopener">Bit gold, dal blog di Szabo</a></p>
+      </article>
+      <article class="tappa" id="t-rpow">
+        <p class="quando"><time>agosto 2004</time> · <span class="strada">Il lavoro che costa</span></p>
+        <h3>RPOW, prove di lavoro riutilizzabili</h3>
+        <p class="chi">Hal Finney</p>
+        <p class="dice">Finney costruisce un sistema funzionante in cui una prova di lavoro, una volta spesa, può essere scambiata con un’altra: gettoni che passano di mano. Non è un esperimento su carta, è software che gira. Resta però un server centrale a tenere il conto.</p>
+        <p class="conta"><b>Perché conta</b> Finney sarà la prima persona al mondo a ricevere un bitcoin.</p>
+        <p class="dove"><a href="https://nakamotoinstitute.org/finney/rpow/" target="_blank" rel="noopener">RPOW</a></p>
+      </article>
+      <article class="tappa tronco" id="t-dominio">
+        <p class="quando"><time>18 agosto 2008</time> · <span class="strada">Bitcoin</span></p>
+        <h3>Viene registrato bitcoin.org</h3>
+        <p class="dice">Il dominio è registrato in forma anonima, attraverso un servizio che schermava l’intestatario. Due mesi prima che il mondo sappia cosa sia Bitcoin, l’indirizzo dove vivrà esiste già.</p>
+        <p class="conta"><b>Perché conta</b> È la prima traccia datata dell’esistenza del progetto.</p>
+        <p class="dove"><a href="https://en.wikipedia.org/wiki/History_of_bitcoin" target="_blank" rel="noopener">Cronologia di Bitcoin</a></p>
+      </article>
+      <article class="tappa tronco" id="t-lehman">
+        <p class="quando"><time>15 settembre 2008</time> · <span class="strada">Bitcoin</span></p>
+        <h3>Lehman Brothers fallisce</h3>
+        <p class="dice">La più grande bancarotta della storia americana apre la crisi finanziaria. Nei mesi seguenti i governi salvano con denaro pubblico le banche che l’avevano innescata. La fiducia negli intermediari finanziari tocca il minimo.</p>
+        <p class="conta"><b>Perché conta</b> Sei settimane dopo esce il white paper. Il primo blocco porterà scritto un titolo di giornale sui salvataggi bancari.</p>
+        <p class="dove"><a href="https://www.federalreservehistory.org/essays/support-for-specific-institutions" target="_blank" rel="noopener">Cronologia della crisi</a></p>
+      </article>
+      <article class="tappa tronco" id="t-doppia-spesa">
+        <p class="quando"><time>il problema aperto</time> · <span class="strada">Bitcoin</span></p>
+        <h3>Il problema che nessuno aveva risolto</h3>
+        <p class="dice">Un file si copia. Se il denaro è un file, chi paga può spendere due volte la stessa moneta mandandola a due persone diverse nello stesso istante. Una banca risolve la questione tenendo lei l’unico registro valido. Senza banca servirebbe che migliaia di copie dello stesso registro, aggiornate da sconosciuti che non si fidano fra loro, arrivassero da sole alla stessa versione della storia. Per trent’anni nessuno c’era riuscito.</p>
+        <p class="conta"><b>Perché conta</b> Tutte e cinque le strade si fermano qui. Il white paper si apre esattamente su questo punto.</p>
+        <p class="dove"><a href="https://en.wikipedia.org/wiki/Double-spending" target="_blank" rel="noopener">Il problema della doppia spesa</a></p>
+      </article>
+      <article class="tappa tronco" id="t-whitepaper">
+        <p class="quando"><time>31 ottobre 2008, 18:10 UTC</time> · <span class="strada">Bitcoin</span></p>
+        <h3>Nove pagine su una mailing list</h3>
+        <p class="chi">Satoshi Nakamoto</p>
+        <p class="dice">Un messaggio a una lista di crittografia frequentata da poche centinaia di persone annuncia un documento intitolato «Bitcoin: un sistema di contante elettronico da utente a utente». In nove pagine le cinque strade si chiudono in un progetto solo: firme digitali, catena di marche temporali, prova di lavoro, e una regola per decidere quale versione del registro vale — quella su cui è stato speso più lavoro.</p>
+        <p class="conta"><b>Perché conta</b> È il punto in cui tutto converge. Le prime reazioni sulla lista sono tiepide o scettiche.</p>
+        <p class="dove"><a href="https://bitcoin.org/bitcoin.pdf" target="_blank" rel="noopener">Il white paper (PDF)</a></p>
+      </article>
+      <article class="tappa tronco" id="t-genesi">
+        <p class="quando"><time>3 gennaio 2009</time> · <span class="strada">Bitcoin</span></p>
+        <h3>Il blocco zero</h3>
+        <p class="dice">Viene generato il primo blocco. Dentro, in un campo che nessuna regola obbligava a riempire, c’è la prima pagina del Times di quel giorno: il cancelliere dello Scacchiere sull’orlo di un secondo salvataggio delle banche. Serve a datare il blocco, e insieme dice a chiare lettere contro cosa nasce questa cosa.</p>
+        <p class="conta"><b>Perché conta</b> Quei 50 bitcoin, per com’è scritto il programma, non si possono spendere. Sono ancora lì.</p>
+        <p class="dove"><a href="https://mempool.space/block/000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f" target="_blank" rel="noopener">Il blocco 0 sulla catena</a></p>
+      </article>
+      <article class="tappa tronco" id="t-v01">
+        <p class="quando"><time>9 gennaio 2009</time> · <span class="strada">Bitcoin</span></p>
+        <h3>Il programma è pubblico</h3>
+        <p class="dice">Esce Bitcoin v0.1: codice sorgente aperto, scaricabile da chiunque. Da questo momento la rete non ha più bisogno del permesso di nessuno per esistere, basta che qualcuno tenga acceso un computer.</p>
+        <p class="conta"><b>Perché conta</b> Il codice è in C++, dettaglio che restringerà il campo dei candidati.</p>
+        <p class="dove"><a href="https://satoshi.nakamotoinstitute.org/emails/cryptography/16/" target="_blank" rel="noopener">L’annuncio del rilascio</a></p>
+      </article>
+      <article class="tappa tronco" id="t-finney-tx">
+        <p class="quando"><time>12 gennaio 2009, 03:30 UTC</time> · <span class="strada">Bitcoin</span></p>
+        <h3>Dieci bitcoin a Hal Finney</h3>
+        <p class="chi">Satoshi Nakamoto → Hal Finney</p>
+        <p class="dice">Blocco 170: la prima volta che un bitcoin passa da una persona a un’altra. Il destinatario è Hal Finney, il crittografo che aveva costruito RPOW cinque anni prima e che era stato fra i primi a rispondere all’annuncio del white paper. Nei giorni precedenti aveva scaricato il programma e si era messo a far girare la rete.</p>
+        <p class="conta"><b>Perché conta</b> Finney scriverà anni dopo di aver pensato subito che quella cosa potesse valere qualcosa.</p>
+        <p class="dove"><a href="https://mempool.space/block/00000000d1145790a8694403d4063f323d499e655c83426834d4ce2f8dd4a2ee" target="_blank" rel="noopener">Il blocco 170</a></p>
+      </article>
+      <article class="tappa tronco" id="t-cambio">
+        <p class="quando"><time>5 ottobre 2009</time> · <span class="strada">Bitcoin</span></p>
+        <h3>Il primo prezzo</h3>
+        <p class="dice">Un sito calcola il primo tasso di cambio partendo dal costo dell’elettricità necessaria a generarli: un dollaro vale 1.309 bitcoin. Detto al contrario, un bitcoin vale otto centesimi di centesimo di dollaro.</p>
+        <p class="conta"><b>Perché conta</b> È il punto di partenza per misurare tutto quello che è successo dopo.</p>
+        <p class="dove"><a href="https://en.wikipedia.org/wiki/History_of_bitcoin" target="_blank" rel="noopener">New Liberty Standard</a></p>
+      </article>
+      <article class="tappa tronco" id="t-pizza">
+        <p class="quando"><time>22 maggio 2010</time> · <span class="strada">Bitcoin</span></p>
+        <h3>Diecimila bitcoin per due pizze</h3>
+        <p class="chi">Laszlo Hanyecz</p>
+        <p class="dice">Un programmatore della Florida chiede sul forum se qualcuno gli ordina due pizze in cambio di 10.000 bitcoin. Qualcuno accetta. È il primo acquisto di un bene reale con questa moneta: il momento in cui smette di essere un esercizio di crittografia e diventa denaro, perché qualcuno lo accetta in pagamento.</p>
+        <p class="conta"><b>Perché conta</b> Il 22 maggio si festeggia ancora come Bitcoin Pizza Day.</p>
+        <p class="dove"><a href="https://bitcointalk.org/index.php?topic=137.0" target="_blank" rel="noopener">Il messaggio sul forum</a></p>
+      </article>
+      <article class="tappa tronco" id="t-ultimo-post">
+        <p class="quando"><time>12 dicembre 2010</time> · <span class="strada">Bitcoin</span></p>
+        <h3>L’ultimo messaggio pubblico</h3>
+        <p class="chi">Satoshi Nakamoto</p>
+        <p class="dice">Un messaggio tecnico sul forum, a proposito di alcune difese contro gli attacchi alla rete. Nessun saluto, nessun annuncio. Chi legge quel giorno non ha modo di sapere che è l’ultimo.</p>
+        <p class="conta"><b>Perché conta</b> Nei giorni precedenti aveva discusso, contrario, l’idea che WikiLeaks accettasse donazioni in bitcoin: troppa attenzione, troppo presto.</p>
+        <p class="dove"><a href="https://bitcointalk.org/index.php?topic=2228.msg29279#msg29279" target="_blank" rel="noopener">Il post sul forum</a></p>
+      </article>
+      <article class="tappa tronco" id="t-consegna">
+        <p class="quando"><time>23 aprile 2011</time> · <span class="strada">Bitcoin</span></p>
+        <h3>L’ultima email</h3>
+        <p class="chi">Satoshi Nakamoto</p>
+        <p class="dice">In un’email privata a uno degli sviluppatori, Satoshi scrive di essere passato ad altro e che il progetto è in buone mani con Gavin Andresen e gli altri. È l’ultima comunicazione considerata autentica. Il passaggio vero e proprio delle consegne — il sito, il codice, la chiave che permette di lanciare un allarme sulla rete — era avvenuto poco per volta nei mesi precedenti.</p>
+        <p class="conta"><b>Perché conta</b> Da qui in poi: silenzio. Nessun messaggio, nessuna email, nessuna moneta spostata.</p>
+        <p class="dove"><a href="https://satoshi.nakamotoinstitute.org/emails/" target="_blank" rel="noopener">L’archivio delle email di Satoshi</a></p>
+      </article>
+      <article class="tappa tronco" id="t-silenzio">
+        <p class="quando"><time>dal 2011</time> · <span class="strada">Bitcoin</span></p>
+        <h3>Il silenzio</h3>
+        <p class="dice">Circa un milione di bitcoin risultano generati nei primi sedici mesi da un singolo computer, riconoscibile da una regolarità in un contatore interno ai blocchi che quella macchina faceva avanzare sempre allo stesso modo. Non si sono mai mossi. Non un trasferimento, non una prova, in oltre quindici anni. È la parte più difficile da spiegare di tutta questa storia: chiunque fosse, ha lasciato lì una fortuna e non l’ha toccata.</p>
+        <p class="conta"><b>Perché conta</b> Le ipotesi sono tre: le chiavi sono perse, la persona è morta, oppure muoverle distruggerebbe la cosa stessa che ha costruito.</p>
+        <p class="dove"><a href="https://bitslog.com/2013/04/17/the-well-deserved-fortune-of-satoshi-nakamoto/" target="_blank" rel="noopener">L’analisi del modello Patoshi</a></p>
+      </article>
+      <!-- TAPPE:fine -->
+    </div>
+  </section>
+
   <section class="sezione">
     <h2>Chi era Satoshi Nakamoto</h2>
     <p>
@@ -106,12 +332,71 @@
       elenco per la stessa ragione: il loro lavoro sta dentro Bitcoin, e nel 2008 al mondo
       c'erano forse venti persone capaci di scriverlo.
     </p>
-    <div class="schede"></div>
+    <div class="schede">
+      <!-- SCHEDE:inizio -->
+      <article class="scheda">
+        <h3>Hal Finney <span>1956 – 2014</span></h3>
+        <p class="cosa">Crittografo, secondo sviluppatore di PGP, autore di RPOW.</p>
+        <div class="bilancia">
+          <div class="pro">Primo a rispondere all’annuncio, prima persona a ricevere un bitcoin, tra i pochissimi a far girare la rete nei primi giorni. Nessuno aveva una storia più coerente.</div>
+          <div class="contro">Ha sempre negato. Nel 2014 un’analisi stilometrica commissionata da un giornalista trovò che il suo modo di scrivere era il più vicino a quello di Satoshi fra tutti i candidati esaminati — ma trovò anche che le email ricevute da Satoshi somigliavano al white paper più di quanto ci somigliasse la scrittura di Finney, il che lo scagionava. Si era ammalato di SLA nel 2009; è morto nel 2014.</div>
+        </div>
+        <p><a class="fonte-s" href="https://bitcointalk.org/index.php?topic=155054.0" target="_blank" rel="noopener">Bitcoin and me, il suo racconto</a></p>
+      </article>
+      <article class="scheda">
+        <h3>Nick Szabo <span>n. 1964</span></h3>
+        <p class="cosa">Giurista e informatico, autore di bit gold e del concetto di contratto intelligente.</p>
+        <div class="bilancia">
+          <div class="pro">Bit gold è il progetto più vicino a Bitcoin mai pubblicato prima del 2008. Analisi stilistiche dei testi lo indicano più volte come il più probabile fra i candidati noti.</div>
+          <div class="contro">Nega. E c’è un’anomalia difficile da spiegare: il white paper non cita bit gold, mentre cita b-money e Hashcash.</div>
+        </div>
+        <p><a class="fonte-s" href="https://unenumerated.blogspot.com/" target="_blank" rel="noopener">Il blog di Szabo</a></p>
+      </article>
+      <article class="scheda">
+        <h3>Adam Back <span>n. 1970</span></h3>
+        <p class="cosa">Crittografo, autore di Hashcash, oggi a capo di una società di infrastrutture Bitcoin.</p>
+        <div class="bilancia">
+          <div class="pro">Fra le prime persone al mondo con cui Satoshi si sia scambiato email, prima ancora che il progetto fosse pubblico. Hashcash è una delle otto opere citate nel white paper.</div>
+          <div class="contro">Nega, in modo diretto e ripetuto. Il suo lavoro entra in Bitcoin come componente citata, che è esattamente ciò che ci si aspetta da un predecessore, non dall’autore.</div>
+        </div>
+        <p><a class="fonte-s" href="http://www.hashcash.org/" target="_blank" rel="noopener">Hashcash</a></p>
+      </article>
+      <article class="scheda">
+        <h3>Wei Dai <span>n. 1976 ca.</span></h3>
+        <p class="cosa">Informatico, autore di b-money e della libreria crittografica Crypto++.</p>
+        <div class="bilancia">
+          <div class="pro">b-money è la prima nota del white paper. Programmatore C++ di altissimo livello, come richiede il codice di Bitcoin. Estremamente riservato: di lui non circolano quasi fotografie.</div>
+          <div class="contro">Ha raccontato di essere stato contattato da Satoshi prima della pubblicazione e di non aver dato molto peso alla cosa. Nega.</div>
+        </div>
+        <p><a class="fonte-s" href="http://www.weidai.com/" target="_blank" rel="noopener">Il sito di Wei Dai</a></p>
+      </article>
+      <article class="scheda">
+        <h3>Len Sassaman <span>1980 – 2011</span></h3>
+        <p class="cosa">Crittografo, sviluppatore di sistemi di anonimato, allievo di David Chaum.</p>
+        <div class="bilancia">
+          <div class="pro">Inglese britannico negli scritti, come l’unica parola anomala del white paper. È morto poche settimane dopo l’ultima email di Satoshi.</div>
+          <div class="contro">La coincidenza delle date è l’argomento principale, e una coincidenza non è una prova. Chi lo ha conosciuto respinge l’ipotesi.</div>
+        </div>
+        <p><a class="fonte-s" href="https://en.wikipedia.org/wiki/Len_Sassaman" target="_blank" rel="noopener">Len Sassaman</a></p>
+      </article>
+      <!-- SCHEDE:fine -->
+    </div>
   </section>
 
   <section class="sezione">
-    <h2>Due piste chiuse</h2>
-    <div class="chiuse"></div>
+    <h2>Due attribuzioni smentite</h2>
+    <div class="chiuse">
+      <!-- CHIUSE:inizio -->
+      <div class="chiusa">
+        <h3>Dorian Nakamoto <span>2014</span></h3>
+        <p>Un settimanale americano identifica come inventore di Bitcoin un ingegnere californiano in pensione, che di nome fa davvero Satoshi Nakamoto, e ne pubblica l’indirizzo di casa. Lui nega tutto. Pochi giorni dopo, sul profilo attribuito a Satoshi compare una smentita di poche parole: non sono Dorian Nakamoto.</p>
+      </div>
+      <div class="chiusa">
+        <h3>Craig Wright <span>2016 – 2024</span></h3>
+        <p>Un informatico australiano sostiene per anni di essere Satoshi e porta in tribunale chi lo nega. Nel marzo 2024 l’Alta Corte di Londra stabilisce il contrario in termini definitivi: non ha creato Bitcoin, non ha scritto il white paper, e ha prodotto documenti falsi per sostenere la propria tesi.</p>
+      </div>
+      <!-- CHIUSE:fine -->
+    </div>
   </section>
 
   <section class="sezione">

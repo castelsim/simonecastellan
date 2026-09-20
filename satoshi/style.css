@@ -1,7 +1,7 @@
 /* Token condivisi dalle varianti di layout di /satoshi/. © 2026 Simone Castellan. */
 :root {
   --carta: #ffffff; --inchiostro: #14161a; --testo: #3c4043;
-  --grigio: #5f6368; --tenue: #6b7075;   /* 4.7:1 su bianco: #80868b si fermava a 3.68 */ --traccia: #b9bec6;
+  --grigio: #5f6368; --tenue: #6b7075;   /* 4.7:1 su bianco: #80868b si fermava a 3.68 */ --traccia: #8a9099;   /* 3,2:1 su bianco: #b9bec6 si fermava a 1,87 */
   --linea: #dadce0; --velo: #eef0f2; --pagina: #f6f7f8;
   --serif: "Source Serif 4", Georgia, serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
@@ -18,6 +18,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--inchiostro); ou
   padding: 6px 6px; }  /* senza padding il bersaglio è 36x16: sotto i 24x24 minimi */
 .nav a:hover { color: var(--inchiostro); }
 .nav .sep { color: var(--linea); margin: 0 8px; }
+/* StagePlot porta fuori dal sito: la freccia lo dice prima del clic.
+   Senza queste misure l'SVG non ha dimensione propria e sfonda il menu. */
+.nav .out { white-space: nowrap; }
+.nav .out svg { width: 9px; height: 9px; margin-left: 3px; }
 
 .testata { max-width: 660px; margin: 0 auto; padding: clamp(40px,7vh,74px) 24px clamp(24px,4vh,40px); }
 .arco { font-family: var(--mono); font-size: 12px; color: var(--tenue); display: block; margin-bottom: 18px; }
@@ -75,7 +79,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--inchiostro); ou
 .corsie-fisse button.unione { color: var(--inchiostro); font-size: 12.5px; }
 .corsie-fisse button.unione::after { background: var(--inchiostro); height: 3px; width: 8px; }
 
-.istruzioni { max-width: 1180px; margin: -6px auto 12px; padding: 0 24px;
+/* agganciata alla mappa che spiega, non alla barra sopra */
+.istruzioni { max-width: 1180px; margin: 0 auto 14px; padding: 0 24px;
   font-size: 12.5px; color: var(--tenue); }
 
 .sfuma { position: absolute; top: 0; bottom: 0; width: 46px; pointer-events: none; z-index: 2; }
@@ -97,7 +102,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--inchiostro); ou
 .linea { fill: none; stroke: var(--traccia); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .linea-viva { stroke: var(--inchiostro); stroke-width: 3.4; }
 .stazione { cursor: pointer; }
-.stazione .presa { fill: transparent; }
+.prese rect { fill: transparent; cursor: pointer; }
 .stazione:focus-visible { outline: 2px solid var(--inchiostro); outline-offset: 2px; }
 .stazione .bolla { fill: var(--carta); stroke: var(--traccia); stroke-width: 2; transition: stroke .16s, fill .16s; }
 .stazione[data-tronco] .bolla { stroke: var(--inchiostro); }
@@ -107,7 +112,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--inchiostro); ou
 .stazione .nome { font: 400 12.5px var(--serif); fill: var(--grigio); transition: fill .16s; }
 .stazione:hover .nome, .stazione[aria-pressed="true"] .nome { fill: var(--inchiostro); }
 .stazione[data-tronco] .nome { font-weight: 600; fill: var(--inchiostro); }
-.stazione .anno { font: 400 10.5px var(--mono); fill: var(--tenue); }
+.stazione .anno { font: 400 10.5px var(--mono); fill: var(--tenue); pointer-events: none; }
+.stazione .nascosto { display: none; }
 .mappa.filtra .stazione:not(.acceso) { opacity: .2; }
 .mappa.filtra .linea:not(.acceso) { opacity: .14; }
 
@@ -138,8 +144,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--inchiostro); ou
   .mappa svg { width: 100%; height: auto; }
   .mappa-guscio { border-bottom: 0; }
   .sfuma, .avanzamento, .comandi, .istruzioni { display: none; }
-  .legenda { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px;
-    scrollbar-width: none; }
+  /* In verticale i nomi delle corsie stanno già sopra le linee e filtrano:
+     la legenda sarebbe lo stesso elenco con un lessico diverso. */
+  .legenda { display: none; }
   .legenda::-webkit-scrollbar { display: none; }
   .barra { flex-direction: column; align-items: stretch; gap: 10px; }
   .foglio { grid-template-columns: minmax(0,1fr); gap: 14px; }
@@ -149,14 +156,15 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--inchiostro); ou
   .corsie-fisse { position: sticky; top: 0; left: auto; right: auto; bottom: auto;
     width: 100%; height: 34px; z-index: 6;
     background: linear-gradient(180deg, var(--carta) 0%, var(--carta) 74%, transparent 100%); }
-  .corsie-fisse button { top: 16px; right: auto; left: 0;
+  .corsie-fisse button { top: 17px; right: auto; left: 0; padding: 9px 4px;
     transform: translate(-50%, -50%); text-align: center; font-size: 10.5px; }
   .corsie-fisse button::after { right: auto; left: 50%; top: auto; bottom: -7px;
     width: 1.5px; height: 6px; transform: translateX(-50%); }
   .corsie-fisse button[aria-pressed="true"]::after { width: 3px; height: 8px; }
   .corsie-fisse button.unione { font-size: 12px; }
 
-  .righello { position: fixed; bottom: 74px; right: 12px; top: auto; z-index: 8; }
+  /* sul telefono restava fisso sopra i paragrafi anche a mappa finita */
+  .righello { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) { .avanzamento i { transition: none; } }
@@ -205,3 +213,38 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--inchiostro); ou
   border-top: 1px solid var(--velo); font-size: 12.5px; color: var(--tenue); line-height: 1.75; }
 .piede a { color: var(--grigio); text-decoration: none; border-bottom: 1px solid var(--linea); }
 .piede a:hover { color: var(--inchiostro); }
+
+/* ── Le ventisette tappe in chiaro ───────────────────────────────────
+   Scritte in pagina da ops/prerender.mjs: si leggono di seguito, senza
+   cliccare, e sono ciò che un motore di ricerca trova. */
+.tappe-tutte { max-width: 700px; }
+.tappe { margin-top: 30px; }
+.tappa { padding: 24px 0; border-top: 1px solid var(--velo); }
+.tappa:first-child { border-top: 0; padding-top: 6px; }
+.tappa .quando { font-family: var(--mono); font-size: 11.5px; color: var(--tenue);
+  letter-spacing: -.02em; margin-bottom: 7px; }
+.tappa .quando .strada { font-family: var(--ui); letter-spacing: 0; }
+.tappa h3 { font-family: var(--serif); font-size: 19.5px; font-weight: 600;
+  color: var(--inchiostro); line-height: 1.24; letter-spacing: -.012em; }
+.tappa .chi { font-size: 12.5px; color: var(--grigio); margin-top: 5px; }
+.tappa .dice { font-family: var(--serif); font-size: 16.5px; line-height: 1.66;
+  color: var(--testo); margin-top: 11px; }
+.tappa .conta { font-family: var(--serif); font-size: 14.5px; line-height: 1.6;
+  color: var(--grigio); margin-top: 11px; padding-left: 16px; border-left: 2px solid var(--velo); }
+.tappa .conta b { font-family: var(--ui); font-size: 11px; font-weight: 600;
+  color: var(--tenue); display: block; margin-bottom: 3px; }
+.tappa .dove { margin-top: 11px; }
+.tappa .dove a { font-size: 12.5px; color: var(--tenue); text-decoration: none;
+  border-bottom: 1px solid var(--linea); padding: 4px 0 5px; display: inline-block; }
+.tappa .dove a:hover { color: var(--inchiostro); border-bottom-color: var(--inchiostro); }
+/* da Bitcoin in poi: la stessa linea nera della mappa */
+.tappa.tronco { border-left: 2px solid var(--inchiostro); padding-left: 20px; margin-left: -22px; }
+.tappa.tronco h3 { font-size: 21px; }
+
+.chiusa h3 { font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--grigio);
+  display: flex; align-items: baseline; gap: 10px; }
+.chiusa h3 span { font-family: var(--mono); font-size: 11.5px; font-weight: 400; color: var(--tenue); }
+
+@media (max-width: 560px) {
+  .tappa.tronco { margin-left: 0; padding-left: 16px; }
+}
