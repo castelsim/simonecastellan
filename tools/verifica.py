@@ -201,6 +201,9 @@ def controlla_collegamenti_interni():
         "/en/": ["index.html", "en/profile/index.html"],
         "/privacy/": ["index.html", "profilo/index.html", "cv/index.html"],
         "/tienimi-presente/": ["index.html", "profilo/index.html"],
+        # Dal 25/09/2026 la pagina del servizio audio per conferenze: la home la
+        # linka nella frase «Dal vivo», l'unico ingresso dal sito.
+        "/conferenze/": ["index.html"],
         # Dal 09/08/2026 gli strumenti stanno tutti in /tools/ e la home ci arriva
         # con una parola sola: se salta quel link, sette pagine diventano fantasmi.
         "/tools/": ["index.html"],
@@ -669,7 +672,7 @@ def controlla_sitemap():
         percorso = os.path.join(ROOT, u, "index.html") if u else os.path.join(ROOT, "index.html")
         if not os.path.exists(percorso):
             errore(f"la sitemap elenca /{u} ma il file non esiste")
-    pubblicate = {"", "en/", "profilo/", "cv/", "en/profile/", "privacy/", "tienimi-presente/", "BDG2029/",
+    pubblicate = {"", "en/", "profilo/", "cv/", "en/profile/", "privacy/", "tienimi-presente/", "BDG2029/", "conferenze/",
                   "tools/"} | {t + "/" for t in TOOL}
     mancanti = pubblicate - set(urls)
     if mancanti:
