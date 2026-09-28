@@ -209,7 +209,7 @@ textarea::placeholder { color: var(--faint); }
 .scelta-btn {
   border: 1px solid var(--line);
   background: #fff;
-  font: 600 14px inherit;
+  font-family: inherit; font-size: 14px; font-weight: 600;
   color: #5f6368;
   padding: 9px 16px;
   border-radius: 9px;
