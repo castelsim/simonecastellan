@@ -441,6 +441,36 @@ def controlla_lastmod_sitemap():
         print(f"  lastmod della sitemap: {controllate} date, nessuna indietro rispetto alla pagina")
 
 
+def controlla_font_inherit():
+    """«font: <dimensione> inherit» non è una scorciatoia valida.
+
+    Il browser la considera un errore e butta via la riga INTERA: carattere,
+    dimensione e interlinea tornano quelli di default. È successo su
+    /posizione/ (campi a 13,3 px in monospaziato, zoom su iPhone, 20/09) e il
+    28/09/2026 la revisione l'ha trovato in altre sette regole su quattro
+    pagine: i filtri di /tools/ uscivano in Arial. Si scrive proprietà per
+    proprietà; «font: inherit» da solo invece è valido."""
+    sbagliate = []
+    for radice, _, files in os.walk(ROOT):
+        if "/.git" in radice or "node_modules" in radice:
+            continue
+        for nome in files:
+            if not nome.endswith((".css", ".html")):
+                continue
+            percorso = os.path.join(radice, nome)
+            testo = open(percorso, encoding="utf-8", errors="ignore").read()
+            testo = re.sub(r"/\*.*?\*/", " ", testo, flags=re.S)
+            testo = re.sub(r"<!--.*?-->", " ", testo, flags=re.S)
+            for m in re.finditer(r"font\s*:\s*([^;{}]*)", testo):
+                valore = m.group(1)
+                if "inherit" in valore and re.search(r"\d", valore):
+                    sbagliate.append(f"{os.path.relpath(percorso, ROOT)}: font:{valore.strip()[:40]}")
+    for s in sbagliate:
+        errore(f"{s} — «font: … inherit» non è valido: il browser butta la riga intera")
+    if not sbagliate:
+        print("  caratteri: nessuna scorciatoia «font: … inherit» non valida")
+
+
 def controlla_etichetta_assistente(home):
     """Sul pulsante dell'assistente deve esserci un'AZIONE, non un marchio.
 
@@ -903,6 +933,16 @@ def controlla_cv_allineato():
             if pezzo in pagina:
                 errore(f"cv: «{pezzo}» è tornato nella pagina /cv/: era stato tolto "
                        f"dalla versione pubblica l'11/09/2026 e resta nel PDF dei bandi")
+            # Dal 28/09/2026 anche le altre fonti pubbliche: il profilo è la pagina
+            # che l'assistente AI legge e riferisce al datore di lavoro.
+            for fonte in ("profilo/index.html", "llms.txt"):
+                if pezzo in leggi(fonte):
+                    errore(f"{fonte}: contiene «{pezzo}», che sta solo nel PDF per i bandi — "
+                           f"è la pagina che ChatGPT legge e riferisce così com'è")
+    # La versione inglese dice le stesse posizioni con altre parole.
+    for pezzo in ("7th of 8", "23rd", "40/100"):
+        if pezzo in leggi("en/profile/index.html"):
+            errore(f"en/profile/index.html: contiene «{pezzo}», che sta solo nel PDF per i bandi")
     # Si cerca l'USO nel codice, a commenti tolti: il primo tentativo cercava la
     # parola e la trovava nel commento che la spiega — passava anche col codice
     # rimesso com'era prima. Stesso tranello del «noindex» del 12/08/2026.
@@ -1297,6 +1337,7 @@ def main():
     controlla_nascosti()
     controlla_opere_dichiarate()
     controlla_ascolti()
+    controlla_font_inherit()
     controlla_etichetta_assistente(home)
     controlla_lastmod_sitemap()
     controlla_date_dichiarate()
