@@ -37,9 +37,24 @@ def file_di(loc):
 
 
 def data_ultimo_commit(percorso):
-    """La data dell'ultimo commit che ha toccato il file, in ISO."""
+    """La data dell'ultimo commit che ha toccato il file, in ISO.
+
+    Se il file ha modifiche non ancora salvate in un commit, la data è quella
+    di oggi: la pagina sta cambiando adesso, e il commit arriverà oggi. Fino al
+    29/09/2026 lo script guardava solo i commit, e lanciato — com'è naturale —
+    PRIMA del commit, dava alle pagine appena riscritte la data del giorno
+    prima: la guardia se ne accorgeva solo sul sito già pubblicato (24 date
+    indietro dopo la PR #111)."""
     if not os.path.exists(percorso):
         return None
+    try:
+        sporco = subprocess.run(["git", "status", "--porcelain", "--", percorso],
+                                cwd=RADICE, capture_output=True, text=True, check=True)
+        if sporco.stdout.strip():
+            import datetime
+            return datetime.date.today().isoformat()
+    except subprocess.CalledProcessError:
+        pass
     try:
         out = subprocess.run(
             ["git", "log", "-1", "--format=%cs", "--", percorso],
