@@ -3,7 +3,7 @@
   --bg: #ffffff;
   --text: #3c4043;
   --ink: #1a1a1a;       /* testo forte */
-  --muted: #5f6368;
+  --muted: var(--mut);  /* il grigio comune di /comune/voce.css */
   --muted-2: #68716d;
   --faint: #68716d;
   --pill: #f1f3f4;
@@ -220,6 +220,6 @@ header { text-align: left; margin-bottom: 30px; }
    prende il verde acqua anche se nel codice si chiama «secondario». Il testo
    sopra è scuro, non bianco: su questo verde il bianco non basta. */
 .dropzone .btn-secondary { background: var(--teal-l); color: var(--teal-scuro); }
-.dropzone .btn-secondary:hover { background: var(--teal); }
+.dropzone .btn-secondary:hover { background: var(--teal-hover); }
 .btn-primary { background: var(--teal-l); color: var(--teal-scuro); }
-.btn-primary:hover { background: var(--teal); }
+.btn-primary:hover { background: var(--teal-hover); }
