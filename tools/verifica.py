@@ -292,7 +292,7 @@ def controlla_intestazioni_tool():
             if not testo.endswith("."):
                 AVVISI.append(f"{t}: la seconda riga del titolo «{testo}» non chiude la frase")
 
-        if "simonecastellan.com/tools/" not in pagina.split("<footer", 1)[-1]:
+        if not re.search(r'href="(https://simonecastellan\.com)?/tools/"', pagina.split("<footer", 1)[-1]):
             errore(f"{t}: dal piede non si torna agli altri strumenti")
 
         # Il piede diceva «Designed and built by» su diciotto pagine italiane:

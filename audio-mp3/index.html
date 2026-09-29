@@ -23,6 +23,7 @@
   <!-- La voce comune viene prima del foglio locale: porta i colori e tre classi. -->
   <link rel="stylesheet" href="/comune/voce.css" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/comune/piede.css" />
 
   <!-- L'isolamento cross-origin serve a SharedArrayBuffer, che serve a
        ffmpeg.wasm — che qui è solo il RIPIEGO per i formati che il browser non
@@ -51,6 +52,7 @@
 <body>
   <main class="card">
     <header>
+      <p class="percorso"><a href="/">Simone Castellan</a><span class="su" aria-hidden="true">›</span><a href="/tools/">Strumenti</a></p>
       <p class="occhiello">Mail · WhatsApp · Provini</p>
       <h1 class="titolone">Converti in MP3.<br><span class="eco">Leggero, pronto da mandare.</span></h1>
       <p class="apertura">Un MP3 pesa fino a dieci volte meno dell'originale: così il file
@@ -117,9 +119,9 @@
     </section>
   </main>
 
-  <footer class="site-footer">
-    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
-    · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
+  <footer class="site-footer piede-unico">
+    <p class="gancio">Ti serve un sound engineer? <a href="https://wa.me/393404579244?text=Ciao%20Simone%2C%20ti%20scrivo%20dal%20tuo%20sito." target="_blank" rel="noopener" aria-label="Scrivimi su WhatsApp — si apre in una nuova scheda">Scrivimi</a></p>
+    <a href="/">Simone Castellan</a><span class="sep">·</span><a href="/tools/">Strumenti</a><span class="sep">·</span><a href="/cv/">CV</a><span class="sep">·</span><a href="/privacy/">Privacy</a>
   </footer>
 
   <!-- Motore di fallback universale (caricato leggero ~22KB; il core pesante

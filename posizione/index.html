@@ -216,12 +216,76 @@ a.tasto{
 .piede{border-top:1px solid rgba(27,38,33,.12);padding:14px 0 max(18px,env(safe-area-inset-bottom));font-size:13px;color:var(--tenue);line-height:1.5}
 .piede a{color:var(--acqua)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* piè e percorso: copia di /comune/piede.css (app offline) */
+footer.piede-unico {
+  margin: 40px auto 0;
+  padding: 0 20px 24px;
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 2;
+  letter-spacing: .2px;
+  color: #6b7075;
+  border: 0;
+}
+footer.piede-unico a {
+  position: relative;
+  display: inline-block;
+  color: #5f6368;
+  text-decoration: none;
+  border-bottom: 1px solid #d6d9de;
+  line-height: 1.4;
+}
+footer.piede-unico a:hover { color: #1a1a1a; border-bottom-color: #9aa0a6; }
+footer.piede-unico a:focus-visible { outline: 2px solid #1a1a1a; outline-offset: 3px; border-radius: 3px; }
+footer.piede-unico .sep { color: #bdc1c6; margin: 0 5px; }
+footer.piede-unico .firma { display: block; font-size: 12px; color: #6b7075; }
+footer.piede-unico .gancio { margin: 0 0 2px; font-size: 13.5px; color: #3c4043; }
+footer.piede-unico .gancio a {
+  color: #0a7d72; font-weight: 600;
+  border-bottom-color: rgba(10, 125, 114, .4);
+}
+footer.piede-unico a::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: calc(100% + 8px); min-width: 24px; height: 24px;
+  transform: translate(-50%, -50%);
+}
+@media (max-width: 620px), (pointer: coarse) {
+  footer.piede-unico a::after { width: calc(100% + 12px); min-width: 44px; height: 44px; }
+  footer.piede-unico { line-height: 2.6; }
+}
+.percorso {
+  margin: 0 0 14px;
+  font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #5f6368;
+}
+.percorso a {
+  position: relative;
+  color: #5f6368;
+  text-decoration: none;
+  border-bottom: 1px solid #d6d9de;
+}
+.percorso a:hover { color: #1a1a1a; }
+.percorso a:focus-visible { outline: 2px solid #1a1a1a; outline-offset: 3px; border-radius: 3px; }
+.percorso .su { color: #bdc1c6; margin: 0 6px; }
+.percorso a::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: calc(100% + 8px); min-width: 24px; height: 24px;
+  transform: translate(-50%, -50%);
+}
+@media (max-width: 620px), (pointer: coarse) {
+  .percorso a::after { width: calc(100% + 12px); min-width: 44px; height: 44px; }
+}
+/* sul fondo «carta» il verde comune arriva a 4,35:1, sotto la soglia: qui più scuro */
+footer.piede-unico .gancio a{color:#08665d;border-bottom-color:rgba(8,102,93,.45)}
 </style>
 </head>
 <body>
 
 <header class="testata">
   <div>
+    <p class="percorso"><a href="/">Simone Castellan</a><span class="su" aria-hidden="true">›</span><a href="/tools/">Strumenti</a></p>
     <div class="occhiello">Punto di rilevamento</div>
     <h1>Dove sono, in un prompt<span class="eco">ChatGPT e Claude non sanno dove sei: questa pagina legge il GPS del telefono e scrive il testo da incollare.</span></h1>
   </div>
@@ -291,8 +355,9 @@ a.tasto{
 </div>
 <p class="riservatezza">La posizione resta su questo telefono. Non viene inviata a nessun server.</p>
 
-<footer class="piede">
-  Strumento gratuito di <a href="https://simonecastellan.com/">Simone Castellan</a> — <a href="https://simonecastellan.com/tools/">gli altri strumenti</a>.
+<footer class="piede piede-unico">
+  <p class="gancio">Ti serve un sound engineer? <a href="https://wa.me/393404579244?text=Ciao%20Simone%2C%20ti%20scrivo%20dal%20tuo%20sito." target="_blank" rel="noopener" aria-label="Scrivimi su WhatsApp — si apre in una nuova scheda">Scrivimi</a></p>
+  <a href="/">Simone Castellan</a><span class="sep">·</span><a href="/tools/">Strumenti</a><span class="sep">·</span><a href="/cv/">CV</a><span class="sep">·</span><a href="/privacy/">Privacy</a>
 </footer>
 
 <script>
