@@ -3,7 +3,7 @@
   --bg: #ffffff;
   --text: #3c4043;
   --ink: #1a1a1a;
-  --muted: #5f6368;
+  --muted: var(--mut);  /* il grigio comune di /comune/voce.css */
   --muted-2: #68716d;
   --faint: #68716d;
   --pill: #f1f3f4;

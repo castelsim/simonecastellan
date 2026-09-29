@@ -73,7 +73,7 @@ header { text-align: left; margin-bottom: 26px; }
   color: var(--teal-scuro);
   width: 100%;
 }
-.btn-primario:hover:not(:disabled) { background: var(--teal); }
+.btn-primario:hover:not(:disabled) { background: var(--teal-hover); }
 .btn-primario:disabled { opacity: .45; cursor: default; }
 .btn-secondario { background: var(--pill); color: var(--ink); width: 100%; font-size: 15px; }
 .btn-secondario:hover { background: var(--pill-hover); }

@@ -35,7 +35,7 @@ footer.piede-unico a {
 footer.piede-unico a:hover { color: #1a1a1a; border-bottom-color: #9aa0a6; }
 footer.piede-unico a:focus-visible { outline: 2px solid #1a1a1a; outline-offset: 3px; border-radius: 3px; }
 footer.piede-unico .sep { color: #bdc1c6; margin: 0 5px; }
-footer.piede-unico .firma { display: block; font-size: 12px; color: #6b7075; }
+footer.piede-unico .firma { display: block; font-size: 12px; color: #5f6368; }
 
 /* La domanda di contatto, solo sulle pagine degli strumenti. */
 footer.piede-unico .gancio { margin: 0 0 2px; font-size: 13.5px; color: #3c4043; }

@@ -3,7 +3,7 @@
   --bg: #ffffff;
   --text: #3c4043;
   --ink: #1a1a1a;
-  --muted: #5f6368;
+  --muted: var(--mut);  /* il grigio comune di /comune/voce.css */
   --muted-2: #68716d;
   --faint: #68716d;
   --pill: #f1f3f4;
@@ -270,7 +270,7 @@ header { text-align: left; margin-bottom: 30px; }
 /* Il pulsante che manda il suono nelle casse: qui si viene per premere quello.
    Resta tondo e grande com'era, cambia solo il colore. */
 .play-big { background: var(--teal-l); color: var(--teal-scuro); }
-.play-big:hover { background: var(--teal); }
+.play-big:hover { background: var(--teal-hover); }
 
 /* Il rimando a «Tara un impianto»: questa pagina manda il segnale, l'altra lo
    misura. Chi cerca «tarare un impianto» arriva spesso qui e vuole l'altra. */
