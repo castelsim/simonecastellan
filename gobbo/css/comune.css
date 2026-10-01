@@ -1,0 +1,33 @@
+/* Gobbo — regole comuni a regia e TV.
+   Il carattere è dentro l'app: dal vivo non si chiede niente a internet.
+   «block» invece di «swap»: meglio un istante senza testo che un testo che
+   cambia forma e misura sotto gli occhi del cantante. */
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("../font/AtkinsonHyperlegible-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: block;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("../font/AtkinsonHyperlegible-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: block;
+}
+
+:root {
+  --carattere-testo: "Atkinson Hyperlegible", -apple-system, "Helvetica Neue", Arial, sans-serif;
+
+  /* I cinque colori del testo: tutti sopra 7:1 sul nero (lo verifica la prova
+     in test/testo.test.mjs, che legge gli stessi valori da testo.js). */
+  --giallo: #ffd23f;
+  --azzurro: #5ec8f2;
+  --verde: #7ee08a;
+  --arancio: #ffa94d;
+  --rosa: #ff9ccf;
+
+  /* La riga accesa: barra gialla a sinistra, come nella bozza B scelta. */
+  --accesa: #f5c518;
+}
+
+*, *::before, *::after { box-sizing: border-box; }

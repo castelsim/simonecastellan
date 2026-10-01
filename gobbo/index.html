@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gobbo — regia</title>
+  <meta name="description" content="Gobbo per cantanti: regia sul Mac, testo sulla TV, riga per riga. Funziona senza internet; i testi restano su questo computer.">
+  <!-- Fase 1 (01/10/2026): online solo per chi ha il link. Si toglie quando passa in vetrina. -->
+  <meta name="robots" content="noindex">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icona.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/comune.css">
+  <link rel="stylesheet" href="css/tv.css">
+  <link rel="stylesheet" href="css/regia.css">
+</head>
+<body>
+  <header class="testata">
+    <div class="marchio">Gobbo</div>
+    <nav class="schede" aria-label="Sezioni">
+      <button type="button" data-vista="concerto">Concerto</button>
+      <button type="button" data-vista="libreria">Libreria</button>
+      <button type="button" data-vista="scalette">Scalette</button>
+      <button type="button" data-vista="impostazioni">Impostazioni</button>
+    </nav>
+    <div class="spie">
+      <span id="spia-salvato" class="spia-salvato"></span>
+      <span id="spia-tv" class="spia-tv-regia perso">TV non collegata</span>
+      <button type="button" id="apri-tv" class="pulsante giallo">Apri TV</button>
+    </div>
+  </header>
+
+  <div id="avvisi" class="avvisi" aria-live="assertive"></div>
+
+  <main>
+    <section id="vista-concerto" class="vista" hidden></section>
+    <section id="vista-libreria" class="vista" hidden></section>
+    <section id="vista-scalette" class="vista" hidden></section>
+    <section id="vista-impostazioni" class="vista" hidden></section>
+  </main>
+
+  <script type="module" src="js/regia.js"></script>
+</body>
+</html>
