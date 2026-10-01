@@ -16,6 +16,7 @@ Esiste per impedire il ritorno di problemi già capitati davvero:
 
 Esce con codice 1 se un controllo fallisce.
 """
+import hashlib
 import html
 import json
 import os
@@ -1321,6 +1322,71 @@ def controlla_agganci_css():
     print(f"  agganci CSS: {trovati} classi cercate dal codice, tutte esistenti")
 
 
+# /gobbo/ (01/10/2026): il gobbo per cantanti, un'app intera copiata dal progetto
+# COWORK/GOBBO con `node strumenti/pubblica-sul-sito.mjs`. Fase 1: online solo
+# per chi ha il link (il cantante, per la prova vera). Si mette a False quando
+# passa in vetrina — e allora vanno tolti i noindex e aggiunta la sitemap.
+GOBBO_NASCOSTO = True
+
+
+def controlla_gobbo():
+    """Il gobbo: un'app da palco, non una pagina come le altre.
+
+    Quattro cose che nessun altro controllo vede:
+    1. finché è nascosto, noindex sulle due pagine e nessuna strada per
+       arrivarci (sitemap, vetrina, home);
+    2. niente statistiche: è uno strumento da concerto, deve funzionare senza
+       rete e non si conta chi lo usa né cosa canta;
+    3. il service worker resta dentro /gobbo/ (registrato con percorso relativo);
+    4. la versione del service worker è l'impronta dei file copiati, calcolata
+       come in COWORK/GOBBO/strumenti/impronta.mjs: una copia parziale o un
+       file ritoccato a mano qui servirebbero ai cantanti un misto di file
+       vecchi e nuovi, anche senza rete."""
+    base = os.path.join(ROOT, "gobbo")
+    if not os.path.isdir(base):
+        errore("/gobbo/ non c'è più: il cantante che ha il link troverebbe una pagina vuota")
+        return
+    for rel in ("gobbo/index.html", "gobbo/tv.html"):
+        pagina = leggi(rel)
+        if "track.js" in pagina or "script.google.com" in pagina:
+            errore(f"{rel}: statistiche dentro il gobbo — è un'app da palco, senza rete e senza conteggi")
+        if GOBBO_NASCOSTO:
+            robots = re.search(r'<meta\s+name="robots"\s+content="([^"]*)"', pagina)
+            if not robots or "noindex" not in robots.group(1):
+                errore(f"{rel}: il gobbo è ancora nascosto ma la pagina non ha il meta robots noindex")
+    if GOBBO_NASCOSTO:
+        if "simonecastellan.com/gobbo" in leggi("sitemap.xml"):
+            errore("/gobbo/ è nella sitemap ma è ancora nascosto (GOBBO_NASCOSTO)")
+        for rel in ("index.html", "en/index.html", "tools/index.html"):
+            if re.search(r'href="(https://simonecastellan\.com)?/gobbo/', leggi(rel)):
+                errore(f"{rel} porta a /gobbo/, che è ancora nascosto (GOBBO_NASCOSTO)")
+    if "register('sw.js')" not in leggi("gobbo/js/schermo.js"):
+        errore("gobbo: il service worker non è più registrato con percorso relativo: uscirebbe da /gobbo/")
+
+    file = []
+    for cartella, _, nomi in os.walk(base):
+        for nome in nomi:
+            if nome.startswith("."):
+                continue
+            rel = os.path.relpath(os.path.join(cartella, nome), base).replace(os.sep, "/")
+            if rel != "sw.js":
+                file.append(rel)
+    file.sort()
+    impronta = hashlib.sha256()
+    for f in file:
+        impronta.update((f + "\0").encode("utf-8"))
+        with open(os.path.join(base, f), "rb") as fh:
+            impronta.update(fh.read())
+    attesa = "gobbo-" + impronta.hexdigest()[:12]
+    dichiarata = re.search(r"const VERSIONE = '([^']*)';", leggi("gobbo/sw.js"))
+    if not dichiarata or dichiarata.group(1) != attesa:
+        errore(f"gobbo: la versione del service worker ({dichiarata.group(1) if dichiarata else '?'}) "
+               f"non è l'impronta dei file ({attesa}): ricopiare da COWORK/GOBBO con "
+               f"`node strumenti/versione.mjs` e `node strumenti/pubblica-sul-sito.mjs`")
+    stato = "nascosto (solo col link)" if GOBBO_NASCOSTO else "in vetrina"
+    print(f"  gobbo: {stato}, {len(file) + 1} file, versione {attesa} coerente, niente statistiche")
+
+
 def main():
     print("Verifica del sito…")
     home = leggi("index.html")
@@ -1352,6 +1418,7 @@ def main():
     controlla_fatti_allineati()
     controlla_person_definita_una_volta()
     controlla_agganci_css()
+    controlla_gobbo()
 
     for a in AVVISI:
         print("  AVVISO: " + a)
