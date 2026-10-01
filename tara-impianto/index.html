@@ -24,10 +24,12 @@
   <!-- La voce comune viene prima del foglio locale: porta i colori e tre classi. -->
   <link rel="stylesheet" href="/comune/voce.css" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/comune/piede.css" />
 </head>
 <body>
   <main class="card">
     <header>
+      <p class="percorso"><a href="/">Simone Castellan</a><span class="su" aria-hidden="true">›</span><a href="/tools/">Strumenti</a></p>
       <p class="occhiello">Sala · Impianto · Equalizzatore</p>
       <h1 class="titolone">Tara un impianto.<br><span class="eco">Misura, e dice cosa fare.</span></h1>
       <p class="apertura">Manda il rumore rosa nelle casse e ascolta col microfono. Poi dice
@@ -129,7 +131,7 @@
             aria-describedby="lettura"></canvas>
 
     <!-- Il valore sotto il dito: i consigli dicono le cose grosse, qui si
-         controlla un punto preciso mentre si muove un cursore sull'EQ.
+         controlla un punto preciso mentre si muove un cursore sull'equalizzatore.
          «aria-live» perché con le frecce il numero cambia senza che si sposti
          il fuoco: senza, una lettura vocale non direbbe niente. -->
     <p class="lettura" id="lettura" aria-live="polite" hidden></p>
@@ -177,8 +179,10 @@
         rimbombi e toglie altre parti. Qui dalle casse esce un rumore che contiene
         tutte le frequenze. Il microfono ascolta cosa torna indietro. La differenza
         fra i due suoni è quello che sala e impianto fanno alla musica. Da lì
-        nascono i consigli: quanto togliere, a che frequenza, con quale Q. Sotto
-        trovi anche il ritardo fra le casse e il microfono.</p>
+        nascono i consigli: quanto togliere, a che frequenza, con quale Q. Il Q è
+        la larghezza della correzione: più è alto, più è stretta. Se il tuo
+        equalizzatore non ha il Q, come quelli a cursori, usa la banda più vicina.
+        Sotto trovi anche il ritardo fra le casse e il microfono.</p>
 
       <h2>La curva obiettivo</h2>
       <p>Un impianto in sala non deve venire piatto. L'orecchio riceve il suono
@@ -258,9 +262,9 @@
     </section>
   </main>
 
-  <footer class="site-footer">
-    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
-    · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
+  <footer class="site-footer piede-unico">
+    <p class="gancio">Ti serve un sound engineer? <a href="https://wa.me/393404579244?text=Ciao%20Simone%2C%20ti%20scrivo%20dal%20tuo%20sito." target="_blank" rel="noopener" aria-label="Scrivimi su WhatsApp — si apre in una nuova scheda">Scrivimi</a></p>
+    <a href="/">Simone Castellan</a><span class="sep">·</span><a href="/tools/">Strumenti</a><span class="sep">·</span><a href="/cv/">CV</a><span class="sep">·</span><a href="/privacy/">Privacy</a>
   </footer>
 
   <script src="/comune/audio.js"></script>

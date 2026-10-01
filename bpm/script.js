@@ -210,9 +210,12 @@ function onTap() {
     for (var i = 1; i < recent.length; i++) sum += recent[i] - recent[i - 1];
     var avg = sum / (recent.length - 1);
     var bpm = clamp(60000 / avg);
-    bpmInput.value = bpm;
+    // Arrotondato come in setBpm: il TAP produce valori come 117,2562048075044,
+    // e fino al 28/09/2026 finivano così nel campo e nella riga qui sotto. Nel
+    // testo la virgola; nel campo il punto, che è un <input type="number">.
+    bpmInput.value = perIlCampo(bpm);
     render();
-    tapHint.textContent = bpm + ' BPM da ' + recent.length + ' battiti';
+    tapHint.textContent = perIlCampo(bpm).replace('.', ',') + ' BPM da ' + recent.length + ' battiti';
   } else {
     tapHint.textContent = 'Continua a battere…';
   }

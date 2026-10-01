@@ -1,0 +1,83 @@
+/* Piè di pagina unico e riga di percorso degli strumenti (29/09/2026).
+
+   Fino a questa data il sito aveva quattro piè di pagina diversi per lo stesso
+   ruolo: sottolineati in metà delle pagine e no nell'altra, con un filo sopra
+   solo nel profilo, allineato a sinistra su /posizione/, con «Simone
+   Castellan» che apriva una scheda nuova solo negli strumenti. Adesso è uno
+   solo: «Simone Castellan · Strumenti · CV · Privacy». Sulle pagine degli
+   strumenti si aggiunge una riga sopra, la domanda di contatto: chi arriva per
+   convertire un MP3 spesso non sa che dietro c'è un sound engineer che lavora.
+
+   I selettori sono «footer.piede-unico» e non la classe da sola: sugli
+   strumenti il piè porta ancora anche la classe «site-footer» (la cerca il
+   banco di prova), e le regole di ogni style.css non devono vincere su queste.
+   /posizione/ copia queste regole dentro la pagina: è un'app installabile e
+   un foglio fuori dalla sua cartella non starebbe nella cache offline. */
+
+footer.piede-unico {
+  margin: 40px auto 0;
+  padding: 0 20px 24px;
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 2;
+  letter-spacing: .2px;
+  color: #6b7075;
+  border: 0;
+}
+footer.piede-unico a {
+  position: relative;
+  display: inline-block;
+  color: #5f6368;
+  text-decoration: none;
+  border-bottom: 1px solid #d6d9de;
+  line-height: 1.4;
+}
+footer.piede-unico a:hover { color: #1a1a1a; border-bottom-color: #9aa0a6; }
+footer.piede-unico a:focus-visible { outline: 2px solid #1a1a1a; outline-offset: 3px; border-radius: 3px; }
+footer.piede-unico .sep { color: #bdc1c6; margin: 0 5px; }
+footer.piede-unico .firma { display: block; font-size: 12px; color: #5f6368; }
+
+/* La domanda di contatto, solo sulle pagine degli strumenti. */
+footer.piede-unico .gancio { margin: 0 0 2px; font-size: 13.5px; color: #3c4043; }
+footer.piede-unico .gancio a {
+  color: #0a7d72; font-weight: 600;
+  border-bottom-color: rgba(10, 125, 114, .4);
+}
+
+/* Bersagli: 24 px col mouse, 44 col dito. Cresce l'area, non il testo. */
+footer.piede-unico a::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: calc(100% + 8px); min-width: 24px; height: 24px;
+  transform: translate(-50%, -50%);
+}
+@media (max-width: 620px), (pointer: coarse) {
+  footer.piede-unico a::after { width: calc(100% + 12px); min-width: 44px; height: 44px; }
+  footer.piede-unico { line-height: 2.6; }
+}
+
+/* La riga di percorso sopra l'occhiello degli strumenti: chi arriva da Google
+   su uno strumento vede subito di chi è il sito e come tornare agli altri. */
+.percorso {
+  margin: 0 0 14px;
+  font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #5f6368;
+}
+.percorso a {
+  position: relative;
+  color: #5f6368;
+  text-decoration: none;
+  border-bottom: 1px solid #d6d9de;
+}
+.percorso a:hover { color: #1a1a1a; }
+.percorso a:focus-visible { outline: 2px solid #1a1a1a; outline-offset: 3px; border-radius: 3px; }
+.percorso .su { color: #bdc1c6; margin: 0 6px; }
+.percorso a::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: calc(100% + 8px); min-width: 24px; height: 24px;
+  transform: translate(-50%, -50%);
+}
+@media (max-width: 620px), (pointer: coarse) {
+  .percorso a::after { width: calc(100% + 12px); min-width: 44px; height: 44px; }
+}

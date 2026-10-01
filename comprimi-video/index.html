@@ -24,6 +24,7 @@
   <!-- La voce comune viene prima del foglio locale: porta i colori e tre classi. -->
   <link rel="stylesheet" href="/comune/voce.css" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/comune/piede.css" />
 
   <!-- Serve l'isolamento cross-origin (SharedArrayBuffer) perché il motore
        lavori. Si attiva da solo, chi arriva non se ne accorge. -->
@@ -32,6 +33,7 @@
 <body>
   <main class="card">
     <header>
+      <p class="percorso"><a href="/">Simone Castellan</a><span class="su" aria-hidden="true">›</span><a href="/tools/">Strumenti</a></p>
       <p class="occhiello">Peso · Email · WhatsApp</p>
       <h1 class="titolone">Comprimi video.<br><span class="eco">Sotto il peso che ti chiedono.</span></h1>
       <p class="apertura">La posta si ferma a 25 MB, WhatsApp a 16. Qui il video scende sotto
@@ -135,9 +137,9 @@
     </section>
   </main>
 
-  <footer class="site-footer">
-    Fatto da <a href="https://simonecastellan.com" target="_blank" rel="noopener">Simone Castellan</a>
-    · <a href="https://simonecastellan.com/tools/">Altri strumenti</a>
+  <footer class="site-footer piede-unico">
+    <p class="gancio">Ti serve un sound engineer? <a href="https://wa.me/393404579244?text=Ciao%20Simone%2C%20ti%20scrivo%20dal%20tuo%20sito." target="_blank" rel="noopener" aria-label="Scrivimi su WhatsApp — si apre in una nuova scheda">Scrivimi</a></p>
+    <a href="/">Simone Castellan</a><span class="sep">·</span><a href="/tools/">Strumenti</a><span class="sep">·</span><a href="/cv/">CV</a><span class="sep">·</span><a href="/privacy/">Privacy</a>
   </footer>
 
   <!-- Il motore sta in /audio-mp3/vendor/: è lo stesso, e 24 MB non si tengono in

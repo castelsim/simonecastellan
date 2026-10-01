@@ -2,7 +2,7 @@
   --bg: #ffffff;
   --text: #3c4043;
   --ink: #1a1a1a;
-  --muted: #5f6368;
+  --muted: var(--mut);  /* il grigio comune di /comune/voce.css */
   --muted-2: #68716d;
   --faint: #68716d;
   --pill: #f1f3f4;
@@ -209,7 +209,7 @@ textarea::placeholder { color: var(--faint); }
 .scelta-btn {
   border: 1px solid var(--line);
   background: #fff;
-  font: 600 14px inherit;
+  font-family: inherit; font-size: 14px; font-weight: 600;
   color: #5f6368;
   padding: 9px 16px;
   border-radius: 9px;
@@ -268,7 +268,7 @@ header { text-align: left; margin-bottom: 30px; }
 
 /* Scaricare il codice è il gesto per cui si è aperta la pagina. */
 .btn-primary { background: var(--teal-l); color: var(--teal-scuro); }
-.btn-primary:hover { background: var(--teal); }
+.btn-primary:hover { background: var(--teal-hover); }
 
 /* Il modo scelto — link oppure Wi-Fi — va visto a colpo d'occhio: è la
    scelta che decide cosa si vede sotto. */

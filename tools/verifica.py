@@ -16,6 +16,7 @@ Esiste per impedire il ritorno di problemi già capitati davvero:
 
 Esce con codice 1 se un controllo fallisce.
 """
+import hashlib
 import html
 import json
 import os
@@ -295,7 +296,7 @@ def controlla_intestazioni_tool():
             if not testo.endswith("."):
                 AVVISI.append(f"{t}: la seconda riga del titolo «{testo}» non chiude la frase")
 
-        if "simonecastellan.com/tools/" not in pagina.split("<footer", 1)[-1]:
+        if not re.search(r'href="(https://simonecastellan\.com)?/tools/"', pagina.split("<footer", 1)[-1]):
             errore(f"{t}: dal piede non si torna agli altri strumenti")
 
         # Il piede diceva «Designed and built by» su diciotto pagine italiane:
@@ -442,6 +443,36 @@ def controlla_lastmod_sitemap():
                f"Rimedio: python3 ops/allinea-sitemap.py --scrivi")
     elif controllate:
         print(f"  lastmod della sitemap: {controllate} date, nessuna indietro rispetto alla pagina")
+
+
+def controlla_font_inherit():
+    """«font: <dimensione> inherit» non è una scorciatoia valida.
+
+    Il browser la considera un errore e butta via la riga INTERA: carattere,
+    dimensione e interlinea tornano quelli di default. È successo su
+    /posizione/ (campi a 13,3 px in monospaziato, zoom su iPhone, 20/09) e il
+    28/09/2026 la revisione l'ha trovato in altre sette regole su quattro
+    pagine: i filtri di /tools/ uscivano in Arial. Si scrive proprietà per
+    proprietà; «font: inherit» da solo invece è valido."""
+    sbagliate = []
+    for radice, _, files in os.walk(ROOT):
+        if "/.git" in radice or "node_modules" in radice:
+            continue
+        for nome in files:
+            if not nome.endswith((".css", ".html")):
+                continue
+            percorso = os.path.join(radice, nome)
+            testo = open(percorso, encoding="utf-8", errors="ignore").read()
+            testo = re.sub(r"/\*.*?\*/", " ", testo, flags=re.S)
+            testo = re.sub(r"<!--.*?-->", " ", testo, flags=re.S)
+            for m in re.finditer(r"font\s*:\s*([^;{}]*)", testo):
+                valore = m.group(1)
+                if "inherit" in valore and re.search(r"\d", valore):
+                    sbagliate.append(f"{os.path.relpath(percorso, ROOT)}: font:{valore.strip()[:40]}")
+    for s in sbagliate:
+        errore(f"{s} — «font: … inherit» non è valido: il browser butta la riga intera")
+    if not sbagliate:
+        print("  caratteri: nessuna scorciatoia «font: … inherit» non valida")
 
 
 def controlla_etichetta_assistente(home):
@@ -906,6 +937,16 @@ def controlla_cv_allineato():
             if pezzo in pagina:
                 errore(f"cv: «{pezzo}» è tornato nella pagina /cv/: era stato tolto "
                        f"dalla versione pubblica l'11/09/2026 e resta nel PDF dei bandi")
+            # Dal 28/09/2026 anche le altre fonti pubbliche: il profilo è la pagina
+            # che l'assistente AI legge e riferisce al datore di lavoro.
+            for fonte in ("profilo/index.html", "llms.txt"):
+                if pezzo in leggi(fonte):
+                    errore(f"{fonte}: contiene «{pezzo}», che sta solo nel PDF per i bandi — "
+                           f"è la pagina che ChatGPT legge e riferisce così com'è")
+    # La versione inglese dice le stesse posizioni con altre parole.
+    for pezzo in ("7th of 8", "23rd", "40/100"):
+        if pezzo in leggi("en/profile/index.html"):
+            errore(f"en/profile/index.html: contiene «{pezzo}», che sta solo nel PDF per i bandi")
     # Si cerca l'USO nel codice, a commenti tolti: il primo tentativo cercava la
     # parola e la trovava nel commento che la spiega — passava anche col codice
     # rimesso com'era prima. Stesso tranello del «noindex» del 12/08/2026.
@@ -1284,6 +1325,71 @@ def controlla_agganci_css():
     print(f"  agganci CSS: {trovati} classi cercate dal codice, tutte esistenti")
 
 
+# /gobbo/ (01/10/2026): il gobbo per cantanti, un'app intera copiata dal progetto
+# COWORK/GOBBO con `node strumenti/pubblica-sul-sito.mjs`. Fase 1: online solo
+# per chi ha il link (il cantante, per la prova vera). Si mette a False quando
+# passa in vetrina — e allora vanno tolti i noindex e aggiunta la sitemap.
+GOBBO_NASCOSTO = True
+
+
+def controlla_gobbo():
+    """Il gobbo: un'app da palco, non una pagina come le altre.
+
+    Quattro cose che nessun altro controllo vede:
+    1. finché è nascosto, noindex sulle due pagine e nessuna strada per
+       arrivarci (sitemap, vetrina, home);
+    2. niente statistiche: è uno strumento da concerto, deve funzionare senza
+       rete e non si conta chi lo usa né cosa canta;
+    3. il service worker resta dentro /gobbo/ (registrato con percorso relativo);
+    4. la versione del service worker è l'impronta dei file copiati, calcolata
+       come in COWORK/GOBBO/strumenti/impronta.mjs: una copia parziale o un
+       file ritoccato a mano qui servirebbero ai cantanti un misto di file
+       vecchi e nuovi, anche senza rete."""
+    base = os.path.join(ROOT, "gobbo")
+    if not os.path.isdir(base):
+        errore("/gobbo/ non c'è più: il cantante che ha il link troverebbe una pagina vuota")
+        return
+    for rel in ("gobbo/index.html", "gobbo/tv.html"):
+        pagina = leggi(rel)
+        if "track.js" in pagina or "script.google.com" in pagina:
+            errore(f"{rel}: statistiche dentro il gobbo — è un'app da palco, senza rete e senza conteggi")
+        if GOBBO_NASCOSTO:
+            robots = re.search(r'<meta\s+name="robots"\s+content="([^"]*)"', pagina)
+            if not robots or "noindex" not in robots.group(1):
+                errore(f"{rel}: il gobbo è ancora nascosto ma la pagina non ha il meta robots noindex")
+    if GOBBO_NASCOSTO:
+        if "simonecastellan.com/gobbo" in leggi("sitemap.xml"):
+            errore("/gobbo/ è nella sitemap ma è ancora nascosto (GOBBO_NASCOSTO)")
+        for rel in ("index.html", "en/index.html", "tools/index.html"):
+            if re.search(r'href="(https://simonecastellan\.com)?/gobbo/', leggi(rel)):
+                errore(f"{rel} porta a /gobbo/, che è ancora nascosto (GOBBO_NASCOSTO)")
+    if "register('sw.js')" not in leggi("gobbo/js/schermo.js"):
+        errore("gobbo: il service worker non è più registrato con percorso relativo: uscirebbe da /gobbo/")
+
+    file = []
+    for cartella, _, nomi in os.walk(base):
+        for nome in nomi:
+            if nome.startswith("."):
+                continue
+            rel = os.path.relpath(os.path.join(cartella, nome), base).replace(os.sep, "/")
+            if rel != "sw.js":
+                file.append(rel)
+    file.sort()
+    impronta = hashlib.sha256()
+    for f in file:
+        impronta.update((f + "\0").encode("utf-8"))
+        with open(os.path.join(base, f), "rb") as fh:
+            impronta.update(fh.read())
+    attesa = "gobbo-" + impronta.hexdigest()[:12]
+    dichiarata = re.search(r"const VERSIONE = '([^']*)';", leggi("gobbo/sw.js"))
+    if not dichiarata or dichiarata.group(1) != attesa:
+        errore(f"gobbo: la versione del service worker ({dichiarata.group(1) if dichiarata else '?'}) "
+               f"non è l'impronta dei file ({attesa}): ricopiare da COWORK/GOBBO con "
+               f"`node strumenti/versione.mjs` e `node strumenti/pubblica-sul-sito.mjs`")
+    stato = "nascosto (solo col link)" if GOBBO_NASCOSTO else "in vetrina"
+    print(f"  gobbo: {stato}, {len(file) + 1} file, versione {attesa} coerente, niente statistiche")
+
+
 def main():
     print("Verifica del sito…")
     home = leggi("index.html")
@@ -1300,6 +1406,7 @@ def main():
     controlla_nascosti()
     controlla_opere_dichiarate()
     controlla_ascolti()
+    controlla_font_inherit()
     controlla_etichetta_assistente(home)
     controlla_lastmod_sitemap()
     controlla_date_dichiarate()
@@ -1314,6 +1421,7 @@ def main():
     controlla_fatti_allineati()
     controlla_person_definita_una_volta()
     controlla_agganci_css()
+    controlla_gobbo()
 
     for a in AVVISI:
         print("  AVVISO: " + a)

@@ -326,6 +326,13 @@ const CV = {
      Il decreto resta citato in tutte e due, quindi la posizione chiunque la
      può controllare: niente è nascosto, niente è gonfiato.
 
+     Dal 28/09/2026 vale anche per /profilo/, /en/profile/ e llms.txt. L'11/09
+     il profilo le aveva tenute come «archivio», ma la revisione ha mostrato la
+     conseguenza: è la pagina che il pulsante «Chiedi a ChatGPT» fa leggere
+     all'assistente, con l'istruzione di riferire le formule come sono — cioè
+     proprio al datore di lavoro per cui le si era tolte dal CV. Stanno solo nel
+     PDF per i bandi.
+
      `soloCompleto` elenca i pezzi che stanno SOLO nel testo per i bandi. Serve
      alla guardia: devono esserci nel `testo` e mancare nella pagina. */
   idoneita: [

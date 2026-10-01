@@ -176,9 +176,9 @@ FRASI.forEach(function (f) {
   var b = document.createElement('button');
   b.type = 'button';
   b.className = 'chip';
-  // Nella pillola sta la prima parte: per riconoscerla basta, e la riga resta corta.
-  b.textContent = f.length > 26 ? f.slice(0, 25).trim() + '…' : f;
-  b.title = f;
+  // La frase intera: tagliata a 25 caratteri si leggeva solo passandoci sopra
+  // col mouse (title), cioè mai sul telefono. Va a capo se non ci sta.
+  b.textContent = f;
   b.addEventListener('click', function () { msgEl.value = f; aggiorna(); });
   chipsEl.appendChild(b);
 });

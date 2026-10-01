@@ -3,7 +3,7 @@
   --bg: #ffffff;
   --text: #3c4043;
   --ink: #1a1a1a;
-  --muted: #5f6368;
+  --muted: var(--mut);  /* il grigio comune di /comune/voce.css */
   --muted-2: #68716d;
   --faint: #68716d;
   --pill: #f1f3f4;
@@ -230,7 +230,7 @@ header { text-align: left; margin-bottom: 30px; }
 /* «.btn.primario» e non «.primario»: la regola di sopra ha due classi e
    vincerebbe, lasciando il pulsante nero. Provato — restava nero. */
 .btn.primario { background: var(--teal-l); color: var(--teal-scuro); }
-.btn.primario:hover:not(:disabled) { background: var(--teal); }
+.btn.primario:hover:not(:disabled) { background: var(--teal-hover); }
 
 
 /* ————— Il telefono in mano (15/08/2026) —————

@@ -113,7 +113,7 @@ var CONSIGLI = (function () {
           testo: 'A ' + arrotonda(z.picco) + ' Hz c\'è un buco stretto (' +
                  Math.abs(Math.round(z.db)) + ' dB). Non riempirlo: è una ' +
                  'cancellazione, e alzando il cursore mandi più energia dove il ' +
-                 'suono si annulla. Si cura spostando una cassa, non con l\'EQ.'
+                 'suono si annulla. Si cura spostando una cassa, non con l\'equalizzatore.'
         });
       } else if (z.picco < NIENTE_ALZATE_SOTTO) {
         /* Un avvallamento largo nei bassi profondi NON si corregge alzando:

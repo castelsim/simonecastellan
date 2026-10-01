@@ -1,0 +1,14 @@
+{
+  "name": "Gobbo per cantanti",
+  "short_name": "Gobbo",
+  "description": "Regia sul Mac, testo del cantante sulla TV. Funziona senza internet.",
+  "lang": "it",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#111418",
+  "theme_color": "#111418",
+  "icons": [
+    { "src": "icona.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
