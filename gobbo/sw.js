@@ -5,7 +5,7 @@
 // l'impronta dei file: la riscrive `node strumenti/versione.mjs`, e la prova
 // test/versione.test.mjs fallisce se qualcuno se ne dimentica.
 
-const VERSIONE = 'gobbo-6a05e8bc92fc';
+const VERSIONE = 'gobbo-b9577d36ce1f';
 
 const FILE = [
   './',
@@ -21,6 +21,7 @@ const FILE = [
   'js/canale.js',
   'js/cerca.js',
   'js/concerto.js',
+  'js/copia.js',
   'js/esempi.js',
   'js/impostazioni-tv.js',
   'js/impostazioni.js',

@@ -18,7 +18,7 @@ function quandoBackup(iso) {
   return `${d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' })} alle ${ore}`;
 }
 
-export function creaImpostazioni({ archivio, radice, avvisi, concerto }) {
+export function creaImpostazioni({ archivio, radice, avvisi, concerto, copia }) {
   let imp = { ...IMPOSTAZIONI_TV };
   const misura = misuratoreCanvas('"Atkinson Hyperlegible"');
 
@@ -40,6 +40,17 @@ export function creaImpostazioni({ archivio, radice, avvisi, concerto }) {
             <p class="etichetta">Anteprima</p>
             <div class="anteprima" id="imp-anteprima-box"><div class="schermo" id="imp-anteprima"></div></div>
           </div>
+        </div>
+      </section>
+
+      <section class="blocco">
+        <h2>Copia automatica in una cartella</h2>
+        <p id="cartella-stato" class="ultimo-backup"></p>
+        <p class="guida">Scegli una volta una cartella (Documenti, o iCloud Drive per averla anche su altri apparecchi): a ogni modifica di brani, scalette o impostazioni il gobbo ci scrive <code>gobbo-libreria.json</code> e una copia al giorno in <code>storico/</code> (ultime 30). Durante il concerto i tasti non scrivono niente sul disco. Su un altro Mac: «Importa un backup» e scegli <code>gobbo-libreria.json</code>.</p>
+        <div class="riga-pulsanti">
+          <button type="button" class="pulsante giallo" data-azione="scegli-cartella">Scegli la cartella…</button>
+          <button type="button" class="pulsante" data-azione="copia-ora">Copia adesso</button>
+          <button type="button" class="pulsante pericolo" data-azione="smetti-cartella">Smetti di copiare</button>
         </div>
       </section>
 
@@ -183,11 +194,30 @@ export function creaImpostazioni({ archivio, radice, avvisi, concerto }) {
   radice.addEventListener('click', e => {
     const az = e.target.closest('[data-azione]')?.dataset.azione;
     if (az === 'esporta') esporta();
+    if (az === 'scegli-cartella') copia.scegli();
+    if (az === 'copia-ora') copia.copiaOra();
+    if (az === 'smetti-cartella') copia.smetti();
     if (az === 'valori-partenza') { imp = { ...IMPOSTAZIONI_TV }; riempi(); applica(imp); }
   });
 
+  function aggiornaCartella() {
+    const el = $('#cartella-stato');
+    const nome = copia.nome() ? `«${copia.nome() || 'cartella'}»` : '';
+    const ora = copia.ultima()?.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const stato = copia.stato();
+    el.textContent = stato === 'attiva' ? `Attiva nella cartella ${nome}${ora ? ` · ultima copia alle ${ora}` : ''}`
+      : stato === 'in-pausa' ? `In pausa: Chrome chiede di riconfermare la cartella ${nome} (avviso in alto, «Riattiva»)`
+      : stato === 'errore' ? `Non riesce a scrivere nella cartella ${nome}`
+      : 'Non attiva: nessuna cartella scelta';
+    $('[data-azione="copia-ora"]').disabled = stato !== 'attiva';
+    $('[data-azione="smetti-cartella"]').disabled = stato === 'spenta';
+    scriviUltimo();   // una copia nella cartella vale come backup
+  }
+
   return {
+    aggiornaCartella,
     async mostra() {
+      aggiornaCartella();
       const t = await archivio.leggi('tv').catch(() => null);
       imp = { ...IMPOSTAZIONI_TV, ...(t ?? {}) };
       riempi();
