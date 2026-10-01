@@ -13,6 +13,11 @@ const VERSIONE_DB = 1;
 const VERSIONI_TENUTE = 30;
 // Stato della sessione: non viaggia nei backup.
 const SOLO_SESSIONE = new Set(['posizione', 'concerto']);
+// La cartella della copia automatica è di questo Mac: non viaggia nei backup.
+const NON_ESPORTATI = new Set([...SOLO_SESSIONE, 'cartella']);
+// Scritture che NON sono un cambiamento della libreria: la posizione del
+// concerto cambia a ogni tasto, e la copia su disco non deve partire a ogni riga.
+const NON_CAMBIAMENTI = new Set([...NON_ESPORTATI, 'ultimoBackup', 'esempiInseriti']);
 
 const promessa = r => new Promise((ok, ko) => { r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error); });
 
@@ -61,12 +66,17 @@ export async function apriArchivio(nome = 'gobbo') {
 
   const tutti = nomeStore => transazione([nomeStore], 'readonly', t => promessa(t.objectStore(nomeStore).getAll()));
 
+  // Chi vuole sapere quando la libreria cambia davvero (la copia nella cartella).
+  const ascoltatori = [];
+  const cambiato = valore => { for (const f of ascoltatori) { try { f(); } catch { /* un ascoltatore rotto non ferma l'archivio */ } } return valore; };
+
   const archivio = {
     brani: () => tutti('brani'),
     brano: id => transazione(['brani'], 'readonly', t => promessa(t.objectStore('brani').get(id))),
 
     salvaBrano(dati) {
       const ora = new Date().toISOString();
+      let cambiatoDavvero = false;
       return transazione(['brani', 'versioni'], 'readwrite', async t => {
         const brani = t.objectStore('brani');
         const versioni = t.objectStore('versioni');
@@ -82,6 +92,7 @@ export async function apriArchivio(nome = 'gobbo') {
           aggiornato: ora,
         };
         if (prima && ['titolo', 'artista', 'note', 'testo'].every(k => prima[k] === nuovo[k])) return prima;
+        cambiatoDavvero = true;
         if (prima) {
           versioni.add({ branoId: id, titolo: prima.titolo, artista: prima.artista, note: prima.note, testo: prima.testo, salvato: prima.aggiornato });
           const chiavi = await promessa(versioni.index('brano').getAllKeys(id));
@@ -90,7 +101,7 @@ export async function apriArchivio(nome = 'gobbo') {
         }
         brani.put(nuovo);
         return nuovo;
-      });
+      }).then(b => (cambiatoDavvero ? cambiato(b) : b));
     },
 
     async versioni(id) {
@@ -108,7 +119,7 @@ export async function apriArchivio(nome = 'gobbo') {
         for (const s of await promessa(scalette.getAll())) {
           if (s.brani.includes(id)) scalette.put({ ...s, brani: s.brani.filter(x => x !== id), aggiornata: new Date().toISOString() });
         }
-      });
+      }).then(cambiato);
     },
 
     scalette: () => tutti('scalette'),
@@ -127,12 +138,13 @@ export async function apriArchivio(nome = 'gobbo') {
         };
         store.put(nuova);
         return nuova;
-      });
+      }).then(cambiato);
     },
-    eliminaScaletta: id => transazione(['scalette'], 'readwrite', t => { t.objectStore('scalette').delete(id); }),
+    eliminaScaletta: id => transazione(['scalette'], 'readwrite', t => { t.objectStore('scalette').delete(id); }).then(cambiato),
 
     leggi: chiave => transazione(['impostazioni'], 'readonly', t => promessa(t.objectStore('impostazioni').get(chiave))),
-    scrivi: (chiave, valore) => transazione(['impostazioni'], 'readwrite', t => { t.objectStore('impostazioni').put(valore, chiave); }),
+    scrivi: (chiave, valore) => transazione(['impostazioni'], 'readwrite', t => { t.objectStore('impostazioni').put(valore, chiave); })
+      .then(v => (NON_CAMBIAMENTI.has(chiave) ? v : cambiato(v))),
 
     async esporta() {
       const [brani, scalette, chiavi, valori] = await transazione(['brani', 'scalette', 'impostazioni'], 'readonly', t => Promise.all([
@@ -142,7 +154,7 @@ export async function apriArchivio(nome = 'gobbo') {
         promessa(t.objectStore('impostazioni').getAll()),
       ]));
       const impostazioni = {};
-      chiavi.forEach((k, i) => { if (!SOLO_SESSIONE.has(k)) impostazioni[k] = valori[i]; });
+      chiavi.forEach((k, i) => { if (!NON_ESPORTATI.has(k)) impostazioni[k] = valori[i]; });
       return { formato: 'gobbo', versione: 1, esportato: new Date().toISOString(), brani, scalette, impostazioni };
     },
 
@@ -165,10 +177,10 @@ export async function apriArchivio(nome = 'gobbo') {
         }
         for (const s of dati.scalette) scalette.put(s);
         for (const [k, v] of Object.entries(dati.impostazioni ?? {})) {
-          if (!SOLO_SESSIONE.has(k)) t.objectStore('impostazioni').put(v, k);
+          if (!NON_ESPORTATI.has(k)) t.objectStore('impostazioni').put(v, k);
         }
         return { brani: dati.brani.length, scalette: dati.scalette.length };
-      });
+      }).then(cambiato);
     },
 
     // Chiede al browser di non cancellare mai questi dati da solo.
@@ -179,6 +191,9 @@ export async function apriArchivio(nome = 'gobbo') {
     },
 
     chiudi() { db.close(); chiuso = true; },
+
+    // f() viene chiamata dopo ogni cambiamento vero di brani, scalette o impostazioni.
+    alCambio(f) { ascoltatori.push(f); },
   };
   return archivio;
 }

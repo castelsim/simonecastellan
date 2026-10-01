@@ -7,6 +7,7 @@ import { creaLibreria } from './libreria.js';
 import { creaScalette } from './scalette.js';
 import { creaImpostazioni } from './impostazioni.js';
 import { apriTv as apriTvSuSchermo, tieniAcceso, registraFuoriLinea } from './schermo.js';
+import { creaCopia } from './copia.js';
 
 // ——— avvisi fissi in cima (rossi = problema, ambra = informazione) ————————
 
@@ -39,6 +40,12 @@ try {
 } catch (e) {
   avvisi.mostra('archivio', e.message);
 }
+
+// ——— copia automatica in una cartella (01/10/2026) ————————————————————————
+// Ogni cambiamento vero della libreria (non i tasti del concerto) ne fa
+// partire una copia nella cartella scelta in Impostazioni.
+const copia = creaCopia({ archivio, avvisi, suCambio: () => moduli.impostazioni?.aggiornaCartella?.() });
+archivio?.alCambio(() => copia.segnala());
 
 // ——— sezioni ——————————————————————————————————————————————————————————
 
@@ -141,8 +148,8 @@ moduli.concerto = { mostra: () => concerto.disegna() };
 const scalette = creaScalette({ archivio, radice: document.getElementById('vista-scalette'), avvisi, concerto, libreria, vaiA });
 moduli.scalette = { mostra: () => scalette.mostra() };
 
-const impostazioni = creaImpostazioni({ archivio, radice: document.getElementById('vista-impostazioni'), avvisi, concerto });
-moduli.impostazioni = { mostra: () => impostazioni.mostra() };
+const impostazioni = creaImpostazioni({ archivio, radice: document.getElementById('vista-impostazioni'), avvisi, concerto, copia });
+moduli.impostazioni = { mostra: () => impostazioni.mostra(), aggiornaCartella: () => impostazioni.aggiornaCartella() };
 
 // Chiudere o ricaricare la regia durante un concerto chiede conferma. Anche
 // confermando non succede niente di grave: la TV tiene il testo e la regia,
@@ -158,6 +165,7 @@ await concerto.avvia({ demo: parametri.has('demo') });
 // Senza concerto in corso si parte dalla libreria.
 if (!concerto.inCorso()) vaiA('libreria');
 archivio?.protetta().catch(() => {});
-impostazioni.promemoria(libreria.brani().length);
+await copia.avvia();
+if (copia.stato() !== 'attiva') impostazioni.promemoria(libreria.brani().length);
 
-export { archivio, avvisi, concerto, moduli };
+export { archivio, avvisi, concerto, moduli, copia };
