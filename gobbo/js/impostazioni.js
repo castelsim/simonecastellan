@@ -64,6 +64,10 @@ export function creaImpostazioni({ archivio, radice, avvisi, concerto, copia }) 
           <label class="spunta"><input type="radio" name="modo-import" value="unisci" checked> aggiungi alla libreria</label>
           <label class="spunta"><input type="radio" name="modo-import" value="sostituisci"> sostituisci tutto</label>
         </div>
+        <p class="guida">Per un cantante nuovo: «Ricomincia da zero» cancella brani e scalette (prima ne scarica una copia). Le impostazioni della TV restano.</p>
+        <div class="riga-pulsanti">
+          <button type="button" class="pulsante pericolo" data-azione="ricomincia">Ricomincia da zero</button>
+        </div>
       </section>
 
       <section class="blocco">
@@ -90,6 +94,11 @@ export function creaImpostazioni({ archivio, radice, avvisi, concerto, copia }) 
       <p>Sostituire <b>tutta</b> la libreria e le scalette con quelle del backup? Ciò che non è nel backup sparisce.</p>
       <p>Prima scarico una copia di quello che c'è adesso (nei Download): se serve, si reimporta.</p>
       <div class="pulsanti"><button type="button" class="pulsante" data-annulla>Annulla</button><button type="button" class="pulsante pericolo" data-conferma>Sostituisci tutto</button></div>
+    </dialog>
+    <dialog id="dialogo-ricomincia" class="dialogo">
+      <p>Ricominciare da zero? Si cancellano <b>tutti</b> i brani, le scalette e le loro versioni. Le impostazioni della TV restano.</p>
+      <p>Prima scarico una copia di quello che c'è adesso (nei Download): se serve, si reimporta.</p>
+      <div class="pulsanti"><button type="button" class="pulsante" data-annulla>Annulla</button><button type="button" class="pulsante pericolo" data-conferma>Ricomincia da zero</button></div>
     </dialog>`;
 
   const $ = s => radice.querySelector(s);
@@ -202,8 +211,28 @@ export function creaImpostazioni({ archivio, radice, avvisi, concerto, copia }) 
       });
     }
   });
+  $('#dialogo-ricomincia').addEventListener('click', e => {
+    const d = $('#dialogo-ricomincia');
+    if (e.target.closest('[data-annulla]')) d.close();
+    if (e.target.closest('[data-conferma]')) {
+      d.close();
+      // Come «sostituisci tutto» con un backup vuoto: prima la copia, poi si svuota.
+      esporta().then(async fatta => {
+        if (!fatta) { avvisi.mostra('importato', 'Non sono riuscito a scaricare la copia di sicurezza: niente è stato cancellato.'); return; }
+        try {
+          await archivio.importa({ formato: 'gobbo', versione: 1, brani: [], scalette: [], impostazioni: {} }, 'sostituisci');
+          avvisi.mostra('importato', 'Libreria vuota: si riparte da zero. La copia di prima è nei Download.', { tipo: 'info' });
+          setTimeout(() => avvisi.togli('importato'), 6000);
+        } catch (err) { avvisi.mostra('importato', err.message); }
+      });
+    }
+  });
   radice.addEventListener('click', e => {
     const az = e.target.closest('[data-azione]')?.dataset.azione;
+    if (az === 'ricomincia') {
+      if (concerto.inCorso()) avvisi.mostra('importato', 'Durante il concerto non si ricomincia da zero: prima «Termina il concerto».', { tipo: 'info' });
+      else $('#dialogo-ricomincia').showModal();
+    }
     if (az === 'esporta') esporta();
     if (az === 'scegli-cartella') copia.scegli();
     if (az === 'copia-ora') copia.copiaOra();
