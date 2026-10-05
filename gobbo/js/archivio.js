@@ -21,6 +21,17 @@ const NON_CAMBIAMENTI = new Set([...NON_ESPORTATI, 'ultimoBackup', 'esempiInseri
 
 const promessa = r => new Promise((ok, ko) => { r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error); });
 
+const stessoContenuto = (a, b) => ['titolo', 'artista', 'note', 'testo'].every(k => a[k] === b[k]);
+
+// Mette da parte la versione `prima` di un brano (ultime VERSIONI_TENUTE):
+// la usano il salvataggio e l'importazione, così nessun testo sparisce senza traccia.
+async function tieniVersione(versioni, prima) {
+  versioni.add({ branoId: prima.id, titolo: prima.titolo, artista: prima.artista, note: prima.note, testo: prima.testo, salvato: prima.aggiornato });
+  const chiavi = await promessa(versioni.index('brano').getAllKeys(prima.id));
+  chiavi.sort((a, b) => a - b);
+  for (const k of chiavi.slice(0, Math.max(0, chiavi.length - VERSIONI_TENUTE))) versioni.delete(k);
+}
+
 function errore(e) {
   if (e?.name === 'QuotaExceededError') return new Error('Archivio pieno: la memoria del browser è finita. Esporta un backup e libera spazio.');
   return new Error(`Archivio non disponibile (${e?.message || e?.name || 'errore sconosciuto'}). Ricarica la pagina.`);
@@ -91,14 +102,9 @@ export async function apriArchivio(nome = 'gobbo') {
           creato: prima?.creato ?? ora,
           aggiornato: ora,
         };
-        if (prima && ['titolo', 'artista', 'note', 'testo'].every(k => prima[k] === nuovo[k])) return prima;
+        if (prima && stessoContenuto(prima, nuovo)) return prima;
         cambiatoDavvero = true;
-        if (prima) {
-          versioni.add({ branoId: id, titolo: prima.titolo, artista: prima.artista, note: prima.note, testo: prima.testo, salvato: prima.aggiornato });
-          const chiavi = await promessa(versioni.index('brano').getAllKeys(id));
-          chiavi.sort((a, b) => a - b);
-          for (const k of chiavi.slice(0, Math.max(0, chiavi.length - VERSIONI_TENUTE))) versioni.delete(k);
-        }
+        if (prima) await tieniVersione(versioni, prima);
         brani.put(nuovo);
         return nuovo;
       }).then(b => (cambiatoDavvero ? cambiato(b) : b));
@@ -159,7 +165,8 @@ export async function apriArchivio(nome = 'gobbo') {
     },
 
     // modo 'sostituisci': l'archivio diventa il backup. 'unisci': si aggiunge,
-    // e a parità di id vince il brano modificato più di recente.
+    // e a parità di id vince il brano (o la scaletta) modificato più di recente;
+    // il testo di un brano sostituito resta nelle sue versioni.
     importa(dati, modo = 'unisci') {
       const valido = dati && dati.formato === 'gobbo' && Array.isArray(dati.brani) && Array.isArray(dati.scalette)
         && dati.brani.every(b => b && typeof b.id === 'string' && typeof b.testo === 'string')
@@ -171,11 +178,17 @@ export async function apriArchivio(nome = 'gobbo') {
         if (modo === 'sostituisci') {
           brani.clear(); scalette.clear(); t.objectStore('versioni').clear();
         }
+        const versioni = t.objectStore('versioni');
         for (const b of dati.brani) {
           const esistente = modo === 'unisci' ? await promessa(brani.get(b.id)) : null;
-          if (!esistente || String(b.aggiornato ?? '') >= String(esistente.aggiornato ?? '')) brani.put(b);
+          if (esistente && String(b.aggiornato ?? '') < String(esistente.aggiornato ?? '')) continue;
+          if (esistente && !stessoContenuto(esistente, b)) await tieniVersione(versioni, esistente);
+          brani.put(b);
         }
-        for (const s of dati.scalette) scalette.put(s);
+        for (const s of dati.scalette) {
+          const esistente = modo === 'unisci' ? await promessa(scalette.get(s.id)) : null;
+          if (!esistente || String(s.aggiornata ?? '') >= String(esistente.aggiornata ?? '')) scalette.put(s);
+        }
         for (const [k, v] of Object.entries(dati.impostazioni ?? {})) {
           if (!NON_ESPORTATI.has(k)) t.objectStore('impostazioni').put(v, k);
         }

@@ -14,6 +14,7 @@ import { caratterePerBrano, misuratoreCanvas } from './misura.js';
 import { apriCanale, sorveglia } from './canale.js';
 import { IMPOSTAZIONI_TV } from './impostazioni-tv.js';
 import { ESEMPI } from './esempi.js';
+import { leggiSchermi, tvSulMac, tvNonIntera } from './schermo.js';
 
 const ASCOLTO_INIZIALE = 700;
 
@@ -25,7 +26,8 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
   let attiva = false;
   let solaLettura = false;
   let tvDim = { larghezza: 1920, altezza: 1080 };
-  let tvAllAvvio = null;          // statoTv ricevuto mentre la regia ascoltava
+  let schermi = null;             // schermi collegati, se Chrome ha il permesso di vederli
+  let tvAllAvvio = null;         // statoTv ricevuto mentre la regia ascoltava
   let concertoDellaTv = null;     // concerto mandato dalla TV su richiesta, all'avvio
   let correzione = null;          // { s, r, input } mentre si corregge una riga
   const misura = misuratoreCanvas('"Atkinson Hyperlegible"');
@@ -34,8 +36,16 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
   const sorvTv = sorveglia({
     battito: () => { if (attiva && !solaLettura) canale.manda({ tipo: 'battito' }); },
     suPerso: () => { aggiornaSpia(); },
-    suRitrovato: () => { aggiornaSpia(); },
+    suRitrovato: () => { if (!schermi) aggiornaSchermi(); aggiornaSpia(); },
   });
+
+  // Gli schermi servono a capire se la finestra della TV è finita sul Mac.
+  // Senza permesso restano null (nessun avviso): si riprova quando la TV si collega.
+  function aggiornaSchermi() {
+    leggiSchermi(nuovi => { schermi = nuovi; if (concerto) disegnaStatoTv(); })
+      .then(s => { if (s) { schermi = s; if (concerto) disegnaStatoTv(); } });
+  }
+  aggiornaSchermi();
 
   // ——— messaggi ———————————————————————————————————————————————————————
 
@@ -315,7 +325,13 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
   function disegnaStatoTv() {
     const box = radice.querySelector('#stato-tv');
     if (!box) return;
-    if (sorvTv.collegato()) {
+    if (sorvTv.collegato() && tvSulMac(tvDim, schermi)) {
+      box.className = 'stato-tv attenzione';
+      box.textContent = 'La finestra della TV è sullo schermo del Mac, non sulla TV: trovala (⌘` passa da una finestra all\'altra), trascinala sulla TV e premi F.';
+    } else if (sorvTv.collegato() && tvNonIntera(tvDim, schermi)) {
+      box.className = 'stato-tv attenzione';
+      box.textContent = 'La TV non è a schermo intero: doppio clic sul testo della TV (o tasto F sulla finestra della TV).';
+    } else if (sorvTv.collegato()) {
       box.className = 'stato-tv ok';
       box.textContent = `TV collegata · ${tvDim.larghezza}×${tvDim.altezza}`;
     } else {

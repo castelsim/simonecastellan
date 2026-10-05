@@ -112,6 +112,7 @@ main { flex: 1; min-height: 0; position: relative; }
 .etichetta { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--tenue); margin: 0 0 6px; }
 .stato-tv { font-weight: 700; padding: 10px 12px; border-radius: 10px; }
 .stato-tv.ok { background: rgba(63, 185, 80, .14); color: #7ee08a; }
+.stato-tv.attenzione { background: rgba(255, 210, 63, .18); color: #ffd23f; }
 .stato-tv.perso { background: rgba(229, 72, 77, .2); color: #ffb3b5; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 
 .comandi { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
