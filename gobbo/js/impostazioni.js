@@ -88,6 +88,7 @@ export function creaImpostazioni({ archivio, radice, avvisi, concerto, copia }) 
     </div>
     <dialog id="dialogo-sostituisci-tutto" class="dialogo">
       <p>Sostituire <b>tutta</b> la libreria e le scalette con quelle del backup? Ciò che non è nel backup sparisce.</p>
+      <p>Prima scarico una copia di quello che c'è adesso (nei Download): se serve, si reimporta.</p>
       <div class="pulsanti"><button type="button" class="pulsante" data-annulla>Annulla</button><button type="button" class="pulsante pericolo" data-conferma>Sostituisci tutto</button></div>
     </dialog>`;
 
@@ -164,7 +165,8 @@ export function creaImpostazioni({ archivio, radice, avvisi, concerto, copia }) 
       await archivio.scrivi('ultimoBackup', new Date().toISOString());
       avvisi.togli('backup');
       await scriviUltimo();
-    } catch (e) { avvisi.mostra('backup', 'Backup non riuscito: ' + e.message); }
+      return true;
+    } catch (e) { avvisi.mostra('backup', 'Backup non riuscito: ' + e.message); return false; }
   }
 
   let daImportare = null;
@@ -189,7 +191,16 @@ export function creaImpostazioni({ archivio, radice, avvisi, concerto, copia }) 
   $('#dialogo-sostituisci-tutto').addEventListener('click', e => {
     const d = $('#dialogo-sostituisci-tutto');
     if (e.target.closest('[data-annulla]')) { d.close(); daImportare = null; }
-    if (e.target.closest('[data-conferma]')) { d.close(); importa(daImportare, 'sostituisci'); daImportare = null; }
+    if (e.target.closest('[data-conferma]')) {
+      d.close();
+      const dati = daImportare;
+      daImportare = null;
+      // Prima la copia di ciò che c'è: senza, niente viene sostituito.
+      esporta().then(fatta => {
+        if (fatta) importa(dati, 'sostituisci');
+        else avvisi.mostra('importato', 'Non sono riuscito a scaricare la copia di sicurezza: niente è stato sostituito.');
+      });
+    }
   });
   radice.addEventListener('click', e => {
     const az = e.target.closest('[data-azione]')?.dataset.azione;
