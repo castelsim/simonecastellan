@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Service audio per matrimoni in Veneto | Simone Castellan</title>
-<meta name="description" content="Tecnico audio per matrimoni in Veneto: impianto, microfoni, musica scelta dagli sposi nei momenti giusti, musica dal vivo e una festa in cui scelgono gli invitati.">
+<meta name="description" content="Tecnico audio per matrimoni in Veneto: impianto, microfoni, musica scelta dagli sposi e una postazione per gli invitati. Senza DJ, senza animazione.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://simonecastellan.com/matrimoni/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#ffffff">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Voi scegliete la musica che conta. Gli invitati scelgono la festa.">
-<meta property="og:description" content="Tutto l’audio del matrimonio, dall’arrivo degli invitati all’ultimo ballo. Senza DJ, senza animazione, con un tecnico presente tutta la giornata.">
+<meta property="og:description" content="Tecnico audio per matrimoni in Veneto: impianto, microfoni, musica scelta dagli sposi e una postazione per gli invitati. Senza DJ, senza animazione.">
 <meta property="og:locale" content="it_IT">
 <meta property="og:url" content="https://simonecastellan.com/matrimoni/">
 <meta property="og:image" content="https://simonecastellan.com/matrimoni/og-matrimoni.jpg">
@@ -85,6 +85,7 @@ p{margin:0}
 .lead{font-size:clamp(1.12rem,1.6vw,1.3rem);color:var(--grey);max-width:58ch;line-height:1.55}
 .prose{max-width:62ch;color:var(--grey)}
 .prose+.prose{margin-top:14px}
+.lead .forte{color:var(--ink);font-weight:700}
 .eyebrow{font-size:.82rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);margin-bottom:18px}
 
 /* barra */
@@ -152,7 +153,7 @@ section.block+section.block{border-top:1px solid var(--line)}
 /* la festa */
 .party{background:var(--soft)}
 .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1.5px dashed var(--note);color:var(--note);font-weight:600;font-size:.85rem;letter-spacing:.02em;width:max-content;max-width:100%}
-.shots{display:grid;grid-template-columns:1.25fr 1fr;gap:clamp(16px,2.4vw,28px);align-items:start}
+.shots{display:grid;grid-template-columns:1.25fr 1fr;gap:clamp(16px,2.4vw,28px);align-items:center}
 .shot{margin:0}
 .shot .frame{background:var(--screen);border-radius:18px;padding:10px;box-shadow:0 18px 40px -24px rgba(0,0,0,.45)}
 .shot img{border-radius:10px;width:100%}
@@ -194,16 +195,16 @@ section.block+section.block{border-top:1px solid var(--line)}
 .aside{margin-top:22px;color:var(--grey);max-width:44ch}
 
 /* location e planner */
-.b2b{background:var(--ink);color:var(--paper)}
-.b2b h2{color:var(--paper);max-width:24ch}
-.b2b .lead{color:color-mix(in srgb,var(--paper) 78%,transparent)}
+.b2b{--b-bg:#15181A;--b-fg:#F3F4F2;background:var(--b-bg);color:var(--b-fg)}
+.b2b h2{color:var(--b-fg);max-width:24ch}
+.b2b .lead{color:color-mix(in srgb,var(--b-fg) 78%,transparent)}
 .b2b .claims{list-style:none;margin:0;padding:0}
-.b2b .claims li{padding:18px 0;border-top:1px solid color-mix(in srgb,var(--paper) 18%,transparent);font-size:clamp(1.12rem,2vw,1.4rem);font-weight:600;letter-spacing:-.015em;line-height:1.3}
+.b2b .claims li{padding:18px 0;border-top:1px solid color-mix(in srgb,var(--b-fg) 18%,transparent);font-size:clamp(1.12rem,2vw,1.4rem);font-weight:600;letter-spacing:-.015em;line-height:1.3}
 .b2b .claims li:first-child{border-top:0;padding-top:0}
 .b2b .ctas{margin-top:36px}
-.b2b .btn.primary:hover{background:var(--paper);border-color:var(--paper);color:var(--ink)}
-.b2b .btn.ghost{border-color:var(--paper);color:var(--paper)}
-.b2b .btn.ghost:hover{background:var(--paper);color:var(--ink)}
+.b2b .btn.primary:hover{background:var(--b-fg);border-color:var(--b-fg);color:var(--b-bg)}
+.b2b .btn.ghost{border-color:var(--b-fg);color:var(--b-fg)}
+.b2b .btn.ghost:hover{background:var(--b-fg);color:var(--b-bg)}
 section.b2b+section.block{border-top:0}
 
 /* modulo */
@@ -224,6 +225,10 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px soli
 .privacy a{color:var(--ink)}
 .esito{grid-column:1 / -1;min-height:1.5em;font-size:.95rem;color:var(--grey)}
 .esito[data-tipo="errore"]{color:#B42318}
+#errore{min-height:0;color:#B42318}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #errore,:root:not([data-theme="light"]) .esito[data-tipo="errore"]{color:#FF8A7A}}
+:root[data-theme="dark"] #errore,:root[data-theme="dark"] .esito[data-tipo="errore"]{color:#FF8A7A}
+.lungo{grid-column:1 / -1}
 .mail{margin-top:28px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;color:var(--grey);font-size:.98rem}
 .mail code{font-family:var(--font);font-weight:600;color:var(--ink);user-select:all;font-size:1.02rem;overflow-wrap:anywhere}
 .copy{min-height:46px;padding:0 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);font:inherit;font-size:.9rem;cursor:pointer}
@@ -293,10 +298,10 @@ footer.piede-unico .firma{color:var(--grey)}
 <section class="hero" aria-labelledby="titolo">
   <div class="wrap">
     <div>
-      <p class="eyebrow">Audio per matrimoni · Veneto</p>
+      <p class="eyebrow">Responsabile audio per matrimoni · Veneto</p>
       <h1 id="titolo">Voi scegliete la musica che conta. Gli invitati scelgono la festa.</h1>
       <p class="sub">Io porto l’impianto, faccio partire ogni brano al momento giusto e resto lì a controllare tutto, dall’arrivo degli invitati all’ultimo ballo.</p>
-      <p class="lead">Sono Simone Castellan, sound engineer. Non faccio il DJ e non faccio animazione: mi occupo di tutto l’audio della giornata, così voi potete godervela.</p>
+      <p class="lead">Sono Simone Castellan, sound engineer. <b class="forte">Non faccio il DJ e non faccio animazione</b>: mi occupo di tutto l’audio della giornata, così voi potete godervela.</p>
       <div class="ctas">
         <a class="btn primary" href="#contatti">Raccontami il vostro matrimonio</a>
         <a class="btn ghost" href="#come-funziona">Come funziona</a>
@@ -332,11 +337,11 @@ footer.piede-unico .firma{color:var(--grey)}
       <li><span class="when">Arrivo sposi</span><span class="what"><b>Parte il vostro brano</b>, nel momento esatto in cui entrate.</span></li>
       <li><span class="when">Annunci</span><span class="what"><b>Pochi e già scritti con voi:</b> invitare in sala, chiamare i tavoli per le foto.</span></li>
       <li><span class="when">Pranzo</span><span class="what"><b>Ingresso in sala, torta, balli:</b> ogni momento ha il suo brano, nella versione giusta.</span></li>
-      <li><span class="when">Tramonto</span><span class="what"><b>Voi fate le foto, io cambio l’impianto</b> per la sera. Nessuno se ne accorge.</span></li>
+      <li><span class="when">Tramonto</span><span class="what"><b>Voi fate le foto, io preparo l’impianto</b> per la sera: l’idea è che nessuno debba aspettare.</span></li>
       <li><span class="when">Dal vivo</span><span class="what"><b>Musicisti, coro, video:</b> li collego all’impianto e gestisco la sala.</span></li>
       <li><span class="when">La sera</span><span class="what"><b>Fuori a volume basso, poi dentro</b> per la festa, con la postazione per gli invitati.</span></li>
     </ol>
-    <p class="verdict">Una persona sola segue tutto l’audio, dall’arrivo alla chiusura. Voi non dovete cercarla per niente.</p>
+    <p class="verdict">Una persona sola segue tutto l’audio, dall’arrivo alla chiusura: avete un solo riferimento per ogni cosa che riguarda il suono.</p>
   </div>
 </section>
 
@@ -358,7 +363,7 @@ footer.piede-unico .firma{color:var(--grey)}
           <p class="tit">Per ogni momento fissiamo</p>
           <dl>
             <dt>Il brano</dt><dd>Titolo, artista e la versione giusta.</dd>
-            <dt>Quando parte</dt><dd>Al segnale concordato, non “più o meno”.</dd>
+            <dt>Quando parte</dt><dd>Al segnale che concordiamo prima: un cenno, la fine di un discorso, l’ingresso.</dd>
             <dt>Da dove</dt><dd>Dall’inizio o da un punto preciso del brano.</dd>
             <dt>E dopo</dt><dd>Cosa succede quando finisce: sfuma, riparte la playlist, silenzio.</dd>
           </dl>
@@ -367,7 +372,7 @@ footer.piede-unico .firma{color:var(--grey)}
         <p class="prose">La musica arriva dalle vostre playlist e dai vostri file. Io non scelgo i brani al posto vostro.</p>
       </div>
     </div>
-    <p class="note">Il permesso SIAE per la festa lo richiedono gli sposi: vi guido nella richiesta. Il costo dipende dal numero di invitati e dal tipo di musica, ed è indicato sul <a href="https://www.siae.it/it/utilizzatori/feste-private/matrimonio" target="_blank" rel="noopener">sito della SIAE</a>.</p>
+    <p class="note">Il permesso SIAE per la festa lo richiedono gli sposi: vi guido nella richiesta. Il costo dipende dal numero di invitati e dal tipo di musica, ed è indicato sul <a href="https://www.siae.it/it/utilizzatori/feste-private/matrimonio" target="_blank" rel="noopener" aria-label="sito della SIAE (si apre in una nuova scheda)">sito della SIAE</a>.</p>
   </div>
 </section>
 
@@ -410,17 +415,17 @@ footer.piede-unico .firma{color:var(--grey)}
     <div class="control">
       <figure class="shot">
         <div class="frame"><img src="/matrimoni/regia-regole.webp" width="590" height="570" alt="Pannello di regia, sezione Regole: blocco di «Suonala adesso», pausa di 3 minuti fra due richieste immediate, sfumata di 3 secondi, niente doppioni negli ultimi 20 brani, al massimo 3 richieste in attesa per postazione." loading="lazy"></div>
-        <figcaption>La regia: le regole si cambiano durante la serata, in un tocco.</figcaption>
+        <figcaption>La regia: le regole si cambiano durante la serata, in un tocco. Nel pannello la postazione è chiamata «chiosco».</figcaption>
       </figure>
       <div>
         <h3 style="font-size:clamp(1.35rem,2.4vw,1.75rem);letter-spacing:-.02em;line-height:1.2;max-width:24ch">Gli invitati scelgono. Le regole le tengo io.</h3>
-        <p class="prose" style="margin-top:14px">Dalla regia vedo cosa è in coda e cosa è stato chiesto. Quando arriva il vostro ballo blocco le richieste immediate; quando finisce le riapro. Se un brano non c’entra, lo tolgo prima che parta.</p>
+        <p class="prose" style="margin-top:14px">Dalla regia vedo cosa è in coda e cosa è stato chiesto. Quando arriva il vostro ballo blocco le richieste immediate; quando finisce le riapro. Se un brano non c’entra, lo tolgo dalla coda.</p>
       </div>
     </div>
 
     <div class="honest">
-      <p><b>Detto con chiarezza:</b> la postazione è in fase di prova. Non è un prodotto che si noleggia: la porto io e resta sotto il mio controllo per tutta la sera. Le schermate qui sopra sono quelle vere.</p>
-      <p>Funziona con il vostro abbonamento di musica in streaming e con una connessione internet nella location. Se vi interessa, la proviamo insieme prima del matrimonio.</p>
+      <p><b>Detto con chiarezza:</b> la postazione è in fase di prova. Non è un prodotto che si noleggia: la porto io e resta sotto il mio controllo per tutta la sera. Le schermate qui sopra vengono dalla versione di prova, con brani di esempio.</p>
+      <p>La postazione usa l’abbonamento di musica in streaming degli sposi (non il mio) e ha bisogno di una connessione internet stabile: la verifichiamo insieme prima del matrimonio.</p>
     </div>
   </div>
 </section>
@@ -438,11 +443,11 @@ footer.piede-unico .firma{color:var(--grey)}
     </div>
     <div class="groups">
       <div><h3>L’impianto</h3><p>Lo progetto per la vostra location, lo porto, lo monto e lo provo prima degli invitati. A fine festa lo smonto.</p></div>
-      <div><h3>Più zone</h3><p>Esterno, sala, pista e altri ambienti partono dallo stesso mixer, ognuno con il suo volume. Durante la giornata le zone cambiano con voi.</p></div>
-      <div><h3>Microfoni</h3><p>Discorsi, letture, brindisi, annunci. Il microfono è pronto quando serve e non fischia.</p></div>
-      <div><h3>Livelli e continuità</h3><p>La musica non si interrompe e non copre le conversazioni a tavola.</p></div>
+      <div><h3>Più zone</h3><p>Esterno, sala, pista e altri ambienti si gestiscono dallo stesso mixer, ognuno con il suo volume. Le zone possibili dipendono dalla location: lo vediamo insieme.</p></div>
+      <div><h3>Microfoni</h3><p>Discorsi, letture, brindisi, annunci. I microfoni li provo prima degli invitati, nel punto in cui verranno usati, così sono pronti quando serve.</p></div>
+      <div><h3>Livelli e continuità</h3><p>Tengo la musica a un volume che permette di parlare a tavola, e controllo che non si fermi.</p></div>
       <div><h3>Cambi di scena</h3><p>Il tramonto e le foto sono la pausa naturale per preparare la sera, senza che nessuno aspetti.</p></div>
-      <div><h3>Imprevisti</h3><p>Se il programma cambia, mi adeguo io. Voi non dovete prendere decisioni tecniche.</p></div>
+      <div><h3>Imprevisti</h3><p>Se il programma cambia, mi adeguo io. Le decisioni tecniche le prendo io.</p></div>
     </div>
     <p class="quote">Non parlo per ore al microfono e non decido cosa deve piacere agli invitati. <span>Faccio in modo che tutto si senta bene.</span></p>
   </div>
@@ -492,7 +497,7 @@ footer.piede-unico .firma{color:var(--grey)}
       <div>
         <p class="sublabel">Fa per voi se</p>
         <ul class="fit">
-          <li>volete poca animazione e nessuno speaker invadente;</li>
+          <li>volete poca animazione e pochi annunci al microfono;</li>
           <li>la musica volete sceglierla voi;</li>
           <li>vi piace l’idea che gli amici partecipino alla festa;</li>
           <li>avete musicisti, un coro o un video da far sentire bene;</li>
@@ -521,8 +526,8 @@ footer.piede-unico .firma{color:var(--grey)}
       </div>
       <div>
         <ul class="claims">
-          <li>Conosco la vostra sala e il vostro giardino prima del primo matrimonio.</li>
-          <li>Agli sposi date un riferimento sicuro per tutto l’audio.</li>
+          <li>Prima del primo matrimonio facciamo insieme un sopralluogo della sala e del giardino.</li>
+          <li>Agli sposi date un unico riferimento per l’audio.</li>
           <li>Voi pensate al resto: l’audio non diventa un problema vostro.</li>
         </ul>
         <div class="ctas">
@@ -548,11 +553,11 @@ footer.piede-unico .firma{color:var(--grey)}
         <p class="mail">Oppure scrivete a <code id="email">castellansimone@gmail.com</code> <button class="copy" type="button" id="copia">Copia indirizzo</button></p>
       </div>
       <form id="modulo" novalidate aria-describedby="nota-privacy">
-        <div class="field"><label for="f-nome">Nome</label><input id="f-nome" name="nome" type="text" autocomplete="name" required></div>
-        <div class="field"><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email" inputmode="email" required></div>
+        <div class="field"><label for="f-nome">Nome</label><input id="f-nome" name="nome" type="text" autocomplete="name" required aria-required="true"></div>
+        <div class="field"><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email" inputmode="email" required aria-required="true"></div>
         <div class="field"><label for="f-tel">Telefono <span class="opt">(facoltativo)</span></label><input id="f-tel" name="telefono" type="tel" autocomplete="tel" inputmode="tel"></div>
         <div class="field"><label for="f-data">Data del matrimonio</label><input id="f-data" name="data" type="date"></div>
-        <div class="field"><label for="f-luogo">Location</label><input id="f-luogo" name="location" type="text" placeholder="Nome o paese, anche se non è sicura"></div>
+        <div class="field"><label for="f-luogo">Location</label><input id="f-luogo" name="location" type="text" placeholder="Nome o paese"></div>
         <div class="field"><label for="f-invitati">Invitati, più o meno</label>
           <select id="f-invitati" name="invitati">
             <option value="">Non lo sappiamo ancora</option>
@@ -564,13 +569,16 @@ footer.piede-unico .firma{color:var(--grey)}
           </select>
         </div>
         <div class="field wide"><label for="f-idea">Raccontami cosa avete in mente</label><textarea id="f-idea" name="idea" placeholder="Momenti importanti, musicisti o coro, cosa vi piacerebbe per la festa…"></textarea></div>
-        <div class="esca" aria-hidden="true"><label for="f-sito">Non compilare</label><input id="f-sito" name="sito" type="text" tabindex="-1" autocomplete="off"></div>
+        <div class="esca" aria-hidden="true"><label for="f-extra">Lasciare vuoto</label><input id="f-extra" name="contatto-extra" type="text" tabindex="-1" autocomplete="off"></div>
         <div class="send">
           <button class="btn primary" type="submit" data-via="email">Invia con la tua email</button>
           <button class="btn ghost" type="submit" data-via="whatsapp">Invia su WhatsApp</button>
+          <button class="btn ghost" type="button" id="copia-msg2">Copia il messaggio</button>
         </div>
         <p class="esito" id="esito" role="status" aria-live="polite"></p>
-        <p class="privacy" id="nota-privacy">Il modulo non salva niente su questo sito: prepara un messaggio nella vostra email o su WhatsApp, e siete voi a inviarlo. Uso i dati solo per rispondervi. Dettagli nella pagina <a href="/privacy/">Privacy</a>.</p>
+        <p class="esito" id="errore" role="alert"></p>
+        <div class="lungo" id="lungo" hidden><button class="copy" type="button" id="copia-msg">Copia il messaggio completo</button></div>
+        <p class="privacy" id="nota-privacy">Il modulo non salva niente su questo sito: prepara un messaggio nella vostra email o su WhatsApp, e siete voi a inviarlo. «Invia con la tua email» funziona se sul dispositivo c’è un programma di posta configurato; altrimenti usate WhatsApp oppure «Copia il messaggio» e incollatelo dove preferite. Uso i dati solo per rispondervi. Dettagli nella pagina <a href="/privacy/">Privacy</a>.</p>
       </form>
     </div>
   </div>
@@ -607,16 +615,15 @@ footer.piede-unico .firma{color:var(--grey)}
     return m ? m[3] + '/' + m[2] + '/' + m[1] : s;
   }
   function segnala(testo, campo){
-    esito.setAttribute('data-tipo', 'errore'); esito.textContent = testo;
-    if (campo) f.elements[campo].focus();
+    esito.textContent = ''; esito.removeAttribute('data-tipo');
+    document.getElementById('errore').textContent = testo;
+    ['nome','email'].forEach(function(n){ f.elements[n].removeAttribute('aria-invalid'); });
+    if (campo) { f.elements[campo].setAttribute('aria-invalid', 'true'); f.elements[campo].focus(); }
   }
-  f.addEventListener('submit', function(e){
-    e.preventDefault();
-    if (v('sito')) return;                       // campo esca: lo riempiono solo i programmi
-    if (!v('nome')) return segnala('Manca il nome.', 'nome');
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('email'))) return segnala('Controllate l’indirizzo email: serve per rispondervi.', 'email');
+  var MAX = 1800, lungo = document.getElementById('lungo');
+  function componi(idea, eol){
     var data = dataLeggibile(v('data'));
-    var righe = [
+    return [
       'Ciao Simone,',
       '',
       'vi scrivo dalla pagina matrimoni.',
@@ -629,17 +636,69 @@ footer.piede-unico .firma{color:var(--grey)}
       'Invitati: ' + (v('invitati') || 'non lo sappiamo ancora'),
       '',
       'Cosa abbiamo in mente:',
-      v('idea') || '-'
-    ];
-    var testo = righe.join('\n');
+      idea || '-'
+    ].join(eol);
+  }
+  // Costruisce l'indirizzo; se supera MAX caratteri accorcia solo il testo libero.
+  function costruisci(via){
+    var eol = via === 'whatsapp' ? '\n' : '\r\n';
+    var data = dataLeggibile(v('data'));
     var oggetto = 'Matrimonio' + (data ? ' del ' + data : '') + (v('location') ? ' - ' + v('location') : '');
+    function url(idea){
+      var t = componi(idea, eol);
+      return via === 'whatsapp'
+        ? 'https://wa.me/' + WA + '?text=' + encodeURIComponent(t)
+        : 'mailto:' + EMAIL + '?subject=' + encodeURIComponent(oggetto) + '&body=' + encodeURIComponent(t);
+    }
+    var idea = v('idea'), u = url(idea), accorciato = false;
+    if (u.length > MAX) {
+      accorciato = true;
+      var lo = 0, hi = idea.length;
+      while (lo < hi) {                        // cerca la lunghezza massima che sta nel limite
+        var m = Math.ceil((lo + hi) / 2);
+        if (url(idea.slice(0, m).replace(/\s+$/, '') + '…').length <= MAX) lo = m; else hi = m - 1;
+      }
+      idea = idea.slice(0, lo).replace(/\s+$/, '') + '…';
+      u = url(idea);
+    }
+    return { url: u, accorciato: accorciato, completo: componi(v('idea'), '\n') };
+  }
+  window.__costruisci = costruisci;           // per le prove a mano
+  var ultimo = '';
+  function copiaMsg(b, etichetta){
+    var t = ultimo || componi(v('idea'), '\n');
+    function ok(){ b.textContent = 'Copiato'; setTimeout(function(){ b.textContent = etichetta; }, 2000); }
+    function no(){ b.textContent = 'Non riesco a copiare: selezionate il testo a mano'; }
+    try { navigator.clipboard.writeText(t).then(ok, no); } catch(e){ no(); }
+  }
+  document.getElementById('copia-msg').addEventListener('click', function(){ copiaMsg(this, 'Copia il messaggio completo'); });
+  document.getElementById('copia-msg2').addEventListener('click', function(){
+    if (!v('nome') || !v('email')) { segnala('Compilate almeno nome ed email, poi copiate il messaggio.', v('nome') ? 'email' : 'nome'); return; }
+    ultimo = componi(v('idea'), '\n'); copiaMsg(this, 'Copia il messaggio');
+  });
+  f.addEventListener('submit', function(e){
+    e.preventDefault();
+    document.getElementById('errore').textContent = '';
+    lungo.hidden = true;
+    if (v('contatto-extra')) {                   // campo esca: lo riempiono solo i programmi
+      esito.removeAttribute('data-tipo');
+      esito.textContent = via === 'whatsapp' ? 'Si apre WhatsApp con il messaggio pronto: manca solo «Invia».' : 'Si apre la vostra email con il messaggio pronto.';
+      return;
+    }
+    if (!v('nome')) return segnala('Manca il nome.', 'nome');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('email'))) return segnala('Controllate l’indirizzo email: serve per rispondervi.', 'email');
+    ['nome','email'].forEach(function(n){ f.elements[n].removeAttribute('aria-invalid'); });
+    var r = costruisci(via);
+    ultimo = r.completo;
     esito.removeAttribute('data-tipo');
+    var nota = r.accorciato ? ' Messaggio lungo: abbiamo accorciato il testo, potete completarlo nella mail.' : '';
+    if (r.accorciato) lungo.hidden = false;
     if (via === 'whatsapp') {
-      window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(testo), '_blank', 'noopener');
-      esito.textContent = 'Si apre WhatsApp con il messaggio pronto: manca solo «Invia».';
+      window.open(r.url, '_blank', 'noopener');
+      esito.textContent = 'Si apre WhatsApp con il messaggio pronto: manca solo «Invia».' + nota;
     } else {
-      location.href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent(oggetto) + '&body=' + encodeURIComponent(testo);
-      esito.textContent = 'Si apre la vostra email con il messaggio pronto. Se non si apre niente, usate WhatsApp o copiate l’indirizzo qui accanto.';
+      location.href = r.url;
+      esito.textContent = 'Si apre la vostra email con il messaggio pronto (serve un programma di posta configurato). Se non si apre niente, usate WhatsApp o «Copia il messaggio».' + nota;
     }
   });
 })();
