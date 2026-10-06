@@ -1,15 +1,21 @@
 // La regia durante il concerto: lo stato, il collegamento con la TV, la
 // schermata con scaletta, testo intero e anteprima.
 //
-// Una regia sola comanda. Una seconda finestra di regia se ne accorge entro
-// un secondo e resta in sola lettura (mostra cosa succede, non comanda).
+// Una regia sola comanda: quella che tiene il lucchetto «gobbo-regia» (Web
+// Locks). Lo prende la prima finestra di regia che si apre; le altre restano
+// in sola lettura (mostrano cosa succede, non comandano) e lo prendono da sole
+// quando quella si chiude o va in crash. Una regia che comanda non lo perde
+// mai (verifica del 06/10/2026: col battito una scheda nascosta, coi timer
+// rallentati, si faceva sentire tardi e toglieva la regia all'operatore).
+// Unica eccezione: F5 sulla regia che comandava. Chi ricarica lo chiede
+// indietro e l'altra, se nessuno l'ha ancora usata, lo cede.
 // All'avvio la regia ascolta per 700 ms prima di parlare: se la TV è andata
 // avanti da sola, riparte dalla riga della TV.
 
 import { prepara, statoIniziale, applica, vista, riallinea } from './navigazione.js';
 import { disegnaVista, riempiRiga } from './resa.js';
 import { sostituisciRiga } from './testo.js';
-import { cerca as cercaBrani, creaIndice } from './cerca.js';
+import { cerca as cercaBrani, creaIndice, creaIndiceRighe, cercaRighe, pezziTrovati, normalizza } from './cerca.js';
 import { caratterePerBrano, misuratoreCanvas } from './misura.js';
 import { apriCanale, sorveglia } from './canale.js';
 import { IMPOSTAZIONI_TV } from './impostazioni-tv.js';
@@ -17,6 +23,11 @@ import { ESEMPI } from './esempi.js';
 import { leggiSchermi, tvSulMac, tvNonIntera } from './schermo.js';
 
 const ASCOLTO_INIZIALE = 700;
+const LUCCHETTO = 'gobbo-regia';
+const SEGNO = 'gobbo-regia-al-comando';   // in sessionStorage: questa scheda comandava
+const CEDE_ENTRO = 20000;                 // una regia cede il comando solo appena preso
+const ATTESA_CONTROLLO = 800;             // testi del concerto contro libreria: a cose ferme
+const conLucchetto = !!globalThis.navigator?.locks;
 
 export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, braniLibreria = () => [], suCambio = () => {} }) {
   let concerto = null;            // { id, nome, versione, brani }
@@ -30,6 +41,13 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
   let tvAllAvvio = null;         // statoTv ricevuto mentre la regia ascoltava
   let concertoDellaTv = null;     // concerto mandato dalla TV su richiesta, all'avvio
   let correzione = null;          // { s, r, input } mentre si corregge una riga
+  let ultimoCiao = 0;             // quando una TV appena aperta ha salutato
+  let hoLucchetto = false;        // questa finestra tiene il lucchetto «gobbo-regia»
+  let presoAlle = 0;              // quando lo ha preso
+  let toccata = false;            // l'operatore l'ha usata da quando lo ha preso
+  let ceduto = null;              // in attesa che un'altra regia ceda il comando
+  addEventListener('keydown', () => { toccata = true; }, true);
+  addEventListener('pointerdown', () => { toccata = true; }, true);
   const misura = misuratoreCanvas('"Atkinson Hyperlegible"');
 
   const canale = apriCanale('regia', ricevi);
@@ -51,13 +69,19 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
 
   function ricevi(m) {
     if (m.da === 'regia') {
+      // Senza lucchetti (Chrome vecchio) vale la regola di prima: vince la più vecchia.
       const piuVecchia = m.nato < canale.nato || (m.nato === canale.nato && m.id < canale.id);
-      if (!solaLettura && piuVecchia) diventaSolaLettura();
+      if (!conLucchetto && !solaLettura && piuVecchia) diventaSolaLettura();
+      // Una regia ricaricata che comandava rivuole il comando: lo cede solo
+      // chi lo ha appena preso e non è ancora stata usata.
+      if (m.tipo === 'rivoglio' && hoLucchetto && !toccata && Date.now() - presoAlle < CEDE_ENTRO) canale.manda({ tipo: 'cedo', a: m.id });
+      if (m.tipo === 'cedo' && m.a === canale.id) ceduto?.();
       if (solaLettura && (m.tipo === 'concerto' || m.tipo === 'stato')) specchia(m);
       return;
     }
     if (m.da !== 'tv') return;
     sorvTv.visto();
+    if (m.tipo === 'ciao') ultimoCiao = Date.now();
     if (m.larghezza && m.altezza && (m.larghezza !== tvDim.larghezza || m.altezza !== tvDim.altezza)) {
       tvDim = { larghezza: m.larghezza, altezza: m.altezza };
       if (concerto) disegnaLato();
@@ -78,11 +102,16 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
     if (m.concertoId !== concerto.id || m.versione < concerto.versione) { mandaConcerto(); return; }
     if (m.stato.n > stato.n) { stato = { ...m.stato }; salva(); disegna(); mandaStato(); }
     else if (m.stato.n < stato.n) mandaStato();
+    // Stesso n ma righe diverse (regia bloccata mentre la TV andava da sola,
+    // verifica 06/10, stress-01): vince la TV, è lei che il cantante guarda.
+    else if (m.stato.b !== stato.b || m.stato.r !== stato.r || !!m.stato.nero !== !!stato.nero) {
+      stato = { ...m.stato }; salva(); disegna();
+    }
   }
 
   // La regia in sola lettura mostra ciò che manda la regia attiva.
   function specchia(m) {
-    if (m.tipo === 'concerto') { concerto = m.concerto; prep = prepara(concerto); }
+    if (m.tipo === 'concerto') { concerto = m.concerto; prep = prepara(concerto); controllaPoi(); }
     stato = m.stato;
     disegna();
   }
@@ -99,12 +128,72 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
       .catch(e => avvisi.mostra('posizione', 'La posizione non si salva: ' + e.message));
   }
 
+  // Il concerto è una copia fissa della libreria. Se un suo brano ha in
+  // libreria un testo (o un titolo) diverso (import, modifica in Libreria), lo
+  // si dice in un avviso fisso coi titoli: il 09/10 la regia riaperta
+  // riprendeva il concerto salvato coi testi vecchi senza dire niente
+  // (revisione 06/10/2026, dati0910-1). Si controlla alla ripresa, dopo un
+  // import (subito) e a ogni cambiamento della libreria o del concerto.
+  // «Ho capito» lo nasconde finché non cambia qualcosa di vero: un altro brano
+  // diverso o un testo nuovo in libreria.
+  // Una correzione al volo (prima il concerto, poi la libreria) e una modifica
+  // in Libreria (prima la libreria, poi il concerto quando si esce dal campo)
+  // passano per un attimo da testi diversi: per non dare falsi allarmi si
+  // aspetta che tutto sia fermo, e non si decide mentre si scrive in Libreria.
+  let giroControllo = 0;
+  let avvisoTesti = false;
+  let controlloDopo = null;
+  let capito = null;              // i testi diversi su cui l'operatore ha detto «Ho capito»
+  function controllaPoi() {
+    clearTimeout(controlloDopo);
+    controlloDopo = setTimeout(controllaLibreria, ATTESA_CONTROLLO);
+  }
+  async function controllaLibreria() {
+    clearTimeout(controlloDopo);
+    if (document.activeElement?.closest?.('#vista-libreria input, #vista-libreria textarea')) { controllaPoi(); return; }
+    const giro = ++giroControllo;
+    const c = concerto;
+    let lib = [];
+    if (c && archivio) {
+      try { lib = await archivio.brani(); } catch { return; }
+    }
+    if (giro !== giroControllo) return;
+    if (c !== concerto) { controllaPoi(); return; }   // cambiato intanto: di nuovo, a cose ferme
+    const perId = new Map(lib.map(b => [b.id, b]));
+    const diversi = [];
+    for (const b of c?.brani ?? []) {
+      const l = perId.get(b.id);
+      if (l && (l.testo !== b.testo || l.titolo !== b.titolo) && !diversi.some(d => d.id === b.id)) diversi.push({ id: b.id, titolo: b.titolo, libreria: [l.titolo, l.testo] });
+    }
+    const firma = JSON.stringify(diversi.map(d => [d.id, d.libreria]));
+    if (!diversi.length) capito = null;
+    if (!diversi.length || firma === capito) {
+      if (avvisoTesti) avvisi.togli('concerto-vecchio');
+      avvisoTesti = false;
+      return;
+    }
+    avvisoTesti = true;
+    avvisi.mostra('concerto-vecchio', `Il concerto in corso usa ancora i testi di prima per ${diversi.map(d => `«${d.titolo}»`).join(', ')}. Per avere quelli nuovi sulla TV: «Termina il concerto», poi Scalette → «Inizia il concerto». Fino ad allora la TV continua con quelli di prima.`,
+      { tipo: 'info', azione: { etichetta: 'Ho capito', fai: () => { capito = firma; avvisoTesti = false; avvisi.togli('concerto-vecchio'); } } });
+  }
+  archivio?.alCambio?.(controllaPoi);
+
   function diventaSolaLettura() {
     solaLettura = true;
     attiva = false;
+    segnaAlComando(false);
+    delete document.body.dataset.regia;
     radice.classList.add('solo-lettura');
-    avvisi.mostra('sola-lettura', "C'è già un'altra finestra di regia aperta: questa è in sola lettura. Chiudila e usa l'altra.", { classe: 'sola-lettura' });
+    avvisi.mostra('sola-lettura', conLucchetto
+      ? "C'è già un'altra finestra di regia aperta: comanda quella, questa è in sola lettura. Se chiudi l'altra, questa prende il comando da sola."
+      : "C'è già un'altra finestra di regia aperta: questa è in sola lettura. Chiudila e usa l'altra.", { classe: 'sola-lettura' });
     suCambio();
+  }
+
+  function esciDaSolaLettura() {
+    solaLettura = false;
+    radice.classList.remove('solo-lettura');
+    avvisi.togli('sola-lettura');
   }
 
   // ——— comandi ————————————————————————————————————————————————————————
@@ -140,6 +229,7 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
     mandaConcerto();
     disegna();
     suCambio();
+    controllaLibreria();
   }
 
   // Il concerto cambia (correzione al volo, brano aggiunto): la riga accesa resta la stessa.
@@ -153,6 +243,7 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
     mandaConcerto();
     salva();
     disegna();
+    controllaPoi();
   }
 
   function finisci() {
@@ -165,6 +256,7 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
     canale.manda({ tipo: 'fine', concertoId: finito });
     disegna();
     suCambio();
+    controllaLibreria();
   }
 
   function impostazioni(nuove) {
@@ -208,7 +300,7 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
           </div>
           <div class="legenda">
             <kbd>→</kbd> <kbd>Spazio</kbd> riga · <kbd>←</kbd> indietro · <kbd>↓</kbd> <kbd>↑</kbd> strofa<br>
-            <kbd>N</kbd> <kbd>P</kbd> brano · <kbd>B</kbd> nero · <kbd>/</kbd> vai al brano<br>
+            <kbd>N</kbd> <kbd>P</kbd> brano · <kbd>B</kbd> nero · <kbd>/</kbd> vai al brano o a una riga<br>
             <kbd>Invio</kbd> o doppio clic: correggi la riga
           </div>
           <button type="button" class="pulsante pericolo" data-azione="fine">Termina il concerto</button>
@@ -307,6 +399,9 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
     const v = vista(prep, stato);
     const anteprima = radice.querySelector('#anteprima');
     const schermo = radice.querySelector('#schermo');
+    // La TV può mandare misure nuove mentre la regia si avvia: il concerto è
+    // già letto ma la schermata non c'è ancora (revisione 06/10, TypeError).
+    if (!anteprima || !schermo) return;
     anteprima.style.aspectRatio = `${tvDim.larghezza} / ${tvDim.altezza}`;
     schermo.style.width = tvDim.larghezza + 'px';
     schermo.style.height = tvDim.altezza + 'px';
@@ -326,8 +421,10 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
     const box = radice.querySelector('#stato-tv');
     if (!box) return;
     if (sorvTv.collegato() && tvSulMac(tvDim, schermi)) {
+      // Il pulsante chiude la finestra finita sul Mac e ne apre una sulla TV
+      // (verifica 06/10, avvio-04: a schermo intero non si trascina).
       box.className = 'stato-tv attenzione';
-      box.textContent = 'La finestra della TV è sullo schermo del Mac, non sulla TV: trovala (⌘` passa da una finestra all\'altra), trascinala sulla TV e premi F.';
+      box.innerHTML = '<span>La finestra della TV è sullo schermo del Mac, non sulla TV.</span> <button type="button" class="pulsante giallo" data-azione="apri-tv">Rimetti sulla TV</button>';
     } else if (sorvTv.collegato() && tvNonIntera(tvDim, schermi)) {
       box.className = 'stato-tv attenzione';
       box.textContent = 'La TV non è a schermo intero: doppio clic sul testo della TV (o tasto F sulla finestra della TV).';
@@ -422,6 +519,11 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
   // ——— vai al brano ——————————————————————————————————————————————————————
   // Cerca in scaletta e in tutta la libreria. Un brano fuori scaletta entra
   // nella copia del concerto subito dopo quello in corso.
+  // Le parole del testo trovano le RIGHE (prova con il cantante del
+  // 06/10/2026: l'operatore cercava la riga scorrendo, «più avanti, più
+  // avanti…»): Invio porta la TV dritta a quella riga. Prima le righe del
+  // brano in corso, poi i brani della scaletta per titolo, le righe degli
+  // altri brani della scaletta, i brani fuori scaletta e le loro righe.
 
   document.body.insertAdjacentHTML('beforeend', `
     <div id="dialogo-vai" class="pannello-vai" role="dialog" aria-modal="true" aria-label="Vai al brano">
@@ -430,7 +532,7 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
         <input id="vai-cerca" class="campo grande" placeholder="Vai al brano: titolo, artista o parole del testo…" autocomplete="off" spellcheck="false">
         <ul id="vai-risultati" class="risultati grandi"></ul>
         <p id="vai-conferma" class="avviso info" hidden></p>
-        <p class="guida">↑ ↓ per scegliere · Invio per andare · Esc per chiudere. Prima la scaletta; un brano fuori scaletta chiede un secondo Invio.</p>
+        <p class="guida">↑ ↓ per scegliere · Invio per andare · Esc per chiudere. Scrivi un titolo o delle parole del testo: con una riga la TV va dritta lì. Prima il brano in corso e la scaletta; fuori scaletta serve un secondo Invio.</p>
       </div>
     </div>
     <dialog id="dialogo-fine" class="dialogo">
@@ -440,9 +542,24 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
   const dVai = document.getElementById('dialogo-vai');
   const campoVai = document.getElementById('vai-cerca');
   const listaVai = document.getElementById('vai-risultati');
-  let trovati = [];
+  let trovati = [];          // brani { ...brano, posto } e righe { ...brano, posto, riga: { i, s, n, testo } }
   let scelto = 0;
-  let daConfermare = null;   // id del brano fuori scaletta in attesa del secondo Invio
+  let daConfermare = null;   // brano (o riga) fuori scaletta in attesa del secondo Invio
+  let indici = null;         // preparati all'apertura: la scaletta non cambia a pannello aperto
+  const RIGHE_IN_CORSO = 8, RIGHE_SCALETTA = 8, RIGHE_FUORI = 6;
+
+  function preparaIndici() {
+    const inScaletta = concerto.brani.map((b, i) => ({ ...b, posto: i }));
+    const ids = new Set(concerto.brani.map(b => b.id));
+    const fuori = braniLibreria().filter(b => !ids.has(b.id)).map(b => ({ ...b, posto: -1 }));
+    indici = {
+      inScaletta,
+      braniScaletta: creaIndice(inScaletta),
+      braniFuori: creaIndice(fuori),
+      righeScaletta: creaIndiceRighe(inScaletta),
+      righeFuori: creaIndiceRighe(fuori),
+    };
+  }
 
   // Sotto pressione due tasti sbagliati non devono mettere in onda un testo
   // estraneo (revisione 01/10/2026, I5): a ricerca vuota solo la scaletta col
@@ -450,16 +567,23 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
   // un brano fuori scaletta va in onda solo con un secondo Invio.
   function cercaNelConcerto() {
     const q = campoVai.value;
-    const inScaletta = concerto.brani.map((b, i) => ({ ...b, posto: i }));
     if (!q.trim()) {
-      trovati = inScaletta;
+      trovati = indici.inScaletta;
       scelto = Math.min(stato.b + 1, trovati.length - 1);
     } else {
-      const ids = new Set(concerto.brani.map(b => b.id));
-      const fuori = braniLibreria().filter(b => !ids.has(b.id)).map(b => ({ ...b, posto: -1 }));
+      // I brani per titolo o artista; le parole del testo diventano righe.
+      // Prima i titoli della scaletta: scrivere il titolo del brano dopo deve
+      // portare a quel brano, non a una riga del brano in corso che contiene le
+      // stesse parole (revisione finale 06/10: da Cirano a «Dio è morto»).
+      const perTitolo = (indice, quanti) => cercaBrani(indice, q, quanti).filter(x => x.dove !== 'testo').map(x => x.brano);
+      const riga = x => ({ ...x.brano, riga: { i: x.i, s: x.s, n: x.n, testo: x.testo } });
+      const righeScaletta = cercaRighe(indici.righeScaletta, q, 500);
       trovati = [
-        ...cercaBrani(creaIndice(inScaletta), q, 12).map(x => x.brano),
-        ...cercaBrani(creaIndice(fuori), q, 8).map(x => x.brano),
+        ...perTitolo(indici.braniScaletta, 12),
+        ...righeScaletta.filter(x => x.brano.posto === stato.b).slice(0, RIGHE_IN_CORSO).map(riga),
+        ...righeScaletta.filter(x => x.brano.posto !== stato.b).slice(0, RIGHE_SCALETTA).map(riga),
+        ...perTitolo(indici.braniFuori, 8),
+        ...cercaRighe(indici.righeFuori, q, RIGHE_FUORI).map(riga),
       ];
       scelto = 0;
     }
@@ -467,23 +591,48 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
     disegnaTrovati();
   }
 
+  const chiaveDi = b => (b.riga ? `${b.id}\u0000${b.riga.i}` : b.id);
+
   function chiediConferma(b) {
-    daConfermare = b?.id ?? null;
+    daConfermare = b ? chiaveDi(b) : null;
     const p = document.getElementById('vai-conferma');
     p.hidden = !b;
-    if (b) p.textContent = `«${b.titolo}» non è in scaletta. Invio di nuovo per aggiungerlo dopo il brano in corso e mandarlo in onda; Esc per annullare.`;
+    if (b) {
+      p.textContent = b.riga
+        ? `«${b.titolo}» non è in scaletta. Invio di nuovo per aggiungerlo dopo il brano in corso e mandare in onda la riga «${b.riga.testo}»; Esc per annullare.`
+        : `«${b.titolo}» non è in scaletta. Invio di nuovo per aggiungerlo dopo il brano in corso e mandarlo in onda; Esc per annullare.`;
+    }
   }
 
   function disegnaTrovati() {
+    // Una riga ripetuta nello stesso brano (ritornello) dice anche dov'è.
+    const quante = new Map();
+    for (const b of trovati) if (b.riga) { const k = b.id + '\u0000' + normalizza(b.riga.testo); quante.set(k, (quante.get(k) ?? 0) + 1); }
     listaVai.replaceChildren(...trovati.map((b, i) => {
       const li = document.createElement('li');
       li.dataset.i = i;
       if (i === scelto) li.className = 'scelto';
-      li.innerHTML = '<span class="titolo"></span><span class="dove"></span>';
-      li.querySelector('.titolo').textContent = b.titolo;
-      li.querySelector('.dove').textContent = b.posto >= 0 ? `n. ${b.posto + 1} in scaletta` : 'fuori scaletta';
+      const dove = b.posto < 0 ? 'fuori scaletta' : b.riga && b.posto === stato.b ? 'in corso' : `n. ${b.posto + 1} in scaletta`;
+      if (b.riga) {
+        li.classList.add('riga');
+        li.innerHTML = '<span class="riga-trovata"></span><span class="dove"></span>';
+        const testo = li.querySelector('.riga-trovata');
+        for (const p of pezziTrovati(b.riga.testo, campoVai.value)) {
+          if (!p.trovato) { testo.append(p.testo); continue; }
+          const m = document.createElement('mark');
+          m.textContent = p.testo;
+          testo.append(m);
+        }
+        const ripetuta = quante.get(b.id + '\u0000' + normalizza(b.riga.testo)) > 1;
+        li.querySelector('.dove').textContent = `«${b.titolo}» · ${dove}${ripetuta ? ` · strofa ${b.riga.s + 1}, riga ${b.riga.n}` : ''}`;
+      } else {
+        li.innerHTML = '<span class="titolo"></span><span class="dove"></span>';
+        li.querySelector('.titolo').textContent = b.titolo;
+        li.querySelector('.dove').textContent = dove;
+      }
       return li;
     }));
+    listaVai.querySelector('.scelto')?.scrollIntoView({ block: 'nearest' });
   }
 
   // Un pannello normale, non un <dialog>: in Chrome la chiusura di un dialog
@@ -494,6 +643,7 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
   const ricercaAperta = () => dVai.hasAttribute('open');
   function apriRicerca() {
     campoVai.value = '';
+    preparaIndici();
     cercaNelConcerto();
     dVai.setAttribute('open', '');
     campoVai.focus();
@@ -503,11 +653,26 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
     campoVai.blur();
   }
   dVai.addEventListener('click', e => { if (e.target.closest('[data-chiudi]')) chiudiRicerca(); });
+  // Un clic dentro il pannello non toglie la tastiera al campo: senza, Esc,
+  // frecce e Invio restavano senza nessuno che li ascolti (verifica 06/10, sincronia-5).
+  dVai.addEventListener('mousedown', e => { if (e.target !== campoVai) e.preventDefault(); });
 
   function vaiA_(b) {
     if (!b) { chiudiRicerca(); return; }
-    if (b.posto < 0 && daConfermare !== b.id) { chiediConferma(b); return; }
+    if (b.posto < 0 && daConfermare !== chiaveDi(b)) { chiediConferma(b); return; }
     chiudiRicerca();
+    // Una riga: la TV va dritta lì (anche nel brano in corso).
+    if (b.riga && b.posto >= 0) { comando({ tipo: 'vaiRiga', b: b.posto, r: b.riga.i }); return; }
+    if (b.riga) {
+      const brani = [...concerto.brani];
+      brani.splice(stato.b + 1, 0, { id: b.id, titolo: b.titolo, artista: b.artista, testo: b.testo });
+      aggiorna(brani);
+      comando({ tipo: 'vaiRiga', b: stato.b + 1, r: b.riga.i });
+      return;
+    }
+    // Il brano in corso: solo chiudere. Andarci azzererebbe la riga a metà
+    // canzone (sull'ultimo brano è quello già scelto; verifica 06/10, sincronia-4).
+    if (b.posto === stato.b) return;
     if (b.posto >= 0) { comando({ tipo: 'vaiBrano', b: b.posto }); return; }
     const brani = [...concerto.brani];
     brani.splice(stato.b + 1, 0, { id: b.id, titolo: b.titolo, artista: b.artista, testo: b.testo });
@@ -536,15 +701,97 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
 
   // ——— avvio ——————————————————————————————————————————————————————————
 
-  async function avvia({ demo = false } = {}) {
+  async function leggiArchivio() {
     try {
       const s = await archivio.leggi('concerto');
       if (s?.concerto) { concerto = s.concerto; prep = prepara(concerto); stato = s.stato ?? statoIniziale(); }
       const t = await archivio.leggi('tv');
       if (t) imp = { ...IMPOSTAZIONI_TV, ...t };
     } catch (e) { avvisi.mostra('archivio', e.message); }
+  }
+
+  // Chiede il lucchetto e lo tiene finché la finestra vive. → promessa: true
+  // quando arriva, false se la richiesta viene annullata. Se poi una regia
+  // ricaricata se lo riprende (steal), si passa in sola lettura e ci si
+  // rimette in coda.
+  function chiediLucchetto(opzioni = {}) {
+    return new Promise(risolvi => {
+      let mio = false;
+      navigator.locks.request(LUCCHETTO, opzioni, () => {
+        mio = true;
+        hoLucchetto = true;
+        presoAlle = Date.now();
+        toccata = false;
+        risolvi(true);
+        return new Promise(() => {});
+      }).catch(() => {
+        if (!mio) { risolvi(false); return; }
+        hoLucchetto = false;
+        diventaSolaLettura();
+        chiediLucchetto().then(ok => { if (ok) riprendi(); });
+      });
+    });
+  }
+
+  // L'altra regia si è chiusa (o ha ceduto): si riparte da dove era arrivata
+  // (archivio e TV). Se intanto una regia ricaricata si è ripresa il
+  // lucchetto, si resta in sola lettura (revisione 06/10/2026: con l'archivio
+  // lento comandavano in due).
+  async function riprendi() {
+    await leggiArchivio();
+    if (!hoLucchetto) return;
+    esciDaSolaLettura();
+    await comanda({ demo: false });
+    controllaLibreria();
+  }
+
+  // F5 sulla regia che comandava, con un'altra regia aperta: la vecchia pagina
+  // lascia il lucchetto e lo prende l'altra, che era in coda. Chi ha ricaricato
+  // è l'operatore: chiede il comando indietro, e l'altra lo cede se nessuno
+  // l'ha ancora usata (revisione 06/10/2026).
+  function eraAlComando() {
+    try {
+      return performance.getEntriesByType('navigation')[0]?.type === 'reload' && sessionStorage.getItem(SEGNO) === '1';
+    } catch { return false; }
+  }
+  function segnaAlComando(si) {
+    try { if (si) sessionStorage.setItem(SEGNO, '1'); else sessionStorage.removeItem(SEGNO); } catch { /* niente */ }
+  }
+  function chiediDiRiaverlo() {
+    return new Promise(risolvi => {
+      const basta = setTimeout(() => { ceduto = null; risolvi(false); }, 800);
+      ceduto = () => { clearTimeout(basta); ceduto = null; risolvi(true); };
+      canale.manda({ tipo: 'rivoglio' });
+    });
+  }
+
+  async function avvia({ demo = false } = {}) {
+    await leggiArchivio();
     disegna();
     aggiornaSpia();
+    if (conLucchetto) {
+      const annulla = new AbortController();
+      const arrivato = chiediLucchetto({ signal: annulla.signal });
+      // Entro 300 ms: chi ricarica la pagina lo ritrova appena la vecchia lo lascia.
+      let preso = await Promise.race([arrivato, new Promise(r => setTimeout(() => r(false), 300))]);
+      if (!preso && eraAlComando() && (await chiediDiRiaverlo()) && !hoLucchetto) {
+        annulla.abort();
+        preso = await chiediLucchetto({ steal: true });
+      }
+      if (!preso && !hoLucchetto) {
+        diventaSolaLettura();
+        controllaLibreria();
+        arrivato.then(ok => { if (ok) riprendi(); });
+        return;
+      }
+    }
+    await comanda({ demo });
+    controllaLibreria();
+  }
+
+  async function comanda({ demo }) {
+    tvAllAvvio = null;
+    concertoDellaTv = null;
     canale.manda({ tipo: 'chiedi' });
     await new Promise(r => setTimeout(r, ASCOLTO_INIZIALE));
     if (solaLettura) return;
@@ -570,6 +817,7 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
     }
     if (solaLettura) return;
     attiva = true;
+    segnaAlComando(true);
     if (!concerto && demo) inizia({ nome: "Testi d'esempio", brani: ESEMPI });
     else if (concerto) mandaConcerto();
     disegna();
@@ -590,11 +838,17 @@ export function creaConcerto({ archivio, radice, avvisi, spiaTv, apriTv, vaiA, b
       apriRicerca();
     },
     ricercaAperta,
+    controllaTesti: () => controllaLibreria(),
     correggi: () => correggi(),
     chiediFine() { if (concerto && !solaLettura) dFine.showModal(); },
     inCorso: () => !!concerto,
     solaLettura: () => solaLettura,
     tvCollegata: () => sorvTv.collegato(),
+    tvFinitaSulMac: () => sorvTv.collegato() && tvSulMac(tvDim, schermi),
+    tvSalutata: dopo => ultimoCiao >= dopo,
+    // Chiede alla finestra della TV finita sul Mac di chiudersi: solo a quella
+    // grande così, non a una TV giusta sullo schermo esterno.
+    chiudiTvSulMac() { if (!solaLettura) canale.manda({ tipo: 'chiudi', larghezza: tvDim.larghezza, altezza: tvDim.altezza }); },
     concerto: () => concerto,
     stato: () => stato,
     prep: () => prep,

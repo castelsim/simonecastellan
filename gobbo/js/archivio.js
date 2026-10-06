@@ -14,9 +14,17 @@ const VERSIONI_TENUTE = 30;
 // Stato della sessione: non viaggia nei backup.
 const SOLO_SESSIONE = new Set(['posizione', 'concerto']);
 // La cartella della copia automatica è di questo Mac: non viaggia nei backup.
-const NON_ESPORTATI = new Set([...SOLO_SESSIONE, 'cartella']);
+// 'primaDiSostituire' = { quando, dati }: la libreria com'era prima dell'ultimo
+// «Ricomincia da zero» / «sostituisci tutto» / «Ripristina» (una sola, l'ultima).
+// Sta qui dentro perché un download non dice se Chrome l'ha salvato davvero;
+// non viaggia nei backup (conterrebbe una libreria dentro l'altra).
+// 'ultimaScritta' = il campo «esportato» dell'ultimo file scritto da questo gobbo
+// nella cartella: serve a riconoscere, all'avvio, un file che è ancora il suo.
+const NON_ESPORTATI = new Set([...SOLO_SESSIONE, 'cartella', 'primaDiSostituire', 'ultimaScritta']);
 // Scritture che NON sono un cambiamento della libreria: la posizione del
 // concerto cambia a ogni tasto, e la copia su disco non deve partire a ogni riga.
+// Anche le copie di sicurezza interne: non cambiano la libreria, e la copia in cartella
+// non deve riscriversi per loro.
 const NON_CAMBIAMENTI = new Set([...NON_ESPORTATI, 'ultimoBackup', 'esempiInseriti']);
 
 const promessa = r => new Promise((ok, ko) => { r.onsuccess = () => ok(r.result); r.onerror = () => ko(r.error); });
@@ -85,7 +93,14 @@ export async function apriArchivio(nome = 'gobbo') {
     brani: () => tutti('brani'),
     brano: id => transazione(['brani'], 'readonly', t => promessa(t.objectStore('brani').get(id))),
 
-    salvaBrano(dati) {
+    // Opzioni (le usa l'editor della libreria):
+    //  atteso:   l'«aggiornato» del brano da cui l'editor è partito. Se intanto il
+    //            brano è cambiato altrove (correzione al volo, import, altra
+    //            finestra) o è stato cancellato, NON si riscrive: il testo
+    //            dell'editor va nelle Versioni e si risponde { conflitto, attuale }.
+    //  versione: false = non tenere la versione precedente (salvataggi automatici
+    //            ravvicinati: senza, 30 versioni si consumavano in 12 secondi).
+    salvaBrano(dati, { atteso, versione = true } = {}) {
       const ora = new Date().toISOString();
       let cambiatoDavvero = false;
       return transazione(['brani', 'versioni'], 'readwrite', async t => {
@@ -93,6 +108,11 @@ export async function apriArchivio(nome = 'gobbo') {
         const versioni = t.objectStore('versioni');
         const id = dati.id || crypto.randomUUID();
         const prima = await promessa(brani.get(id));
+        if (atteso !== undefined && (prima?.aggiornato ?? null) !== atteso) {
+          const scartato = { id, titolo: String(dati.titolo ?? ''), artista: String(dati.artista ?? ''), note: String(dati.note ?? ''), testo: String(dati.testo ?? ''), aggiornato: ora };
+          if (prima && !stessoContenuto(prima, scartato)) await tieniVersione(versioni, scartato);
+          return { conflitto: true, attuale: prima ?? null };
+        }
         const nuovo = {
           id,
           titolo: String(dati.titolo ?? '').trim() || 'Senza titolo',
@@ -104,7 +124,7 @@ export async function apriArchivio(nome = 'gobbo') {
         };
         if (prima && stessoContenuto(prima, nuovo)) return prima;
         cambiatoDavvero = true;
-        if (prima) await tieniVersione(versioni, prima);
+        if (prima && versione) await tieniVersione(versioni, prima);
         brani.put(nuovo);
         return nuovo;
       }).then(b => (cambiatoDavvero ? cambiato(b) : b));
@@ -166,7 +186,10 @@ export async function apriArchivio(nome = 'gobbo') {
 
     // modo 'sostituisci': l'archivio diventa il backup. 'unisci': si aggiunge,
     // e a parità di id vince il brano (o la scaletta) modificato più di recente;
-    // il testo di un brano sostituito resta nelle sue versioni.
+    // il testo di un brano sostituito resta nelle sue versioni. Con 'unisci' le
+    // impostazioni (TV comprese) restano quelle di questo Mac.
+    // Risponde { brani, scalette } = quanti scritti, { tenuti, scaletteTenute } =
+    // titoli/nomi lasciati come sono qui perché modificati dopo il file, e gli id scritti.
     importa(dati, modo = 'unisci') {
       const valido = dati && dati.formato === 'gobbo' && Array.isArray(dati.brani) && Array.isArray(dati.scalette)
         && dati.brani.every(b => b && typeof b.id === 'string' && typeof b.testo === 'string')
@@ -179,20 +202,30 @@ export async function apriArchivio(nome = 'gobbo') {
           brani.clear(); scalette.clear(); t.objectStore('versioni').clear();
         }
         const versioni = t.objectStore('versioni');
+        const esito = { brani: 0, scalette: 0, tenuti: [], scaletteTenute: [], scritti: [] };
         for (const b of dati.brani) {
           const esistente = modo === 'unisci' ? await promessa(brani.get(b.id)) : null;
-          if (esistente && String(b.aggiornato ?? '') < String(esistente.aggiornato ?? '')) continue;
+          // Più vecchio di quello qui: si tiene quello qui; si dice solo se il contenuto è davvero diverso.
+          if (esistente && String(b.aggiornato ?? '') < String(esistente.aggiornato ?? '')) {
+            if (!stessoContenuto(esistente, b)) esito.tenuti.push(esistente.titolo);
+            continue;
+          }
           if (esistente && !stessoContenuto(esistente, b)) await tieniVersione(versioni, esistente);
           brani.put(b);
+          esito.brani++;
+          esito.scritti.push(b.id);
         }
         for (const s of dati.scalette) {
           const esistente = modo === 'unisci' ? await promessa(scalette.get(s.id)) : null;
-          if (!esistente || String(s.aggiornata ?? '') >= String(esistente.aggiornata ?? '')) scalette.put(s);
+          if (!esistente || String(s.aggiornata ?? '') >= String(esistente.aggiornata ?? '')) { scalette.put(s); esito.scalette++; }
+          else esito.scaletteTenute.push(esistente.nome);
         }
-        for (const [k, v] of Object.entries(dati.impostazioni ?? {})) {
-          if (!NON_ESPORTATI.has(k)) t.objectStore('impostazioni').put(v, k);
+        if (modo !== 'unisci') {
+          for (const [k, v] of Object.entries(dati.impostazioni ?? {})) {
+            if (!NON_ESPORTATI.has(k)) t.objectStore('impostazioni').put(v, k);
+          }
         }
-        return { brani: dati.brani.length, scalette: dati.scalette.length };
+        return esito;
       }).then(cambiato);
     },
 

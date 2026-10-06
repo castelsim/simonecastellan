@@ -172,6 +172,20 @@ main { flex: 1; min-height: 0; position: relative; }
   border: 1px solid var(--linea); border-radius: 10px; padding: 14px 16px; tab-size: 2;
 }
 #ed-testo:focus { outline: 2px solid var(--accesa); border-color: transparent; }
+
+/* ——— cerca nel testo ——— */
+.cerca-testo { display: flex; align-items: center; gap: 10px; }
+.campo-cerca {
+  flex: 1; min-width: 0; min-height: 40px; padding: 8px 11px; font: inherit; color: var(--testo);
+  background: #0b0d10; border: 1px solid var(--linea); border-radius: 8px;
+}
+.campo-cerca:focus { outline: 2px solid var(--accesa); outline-offset: 0; border-color: transparent; }
+.cerca-conta { flex: none; min-width: 6.5em; color: var(--tenue); font-size: 14px; font-variant-numeric: tabular-nums; }
+.testo-cerca { position: relative; }
+.testo-cerca #ed-testo { display: block; }
+.cerca-sopra { position: absolute; inset: 1px; overflow: hidden; pointer-events: none; border-radius: 9px; }
+.cerca-scorri { position: absolute; left: 0; right: 0; top: 0; }
+.cerca-evidenza { position: absolute; left: 0; right: 0; background: rgba(245, 197, 24, .22); box-shadow: inset 4px 0 0 var(--accesa); }
 .guida { margin: 0; color: var(--tenue); font-size: 12.5px; }
 .guida code { font: 12px ui-monospace, Menlo, monospace; color: var(--testo); background: var(--pannello-2); padding: 1px 4px; border-radius: 4px; }
 .colonna-anteprima { position: sticky; top: 0; align-self: start; }
@@ -247,3 +261,8 @@ main { flex: 1; min-height: 0; position: relative; }
 .pannello-vai[open] { display: flex; }
 .sfondo-vai { position: absolute; inset: 0; background: rgba(0, 0, 0, .6); }
 .pannello-vai .dialogo { position: relative; }
+/* righe trovate in «Vai al brano»: la parola cercata in giallo, elenco che scorre */
+.pannello-vai .risultati { max-height: 52vh; overflow-y: auto; }
+.risultati li.riga .riga-trovata { min-width: 0; font-weight: 500; }
+.risultati li.riga .riga-trovata mark { background: none; color: var(--accesa); font-weight: 700; }
+.risultati li.riga .dove { flex: none; max-width: 45%; text-align: right; }

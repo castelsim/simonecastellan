@@ -229,6 +229,7 @@ export function creaScalette({ archivio, radice, avvisi, concerto, libreria, vai
     const brani = aperta.brani.filter(id => perId.has(id)).map(id => perId.get(id));
     if (!brani.length) return;
     concerto.inizia({ nome: aperta.nome, brani });
+    avvisi.togli('concerto-vecchio');   // il concerto nuovo prende i testi della libreria
     vaiA('concerto');
   }
 

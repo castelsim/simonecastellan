@@ -97,11 +97,18 @@ async function avviaCollegata() {
   });
   spia.classList.add('autonoma');
 
-  let inAttesa = null;   // tasto mandato alla regia, in attesa di risposta
+  // Tasti mandati alla regia e ancora senza risposta. Se la regia tace per
+  // 300 ms la TV li applica da sola, tutti e in ordine, e finché la regia non
+  // si rifà sentire applica da sola anche i tasti dopo (verifica 06/10,
+  // stress-02: subito dopo la morte della regia se ne salvava solo l'ultimo).
+  const inAttesa = [];
+  let attesa = null;
+  let regiaMuta = false;
 
   function ricevi(m) {
     if (m.da !== 'regia') return;
     sorv.visto();
+    regiaMuta = false;
     switch (m.tipo) {
       case 'concerto': {
         const nuovo = !tv.concerto || m.concerto.id !== tv.concerto.id;
@@ -114,9 +121,12 @@ async function avviaCollegata() {
         break;
       }
       case 'stato':
-        clearTimeout(inAttesa); inAttesa = null;
+        clearTimeout(attesa); attesa = null; inAttesa.length = 0;
         if (m.stato.n > tv.stato.n) impostaStato(m.stato);
         else if (m.stato.n < tv.stato.n) statoTv();
+        // Stesso n ma righe diverse (verifica 06/10, stress-01): la TV dice
+        // dove è, e la regia si allinea a lei.
+        else if (m.stato.b !== tv.stato.b || m.stato.r !== tv.stato.r || !!m.stato.nero !== !!tv.stato.nero) statoTv();
         break;
       case 'impostazioni':
         tv.imp = { ...IMPOSTAZIONI_TV, ...m.tv };
@@ -125,6 +135,16 @@ async function avviaCollegata() {
         break;
       case 'chiedi':
         statoTv();
+        break;
+      case 'chiudi':
+        // La regia ha visto questa finestra sullo schermo del Mac e ne apre una
+        // nuova sulla TV (verifica 06/10, avvio-04). Solo se è proprio questa.
+        // Se Chrome non lascia chiuderla (finestra non aperta da «Apri TV»), la
+        // svuota: due TV che parlano alla regia confonderebbero gli avvisi.
+        if (m.larghezza === innerWidth && m.altezza === innerHeight) {
+          window.close();
+          if (!window.closed) location.replace('about:blank');
+        }
         break;
       case 'dammiConcerto':
         if (tv.concerto) canale.manda({ tipo: 'concertoTv', concerto: tv.concerto, stato: tv.stato });
@@ -158,10 +178,15 @@ async function avviaCollegata() {
   tastiera((comando, tasto) => {
     if (!sorv.collegato()) { daSola(comando); return; }
     if (!TASTI_DA_COLLEGATA.has(tasto)) return;
+    if (regiaMuta) { daSola(comando); return; }
     canale.manda({ tipo: 'tasto', comando });
-    clearTimeout(inAttesa);
-    // La regia risponde in pochi millisecondi; se tace, il tasto non va perso.
-    inAttesa = setTimeout(() => { inAttesa = null; daSola(comando); }, 300);
+    inAttesa.push(comando);
+    // La regia risponde in pochi millisecondi; se tace, i tasti non vanno persi.
+    attesa ??= setTimeout(() => {
+      attesa = null;
+      regiaMuta = true;
+      for (const c of inAttesa.splice(0)) daSola(c);
+    }, 300);
   });
 
   // Riparte dall'ultimo concerto salvato, finché la regia non dice altro.
