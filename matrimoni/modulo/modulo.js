@@ -115,7 +115,7 @@
 
   function nuovo() {
     return {
-      formato: FORMATO, versione: VERSIONE,
+      formato: FORMATO, versione: VERSIONE, passo: 1,
       sposi: { nome1: "", nome2: "", telefono: "" },
       evento: { data: "", location: "", indirizzo: "", comune: "", invitati: "", arrivo: "",
                 coord: null, referente: { nome: "", ruolo: "", telefono: "" } },
@@ -154,37 +154,59 @@
     }
     return dati === undefined ? base : dati;
   }
-  function ripara(dati) {
-    var s = unisci(nuovo(), dati);
-    s.formato = FORMATO; s.versione = VERSIONE;
-    s.momenti = (s.momenti || []).map(function (m) {
-      var b = unisci(momento({ id: m.id || "m", titolo: m.titolo || "" }), m);
-      if (!Array.isArray(b.brani) || !b.brani.length) b.brani = [brano()];
-      b.brani = b.brani.map(function (x) { return unisci(brano(), x); });
-      return b;
+  // Gli elenchi (momenti, playlist, annunci) si uniscono per `id`: un salvataggio
+  // fatto prima che si aggiungesse una voce la ritrova vuota; le voci inventate
+  // dagli sposi (id che non conosciamo) restano in coda.
+  function unisciPerId(base, dati, crea) {
+    var out = base.map(function (b) {
+      var d = (Array.isArray(dati) ? dati : []).filter(function (x) { return x && x.id === b.id; })[0];
+      return d ? unisci(b, d) : b;
     });
+    (Array.isArray(dati) ? dati : []).forEach(function (x) {
+      if (x && typeof x === "object" && !base.some(function (b) { return b.id === x.id; })) out.push(crea ? crea(x) : x);
+    });
+    return out;
+  }
+  function ripara(dati) {
+    dati = (dati && typeof dati === "object") ? dati : {};
+    var liste = { momenti: dati.momenti, playlist: dati.playlist, annunci: dati.annunci };
+    var resto = {};
+    Object.keys(dati).forEach(function (k) { if (!(k in liste)) resto[k] = dati[k]; });
+    var s = unisci(nuovo(), resto);
+    s.formato = FORMATO; s.versione = VERSIONE;
+    s.passo = Math.max(1, Math.min(6, +s.passo || 1));
+    var base = nuovo();
+    s.momenti = unisciPerId(base.momenti, liste.momenti, function (m) { return unisci(momento({ id: m.id || "m", titolo: m.titolo || "" }), m); })
+      .map(function (b) {
+        if (!Array.isArray(b.brani) || !b.brani.length) b.brani = [brano()];
+        b.brani = b.brani.map(function (x) { return unisci(brano(), x); });
+        return b;
+      });
+    s.playlist = unisciPerId(base.playlist, liste.playlist);
+    s.annunci = unisciPerId(base.annunci, liste.annunci);
     return s;
   }
 
   /* ————— salvataggio nel browser ————— */
 
   var timerSalva = null;
+  var modificato = false;     // c'è stato un cambiamento dall'ultima copia scaricata
   function salvaPresto() {
+    modificato = true;
     clearTimeout(timerSalva);
     timerSalva = setTimeout(salva, 400);
   }
   function salva() {
+    clearTimeout(timerSalva);
     var el = document.getElementById("salvataggio");
     try {
       S.salvato = new Date().toISOString();
       localStorage.setItem(CHIAVE, JSON.stringify(S));
       salvabile = true;
-      el.className = "salvataggio";
-      el.textContent = "Salvato su questo dispositivo alle " + oraAdesso() + ".";
+      if (el) { el.className = "salvataggio"; el.textContent = "Salvato su questo dispositivo alle " + oraAdesso() + "."; }
     } catch (e) {
       salvabile = false;
-      el.className = "salvataggio attenzione";
-      el.textContent = "Questo browser non tiene le risposte: prima di chiuderlo, scaricate il file al passo 6.";
+      if (el) { el.className = "salvataggio attenzione"; el.textContent = "Questo browser non tiene le risposte: prima di chiuderlo, scaricate il file al passo 6."; }
     }
   }
   function carica() {
@@ -225,14 +247,43 @@
     if (h > 23 || mi > 59) return null;
     return h * 60 + mi;
   }
-  // «1.20», «1:20», «80» (secondi) → «1:20».
+  // «1.20», «1:20», «80» (secondi) → «1:20». Se i secondi hanno una cifra sola
+  // («1.5») non si indovina se sono cinque o cinquanta: si lascia com'è scritto.
   function puntoDa(t) {
     t = String(t || "").trim();
     if (!t) return "";
-    var m = /^(\d{1,2})\s*[:.,']\s*(\d{1,2})$/.exec(t);
-    if (m) return +m[1] + ":" + ("0" + m[2]).slice(-2);
+    var m = /^(\d{1,2})\s*[:.,']\s*(\d{2})$/.exec(t);
+    if (m) return +m[1] + ":" + m[2];
     if (/^\d+$/.test(t)) { var s = +t; return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
     return t;
+  }
+  // «20.30», «20h30», «ore 20,30» → «20:30»; il resto del testo non si tocca.
+  function oraNorm(t) {
+    return String(t == null ? "" : t).replace(/\b(\d{1,2})\s*[.,h]\s*([0-5]\d)\b/g, function (x, h, mi) {
+      return +h <= 23 ? ("0" + h).slice(-2) + ":" + mi : x;
+    });
+  }
+  // I link: manca «https://» → si aggiunge; solo http(s) diventa un collegamento.
+  function linkNorm(t) {
+    t = String(t == null ? "" : t).trim();
+    if (!t || /\s/.test(t) || /^[a-z][a-z0-9+.-]*:/i.test(t)) return t;
+    return /^[^\/?#]+\.[^\/?#]{2,}/.test(t) ? "https://" + t : t;
+  }
+  function hrefSicuro(t) {
+    var n = linkNorm(t);
+    return /^https?:\/\/[^\s]+$/i.test(n) ? n : "";
+  }
+  function linkHTML(t) {
+    var h = hrefSicuro(t);
+    return h ? '<a href="' + esc(h) + '" target="_blank" rel="noopener">' + esc(corto(h)) + "</a>" : esc(t);
+  }
+  function oggiISO() {
+    var d = new Date();
+    return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+  }
+  function dataPassata() { return /^\d{4}-\d{2}-\d{2}$/.test(S.evento.data) && S.evento.data < oggiISO(); }
+  function htmlDataPassata() {
+    return dataPassata() ? "Questa data è già passata: è giusta? (Si può mandare lo stesso.)" : "";
   }
   function dataLunga(iso) {
     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
@@ -327,7 +378,8 @@
       ? '<textarea class="txt area" rows="' + (o.righe || 3) + '"' + attr + ">" + esc(v) + "</textarea>"
       : '<input class="txt" type="' + (o.tipo || "text") + '" value="' + esc(v) + '"' + attr + " />";
     return '<div class="campo' + (o.classe ? " " + o.classe : "") + '"><label class="lbl" for="' + id + '">' + etichetta +
-      (o.facoltativo ? ' <span class="opz">facoltativo</span>' : "") + "</label>" + aiuto + ctrl + "</div>";
+      (o.obbl ? ' <span class="ast" title="serve davvero">*</span>' : "") +
+      (o.sapete ? ' <span class="opz">se lo sapete</span>' : o.facoltativo ? ' <span class="opz">facoltativo</span>' : "") + "</label>" + aiuto + ctrl + "</div>";
   }
 
   function menu(perc, etichetta, scelte, o) {
@@ -360,135 +412,246 @@
   function passo1() {
     return '<section class="passo" aria-labelledby="h-passo">' +
       '<h2 id="h-passo" tabindex="-1">1 · I vostri dati</h2>' +
-      '<p class="intro">Le risposte restano <b>su questo telefono</b> (o computer) finché non me le mandate voi, all\'ultimo passo.</p>' +
+      '<p class="intro">Le risposte restano <b>su questo telefono</b> (o computer) finché non me le mandate voi, all\'ultimo passo. ' +
+      'I campi con <span class="ast">*</span> servono davvero; il resto, se lo sapete.</p>' +
       '<p class="intro importa-riga">Avete già un file del modulo? <button type="button" class="link-btn" data-azione="importa">Caricatelo qui</button></p>' +
       '<div class="scheda">' +
         '<fieldset class="gruppo"><legend class="lbl">I vostri nomi</legend><div class="due">' +
-          campo("sposi.nome1", "Nome", { placeholder: "es. Anna", autocomplete: "given-name", classe: "senza-sopra" }) +
-          campo("sposi.nome2", "Nome", { placeholder: "es. Marco", autocomplete: "off", classe: "senza-sopra" }) +
+          campo("sposi.nome1", "Nome", { placeholder: "es. Anna", autocomplete: "given-name", classe: "senza-sopra", obbl: true }) +
+          campo("sposi.nome2", "Nome", { placeholder: "es. Marco", autocomplete: "off", classe: "senza-sopra", obbl: true }) +
         "</div></fieldset>" +
-        campo("sposi.telefono", "Un telefono per sentirci", { tipo: "tel", inputmode: "tel", autocomplete: "tel", placeholder: "es. 345 123 4567" }) +
-        campo("evento.data", "Data del matrimonio", { tipo: "date" }) +
-        campo("evento.invitati", "Quanti invitati, più o meno", { inputmode: "numeric", placeholder: "es. 120", facoltativo: true }) +
+        campo("sposi.telefono", "Un telefono per sentirci", { tipo: "tel", inputmode: "tel", autocomplete: "tel", placeholder: "es. 345 123 4567", sapete: true }) +
+        campo("evento.data", "Data del matrimonio", { tipo: "date", obbl: true }) +
+        '<p class="aiuto avviso-data" id="avviso-data" role="status">' + htmlDataPassata() + "</p>" +
+        campo("evento.invitati", "Quanti invitati, più o meno", { inputmode: "numeric", placeholder: "es. 120", sapete: true }) +
       "</div>" +
       '<h3 class="sotto">Dove</h3><div class="scheda">' +
-        campo("evento.location", "Nome della location", { placeholder: "es. Villa …, Agriturismo …" }) +
-        campo("evento.indirizzo", "Indirizzo della location", { placeholder: "via e numero", autocomplete: "off" }) +
-        campo("evento.comune", "Comune", { list: "elenco-comuni", placeholder: "es. Bassano del Grappa",
+        campo("evento.location", "Nome della location", { placeholder: "es. Villa …, Agriturismo …", obbl: true }) +
+        campo("evento.indirizzo", "Indirizzo della location", { placeholder: "via e numero", autocomplete: "off", sapete: true }) +
+        campo("evento.comune", "Comune", { list: "elenco-comuni", placeholder: "es. Bassano del Grappa", sapete: true,
           aiuto: "Serve per l'ora del tramonto. I comuni dell'elenco si riconoscono subito, anche senza rete." }) +
         '<datalist id="elenco-comuni">' + (window.Luoghi ? Luoghi.elenco.map(function (l) { return '<option value="' + esc(l[0]) + '">'; }).join("") : "") + "</datalist>" +
         '<div class="sole" id="sole" aria-live="polite">' + htmlSole() + "</div>" +
         '<div class="cerca"><button type="button" class="btn secondario piccolo" data-azione="cerca-luogo">Calcola dal luogo</button>' +
         '<span class="aiuto" id="esito-luogo">Cerca l\'indirizzo su OpenStreetMap: solo se lo toccate, e manda solo l\'indirizzo.</span></div>' +
-        campo("evento.arrivo", "A che ora arrivano gli invitati alla location", { placeholder: "es. 12:30", facoltativo: true }) +
+        campo("evento.arrivo", "A che ora arrivano gli invitati alla location", { placeholder: "es. 12:30", sapete: true }) +
       "</div>" +
       '<h3 class="sotto">Chi mi dà il via, quel giorno</h3>' +
-      '<p class="intro">Voi sarete occupati. Mi serve una persona che sappia il programma e risponda al telefono: un testimone, la wedding planner, il referente della location.</p>' +
+      '<p class="intro">Voi sarete occupati. Mi serve una persona che sappia il programma e risponda al telefono: un testimone, la wedding planner, il referente della location. ' +
+      '<b>Avvisate la persona che mi date come contatto</b>: potrei chiamarla il giorno stesso. Nome e telefono finiscono nel file che mi mandate (<a href="/privacy/#modulo-musicale">come li tratto</a>).</p>' +
       '<div class="scheda">' +
-        campo("evento.referente.nome", "Nome", { placeholder: "es. Giulia" }) +
-        campo("evento.referente.ruolo", "Chi è", { placeholder: "es. testimone, wedding planner" }) +
-        campo("evento.referente.telefono", "Telefono", { tipo: "tel", inputmode: "tel", placeholder: "es. 333 765 4321" }) +
+        campo("evento.referente.nome", "Nome", { placeholder: "es. Giulia", sapete: true }) +
+        campo("evento.referente.ruolo", "Chi è", { placeholder: "es. testimone, wedding planner", sapete: true }) +
+        campo("evento.referente.telefono", "Telefono", { tipo: "tel", inputmode: "tel", placeholder: "es. 333 765 4321", sapete: true }) +
       "</div></section>";
   }
 
-  /* ————— passo 2: i momenti ————— */
+  /* ————— passi 2 e 3: elenco corto + schede a fisarmonica ————— */
+
+  // Una scheda aperta alla volta: `aperto[passo]` è l'id della scheda aperta
+  // (undefined = ancora da scegliere, null = tutte chiuse). I «dettagli» sono
+  // un <details> nativo: si ricorda se erano aperti perché ridisegnare non li chiuda.
+  var aperto = { 2: undefined, 3: undefined };
+  var dettAperti = {};
+
+  function musicaFatta(m) {
+    if (m.musica === "brano") return m.brani.some(function (b) { return String(b.titolo).trim(); });
+    if (m.musica === "playlist") return !!m.playlist;
+    if (m.musica === "live") return !!String(m.live).trim();
+    return true; // «nessuna»
+  }
+  function compilato(m) { return m.presente === true && musicaFatta(m) && !!String(m.segnale).trim(); }
+  // Numero del momento nell'elenco: il video (passo 5) non conta.
+  function numero(i) { return S.momenti.slice(0, i + 1).filter(function (m) { return !m.speciale; }).length; }
+  function momentiVeri() { return S.momenti.filter(function (m) { return !m.speciale; }); }
+
+  function riassuntoMusica(m) {
+    if (m.musica === "brano") {
+      var f = m.brani.filter(function (b) { return String(b.titolo).trim(); });
+      if (!f.length) return "";
+      return f[0].titolo + (f[0].artista ? " — " + f[0].artista : "") + (f.length > 1 ? " (+" + (f.length - 1) + ")" : "");
+    }
+    if (m.musica === "playlist") return m.playlist ? "Playlist «" + nomePlaylist(m.playlist) + "»" : "";
+    if (m.musica === "live") return m.live ? "Musica dal vivo" : "";
+    return "Niente musica";
+  }
+  function testataMomento(m, n) {
+    var fatto = compilato(m), r = [oraNorm(m.ora), riassuntoMusica(m)].filter(Boolean).join(" · ");
+    var sub = fatto ? r : (r ? r + " · " : "") + (musicaFatta(m) && !String(m.segnale).trim() ? "manca il segnale" : "da compilare");
+    return '<span class="num">' + n + '</span><span class="acc-testi"><span class="acc-nome">' + esc(m.titolo || "Momento senza nome") + '</span>' +
+      '<span class="acc-sub' + (fatto ? "" : " da-fare") + '">' + esc(sub) + "</span></span>" +
+      '<span class="acc-stato" aria-hidden="true">' + (fatto ? "✓" : "›") + "</span>" +
+      (fatto ? '<span class="nascosta">compilato</span>' : "");
+  }
+  function testataPlaylist(p, n) {
+    var fatto = !!String(p.link).trim();
+    var sub = fatto ? (p.titolo ? p.titolo + " · " : "") + "link inserito" : "nessun link: lasciate vuota se non vi serve";
+    return '<span class="num">' + n + '</span><span class="acc-testi"><span class="acc-nome">' + esc(p.nome) + '</span>' +
+      '<span class="acc-sub' + (fatto ? "" : " da-fare") + '">' + esc(sub) + "</span></span>" +
+      '<span class="acc-stato" aria-hidden="true">' + (fatto ? "✓" : "›") + "</span>" + (fatto ? '<span class="nascosta">con link</span>' : "");
+  }
+  function testoContatore() {
+    if (passo === 3) {
+      var c = S.playlist.filter(function (p) { return String(p.link).trim(); }).length;
+      return "<b>" + c + " di " + S.playlist.length + "</b> playlist con il link";
+    }
+    var mm = momentiVeri(), conf = mm.filter(function (m) { return m.presente === true; }),
+        ok = conf.filter(compilato).length, ind = mm.filter(function (m) { return m.presente === null; }).length;
+    if (!conf.length) return "Segnate sotto quali momenti ci saranno" + (ind ? " (" + ind + " da decidere)" : "");
+    return "<b>" + ok + " di " + conf.length + "</b> momenti compilati" + (ind ? " · " + ind + " da decidere" : "");
+  }
+  function contatoreHTML() { return '<p class="contatore" id="contatore">' + testoContatore() + "</p>"; }
+  // Mentre si scrive: contatore e riga riassuntiva si aggiornano senza ridisegnare.
+  function aggiornaSintesi() {
+    if (passo !== 2 && passo !== 3) return;
+    var c = document.getElementById("contatore");
+    if (c) c.innerHTML = testoContatore();
+    Array.prototype.forEach.call(document.querySelectorAll("[data-testata]"), function (b) {
+      var k = b.dataset.k, h = "";
+      if (passo === 2) { var i = indiceMomento(k); if (i >= 0) h = testataMomento(S.momenti[i], numero(i)); }
+      else { var j = indicePlaylist(k); if (j >= 0) h = testataPlaylist(S.playlist[j], j + 1); }
+      // Solo se è cambiata: sostituire il contenuto di un bottone mentre lo si sta
+      // toccando (il campo perde il fuoco, scatta «change») farebbe perdere il tocco.
+      if (h && b.dataset.h !== h) { b.innerHTML = h; b.dataset.h = h; }
+    });
+  }
+  function indiceMomento(id) { for (var i = 0; i < S.momenti.length; i++) if (S.momenti[i].id === id) return i; return -1; }
+  function indicePlaylist(id) { for (var i = 0; i < S.playlist.length; i++) if (S.playlist[i].id === id) return i; return -1; }
+
+  // Il primo scheda da fare si apre da sola, una volta.
+  function risolviAperto() {
+    if (aperto[2] === undefined) {
+      var c = momentiVeri().filter(function (m) { return m.presente === true && !compilato(m); })[0];
+      if (c) aperto[2] = c.id;
+    }
+    if (aperto[3] === undefined) {
+      var p = S.playlist.filter(function (x) { return !String(x.link).trim(); })[0];
+      if (p) aperto[3] = p.id;
+    }
+  }
+
+  function dettagli(chiave, campi, haValori) {
+    var aperta = dettAperti[chiave] !== undefined ? dettAperti[chiave] : haValori;
+    return '<details class="altri" data-det="' + esc(chiave) + '"' + (aperta ? " open" : "") + '><summary>Altri dettagli <span class="opz">facoltativo</span></summary>' +
+      '<div class="altri-corpo">' + campi + "</div></details>";
+  }
+
+  function schedaAcc(id, i, aperta, testata, corpo, extra) {
+    var cid = "acc-" + id;
+    return '<article class="momento acc c-e' + (aperta ? " aperta" : "") + '" id="' + cid + '">' +
+      '<h3 class="acc-titolo"><button type="button" class="acc-testa" id="' + cid + '-t" data-azione="apri" data-k="' + esc(id) + '" data-testata="1" data-h="' + esc(testata) + '" aria-expanded="' + (aperta ? "true" : "false") +
+      '" aria-controls="' + cid + '-corpo">' + testata + "</button></h3>" +
+      (aperta ? '<div class="acc-corpo" id="' + cid + '-corpo">' + corpo + "</div>" : "") + (extra || "") + "</article>";
+  }
 
   function opzioniPlaylist() {
     return [{ v: "", t: "Scegliete la playlist…" }].concat(S.playlist.map(function (p) { return { v: p.id, t: p.nome }; }));
   }
 
-  function cartaMomento(m, i) {
-    var base = "momenti." + i;
-    var modello = MOMENTI.filter(function (x) { return x.id === m.id; })[0] || {};
-    var titoloId = "m-" + i + "-titolo";
-
+  function riga(m, i) {
+    var base = "momenti." + i, stato = m.presente === true ? " c-e" : m.presente === false ? " non-c-e" : "";
     if (m.speciale === "video") {
-      return '<article class="momento video-rimando" aria-labelledby="' + titoloId + '">' +
-        '<h3 class="momento-titolo" id="' + titoloId + '"><span class="num">' + (i + 1) + "</span>" + esc(m.titolo) + "</h3>" +
-        '<p class="aiuto">Del video parliamo al passo 5: chi porta il file, quanto dura, quando parte.</p>' +
-        '<button type="button" class="btn secondario piccolo" data-azione="vai" data-passo="5">Vai al video ›</button></article>';
+      return '<li class="riga-momento video-rimando"><span class="riga-nome">' + esc(m.titolo) + '</span> <span class="aiuto">si decide al passo 5</span> ' +
+        '<button type="button" class="link-btn" data-azione="vai" data-passo="5">Vai al video ›</button></li>';
     }
-
-    var stato = m.presente === true ? " c-e" : m.presente === false ? " non-c-e" : "";
-    var h = '<article class="momento' + stato + '" aria-labelledby="' + titoloId + '">' +
-      '<h3 class="momento-titolo" id="' + titoloId + '"><span class="num">' + (i + 1) + "</span>" + esc(m.titolo || "Momento senza nome") + "</h3>" +
-      (modello.aiuto && m.presente !== false ? '<p class="aiuto">' + modello.aiuto + "</p>" : "") +
-      scelta(base + ".presente", "Ci sarà questo momento? — " + esc(m.titolo), [{ v: true, t: "Ci sarà" }, { v: false, t: "Non ci sarà" }], { nascosta: true, classe: "presenza" });
-
-    if (m.presente === true) {
-      if (m.personalizzato) h += campo(base + ".titolo", "Come lo chiamate", { placeholder: "es. Musica dal vivo" });
-      h += '<div class="due">' +
-        campo(base + ".ora", "A che ora, circa", { placeholder: "13:30 · a seguire" }) +
-        campo(base + ".dove", "Dove", { placeholder: modello.dove ? "es. " + modello.dove : "es. giardino, sala" }) +
-        "</div>" +
-        campo(base + ".segnale", "Quando parte: il segnale", { placeholder: "es. " + (modello.segnale || "quando la sposa entra dal cancello"),
-          aiuto: "Chi fa cosa: è il momento in cui premo «play»." }) +
-        scelta(base + ".musica", "Che musica", MUSICHE, { classe: "musica" });
-
-      if (m.musica === "brano") {
-        h += '<div class="brani">' + m.brani.map(function (b, j) { return cartaBrano(m, i, j); }).join("") + "</div>" +
-          '<button type="button" class="btn secondario piccolo" data-azione="aggiungi-brano" data-i="' + i + '">＋ Aggiungi un altro brano</button>';
-      } else if (m.musica === "playlist") {
-        h += menu(base + ".playlist", "Quale playlist", opzioniPlaylist()) +
-          '<p class="aiuto">Il link della playlist lo mettete al passo 3.</p>';
-      } else if (m.musica === "live") {
-        h += campo(base + ".live", "Chi suona, e con cosa", { area: true, righe: 2, placeholder: "es. trio: chitarra classica e voce, hanno il loro mixer" ,
-          aiuto: "Microfoni, prese e collegamenti li vedo io con i musicisti." });
-      }
-
-      h += menu(base + ".poi", "Poi cosa succede", POI, { rifai: true });
-      if (m.poi === "playlist") h += menu(base + ".poiPlaylist", "Quale playlist torna", opzioniPlaylist());
-      if (m.poi === "altro") h += campo(base + ".poiAltro", "Cosa succede dopo", { placeholder: "es. parlano i testimoni, poi la torta" });
-      h += campo(base + ".note", "Note", { area: true, righe: 2, facoltativo: true, placeholder: "es. volume basso, il papà è emozionato…" });
-    }
-    if (m.personalizzato) h += '<p class="togli"><button type="button" class="link-btn" data-azione="togli-momento" data-i="' + i + '">Togli questo momento</button></p>';
-    return h + "</article>";
+    return '<li class="riga-momento' + stato + '"><span class="riga-nome"><span class="num">' + numero(i) + "</span>" + esc(m.titolo || "Momento senza nome") + "</span>" +
+      scelta(base + ".presente", "Ci sarà questo momento? — " + esc(m.titolo), [{ v: true, t: "Ci sarà" }, { v: false, t: "Non ci sarà" }], { nascosta: true, classe: "presenza" }) +
+      (m.personalizzato ? '<button type="button" class="link-btn togli-riga" data-azione="togli-momento" data-i="' + i + '">Togli questo momento</button>' : "") + "</li>";
   }
 
-  function cartaBrano(m, i, j) {
+  function corpoMomento(m, i, ultimo) {
+    var base = "momenti." + i, modello = MOMENTI.filter(function (x) { return x.id === m.id; })[0] || {};
+    var h = (modello.aiuto ? '<p class="aiuto">' + modello.aiuto + "</p>" : "");
+    if (m.personalizzato) h += campo(base + ".titolo", "Come lo chiamate", { placeholder: "es. Musica dal vivo" });
+    h += campo(base + ".ora", "A che ora, circa", { placeholder: "es. 13:30 · a seguire", sapete: true }) +
+      campo(base + ".segnale", "Il segnale: chi mi dà il via", { placeholder: "es. " + (modello.segnale || "quando la sposa entra dal cancello"),
+        aiuto: "Chi fa cosa: è il momento in cui premo «play»." }) +
+      menu(base + ".musica", "Che musica", MUSICHE, { rifai: true });
+    var unico = m.musica === "brano" && m.brani.length === 1;
+    if (m.musica === "brano") {
+      h += '<div class="brani">' + m.brani.map(function (b, j) { return cartaBrano(m, i, j, !unico); }).join("") + "</div>" +
+        '<button type="button" class="btn secondario piccolo" data-azione="aggiungi-brano" data-i="' + i + '">＋ Aggiungi un altro brano</button>';
+    } else if (m.musica === "playlist") {
+      h += menu(base + ".playlist", "Quale playlist", opzioniPlaylist()) +
+        '<p class="aiuto">Il link della playlist lo mettete al passo 3.</p>';
+    } else if (m.musica === "live") {
+      h += campo(base + ".live", "Chi suona, e con cosa", { area: true, righe: 2, placeholder: "es. trio: chitarra classica e voce, hanno il loro mixer",
+        aiuto: "Microfoni, prese e collegamenti li vedo io con i musicisti." });
+    }
+    h += menu(base + ".poi", "Poi cosa succede", POI, { rifai: true });
+    if (m.poi === "playlist") h += menu(base + ".poiPlaylist", "Quale playlist torna", opzioniPlaylist());
+    if (m.poi === "altro") h += campo(base + ".poiAltro", "Cosa succede dopo", { placeholder: "es. parlano i testimoni, poi la torta" });
+    var det = campo(base + ".dove", "Dove", { placeholder: modello.dove ? "es. " + modello.dove : "es. giardino, sala", facoltativo: true });
+    var haVal = !!(m.dove || m.note);
+    if (unico) { det += dettagliBrano("momenti." + i + ".brani.0", m.brani[0]); haVal = haVal || !!(m.brani[0].versione || m.brani[0].da || m.brani[0].link); }
+    det += campo(base + ".note", "Note", { area: true, righe: 2, facoltativo: true, placeholder: "es. volume basso, il papà è emozionato…" });
+    h += dettagli(m.id, det, haVal);
+    h += '<div class="acc-fine"><button type="button" class="btn primario" data-azione="prossimo" data-k="' + esc(m.id) + '">' +
+      (ultimo ? "Fatto" : "Fatto, prossimo momento") + "</button>" +
+      (m.personalizzato ? '<button type="button" class="link-btn" data-azione="togli-momento" data-i="' + i + '">Togli questo momento</button>' : "") + "</div>";
+    return h;
+  }
+
+  function dettagliBrano(b, x) {
+    return campo(b + ".versione", "Versione", { list: "elenco-versioni", placeholder: "originale", facoltativo: true }) +
+      campo(b + ".da", "Da che punto", { inputmode: "decimal", placeholder: "es. 0.45", facoltativo: true,
+        aiuto: "Minuti.secondi, es. 0.45: la canzone parte da 45 secondi." }) +
+      campo(b + ".link", "Link della canzone", { tipo: "url", inputmode: "url", placeholder: "incollate il link della canzone", facoltativo: true });
+  }
+
+  function cartaBrano(m, i, j, conDettagli) {
     var b = "momenti." + i + ".brani." + j, conPer = m.brani.length > 1 || m.id === "genitori" || m.id === "speciali" || m.personalizzato;
+    var x = m.brani[j];
     return '<fieldset class="brano"><legend class="lbl">' + (m.brani.length > 1 ? "Brano " + (j + 1) : "La canzone") + "</legend>" +
       (conPer ? campo(b + ".per", "Per chi o per cosa", { placeholder: m.id === "genitori" ? "es. ballo con il papà" : "es. dedica agli amici", facoltativo: true }) : "") +
       campo(b + ".titolo", "Titolo", { placeholder: "es. Titolo della canzone" }) +
       campo(b + ".artista", "Artista", { placeholder: "es. Nome dell'artista" }) +
-      '<div class="due">' +
-        campo(b + ".versione", "Versione", { list: "elenco-versioni", placeholder: "originale", facoltativo: true }) +
-        campo(b + ".da", "Da che punto", { inputmode: "decimal", placeholder: "es. 0.45", facoltativo: true }) +
-      "</div>" +
-      campo(b + ".link", "Link della canzone", { tipo: "url", inputmode: "url", placeholder: "incollate il link (Spotify, YouTube…)",
-        aiuto: "Dal telefono: «Condividi» sulla canzone → «Copia link», poi incollatelo qui." }) +
+      (conDettagli ? dettagli(m.id + "-" + j, dettagliBrano(b, x), !!(x.versione || x.da || x.link)) : "") +
       (m.brani.length > 1 ? '<p class="togli"><button type="button" class="link-btn" data-azione="togli-brano" data-i="' + i + '" data-j="' + j + '">Togli questo brano</button></p>' : "") +
       "</fieldset>";
   }
 
   function passo2() {
+    risolviAperto();
+    var conf = [];
+    S.momenti.forEach(function (m, i) { if (!m.speciale && m.presente === true) conf.push([m, i]); });
     return '<section class="passo" aria-labelledby="h-passo">' +
       '<h2 id="h-passo" tabindex="-1">2 · I momenti</h2>' +
-      '<p class="intro">Per ogni momento: <b>ci sarà o no</b>, e se c\'è, che musica e quando parte. ' +
+      '<p class="intro">Prima segnate <b>quali momenti ci saranno</b>, poi compilate solo quelli. ' +
       'Quello che non sapete ancora lasciatelo vuoto: ne parliamo.</p>' +
       '<datalist id="elenco-versioni"><option value="originale"><option value="live"><option value="acustica"><option value="strumentale"><option value="remix"><option value="versione corta"></datalist>' +
-      S.momenti.map(cartaMomento).join("") +
-      '<div class="aggiungi-momento"><h3 class="sotto">Un altro momento?</h3><div class="chips">' +
+      contatoreHTML() +
+      '<h3 class="sotto">Quali momenti ci saranno</h3>' +
+      '<ul class="elenco-momenti">' + S.momenti.map(riga).join("") + "</ul>" +
+      '<div class="aggiungi-momento"><p class="aiuto">Un altro momento?</p><div class="chips">' +
       ALTRI_MOMENTI.map(function (t) { return '<button type="button" class="chip" data-azione="aggiungi-momento" data-titolo="' + esc(t) + '">＋ ' + esc(t) + "</button>"; }).join("") +
-      "</div></div></section>";
+      "</div></div>" +
+      '<h3 class="sotto">Ora compilate i momenti che ci saranno</h3>' +
+      (conf.length
+        ? '<p class="aiuto">Toccate un momento per aprirlo. Per i link: dal telefono, «Condividi» sulla canzone → «Copia link», poi incollate in «Altri dettagli».</p>' +
+          conf.map(function (c, n) {
+            return schedaAcc(c[0].id, c[1], aperto[2] === c[0].id, testataMomento(c[0], numero(c[1])), corpoMomento(c[0], c[1], n === conf.length - 1));
+          }).join("")
+        : '<p class="aiuto">Quando segnate «Ci sarà», il momento compare qui da compilare.</p>') +
+      "</section>";
   }
 
-  /* ————— passo 3: le playlist ————— */
-
   function passo3() {
+    risolviAperto();
     return '<section class="passo" aria-labelledby="h-passo">' +
       '<h2 id="h-passo" tabindex="-1">3 · Le playlist</h2>' +
       '<p class="intro">Fra un momento e l\'altro suonano le vostre playlist. Incollate il link di quelle che avete; ' +
-      'quelle che non vi servono lasciatele vuote.</p>' +
+      'quelle che non vi servono lasciatele vuote.</p>' + contatoreHTML() +
       S.playlist.map(function (p, i) {
-        var mod = PLAYLIST.filter(function (x) { return x.id === p.id; })[0] || {};
-        var b = "playlist." + i;
-        return '<fieldset class="scheda playlist"><legend class="lbl grande">' + esc(p.nome) + "</legend>" +
-          (mod.es ? '<p class="aiuto">' + esc(mod.es) + "</p>" : "") +
-          campo(b + ".titolo", "Come si chiama la playlist", { placeholder: "es. Buffet matrimonio", facoltativo: true }) +
-          campo(b + ".link", "Link della playlist", { tipo: "url", inputmode: "url", placeholder: "incollate il link (Spotify, YouTube…)" }) +
-          campo(b + ".note", "Note", { area: true, righe: 2, facoltativo: true, placeholder: "es. solo strumentale fino alle 14" }) +
-          "</fieldset>";
+        var mod = PLAYLIST.filter(function (x) { return x.id === p.id; })[0] || {}, b = "playlist." + i;
+        var corpo = (mod.es ? '<p class="aiuto">' + esc(mod.es) + "</p>" : "") +
+          campo(b + ".link", "Link della playlist", { tipo: "url", inputmode: "url", placeholder: "incollate il link della playlist",
+            aiuto: "Dal telefono: «Condividi» sulla playlist → «Copia link», poi incollate qui." }) +
+          dettagli("pl-" + p.id, campo(b + ".titolo", "Come si chiama la playlist", { placeholder: "es. Buffet matrimonio", facoltativo: true }) +
+            campo(b + ".note", "Note", { area: true, righe: 2, facoltativo: true, placeholder: "es. solo strumentale fino alle 14" }), !!(p.titolo || p.note)) +
+          '<div class="acc-fine"><button type="button" class="btn primario" data-azione="prossimo" data-k="' + esc(p.id) + '">' +
+          (i === S.playlist.length - 1 ? "Fatto" : "Fatto, prossima playlist") + "</button></div>";
+        return schedaAcc(p.id, i, aperto[3] === p.id, testataPlaylist(p, i + 1), corpo);
       }).join("") +
       '<div class="scheda">' +
         campo("nonMettere", "Canzoni da NON mettere", { area: true, righe: 3, facoltativo: true,
@@ -641,6 +804,7 @@
       if (x.presente !== true) return;
       if (x.musica === "brano" && !x.brani.some(function (b) { return b.titolo; })) m.push([2, "la canzone di «" + x.titolo + "»"]);
       if (x.musica === "playlist" && !x.playlist) m.push([2, "quale playlist per «" + x.titolo + "»"]);
+      if (!String(x.segnale).trim()) m.push([2, "il segnale di «" + x.titolo + "»: chi mi dà il via"]);
     });
     var usate = {};
     S.momenti.forEach(function (x) {
@@ -681,7 +845,7 @@
     var playlistUsate = S.playlist.filter(function (p) { return p.link || p.titolo || p.note; });
     var pl = playlistUsate.length ? '<h3 class="sotto">Playlist</h3><ul class="elenco">' + playlistUsate.map(function (p) {
       return "<li><b>" + esc(p.nome) + "</b>" + (p.titolo ? " — «" + esc(p.titolo) + "»" : "") +
-        (p.link ? ' — <a href="' + esc(p.link) + '" target="_blank" rel="noopener">' + esc(corto(p.link)) + "</a>" : " — <i>link mancante</i>") +
+        (p.link ? " — " + linkHTML(p.link) : " — <i>link mancante</i>") +
         (p.note ? "<br><span class=\"aiuto\">" + esc(p.note) + "</span>" : "") + "</li>";
     }).join("") + "</ul>" : "";
     var altri = [];
@@ -696,8 +860,7 @@
     var linkBrani = [];
     S.momenti.forEach(function (m) {
       if (m.presente === true && m.musica === "brano") m.brani.forEach(function (b) {
-        if (b.link) linkBrani.push("<li>" + esc(m.titolo) + ": " + (b.titolo ? "«" + esc(b.titolo) + "» " : "") +
-          '<a href="' + esc(b.link) + '" target="_blank" rel="noopener">' + esc(corto(b.link)) + "</a></li>");
+        if (b.link) linkBrani.push("<li>" + esc(m.titolo) + ": " + (b.titolo ? "«" + esc(b.titolo) + "» " : "") + linkHTML(b.link) + "</li>");
       });
     });
     var lb = linkBrani.length ? '<h3 class="sotto">Link delle canzoni</h3><ul class="elenco">' + linkBrani.join("") + "</ul>" : "";
@@ -711,6 +874,7 @@
 
     return '<section class="passo" aria-labelledby="h-passo">' +
       '<h2 id="h-passo" tabindex="-1">6 · Riepilogo e invio</h2>' +
+      (dataPassata() ? '<div class="manca"><p><b>Attenzione:</b> la data del matrimonio è già passata. <button type="button" class="link-btn" data-azione="vai" data-passo="1">Controllatela</button></p></div>' : "") +
       (mm.length ? '<div class="manca"><p><b>Manca ancora</b> (si può mandare lo stesso):</p><ul>' + mm.map(function (x) {
         return '<li><button type="button" class="link-btn" data-azione="vai" data-passo="' + x[0] + '">' + esc(x[1]) + "</button></li>";
       }).join("") + "</ul></div>" : '<p class="tutto-ok">Tutto compilato.</p>') +
@@ -718,10 +882,12 @@
         '<h3 class="sotto senza-sopra">Mandatelo a Simone</h3>' +
         '<ol class="passi-invio">' +
           '<li><span>Mandate il file: dal telefono si apre la condivisione, scegliete WhatsApp (o la mail) e me.</span>' +
-            '<button type="button" class="btn primario" data-azione="manda">Manda il file a Simone</button></li>' +
+            '<button type="button" class="btn primario" data-azione="manda">Manda il file a Simone</button>' +
+            '<p class="numero-wa">Il mio numero: <b class="selezionabile">340 457 9244</b> — salvatelo in rubrica.</p></li>' +
           '<li><span>Oppure scaricatelo e scrivetemi: vi apro la chat con un messaggio già pronto, il file lo allegate voi.</span>' +
             '<div class="fila-btn"><button type="button" class="btn secondario" data-azione="scarica">Scarica il file</button>' +
-            '<a class="btn secondario" id="link-wa" href="' + linkWhatsApp() + '" target="_blank" rel="noopener">Apri WhatsApp</a></div></li>' +
+            '<a class="btn secondario" id="link-wa" href="' + linkWhatsApp() + '" target="_blank" rel="noopener">Apri WhatsApp</a></div>' +
+            '<p class="aiuto">Dal computer: aprite WhatsApp, toccate la graffetta e scegliete il file scaricato.</p></li>' +
         "</ol>" +
         '<div class="fila-btn minori"><button type="button" class="btn secondario piccolo" data-azione="stampa">Stampa o salva in PDF</button>' +
           '<button type="button" class="btn secondario piccolo" data-azione="copia">Copia come testo</button>' +
@@ -741,16 +907,26 @@
 
   function datiDaEsportare() {
     var d = JSON.parse(JSON.stringify(S));
+    delete d.passo;
     d.esportato = new Date().toISOString();
+    // ore e link ripuliti come nel riepilogo (il formato del file non cambia)
+    d.evento.arrivo = oraNorm(d.evento.arrivo); d.video.ora = oraNorm(d.video.ora);
+    d.momenti.forEach(function (m) {
+      m.ora = oraNorm(m.ora);
+      (m.brani || []).forEach(function (b) { b.link = linkNorm(b.link); });
+    });
+    d.playlist.forEach(function (p) { p.link = linkNorm(p.link); });
     var s = sole();
     d.calcolati = s ? { tramonto: s.tramonto, luceDa: s.luceDa, luceA: s.luceA, buio: s.buio, lat: s.lat, lon: s.lon, dove: s.dove } : null;
     return d;
   }
   function nomeFile(est) {
     var n = (nomi() || "sposi").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    return "piano-musicale_" + (S.evento.data || "senza-data") + "_" + n + "." + (est || "json");
+    var o = new Date(), hhmm = ("0" + o.getHours()).slice(-2) + ("0" + o.getMinutes()).slice(-2);
+    return "piano-musicale_" + (S.evento.data || "senza-data") + "_" + n + "_" + hhmm + "." + (est || "json");
   }
   function scarica() {
+    modificato = false; ultimoInvito = Date.now();
     var blob = new Blob([JSON.stringify(datiDaEsportare(), null, 2)], { type: "application/json" });
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob); a.download = nomeFile("json");
@@ -774,13 +950,17 @@
     try {
       if (navigator.canShare) file = prove.filter(function (f) { return navigator.canShare({ files: [f] }); })[0] || null;
     } catch (e) { file = null; }
-    if (!file || !navigator.share) {
+    var ripiega = function () {
       scarica();
       avviso("File scaricato. Ora toccate «Apri WhatsApp» e allegatelo nella chat.");
-      return;
-    }
-    navigator.share({ files: [file], title: "Piano musicale", text: messaggioWhatsApp() })
-      .catch(function (e) { if (!e || e.name !== "AbortError") { scarica(); } });
+    };
+    if (!file || !navigator.share) { ripiega(); return; }
+    // Se la condivisione di sistema fallisce (non per un annullamento) si fa come
+    // dove non esiste: file scaricato e invito ad aprire WhatsApp.
+    try {
+      navigator.share({ files: [file], title: "Piano musicale", text: messaggioWhatsApp() })
+        .catch(function (e) { if (!e || e.name !== "AbortError") ripiega(); });
+    } catch (e) { ripiega(); }
   }
 
   function testoSemplice() {
@@ -793,9 +973,9 @@
       t.push(r.ora + " · " + r.momento + "\n  " + r.musica.replace(/\n/g, "\n  ") + (r.indicazioni ? "\n  " + r.indicazioni : ""));
     });
     var pl = S.playlist.filter(function (p) { return p.link || p.titolo; });
-    if (pl.length) { t.push("", "PLAYLIST"); pl.forEach(function (p) { t.push("- " + p.nome + (p.titolo ? " «" + p.titolo + "»" : "") + (p.link ? ": " + p.link : "")); }); }
+    if (pl.length) { t.push("", "PLAYLIST"); pl.forEach(function (p) { t.push("- " + p.nome + (p.titolo ? " «" + p.titolo + "»" : "") + (p.link ? ": " + linkNorm(p.link) : "")); }); }
     S.momenti.forEach(function (m) {
-      if (m.presente === true && m.musica === "brano") m.brani.forEach(function (b) { if (b.link) t.push("- " + m.titolo + (b.titolo ? " «" + b.titolo + "»" : "") + ": " + b.link); });
+      if (m.presente === true && m.musica === "brano") m.brani.forEach(function (b) { if (b.link) t.push("- " + m.titolo + (b.titolo ? " «" + b.titolo + "»" : "") + ": " + linkNorm(b.link)); });
     });
     if (S.nonMettere) t.push("", "DA NON METTERE: " + S.nonMettere);
     var an = S.annunci.filter(function (a) { return a.attivo; });
@@ -825,16 +1005,54 @@
       try { dati = JSON.parse(String(r.result)); } catch (e) { avviso("Questo file non è un modulo musicale."); return; }
       if (!dati || dati.formato !== FORMATO) { avviso("Questo file non è un modulo musicale."); return; }
       if (haDati() && !confirm("Sostituire le risposte di adesso con quelle del file?")) return;
+      var prima = null;
+      try { prima = JSON.stringify(S); localStorage.setItem(CHIAVE + "-prima", prima); } catch (e) { /* senza salvataggio resta in memoria */ }
       delete dati.calcolati; delete dati.esportato;
       S = ripara(dati);
       salva(); vaiA(1, true);
       avviso("Modulo caricato.");
+      if (prima && haDatiDi(JSON.parse(prima))) {
+        striscia("Modulo caricato. Le risposte di prima sono ancora lì.", [{ t: "Annulla caricamento", f: function () {
+          try { S = ripara(JSON.parse(prima)); } catch (e) { return; }
+          salva(); vaiA(S.passo, true); avviso("Ho rimesso le risposte di prima.");
+        } }], 40000);
+      }
     };
     r.readAsText(file);
   }
-  function haDati() {
-    return !!(nomi() || S.evento.data || S.evento.location || S.momenti.some(function (m) { return m.presente !== null; }));
+  function haDatiDi(x) {
+    return !!((x.sposi && (x.sposi.nome1 || x.sposi.nome2)) || (x.evento && (x.evento.data || x.evento.location)) ||
+      (x.momenti || []).some(function (m) { return m.presente !== null && m.presente !== undefined; }));
   }
+  function haDati() { return haDatiDi(S); }
+
+  /* ————— la striscia in basso: copia di sicurezza, «Annulla» ————— */
+
+  var timerStriscia = null, ultimoInvito = Date.now();
+  function striscia(testo, bottoni, ms) {
+    var el = document.getElementById("striscia"), b = document.getElementById("striscia-b");
+    document.getElementById("striscia-t").textContent = testo;
+    b.innerHTML = "";
+    bottoni.concat([{ t: "Chiudi", f: null, chiudi: true }]).forEach(function (x) {
+      var bt = document.createElement("button");
+      bt.type = "button"; bt.className = x.chiudi ? "link-btn" : "btn secondario piccolo"; bt.textContent = x.t;
+      bt.addEventListener("click", function () { el.hidden = true; if (x.f) x.f(); });
+      b.appendChild(bt);
+    });
+    el.hidden = false;
+    clearTimeout(timerStriscia);
+    if (ms) timerStriscia = setTimeout(function () { el.hidden = true; }, ms);
+  }
+  function proponiCopia(testo) {
+    if (!haDati()) return;
+    ultimoInvito = Date.now();
+    striscia(testo, [{ t: "Scarica una copia di sicurezza", f: scarica }], 25000);
+  }
+  // Ogni dieci minuti di lavoro non ancora copiato, un invito discreto.
+  setInterval(function () {
+    if (modificato && document.visibilityState === "visible" && Date.now() - ultimoInvito > 600000)
+      proponiCopia("Avete lavorato un po\': una copia di sicurezza, nel caso il telefono dimentichi tutto?");
+  }, 30000);
 
   /* ————— disegno e navigazione ————— */
 
@@ -858,6 +1076,8 @@
     av.hidden = passo === 6;
     if (passo < 6) { av.textContent = PASSI[passo].corto + " ›"; av.setAttribute("aria-label", "Avanti: " + PASSI[passo].titolo); }
     document.body.classList.toggle("largo", passo === 6);
+    var nav = document.querySelector(".avanzamento");
+    document.documentElement.style.setProperty("--nav-h", nav.offsetHeight + "px");
     if (attivo) {
       var el = document.getElementById(attivo);
       if (el && app.contains(el)) el.focus({ preventScroll: true });
@@ -865,7 +1085,10 @@
   }
 
   function vaiA(n, scorri) {
+    var prima = passo;
     passo = Math.max(1, Math.min(6, n));
+    S.passo = passo; clearTimeout(timerSalva); timerSalva = setTimeout(salva, 400);
+    if (prima === 2 && passo !== 2 && haDati()) proponiCopia("Avete finito i momenti: volete una copia di sicurezza delle risposte?");
     try { history.replaceState(null, "", "#passo-" + passo); } catch (e) { /* file:// o simili */ }
     disegna(null);
     if (scorri !== false) {
@@ -889,17 +1112,21 @@
     if (!el.dataset || !el.dataset.bind || el.type === "radio" || el.type === "checkbox" || el.tagName === "SELECT") return;
     scrivi(el.dataset.bind, valoreDa(el));
     if (el.dataset.bind === "evento.comune") {
-      var l = window.Luoghi && Luoghi.trova(el.value);
-      if (l) S.evento.coord = null; // il comune scelto adesso vince sulla ricerca di prima
+      S.evento.coord = null; // un altro comune: il punto trovato prima (o il comune di prima) non vale più
       aggiornaSole();
     }
-    if (el.dataset.bind === "evento.data") aggiornaSole();
+    if (el.dataset.bind === "evento.data") { aggiornaSole(); aggiornaDataPassata(); }
     if (el.dataset.bind === "evento.indirizzo" && S.evento.coord && S.evento.coord.fonte === "ricerca") {
       S.evento.coord = null; aggiornaSole(); // l'indirizzo è cambiato: il punto trovato prima non vale più
     }
     if (/^(sposi\.nome|evento\.data)/.test(el.dataset.bind)) { var w = document.getElementById("link-wa"); if (w) w.href = linkWhatsApp(); }
+    aggiornaSintesi();
     salvaPresto();
   });
+  function aggiornaDataPassata() {
+    var el = document.getElementById("avviso-data");
+    if (el) el.textContent = htmlDataPassata();
+  }
 
   document.addEventListener("change", function (e) {
     var el = e.target;
@@ -914,9 +1141,36 @@
         if (fs) Array.prototype.forEach.call(fs.querySelectorAll(".scelta-btn"), function (b) { b.classList.toggle("acceso", b.contains(el)); });
       }
     } else if (el.type === "date") {
-      scrivi(el.dataset.bind, el.value); aggiornaSole(); salvaPresto();
+      scrivi(el.dataset.bind, el.value); aggiornaSole(); aggiornaDataPassata(); salvaPresto();
+    } else if (/\.ora$|^evento\.arrivo$/.test(el.dataset.bind)) {
+      el.value = oraNorm(el.value); scrivi(el.dataset.bind, el.value); aggiornaSintesi(); salvaPresto();
+    } else if (/\.link$/.test(el.dataset.bind)) {
+      el.value = linkNorm(el.value); scrivi(el.dataset.bind, el.value); aggiornaSintesi(); salvaPresto();
     }
   });
+  // <details> non fa «bubble» dell'evento toggle: lo si ascolta in cattura.
+  document.addEventListener("toggle", function (e) {
+    var d = e.target;
+    if (d && d.dataset && d.dataset.det) dettAperti[d.dataset.det] = d.open;
+  }, true);
+
+  // Apre una scheda (e chiude le altre); il fuoco resta sulla sua testata.
+  function apriScheda(k) {
+    aperto[passo] = aperto[passo] === k ? null : k;
+    disegna("acc-" + k + "-t");
+    var el = document.getElementById("acc-" + k);
+    if (el && aperto[passo] === k) el.scrollIntoView({ block: "start" });
+  }
+  function prossimaScheda(k) {
+    var ids = passo === 3 ? S.playlist.map(function (p) { return p.id; })
+      : S.momenti.filter(function (m) { return !m.speciale && m.presente === true; }).map(function (m) { return m.id; });
+    var n = ids[ids.indexOf(k) + 1];
+    aperto[passo] = n || null;
+    disegna(n ? "acc-" + n + "-t" : null);
+    var el = document.getElementById(n ? "acc-" + n : "contatore");
+    if (el) el.scrollIntoView({ block: "start" });
+    if (!n) avviso(passo === 3 ? "Playlist finite. Avanti, agli annunci." : "Momenti finiti. Avanti, alle playlist.");
+  }
 
   document.addEventListener("click", function (e) {
     var b = e.target.closest ? e.target.closest("[data-azione]") : null;
@@ -925,6 +1179,8 @@
     if (az === "avanti") vaiA(passo + 1);
     else if (az === "indietro") vaiA(passo - 1);
     else if (az === "vai") vaiA(+b.dataset.passo);
+    else if (az === "apri") apriScheda(b.dataset.k);
+    else if (az === "prossimo") prossimaScheda(b.dataset.k);
     else if (az === "cerca-luogo") cercaLuogo(b);
     else if (az === "aggiungi-brano") {
       S.momenti[i].brani.push(brano()); salvaPresto(); disegna(null);
@@ -937,9 +1193,8 @@
       var t = b.dataset.titolo === "Altro momento" ? "" : b.dataset.titolo;
       var m = momento({ id: "extra-" + Date.now().toString(36), titolo: t, personalizzato: true, musica: t === "Musica dal vivo" ? "live" : "brano" });
       m.presente = true;
-      S.momenti.push(m); salvaPresto(); disegna(null);
-      var art = document.querySelectorAll(".momento");
-      var ultimo = art[art.length - 1];
+      S.momenti.push(m); aperto[2] = m.id; salvaPresto(); disegna(null);
+      var ultimo = document.getElementById("acc-" + m.id);
       if (ultimo) { ultimo.scrollIntoView({ block: "start" }); var f = ultimo.querySelector("input.txt"); if (f) f.focus({ preventScroll: true }); }
     }
     else if (az === "togli-momento") {
@@ -959,6 +1214,7 @@
     else if (az === "importa") document.getElementById("file-importa").click();
     else if (az === "ricomincia") {
       if (confirm("Cancellare tutte le risposte da questo dispositivo? Se non avete scaricato il file, non si recuperano.")) {
+        try { localStorage.setItem(CHIAVE + "-prima", JSON.stringify(S)); } catch (er) { /* niente */ }
         S = nuovo();
         try { localStorage.removeItem(CHIAVE); } catch (er) { /* niente */ }
         vaiA(1);
@@ -979,11 +1235,16 @@
   // Stampa da qualunque passo: si stampa il riepilogo, aggiornato.
   window.addEventListener("beforeprint", function () { if (passo !== 6) { passo = 6; disegna(null); } });
 
+  // Chiusura, cambio di app, schermo spento: il salvataggio non aspetta i 400 ms.
+  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") salva(); });
+  window.addEventListener("pagehide", salva);
+  window.addEventListener("beforeunload", salva);
+
   /* ————— partenza ————— */
 
   var ripreso = carica();
   var h0 = /passo-(\d)/.exec(location.hash);
-  passo = h0 ? Math.max(1, Math.min(6, +h0[1])) : 1;
+  passo = h0 ? Math.max(1, Math.min(6, +h0[1])) : (ripreso ? Math.max(1, Math.min(6, +S.passo || 1)) : 1);
   disegna(null);
   var st = document.getElementById("salvataggio");
   try {

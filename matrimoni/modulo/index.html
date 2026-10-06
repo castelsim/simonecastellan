@@ -48,6 +48,7 @@
     <h1 class="titolone">Il piano musicale.<span class="eco">Voi scegliete, io lo faccio suonare.</span></h1>
     <p class="apertura">Per ogni momento della giornata ditemi <b>che canzone, quando parte e cosa succede dopo</b>.
       Ci vogliono una ventina di minuti; potete fermarvi e riprendere quando volete.</p>
+    <p class="nota-locale"><b>Le risposte restano solo su questo telefono e in questo browser:</b> riaprite sempre dallo stesso link e dallo stesso browser.</p>
   </header>
 
   <nav class="avanzamento" aria-label="Passi del modulo">
@@ -68,9 +69,11 @@
   </div>
 
   <footer class="piede-unico">
-    <p class="privacy-piede">Le risposte restano su questo dispositivo finché non le mandate voi. Il sito non le riceve e non le conserva.</p>
-    <a href="/">Simone Castellan</a><span class="sep">·</span><a href="/privacy/">Privacy</a>
+    <p class="privacy-piede">Le risposte restano su questo dispositivo (nel browser) finché non le mandate voi. Il sito non le riceve e non le conserva.</p>
+    <a href="/">Simone Castellan</a><span class="sep">·</span><a href="/privacy/#modulo-musicale">Come tratto i dati di questo modulo</a><span class="sep">·</span><a href="/privacy/">Privacy</a>
   </footer>
+
+  <div class="striscia" id="striscia" role="status" hidden><p id="striscia-t"></p><div class="striscia-b" id="striscia-b"></div></div>
 
   <div id="avviso" class="toast" role="status" aria-live="polite"></div>
   <input type="file" id="file-importa" accept=".json,.txt,application/json,text/plain" hidden />
