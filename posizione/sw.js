@@ -1,16 +1,18 @@
 // Service worker: mette in cache i quattro file dell'app, così si apre
 // anche senza rete. Non tocca la posizione e non parla con nessun server.
-const CACHE = 'posizione-v10';
+const CACHE = 'posizione-v11';
 const FILE = ['./', './index.html', './manifest.json', './icona-180.png', './icona-192.png', './icona-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILE)).then(() => self.skipWaiting()));
 });
 
+// Le cache sono di tutto il sito: si cancellano solo quelle di /posizione/,
+// non quelle di /gobbo/ (che senza la sua cache non si apre più senza rete).
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(chiavi => Promise.all(chiavi.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(chiavi => Promise.all(chiavi.filter(k => k.startsWith('posizione-') && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

@@ -1387,6 +1387,23 @@ def controlla_gobbo():
     print(f"  gobbo: {stato}, {len(file) + 1} file, versione {attesa} coerente, niente statistiche")
 
 
+def controlla_cache_posizione():
+    """Le cache del browser sono di tutta l'origine (simonecastellan.com), non di
+    una cartella. Il service worker di /posizione/ cancellava «tutte le cache
+    tranne la propria» e con quelle anche la cache di /gobbo/: l'app da palco
+    non si apriva più senza rete (06/10/2026). Deve cancellare solo le sue."""
+    sw = leggi("posizione/sw.js")
+    prefisso = re.search(r"const CACHE = '([a-z]+-)", sw)
+    if not prefisso:
+        errore("posizione/sw.js: il nome della cache deve avere un prefisso proprio (es. 'posizione-v11')")
+        return
+    if f"k.startsWith('{prefisso.group(1)}')" not in sw:
+        errore(f"posizione/sw.js: deve cancellare solo le cache che iniziano per '{prefisso.group(1)}', "
+               f"non tutte quelle del sito (c'è la cache di /gobbo/)")
+        return
+    print(f"  posizione: il service worker cancella solo le cache '{prefisso.group(1)}…'")
+
+
 def main():
     print("Verifica del sito…")
     home = leggi("index.html")
@@ -1419,6 +1436,7 @@ def main():
     controlla_person_definita_una_volta()
     controlla_agganci_css()
     controlla_gobbo()
+    controlla_cache_posizione()
 
     for a in AVVISI:
         print("  AVVISO: " + a)
