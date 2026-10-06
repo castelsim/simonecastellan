@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<!--
+  simonecastellan.com/matrimoni/modulo/ — il piano musicale per gli sposi.
+  © 2026 Simone Castellan.
+
+  A COSA SERVE
+  Gli sposi lo compilano dal telefono prima del matrimonio: per ogni momento
+  della giornata dicono che musica, quando parte (il segnale, in parole), da
+  che punto e cosa succede dopo; poi le playlist, gli annunci con il testo già
+  scritto e il video. Il riepilogo ha la forma della cronotabella che il
+  sound engineer stampa e tiene in regia: ORA · MOMENTO · MUSICA · INDICAZIONI.
+
+  COME ARRIVA A SIMONE
+  Il sito è statico: non riceve niente. Le risposte restano nel browser
+  (localStorage) finché gli sposi non toccano «Manda a Simone»: sul telefono si
+  apre la condivisione di sistema con il file allegato (WhatsApp, mail…); dove
+  non c'è, il file si scarica e un secondo tasto apre la chat di WhatsApp con
+  un messaggio corto. Niente parte da solo. Il file (.json) lo legge
+  «MATRIMONI ED EVENTI/_GENERALE/strumenti/piano_musicale.py».
+
+  RETE
+  Nessuna risorsa esterna. L'unica richiesta fuori dal sito è la ricerca del
+  luogo su OpenStreetMap (Nominatim), e parte solo con il tocco su «Calcola
+  dal luogo». Niente statistiche su questa pagina: ci sono dati personali.
+
+  Fuori dalle ricerche (noindex) e fuori dalla sitemap: si raggiunge col link.
+-->
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Piano musicale del matrimonio — Simone Castellan</title>
+  <meta name="description" content="Il modulo per gli sposi: per ogni momento del matrimonio la canzone, quando parte e cosa succede dopo. Si compila dal telefono." />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="color-scheme" content="light" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/comune/voce.css" />
+  <link rel="stylesheet" href="modulo.css" />
+  <link rel="stylesheet" href="/comune/piede.css" />
+</head>
+<body>
+  <a class="salta" href="#contenuto">Vai al modulo</a>
+
+  <header class="testa">
+    <p class="percorso"><a href="/">Simone Castellan</a><span class="su" aria-hidden="true">›</span><a href="/matrimoni/">Matrimoni</a></p>
+    <p class="occhiello">Matrimonio · Musica · Momenti</p>
+    <h1 class="titolone">Il piano musicale.<span class="eco">Voi scegliete, io lo faccio suonare.</span></h1>
+    <p class="apertura">Per ogni momento della giornata ditemi <b>che canzone, quando parte e cosa succede dopo</b>.
+      Ci vogliono una ventina di minuti; potete fermarvi e riprendere quando volete.</p>
+  </header>
+
+  <nav class="avanzamento" aria-label="Passi del modulo">
+    <ol id="passi"></ol>
+    <p class="dove" id="dove" aria-live="polite"></p>
+  </nav>
+
+  <p class="salvataggio" id="salvataggio" role="status"></p>
+
+  <main id="contenuto" tabindex="-1">
+    <noscript><p class="avviso">Il modulo ha bisogno di JavaScript. Se non potete attivarlo, scrivetemi su WhatsApp al 340 457 9244.</p></noscript>
+    <div id="app"></div>
+  </main>
+
+  <div class="barra" id="barra" hidden>
+    <button type="button" class="btn secondario" data-azione="indietro" id="b-indietro">‹ Indietro</button>
+    <button type="button" class="btn primario" data-azione="avanti" id="b-avanti">Avanti ›</button>
+  </div>
+
+  <footer class="piede-unico">
+    <p class="privacy-piede">Le risposte restano su questo dispositivo finché non le mandate voi. Il sito non le riceve e non le conserva.</p>
+    <a href="/">Simone Castellan</a><span class="sep">·</span><a href="/privacy/">Privacy</a>
+  </footer>
+
+  <div id="avviso" class="toast" role="status" aria-live="polite"></div>
+  <input type="file" id="file-importa" accept=".json,.txt,application/json,text/plain" hidden />
+
+  <script src="sole.js"></script>
+  <script src="luoghi.js"></script>
+  <script src="modulo.js"></script>
+</body>
+</html>
