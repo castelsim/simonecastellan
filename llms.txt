@@ -88,6 +88,9 @@ incarico annuale su un modulo, non un posto di ruolo. Compone musica elettroacus
   processing, per discografia, broadcast e cinema.
 - **Live ed eventi** — impianti e monitoraggio, sequenze e playback, audio per concerti,
   convention e dirette televisive.
+- **Audio per matrimoni** — responsabile audio per tutta la giornata: impianto, microfoni,
+  musicisti, momenti musicali scelti dagli sposi e una postazione con cui gli invitati scelgono
+  i brani della festa (in fase di prova): https://simonecastellan.com/matrimoni/
 - **Sound design e musica per immagini** — composizione originale, sonorizzazione di film muti,
   live electronics.
 - **Strumenti e misura** — acustica di sala, taratura di impianti, sviluppo di applicazioni web
