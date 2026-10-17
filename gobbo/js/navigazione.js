@@ -13,7 +13,7 @@
 // Ogni azione — tasto, clic, pulsante, domani MIDI o pedale — passa da applica():
 // un comando, un posto.
 
-import { analizza, righeCantate } from './testo.js';
+import { analizza, righeCantate, righeDi } from './testo.js';
 
 const limita = (x, min, max) => Math.max(min, Math.min(max, x));
 
@@ -109,7 +109,8 @@ export function vista(prep, stato) {
   return {
     brano,
     analisi: brano.analisi,
-    s: pos ? pos.s : (brano.analisi.strofe.length ? 0 : null),
+    // Senza righe da cantare (brano vuoto o di sole note) la TV mostra il titolo.
+    s: pos ? pos.s : null,
     rigaAccesa: pos ? { s: pos.s, r: pos.r } : null,
     prossima,
     numero: b + 1,
@@ -117,6 +118,12 @@ export function vista(prep, stato) {
     titoloDopo: dopo ? dopo.titolo : null,
     nero: !!stato.nero,
   };
+}
+
+// Stesso numero di righe e al massimo una diversa, confrontate una per una.
+function unaRigaCambiata(primo, secondo) {
+  const a = righeDi(primo), b = righeDi(secondo);
+  return a.length === b.length && a.filter((x, i) => x !== b[i]).length <= 1;
 }
 
 // Dopo una correzione (o un brano aggiunto al volo) il concerto cambia: la
@@ -139,7 +146,15 @@ export function riallinea(prepVecchio, prepNuovo, stato) {
   const nuovo = prepNuovo.brani[b];
   let r = limita(stato.r, 0, Math.max(0, nuovo.cantate.length - 1));
   const prima = vecchio ? rigaDi(vecchio, vecchio.cantate[stato.r]) : null;
-  if (prima && vecchio.id === nuovo.id) {
+  if (prima && vecchio.id === nuovo.id && unaRigaCambiata(vecchio.testo, nuovo.testo)) {
+    // Cambia una riga sola (la correzione al volo): resta la stessa riga del
+    // testo, anche se un'altra uguale (ritornello) è più vicina per contenuto.
+    // Se la riga è diventata vuota o una nota, la dopo. (Verifica del
+    // 06/10/2026, sincronia-1.) Righe spostate a parità di numero (modifica
+    // dalla Libreria) seguono invece il contenuto, qui sotto (revisione 06/10).
+    const j = nuovo.cantate.findIndex(p => rigaDi(nuovo, p).linea >= prima.linea);
+    r = j >= 0 ? j : Math.max(0, nuovo.cantate.length - 1);
+  } else if (prima && vecchio.id === nuovo.id) {
     let migliore = -1;
     nuovo.cantate.forEach((p, i) => {
       if (rigaDi(nuovo, p).sorgente === prima.sorgente

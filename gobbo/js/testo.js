@@ -25,7 +25,7 @@ const SEGNO = /\*\*|\{\/\}|\{([a-z]+)\}/g;
 // carattere di tutto il brano scende al minimo (revisione 01/10/2026).
 const A_CAPO = /\r\n|[\r\n\u000b\u000c\u0085\u2028]/;
 
-function righeDi(testo) {
+export function righeDi(testo) {
   return String(testo ?? '').replace(/\u2029/g, '\n\n').split(A_CAPO);
 }
 

@@ -7,6 +7,7 @@ import { creaLibreria } from './libreria.js';
 import { creaScalette } from './scalette.js';
 import { creaImpostazioni } from './impostazioni.js';
 import { apriTv as apriTvSuSchermo, tieniAcceso, registraFuoriLinea } from './schermo.js';
+import { creaCopia } from './copia.js';
 
 // ——— avvisi fissi in cima (rossi = problema, ambra = informazione) ————————
 
@@ -40,6 +41,12 @@ try {
   avvisi.mostra('archivio', e.message);
 }
 
+// ——— copia automatica in una cartella (01/10/2026) ————————————————————————
+// Ogni cambiamento vero della libreria (non i tasti del concerto) ne fa
+// partire una copia nella cartella scelta in Impostazioni.
+const copia = creaCopia({ archivio, avvisi, suCambio: () => moduli.impostazioni?.aggiornaCartella?.() });
+archivio?.alCambio(() => copia.segnala());
+
 // ——— sezioni ——————————————————————————————————————————————————————————
 
 const sezioni = ['concerto', 'libreria', 'scalette', 'impostazioni'];
@@ -64,17 +71,34 @@ document.querySelector('.schede').addEventListener('click', e => {
 // ——— TV ————————————————————————————————————————————————————————————————
 
 async function apriTv() {
+  // Una regia in sola lettura non apre TV: due TV collegate si darebbero il
+  // cambio a ogni battito (revisione 06/10/2026). La TV la apre chi comanda.
+  if (concerto.solaLettura()) {
+    avvisi.mostra('schermo', 'Questa regia è in sola lettura: la TV si apre dalla regia che comanda.', { tipo: 'info' });
+    setTimeout(() => avvisi.togli('schermo'), 4000);
+    return;
+  }
   // Una TV collegata non si riapre: riaprirla la ricaricherebbe (nero breve).
-  if (concerto.tvCollegata()) {
+  // Tranne se la sua finestra è finita sullo schermo del Mac (HDMI staccato e
+  // riattaccato; verifica 06/10, avvio-04): lì il cantante non la vede, quindi
+  // si chiude e se ne apre una nuova sulla TV, che riparte dalla stessa riga.
+  const riapri = concerto.tvCollegata() && concerto.tvFinitaSulMac();
+  if (concerto.tvCollegata() && !riapri) {
     avvisi.mostra('schermo', 'La TV è già aperta e collegata.', { tipo: 'info' });
     setTimeout(() => avvisi.togli('schermo'), 4000);
     return;
   }
+  if (riapri) {
+    concerto.chiudiTvSulMac();
+    await new Promise(r => setTimeout(r, 300));
+  }
+  const aperta = Date.now();
   const { esterno } = await apriTvSuSchermo();
   // La TV, appena aperta, saluta sul canale: se in 3 secondi non lo fa, la
   // finestra non si è aperta (Chrome può bloccarla la prima volta).
-  for (let i = 0; i < 30 && !concerto.tvCollegata(); i++) await new Promise(r => setTimeout(r, 100));
-  if (!concerto.tvCollegata()) {
+  const arrivata = () => (riapri ? concerto.tvSalutata(aperta) : concerto.tvCollegata());
+  for (let i = 0; i < 30 && !arrivata(); i++) await new Promise(r => setTimeout(r, 100));
+  if (!arrivata()) {
     avvisi.mostra('schermo', 'La finestra della TV non si è aperta: premi di nuovo «Apri TV».', { tipo: 'info' });
   } else if (!esterno) {
     avvisi.mostra('schermo', 'Nessun secondo schermo trovato: la TV si apre in una finestra. Collega la TV in HDMI e in Impostazioni di Sistema → Monitor scegli «Estendi» (non «Duplica»); poi trascina la finestra sulla TV e premi F.', { tipo: 'info' });
@@ -141,8 +165,8 @@ moduli.concerto = { mostra: () => concerto.disegna() };
 const scalette = creaScalette({ archivio, radice: document.getElementById('vista-scalette'), avvisi, concerto, libreria, vaiA });
 moduli.scalette = { mostra: () => scalette.mostra() };
 
-const impostazioni = creaImpostazioni({ archivio, radice: document.getElementById('vista-impostazioni'), avvisi, concerto });
-moduli.impostazioni = { mostra: () => impostazioni.mostra() };
+const impostazioni = creaImpostazioni({ archivio, radice: document.getElementById('vista-impostazioni'), avvisi, concerto, copia });
+moduli.impostazioni = { mostra: () => impostazioni.mostra(), aggiornaCartella: () => impostazioni.aggiornaCartella() };
 
 // Chiudere o ricaricare la regia durante un concerto chiede conferma. Anche
 // confermando non succede niente di grave: la TV tiene il testo e la regia,
@@ -158,6 +182,7 @@ await concerto.avvia({ demo: parametri.has('demo') });
 // Senza concerto in corso si parte dalla libreria.
 if (!concerto.inCorso()) vaiA('libreria');
 archivio?.protetta().catch(() => {});
-impostazioni.promemoria(libreria.brani().length);
+await copia.avvia();
+if (copia.stato() !== 'attiva') impostazioni.promemoria(libreria.brani().length);
 
-export { archivio, avvisi, concerto, moduli };
+export { archivio, avvisi, concerto, moduli, copia };

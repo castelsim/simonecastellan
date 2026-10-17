@@ -6,6 +6,8 @@
 //               impostazioni {tv}
 //               battito
 //               chiedi                       «TV, dove sei arrivata?»
+//   regia → regia rivoglio                   regia ricaricata che comandava: «ridammi il comando»
+//               cedo {a}                     «te lo ridò» (all'id `a`), se non ancora usata
 //   TV → regia  ciao {larghezza, altezza}
 //               battito {larghezza, altezza}
 //               tasto {comando}
