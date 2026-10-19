@@ -1,0 +1,281 @@
+<!doctype html>
+<!--
+  ══════════════════════════════════════════════════════════════════════
+  simonecastellan.com/domande — © 2026 Simone Castellan.
+
+  A COSA SERVE
+  La bacheca delle domande dei workshop. I ragazzi arrivano dal QR del
+  bigliettino, scrivono una domanda (argomento + a chi la fanno) o
+  premono «+1» su quella di un altro. In un momento dedicato Simone e
+  Marco rispondono a tutte, raggruppate per argomento.
+
+  COME È FATTA
+  · Niente account, niente nomi: ogni telefono ha un numero a caso
+    salvato nel browser, che serve solo a dare un voto per domanda.
+  · Le domande stanno in un database Supabase dedicato (progetto
+    «workshop-domande», separato da StagePlot). La pagina non tocca
+    le tabelle: chiama quattro funzioni (bacheca, invia_domanda, vota,
+    e le due della regia), che controllano lunghezza, doppioni, raffiche
+    e parolacce. Una domanda con parolacce entra ma resta nascosta
+    finché Simone non la guarda dalla regia (/domande/regia/).
+  · La chiave in fondo è quella pubblica: senza le funzioni non apre nulla.
+  · Nessuna statistica e nessun tracciamento: sono ragazzi.
+  · Fuori dalle ricerche (noindex) e fuori dalla sitemap: ci si arriva
+    solo dal QR.
+  ══════════════════════════════════════════════════════════════════════
+-->
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Domande del workshop</title>
+<meta name="description" content="La bacheca delle domande del workshop audio: scrivi una domanda o vota quelle degli altri.">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<style>
+  :root{
+    --carta:#f7f6f2; --pannello:#fff; --inchiostro:#14110e; --tenue:#5b554d;
+    --riga:#dcd6cc; --blu:#1f5fbf; --blu-chiaro:#e9f0fb; --verde:#2f7d45; --verde-chiaro:#e8f4ea;
+    --arancio:#b9600f; --arancio-chiaro:#fcefe1;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0; background:var(--carta); color:var(--inchiostro);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px; line-height:1.45}
+  .foglio{max-width:640px; margin:0 auto; padding:18px 16px 80px}
+  .occhiello{font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--tenue); font-weight:700; margin:0}
+  h1{font-size:28px; line-height:1.15; margin:4px 0 14px; letter-spacing:-.01em}
+
+  .schede{display:flex; gap:8px; position:sticky; top:0; background:var(--carta); padding:8px 0 10px; z-index:2}
+  .schede button{flex:1; min-height:46px; border:2px solid var(--inchiostro); background:#fff; color:var(--inchiostro);
+    border-radius:12px; font:inherit; font-weight:700; cursor:pointer}
+  .schede button[aria-selected="true"]{background:var(--inchiostro); color:#fff}
+
+  .vuoto{color:var(--tenue); text-align:center; padding:30px 10px}
+  .domanda{display:flex; gap:12px; align-items:flex-start; background:var(--pannello); border:1.5px solid var(--riga);
+    border-radius:14px; padding:12px; margin:10px 0}
+  .domanda.fatta{opacity:.6}
+  .voto{min-width:56px; min-height:56px; border:2px solid var(--riga); border-radius:12px; background:#fff; font:inherit;
+    font-weight:700; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.1; padding:4px}
+  .voto .freccia{font-size:14px}
+  .voto[aria-pressed="true"]{border-color:var(--blu); background:var(--blu-chiaro); color:var(--blu)}
+  .voto:disabled{cursor:default; opacity:.5}
+  .testo{flex:1; min-width:0; overflow-wrap:anywhere}
+  .meta{display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; font-size:13px; color:var(--tenue)}
+  .etichetta{border-radius:999px; padding:2px 9px; background:#f0eee9}
+  .etichetta.simone{background:var(--blu-chiaro)} .etichetta.marco{background:var(--arancio-chiaro)}
+  .etichetta.fatta{background:var(--verde-chiaro); color:var(--verde); font-weight:700}
+  .etichetta.attesa{background:#fff3c4}
+
+  fieldset{border:0; padding:0; margin:18px 0 0}
+  legend{font-weight:700; margin-bottom:8px; padding:0}
+  .scelte{display:flex; flex-wrap:wrap; gap:8px}
+  .scelte label{position:relative}
+  .scelte input{position:absolute; opacity:0; width:1px; height:1px}
+  .scelte span{display:inline-flex; flex-direction:column; justify-content:center; min-height:46px; padding:8px 13px;
+    border:2px solid var(--riga); border-radius:999px; background:#fff; cursor:pointer; font-size:16px}
+  .scelte small{color:var(--tenue); font-size:12.5px}
+  .scelte input:checked + span{border-color:var(--blu); background:var(--blu-chiaro)}
+  .scelte input:focus-visible + span{outline:3px solid var(--blu); outline-offset:2px}
+  textarea{width:100%; min-height:120px; border:2px solid var(--riga); border-radius:14px; padding:12px; font:inherit; resize:vertical; background:#fff}
+  textarea:focus{outline:3px solid var(--blu); outline-offset:1px}
+  .conta{font-size:13px; color:var(--tenue); text-align:right; margin-top:4px}
+  .invia{width:100%; min-height:54px; margin-top:12px; border:0; border-radius:14px; background:var(--blu); color:#fff;
+    font:inherit; font-weight:700; font-size:18px; cursor:pointer}
+  .invia:disabled{opacity:.55; cursor:default}
+  .avviso{margin-top:12px; padding:12px 14px; border-radius:12px; display:none}
+  .avviso.ok{display:block; background:var(--verde-chiaro); color:var(--verde)}
+  .avviso.errore{display:block; background:#fde8e6; color:#9b1c12}
+  .nota{font-size:13.5px; color:var(--tenue); margin-top:14px}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+<main class="foglio">
+  <p class="occhiello">Workshop audio</p>
+  <h1>Le domande del gruppo</h1>
+
+  <div class="schede" role="tablist">
+    <button id="tab-bacheca" role="tab" aria-selected="true" aria-controls="bacheca">Più votate</button>
+    <button id="tab-nuova" role="tab" aria-selected="false" aria-controls="nuova">Nuova domanda</button>
+  </div>
+
+  <section id="bacheca" role="tabpanel" aria-labelledby="tab-bacheca">
+    <div id="elenco" aria-live="polite"><p class="vuoto">Carico le domande…</p></div>
+  </section>
+
+  <section id="nuova" role="tabpanel" aria-labelledby="tab-nuova" hidden>
+    <form id="modulo" novalidate>
+      <fieldset>
+        <legend>1 · Di cosa parla?</legend>
+        <div class="scelte" id="argomenti"></div>
+      </fieldset>
+      <fieldset>
+        <legend>2 · A chi la fai?</legend>
+        <div class="scelte" id="perchi"></div>
+      </fieldset>
+      <fieldset>
+        <legend><label for="testo">3 · La tua domanda</label></legend>
+        <textarea id="testo" maxlength="500" placeholder="Es. come si toglie il rumore del vento dalla voce?"></textarea>
+        <div class="conta"><span id="conta">0</span>/500</div>
+      </fieldset>
+      <button class="invia" id="invia" type="submit">Invia</button>
+      <div class="avviso" id="avviso" role="status"></div>
+      <p class="nota">Anonima: non chiediamo il nome. Puoi mandare tutte le domande che vuoi.</p>
+    </form>
+  </section>
+</main>
+
+<script>
+(function(){
+  var URL_DB = 'https://cbsxooaacnwtxnbwwomm.supabase.co/rest/v1/rpc/';
+  var CHIAVE = 'sb_publishable_rYLH1N9DwmtZ3BgsgmkdJQ_Yeut8W55';
+  // Una bacheca per workshop: ?s=nome apre una bacheca diversa.
+  var SESSIONE = (new URLSearchParams(location.search).get('s') || 'workshop-audio-2026').slice(0, 60);
+
+  var ARGOMENTI = [
+    ['presa-diretta', '🎙️ Presa diretta'], ['pulizia', '🧽 Pulizia e restauro'], ['montaggio', '✂️ Montaggio'],
+    ['foley', '👣 Effetti e Foley'], ['manipolare', '🌀 Manipolare il suono'], ['musica', '🎹 Musica per immagini'],
+    ['mix', '🎚️ Mix e volume'], ['programmi', '💻 Programmi'], ['lavoro', '🎬 Lavorare nel suono'], ['altro', '❓ Altro']
+  ];
+  var PER_CHI = [
+    ['simone', 'Simone', 'tecnica, pulizia, editing'], ['marco', 'Marco', 'musica, armonia, emozioni'],
+    ['entrambi', 'Tutti e due', ''], ['non-so', 'Non so', '']
+  ];
+  var NOMI_ARG = {}; ARGOMENTI.forEach(function(a){ NOMI_ARG[a[0]] = a[1]; });
+  var NOMI_CHI = {simone: 'per Simone', marco: 'per Marco', entrambi: 'per tutti e due', 'non-so': ''};
+
+  function idDispositivo(){
+    var k = 'domande-dispositivo', id = null;
+    try { id = localStorage.getItem(k); } catch (e) {}
+    if (!id) {
+      id = (crypto.randomUUID ? crypto.randomUUID() :
+        'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
+          var r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }));
+      try { localStorage.setItem(k, id); } catch (e) {}
+    }
+    return id;
+  }
+  var DISP = idDispositivo();
+
+  function chiama(funzione, dati){
+    return fetch(URL_DB + funzione, {
+      method: 'POST',
+      headers: {'apikey': CHIAVE, 'Content-Type': 'application/json'},
+      body: JSON.stringify(dati)
+    }).then(function(r){
+      return r.text().then(function(t){
+        var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) {}
+        if (!r.ok) throw new Error((j && j.message) || 'Qualcosa non ha funzionato. Riprova.');
+        return j;
+      });
+    });
+  }
+
+  // ── Schede ──
+  var tabB = document.getElementById('tab-bacheca'), tabN = document.getElementById('tab-nuova');
+  function mostra(nuova){
+    tabB.setAttribute('aria-selected', String(!nuova)); tabN.setAttribute('aria-selected', String(nuova));
+    document.getElementById('bacheca').hidden = nuova; document.getElementById('nuova').hidden = !nuova;
+    if (!nuova) carica();
+  }
+  tabB.onclick = function(){ mostra(false); };
+  tabN.onclick = function(){ mostra(true); };
+
+  // ── Bacheca ──
+  var elenco = document.getElementById('elenco'), inVoto = false;
+  function etichetta(testo, classe){
+    var s = document.createElement('span'); s.className = 'etichetta' + (classe ? ' ' + classe : ''); s.textContent = testo; return s;
+  }
+  function disegna(righe){
+    elenco.textContent = '';
+    if (!righe.length) {
+      var p = document.createElement('p'); p.className = 'vuoto';
+      p.textContent = 'Ancora nessuna domanda. Scrivi la prima da «Nuova domanda».';
+      elenco.appendChild(p); return;
+    }
+    righe.forEach(function(d){
+      var box = document.createElement('article'); box.className = 'domanda' + (d.risposta ? ' fatta' : '');
+      var b = document.createElement('button'); b.className = 'voto'; b.type = 'button';
+      b.setAttribute('aria-pressed', String(!!d.mio_voto));
+      b.setAttribute('aria-label', (d.mio_voto ? 'Togli il tuo +1' : 'Anche io voglio saperlo') + ', voti: ' + d.voti);
+      b.innerHTML = '<span class="freccia">▲</span><span></span>';
+      b.lastChild.textContent = d.voti;
+      if (d.mia && d.voti === 0 && !d.mio_voto) b.title = 'Puoi votare anche la tua';
+      // La propria domanda fermata dal filtro si vede, ma non si vota finché Simone non la sblocca.
+      if (d.in_attesa) { b.disabled = true; b.setAttribute('aria-label', 'In attesa, non si può ancora votare'); }
+      else b.onclick = function(){ vota(d.id, b); };
+      var t = document.createElement('div'); t.className = 'testo';
+      var q = document.createElement('div'); q.textContent = d.testo; t.appendChild(q);
+      var m = document.createElement('div'); m.className = 'meta';
+      m.appendChild(etichetta(NOMI_ARG[d.argomento] || d.argomento));
+      if (NOMI_CHI[d.per_chi]) m.appendChild(etichetta(NOMI_CHI[d.per_chi], d.per_chi));
+      if (d.risposta) m.appendChild(etichetta('✓ risposta data', 'fatta'));
+      if (d.in_attesa) m.appendChild(etichetta('la vedi solo tu: prima la guarda Simone', 'attesa'));
+      else if (d.mia) m.appendChild(etichetta('la tua'));
+      t.appendChild(m);
+      box.appendChild(b); box.appendChild(t); elenco.appendChild(box);
+    });
+  }
+  function carica(){
+    if (inVoto || document.getElementById('bacheca').hidden) return;
+    chiama('bacheca', {p_sessione: SESSIONE, p_dispositivo: DISP})
+      .then(function(r){ disegna(r || []); })
+      .catch(function(e){
+        if (!elenco.querySelector('.domanda')) { elenco.innerHTML = '<p class="vuoto"></p>'; elenco.firstChild.textContent = e.message; }
+      });
+  }
+  function vota(id, b){
+    if (b.disabled) return;
+    b.disabled = true; inVoto = true;
+    chiama('vota', {p_id: id, p_dispositivo: DISP})
+      .then(function(){ inVoto = false; carica(); })
+      .catch(function(){ inVoto = false; b.disabled = false; });
+  }
+  carica();
+  setInterval(function(){ if (document.visibilityState === 'visible') carica(); }, 6000);
+  document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible') carica(); });
+
+  // ── Nuova domanda ──
+  function gruppo(contenitore, nome, voci){
+    voci.forEach(function(v){
+      var l = document.createElement('label');
+      var i = document.createElement('input'); i.type = 'radio'; i.name = nome; i.value = v[0];
+      var s = document.createElement('span'); s.textContent = v[1];
+      if (v[2]) { var sm = document.createElement('small'); sm.textContent = v[2]; s.appendChild(sm); }
+      l.appendChild(i); l.appendChild(s); contenitore.appendChild(l);
+    });
+  }
+  gruppo(document.getElementById('argomenti'), 'argomento', ARGOMENTI);
+  gruppo(document.getElementById('perchi'), 'perchi', PER_CHI);
+
+  var testo = document.getElementById('testo'), conta = document.getElementById('conta');
+  var avviso = document.getElementById('avviso'), invia = document.getElementById('invia');
+  testo.addEventListener('input', function(){ conta.textContent = testo.value.length; });
+  function dici(msg, ok){ avviso.textContent = msg; avviso.className = 'avviso ' + (ok ? 'ok' : 'errore'); }
+
+  document.getElementById('modulo').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var arg = document.querySelector('input[name="argomento"]:checked');
+    var chi = document.querySelector('input[name="perchi"]:checked');
+    var t = testo.value.trim();
+    if (!arg) return dici('Scegli di cosa parla la domanda (punto 1).');
+    if (t.length < 3) return dici('Scrivi la domanda (punto 3).');
+    invia.disabled = true; avviso.className = 'avviso';
+    chiama('invia_domanda', {p_sessione: SESSIONE, p_testo: t, p_argomento: arg.value,
+                             p_per_chi: chi ? chi.value : 'non-so', p_dispositivo: DISP})
+      .then(function(stato){
+        testo.value = ''; conta.textContent = '0';
+        document.querySelectorAll('#modulo input').forEach(function(i){ i.checked = false; });
+        dici(stato === 'in_revisione'
+          ? 'Ricevuta. Prima di comparire la guarda Simone.'
+          : 'Inviata, grazie! La trovi in «Più votate».', true);
+      })
+      .catch(function(e){ dici(e.message); })
+      .then(function(){ invia.disabled = false; });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!doctype html>
+<!--
+  ══════════════════════════════════════════════════════════════════════
+  simonecastellan.com/domande/regia — © 2026 Simone Castellan.
+
+  La regia della bacheca /domande/. Si apre col codice di regia (lo
+  tiene Simone; nel database c'è solo la sua impronta cifrata). Mostra
+  tutte le domande, anche quelle nascoste o fermate dal filtro delle
+  parolacce, con i conteggi per argomento e per persona. Da qui si
+  nasconde una domanda, la si rimette, la si segna come «risposta data».
+  «Vista grande» è per il proiettore nel momento delle risposte.
+  Il codice resta solo in questa scheda (sessionStorage), mai nell'URL.
+  ══════════════════════════════════════════════════════════════════════
+-->
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Regia delle domande</title>
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<style>
+  :root{--carta:#f7f6f2; --inchiostro:#14110e; --tenue:#5b554d; --riga:#dcd6cc; --blu:#1f5fbf; --blu-chiaro:#e9f0fb;
+    --arancio-chiaro:#fcefe1; --verde:#2f7d45; --verde-chiaro:#e8f4ea; --rosso:#9b1c12; --rosso-chiaro:#fde8e6}
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--carta); color:var(--inchiostro); font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .foglio{max-width:1100px; margin:0 auto; padding:18px 16px 60px}
+  h1{font-size:24px; margin:0 0 12px}
+  .riga{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+  input[type=password], select{font:inherit; padding:9px 11px; border:2px solid var(--riga); border-radius:10px; background:#fff; min-height:44px}
+  button{font:inherit; min-height:44px; padding:8px 14px; border-radius:10px; border:2px solid var(--inchiostro); background:#fff; cursor:pointer; font-weight:600}
+  button.primo{background:var(--inchiostro); color:#fff}
+  .errore{color:var(--rosso); margin:8px 0}
+  .conti{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; margin:14px 0}
+  .conto{background:#fff; border:1.5px solid var(--riga); border-radius:12px; padding:8px 10px; font-size:14px}
+  .conto b{font-size:22px; display:block}
+  .d{display:flex; gap:12px; align-items:flex-start; background:#fff; border:1.5px solid var(--riga); border-radius:12px; padding:10px 12px; margin:8px 0}
+  .d.nascosta{background:var(--rosso-chiaro); border-color:#efb9b3}
+  .d.fatta{opacity:.55}
+  .v{min-width:48px; text-align:center; font-weight:700; font-size:20px}
+  .t{flex:1; min-width:0; overflow-wrap:anywhere}
+  .m{font-size:13px; color:var(--tenue); margin-top:4px; display:flex; flex-wrap:wrap; gap:6px}
+  .e{border-radius:999px; padding:1px 8px; background:#f0eee9}
+  .e.simone{background:var(--blu-chiaro)} .e.marco{background:var(--arancio-chiaro)} .e.rossa{background:#f6c9c3; color:var(--rosso); font-weight:700}
+  .az{display:flex; flex-direction:column; gap:6px}
+  .az button{min-height:40px; padding:6px 10px; font-size:14px}
+  /* Vista grande, per il proiettore */
+  body.grande .controlli, body.grande .conti, body.grande .az, body.grande .d.nascosta{display:none}
+  body.grande .foglio{max-width:none; padding:28px 40px}
+  body.grande h1{font-size:40px}
+  body.grande .d{font-size:28px; padding:18px 22px; margin:14px 0}
+  body.grande .v{font-size:36px; min-width:80px}
+  body.grande .m{font-size:18px}
+  /* Sul proiettore: niente parole di servizio, il titolo è quello che vedono i ragazzi. */
+  body.grande .e.rossa{display:none}
+  .titolo-grande{display:none} body.grande .titolo-regia{display:none} body.grande .titolo-grande{display:inline}
+  .esci{display:none} body.grande .esci{display:inline-block; position:fixed; top:12px; right:12px}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+<main class="foglio">
+  <h1><span class="titolo-regia">Regia delle domande</span><span class="titolo-grande">Le domande del gruppo</span></h1>
+
+  <form id="accesso" class="riga">
+    <label for="codice">Codice di regia</label>
+    <input type="password" id="codice" autocomplete="current-password" required>
+    <button class="primo" type="submit">Entra</button>
+  </form>
+  <p class="errore" id="errore" role="alert" hidden></p>
+
+  <div id="dentro" hidden>
+    <div class="controlli riga">
+      <select id="f-chi" aria-label="Filtra per persona">
+        <option value="">Tutte le persone</option><option value="simone">Per Simone</option>
+        <option value="marco">Per Marco</option><option value="entrambi">Per tutti e due</option><option value="non-so">Non so</option>
+      </select>
+      <select id="f-arg" aria-label="Filtra per argomento"><option value="">Tutti gli argomenti</option></select>
+      <select id="f-stato" aria-label="Filtra per stato">
+        <option value="">Tutte</option><option value="aperte">Senza risposta</option><option value="nascoste">Nascoste</option>
+      </select>
+      <button type="button" id="grande">Vista grande</button>
+      <span id="agg" style="color:var(--tenue);font-size:14px"></span>
+    </div>
+    <div class="conti" id="conti"></div>
+    <div id="elenco"></div>
+  </div>
+  <button type="button" class="esci" id="esci">Esci dalla vista grande</button>
+</main>
+
+<script>
+(function(){
+  var URL_DB = 'https://cbsxooaacnwtxnbwwomm.supabase.co/rest/v1/rpc/';
+  var CHIAVE = 'sb_publishable_rYLH1N9DwmtZ3BgsgmkdJQ_Yeut8W55';
+  var SESSIONE = (new URLSearchParams(location.search).get('s') || 'workshop-audio-2026').slice(0, 60);
+  var ARG = {'presa-diretta':'🎙️ Presa diretta', pulizia:'🧽 Pulizia e restauro', montaggio:'✂️ Montaggio', foley:'👣 Effetti e Foley',
+    manipolare:'🌀 Manipolare il suono', musica:'🎹 Musica per immagini', mix:'🎚️ Mix e volume', programmi:'💻 Programmi',
+    lavoro:'🎬 Lavorare nel suono', altro:'❓ Altro'};
+  var CHI = {simone:'per Simone', marco:'per Marco', entrambi:'per tutti e due', 'non-so':'non so'};
+  var codice = null, dati = [];
+  try { codice = sessionStorage.getItem('regia-codice'); } catch (e) {}
+
+  var fArg = document.getElementById('f-arg');
+  Object.keys(ARG).forEach(function(k){ var o = document.createElement('option'); o.value = k; o.textContent = ARG[k]; fArg.appendChild(o); });
+
+  function chiama(f, d){
+    return fetch(URL_DB + f, {method:'POST', headers:{apikey:CHIAVE, 'Content-Type':'application/json'}, body:JSON.stringify(d)})
+      .then(function(r){ return r.text().then(function(t){ var j=null; try{ j = t ? JSON.parse(t) : null; }catch(e){}
+        if (!r.ok) throw new Error((j && j.message) || 'Errore di rete'); return j; }); });
+  }
+  function errore(m){ var e = document.getElementById('errore'); e.textContent = m || ''; e.hidden = !m; }
+
+  function carica(){
+    if (!codice) return;
+    return chiama('regia_elenco', {p_codice: codice, p_sessione: SESSIONE}).then(function(r){
+      dati = r || []; errore('');
+      document.getElementById('accesso').hidden = true; document.getElementById('dentro').hidden = false;
+      document.getElementById('agg').textContent = 'aggiornato alle ' + new Date().toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+      disegna();
+    }).catch(function(e){
+      if (/codice/i.test(e.message)) { codice = null; try { sessionStorage.removeItem('regia-codice'); } catch (x) {}
+        document.getElementById('accesso').hidden = false; document.getElementById('dentro').hidden = true; }
+      errore(e.message);
+    });
+  }
+
+  function e(testo, cl){ var s = document.createElement('span'); s.className = 'e' + (cl ? ' ' + cl : ''); s.textContent = testo; return s; }
+  function bottone(testo, fn){ var b = document.createElement('button'); b.type = 'button'; b.textContent = testo; b.onclick = fn; return b; }
+
+  function disegna(){
+    var chi = document.getElementById('f-chi').value, arg = fArg.value, st = document.getElementById('f-stato').value;
+    // Conteggi sulle domande visibili e senza risposta: sono quelle ancora da trattare.
+    var aperte = dati.filter(function(d){ return !d.nascosta && !d.risposta; });
+    var conti = document.getElementById('conti'); conti.textContent = '';
+    function conto(etichetta, n){ var c = document.createElement('div'); c.className = 'conto'; var b = document.createElement('b'); b.textContent = n;
+      c.appendChild(b); c.appendChild(document.createTextNode(etichetta)); conti.appendChild(c); }
+    conto('domande da trattare', aperte.length);
+    conto('per Simone', aperte.filter(function(d){ return d.per_chi === 'simone'; }).length);
+    conto('per Marco', aperte.filter(function(d){ return d.per_chi === 'marco'; }).length);
+    conto('nascoste o da guardare', dati.filter(function(d){ return d.nascosta; }).length);
+    var perArg = {}; aperte.forEach(function(d){ perArg[d.argomento] = (perArg[d.argomento] || 0) + 1; });
+    Object.keys(perArg).sort(function(a, b){ return perArg[b] - perArg[a]; }).forEach(function(k){ conto(ARG[k] || k, perArg[k]); });
+
+    var el = document.getElementById('elenco'); el.textContent = '';
+    dati.filter(function(d){
+      return (!chi || d.per_chi === chi) && (!arg || d.argomento === arg) &&
+        (!st || (st === 'aperte' && !d.risposta && !d.nascosta) || (st === 'nascoste' && d.nascosta));
+    }).forEach(function(d){
+      var box = document.createElement('div'); box.className = 'd' + (d.nascosta ? ' nascosta' : '') + (d.risposta ? ' fatta' : '');
+      var v = document.createElement('div'); v.className = 'v'; v.textContent = d.voti;
+      var t = document.createElement('div'); t.className = 't';
+      var q = document.createElement('div'); q.textContent = d.testo; t.appendChild(q);
+      var m = document.createElement('div'); m.className = 'm';
+      m.appendChild(e(ARG[d.argomento] || d.argomento)); m.appendChild(e(CHI[d.per_chi], d.per_chi));
+      if (d.filtrata) m.appendChild(e('fermata dal filtro', 'rossa'));
+      else if (d.nascosta) m.appendChild(e('nascosta', 'rossa'));
+      if (d.risposta) m.appendChild(e('✓ risposta data'));
+      m.appendChild(e(new Date(d.creata).toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'})));
+      t.appendChild(m);
+      var az = document.createElement('div'); az.className = 'az';
+      az.appendChild(bottone(d.nascosta ? 'Mostra' : 'Nascondi', function(){ imposta(d.id, {p_nascosta: !d.nascosta}); }));
+      az.appendChild(bottone(d.risposta ? 'Riapri' : '✓ Risposta', function(){ imposta(d.id, {p_risposta: !d.risposta}); }));
+      box.appendChild(v); box.appendChild(t); box.appendChild(az); el.appendChild(box);
+    });
+    if (!el.firstChild) { var p = document.createElement('p'); p.style.color = 'var(--tenue)'; p.textContent = 'Nessuna domanda con questi filtri.'; el.appendChild(p); }
+  }
+
+  function imposta(id, cosa){
+    var d = {p_codice: codice, p_id: id}; Object.keys(cosa).forEach(function(k){ d[k] = cosa[k]; });
+    chiama('regia_imposta', d).then(carica).catch(function(x){ errore(x.message); });
+  }
+
+  document.getElementById('accesso').addEventListener('submit', function(ev){
+    ev.preventDefault(); codice = document.getElementById('codice').value.trim();
+    try { sessionStorage.setItem('regia-codice', codice); } catch (x) {}
+    carica();
+  });
+  ['f-chi', 'f-arg', 'f-stato'].forEach(function(id){ document.getElementById(id).onchange = disegna; });
+  document.getElementById('grande').onclick = function(){ document.body.classList.add('grande'); };
+  document.getElementById('esci').onclick = function(){ document.body.classList.remove('grande'); };
+  document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') document.body.classList.remove('grande'); });
+
+  carica();
+  setInterval(function(){ if (codice && document.visibilityState === 'visible') carica(); }, 5000);
+})();
+</script>
+</body>
+</html>
