@@ -178,9 +178,12 @@ section.block+section.block{border-top:1px solid var(--line)}
 .extra p{color:var(--grey);font-size:.98rem;padding-top:12px;border-top:1px solid var(--line)}
 .extra b{color:var(--ink)}
 
-/* parere degli sposi (resta nascosto finché non c'è il consenso scritto) */
-.parere blockquote{margin:0;max-width:62ch;font-size:clamp(1.1rem,1.8vw,1.3rem);line-height:1.55}
-.parere figcaption{margin-top:16px}
+/* parere degli sposi (testo scritto da Lucia, consenso confermato da Simone l'11/11/2026) */
+.parere blockquote{margin:0;max-width:66ch;padding-left:clamp(16px,2.5vw,28px);border-left:3px solid var(--accent);font-size:clamp(1.02rem,1.4vw,1.12rem);line-height:1.6}
+.parere blockquote p{margin:0 0 .9em}
+.parere blockquote p:last-child{margin-bottom:0}
+.parere figcaption{margin-top:20px;padding-left:clamp(16px,2.5vw,28px);color:var(--grey)}
+.parere figcaption b{color:var(--ink)}
 
 /* come funziona */
 .steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:0}
@@ -546,7 +549,7 @@ footer.piede-unico .firma{color:var(--grey)}
           <li>Voi pensate al resto: l’audio non diventa un problema vostro.</li>
         </ul>
         <div class="ctas">
-          <a class="btn primary" href="mailto:castellansimone@gmail.com?subject=Collaborazione%20audio%20per%20matrimoni&amp;body=Location%20o%20agenzia%3A%0AZona%3A%0AQuanti%20matrimoni%20all%E2%80%99anno%20(indicativo)%3A%0ACome%20gestite%20l%E2%80%99audio%20oggi%3A%0ATelefono%3A%0A">Scrivimi</a>
+          <a class="btn primary" href="mailto:simone@stageplot.it?subject=Collaborazione%20audio%20per%20matrimoni&amp;body=Location%20o%20agenzia%3A%0AZona%3A%0AQuanti%20matrimoni%20all%E2%80%99anno%20(indicativo)%3A%0ACome%20gestite%20l%E2%80%99audio%20oggi%3A%0ATelefono%3A%0A">Scrivimi</a>
           <a class="btn ghost" href="https://wa.me/393404579244?text=Ciao%20Simone%2C%20ti%20scrivo%20dalla%20pagina%20matrimoni%3A%20sono%20una%20location%20%2F%20un%20wedding%20planner." target="_blank" rel="noopener" aria-label="Scrivimi su WhatsApp — si apre in una nuova scheda">Scrivimi su WhatsApp</a>
         </div>
       </div>
@@ -554,15 +557,23 @@ footer.piede-unico .firma{color:var(--grey)}
   </div>
 </section>
 
-<!-- Parere degli sposi: si pubblica solo nella forma scritta da loro e solo con il consenso scritto a metterlo sul sito. Fino ad allora la sezione resta nascosta e vuota. -->
-<section class="block parere" id="parere" aria-labelledby="h-parere" hidden>
+<!-- Parere degli sposi: testo integrale scritto da Lucia (29/10/2026), consenso a pubblicarlo confermato da Simone l'11/11/2026. Non cambiare le parole. -->
+<section class="block parere" id="parere" aria-labelledby="h-parere">
   <div class="wrap">
     <div class="head" style="margin-bottom:28px">
       <h2 id="h-parere">Cosa dicono gli sposi.</h2>
     </div>
     <figure>
-      <blockquote></blockquote>
-      <figcaption></figcaption>
+      <blockquote>
+        <p>Siamo stati molto soddisfatti della scelta di affidarci a questo servizio per il nostro matrimonio, perché desideravamo che la musica rispecchiasse pienamente i nostri gusti e accompagnasse i diversi momenti della giornata, senza necessariamente prevedere la presenza di un DJ.</p>
+        <p>Abbiamo avuto la possibilità di creare personalmente le nostre playlist e di organizzare una vera e propria scaletta musicale, associando brani specifici ai momenti più significativi del ricevimento.</p>
+        <p>Il valore aggiunto è stato poter vivere tutto questo con serenità, sapendo di avere una persona competente che si occupasse della gestione dell’audio, del coordinamento musicale e della supervisione tecnica durante l’intero evento.</p>
+        <p>Un aspetto che abbiamo particolarmente apprezzato è stata la possibilità, durante la festa, di lasciare anche agli invitati la libertà di scegliere e riprodurre le proprie canzoni. Questo ha contribuito a creare un’atmosfera spontanea, coinvolgente e partecipativa, senza la necessità di un intrattenimento musicale strutturato.</p>
+        <p>La presenza di un professionista dedicato ci ha permesso di mantenere la libertà di personalizzare ogni momento, senza doverci preoccupare degli aspetti organizzativi e tecnici.</p>
+        <p>Non abbiamo avvertito la mancanza di un DJ, perché cercavamo un’esperienza diversa: una festa costruita attorno alle nostre preferenze musicali, lasciando spazio anche alla spontaneità degli ospiti.</p>
+        <p>Riteniamo quindi che questo servizio rappresenti un’ottima alternativa per le coppie che desiderano curare personalmente la colonna sonora del proprio matrimonio, senza rinunciare alla tranquillità e alla sicurezza di un’assistenza professionale durante tutta la giornata.</p>
+      </blockquote>
+      <figcaption><b>Lucia</b>, sposa, ottobre 2026</figcaption>
     </figure>
   </div>
 </section>
@@ -578,7 +589,7 @@ footer.piede-unico .firma{color:var(--grey)}
           <li>Se la location non è ancora scelta, scrivetelo lo stesso.</li>
           <li>Lavoro in Veneto, con base fra Bassano del Grappa e Castelfranco Veneto.</li>
         </ul>
-        <p class="mail">Oppure scrivete a <code id="email">castellansimone@gmail.com</code> <button class="copy" type="button" id="copia">Copia indirizzo</button></p>
+        <p class="mail">Oppure scrivete a <code id="email">simone@stageplot.it</code> <button class="copy" type="button" id="copia">Copia indirizzo</button></p>
       </div>
       <form id="modulo" novalidate aria-describedby="nota-privacy">
         <div class="field"><label for="f-nome">Nome</label><input id="f-nome" name="nome" type="text" autocomplete="name" required aria-required="true"></div>
@@ -621,7 +632,7 @@ footer.piede-unico .firma{color:var(--grey)}
 
 <script>
 (function(){
-  var EMAIL = 'castellansimone@gmail.com';
+  var EMAIL = 'simone@stageplot.it';
   var WA = '393404579244';
 
   document.getElementById('copia').addEventListener('click', function(){
