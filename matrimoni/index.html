@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Service audio per matrimoni in Veneto | Simone Castellan</title>
-<meta name="description" content="Tecnico audio per matrimoni in Veneto: impianto, microfoni, musica scelta dagli sposi e una postazione per gli invitati. Senza DJ, senza animazione.">
+<meta name="description" content="Tecnico audio per matrimoni in Veneto: cerimonia, aperitivo, cena e festa. Impianto, microfoni, la vostra musica e gli invitati che scelgono le canzoni.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://simonecastellan.com/matrimoni/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#ffffff">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Voi scegliete la musica che conta. Gli invitati scelgono la festa.">
-<meta property="og:description" content="Tecnico audio per matrimoni in Veneto: impianto, microfoni, musica scelta dagli sposi e una postazione per gli invitati. Senza DJ, senza animazione.">
+<meta property="og:description" content="Tecnico audio per matrimoni in Veneto: cerimonia, aperitivo, cena e festa. Impianto, microfoni, la vostra musica e gli invitati che scelgono le canzoni.">
 <meta property="og:locale" content="it_IT">
 <meta property="og:url" content="https://simonecastellan.com/matrimoni/">
 <meta property="og:image" content="https://simonecastellan.com/matrimoni/og-matrimoni.jpg">
@@ -27,7 +27,7 @@
   "@id": "https://simonecastellan.com/matrimoni/#servizio",
   "name": "Audio per matrimoni",
   "serviceType": ["Service audio per matrimoni", "Tecnico audio per matrimoni", "Impianto audio per matrimoni", "Musica per matrimoni senza DJ"],
-  "description": "Gestione completa dell’audio di un matrimonio: impianto, microfoni, musica scelta dagli sposi nei momenti concordati, più zone audio, supporto tecnico a musicisti, coro e video, e una postazione da cui gli invitati scelgono le canzoni della festa, sotto il controllo del tecnico.",
+  "description": "Gestione completa dell’audio di un matrimonio, dalla cerimonia alla festa: impianto, microfoni senza filo per discorsi e letture, musica scelta dagli sposi nei momenti concordati, più zone audio, supporto tecnico a musicisti, coro e video, e uno schermo da cui gli invitati mettono in coda le canzoni della festa, sotto il controllo del tecnico presente tutta la giornata.",
   "url": "https://simonecastellan.com/matrimoni/",
   "inLanguage": "it",
   "provider": { "@type": "Person", "@id": "https://simonecastellan.com/#person", "name": "Simone Castellan", "jobTitle": "Sound engineer" },
@@ -169,12 +169,21 @@ section.block+section.block{border-top:1px solid var(--line)}
 .honest p+p{margin-top:10px}
 .honest b{color:var(--ink)}
 
-/* io controllo il resto */
-.groups{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(24px,3vw,40px)}
-.groups h3{padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:8px}
-.groups p{color:var(--grey);font-size:.99rem}
-.quote{margin:clamp(56px,8vw,96px) 0 0;padding:0;font-size:clamp(1.65rem,3.8vw,2.9rem);font-weight:700;letter-spacing:-.03em;line-height:1.12;max-width:26ch}
-.quote span{color:var(--accent)}
+
+/* attrezzatura */
+.gear{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(24px,3vw,40px)}
+.gear h3{padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.gear p{color:var(--grey);font-size:.99rem}
+.extra{margin-top:clamp(36px,5vw,56px);display:grid;grid-template-columns:1fr 1fr;gap:12px clamp(24px,4vw,56px);max-width:900px}
+.extra p{color:var(--grey);font-size:.98rem;padding-top:12px;border-top:1px solid var(--line)}
+.extra b{color:var(--ink)}
+
+/* parere degli sposi (testo scritto da Lucia, consenso confermato da Simone l'11/11/2026) */
+.parere blockquote{margin:0;max-width:66ch;padding-left:clamp(16px,2.5vw,28px);border-left:3px solid var(--accent);font-size:clamp(1.02rem,1.4vw,1.12rem);line-height:1.6}
+.parere blockquote p{margin:0 0 .9em}
+.parere blockquote p:last-child{margin-bottom:0}
+.parere figcaption{margin-top:20px;padding-left:clamp(16px,2.5vw,28px);color:var(--grey)}
+.parere figcaption b{color:var(--ink)}
 
 /* come funziona */
 .steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:0}
@@ -254,7 +263,7 @@ footer.piede-unico .firma{color:var(--grey)}
   .steps .n{grid-row:span 2;margin:0;align-items:flex-start}
   .steps .n::after{display:none}
   .rules{grid-template-columns:1fr 1fr}
-  .groups{grid-template-columns:1fr 1fr}
+  .gear{grid-template-columns:1fr 1fr}
   .shots{grid-template-columns:1fr}
   .shots .side{grid-template-columns:1fr 1fr}
 }
@@ -262,7 +271,7 @@ footer.piede-unico .firma{color:var(--grey)}
   .bar nav a.link{display:none}
   .brand small{display:none}
   .bar .btn.small{white-space:nowrap;padding:0 16px}
-  .day,.split,.rules,.groups,.control,form{grid-template-columns:1fr}
+  .day,.split,.rules,.gear,.extra,.control,form{grid-template-columns:1fr}
   .day li{grid-template-columns:1fr;gap:2px}
   .facts dl{grid-template-columns:1fr}
   .facts dl>div,.facts dl>div+div{padding:18px 0;border-left:0}
@@ -285,7 +294,8 @@ footer.piede-unico .firma{color:var(--grey)}
   <div class="wrap">
     <a class="brand" href="#top">Simone Castellan<small>Audio per matrimoni</small></a>
     <nav aria-label="Sezioni">
-      <a class="link" href="#giornata">La giornata</a>
+      <a class="link" href="#giornata">Cosa faccio</a>
+      <a class="link" href="#attrezzatura">Attrezzatura</a>
       <a class="link" href="#festa">La festa</a>
       <a class="link" href="#come-funziona">Come funziona</a>
       <a class="btn primary small" href="#contatti">Raccontami</a>
@@ -300,7 +310,7 @@ footer.piede-unico .firma{color:var(--grey)}
     <div>
       <p class="eyebrow">Responsabile audio per matrimoni · Veneto</p>
       <h1 id="titolo">Voi scegliete la musica che conta. Gli invitati scelgono la festa.</h1>
-      <p class="sub">Io porto l’impianto, faccio partire ogni brano al momento giusto e resto lì a controllare tutto, dall’arrivo degli invitati all’ultimo ballo.</p>
+      <p class="sub">Dalla cerimonia all’ultimo ballo: porto l’impianto, faccio partire ogni brano al momento giusto e resto lì a controllare che tutto si senta bene.</p>
       <p class="lead">Sono Simone Castellan, sound engineer. <b class="forte">Non faccio il DJ e non faccio animazione</b>: mi occupo di tutto l’audio della giornata, così voi potete godervela.</p>
       <div class="ctas">
         <a class="btn primary" href="#contatti">Raccontami il vostro matrimonio</a>
@@ -317,9 +327,9 @@ footer.piede-unico .firma{color:var(--grey)}
 <div class="facts" aria-label="In sintesi">
   <div class="wrap">
     <dl>
-      <div><dt>Cosa faccio</dt><dd>Tutto l’audio del matrimonio: impianto, microfoni, musica, musicisti, video.</dd></div>
-      <div><dt>La musica</dt><dd>La scegliete voi: i brani dei momenti importanti e le vostre playlist.</dd></div>
-      <div><dt>La festa</dt><dd>Gli invitati scelgono le canzoni da una postazione. Io controllo.</dd></div>
+      <div><dt>Cosa faccio</dt><dd>L’audio di tutta la giornata: cerimonia, aperitivo, pranzo o cena, festa.</dd></div>
+      <div><dt>Cosa porto</dt><dd>Casse, mixer, microfoni senza filo. Non dipendete dall’impianto della location.</dd></div>
+      <div><dt>La festa</dt><dd>La musica è la vostra; gli invitati mettono in coda le loro canzoni. Io controllo.</dd></div>
       <div><dt>Dove</dt><dd>In Veneto: fra Bassano del Grappa, Vicenza, Treviso e Padova.</dd></div>
     </dl>
   </div>
@@ -328,20 +338,46 @@ footer.piede-unico .firma{color:var(--grey)}
 <section class="block" id="giornata" aria-labelledby="h-giornata">
   <div class="wrap">
     <div class="head">
-      <h2 id="h-giornata">Un matrimonio non è solo musica.</h2>
-      <p class="lead">In una giornata l’audio cambia molte volte: fuori al buffet, in sala per il pranzo, in giardino al tramonto, di nuovo dentro per la festa. Ogni passaggio va preparato prima, perché il giorno stesso nessuno debba pensarci.</p>
+      <h2 id="h-giornata">Cosa faccio, dalla cerimonia alla festa.</h2>
+      <p class="lead">Ogni momento del matrimonio chiede un audio diverso: parole che si capiscono alla cerimonia, musica di sottofondo all’aperitivo, un volume che lascia parlare a tavola, la pista piena alla festa. Li seguo tutti, dal montaggio allo smontaggio.</p>
     </div>
     <ol class="day">
-      <li><span class="when">La mattina</span><span class="what"><b>Arrivo ore prima.</b> Monto e provo tutto prima degli invitati. Porto io l’impianto: non dipendete da quello della location.</span></li>
-      <li><span class="when">Buffet</span><span class="what"><b>La vostra playlist</b>, all’aperto, al volume giusto per parlare.</span></li>
-      <li><span class="when">Arrivo sposi</span><span class="what"><b>Parte il vostro brano</b>, nel momento esatto in cui entrate.</span></li>
-      <li><span class="when">Annunci</span><span class="what"><b>Pochi e già scritti con voi:</b> invitare in sala, chiamare i tavoli per le foto.</span></li>
-      <li><span class="when">Pranzo</span><span class="what"><b>Ingresso in sala, torta, balli:</b> ogni momento ha il suo brano, nella versione giusta.</span></li>
-      <li><span class="when">Tramonto</span><span class="what"><b>Voi fate le foto, io preparo l’impianto</b> per la sera: l’idea è che nessuno debba aspettare.</span></li>
-      <li><span class="when">Dal vivo</span><span class="what"><b>Musicisti, coro, video:</b> li collego all’impianto e gestisco la sala.</span></li>
-      <li><span class="when">La sera</span><span class="what"><b>Fuori a volume basso, poi dentro</b> per la festa, con la postazione per gli invitati.</span></li>
+      <li><span class="when">La mattina</span><span class="what"><b>Monto e provo tutto prima degli invitati.</b> Porto io l’impianto: non dipendete da quello della location.</span></li>
+      <li><span class="when">Cerimonia</span><span class="what"><b>Un microfono per chi celebra, per le letture e per le promesse</b>, e il vostro brano all’ingresso. Se la cerimonia è in un altro luogo, lo organizziamo prima.</span></li>
+      <li><span class="when">Aperitivo</span><span class="what"><b>La vostra playlist, anche all’aperto</b>, al volume giusto per parlare. Quando arrivate voi, parte il vostro brano.</span></li>
+      <li><span class="when">Pranzo o cena</span><span class="what"><b>Ingresso in sala, torta, balli:</b> ogni momento ha il suo brano. Discorsi e brindisi con il microfono senza filo; pochi annunci, scritti prima con voi.</span></li>
+      <li><span class="when">Tramonto</span><span class="what"><b>Voi fate le foto, io preparo la sera.</b> È la pausa giusta per cambiare l’impianto senza far aspettare nessuno.</span></li>
+      <li><span class="when">Dal vivo</span><span class="what"><b>Musicisti, coro, pianoforte, video:</b> li collego all’impianto e li faccio sentire bene in tutta la sala.</span></li>
+      <li><span class="when">La festa</span><span class="what"><b>Gli invitati scelgono le canzoni</b> da uno schermo vicino alla pista. Io tengo il volume e le regole.</span></li>
+      <li><span class="when">Fine serata</span><span class="what"><b>Smonto e porto via tutto</b>, quando la festa è finita.</span></li>
     </ol>
-    <p class="verdict">Una persona sola segue tutto l’audio, dall’arrivo alla chiusura: avete un solo riferimento per ogni cosa che riguarda il suono.</p>
+    <p class="verdict">Sono presente tutto il tempo. Sposi e location hanno una persona sola per tutto quello che riguarda il suono.</p>
+  </div>
+</section>
+
+<section class="block" id="attrezzatura" aria-labelledby="h-attrezzatura">
+  <div class="wrap">
+    <div class="split" style="align-items:center;margin-bottom:clamp(40px,6vw,64px)">
+      <div class="head" style="margin-bottom:0">
+        <h2 id="h-attrezzatura">Cosa porto.</h2>
+        <p class="lead">L’attrezzatura è mia e la porto io, già provata. Qui sotto, in parole semplici, a cosa serve il giorno del matrimonio.</p>
+      </div>
+      <figure class="ill">
+        <img src="/matrimoni/disegno-regia.webp" width="1200" height="900" alt="Disegno a mano: un tecnico di spalle al mixer sotto un gazebo in giardino, accanto una cassa su stativo e i tavoli apparecchiati." loading="lazy">
+      </figure>
+    </div>
+    <ul class="gear">
+      <li><h3>Casse</h3><p>Tre casse grandi su stativo per giardino, sala e pista, e due più piccole per una seconda sala o per la musica a volume basso. Ogni zona ha il suo volume.</p></li>
+      <li><h3>Mixer</h3><p>Un mixer digitale su una postazione compatta. Lo comando anche da un tablet, così regolo i volumi stando in sala, dove si ascolta davvero.</p></li>
+      <li><h3>Microfoni senza filo</h3><p>Due, per chi celebra, per le letture, i discorsi e i brindisi. Si passano di mano in mano, senza cavi in mezzo ai tavoli.</p></li>
+      <li><h3>Microfoni per la musica</h3><p>Microfoni con asta per voci, strumenti e coro, con cinque aste a giraffa per metterli dove servono.</p></li>
+      <li><h3>Collegamenti</h3><p>Per pianoforte digitale, tastiere, computer e per il mixer di una band. Il video della sera esce dall’impianto, non dalle casse del proiettore.</p></li>
+      <li><h3>La musica</h3><p>Un tablet usato solo per la musica, separato da quello con cui controllo il mixer. Cavi e prolunghe in abbondanza.</p></li>
+    </ul>
+    <div class="extra">
+      <p><b>Su richiesta:</b> proiettore e schermo per il video, a noleggio.</p>
+      <p><b>Non sono compresi:</b> luci, DJ e animazione.</p>
+    </div>
   </div>
 </section>
 
@@ -369,7 +405,7 @@ footer.piede-unico .firma{color:var(--grey)}
           </dl>
         </div>
         <p class="prose" style="margin-top:22px">Gli annunci al microfono li scriviamo prima, con le parole che volete voi. La scaletta della giornata tiene conto dell’ora del tramonto, calcolata per la vostra data e il vostro luogo.</p>
-        <p class="prose">La musica arriva dalle vostre playlist e dai vostri file. Io non scelgo i brani al posto vostro.</p>
+        <p class="prose">Le playlist le preparate voi, sul vostro account Spotify Premium, e se volete le sistemiamo insieme. Per i momenti importanti vi mando un modulo online: un brano per momento, con la versione e il punto in cui parte. Io non scelgo la musica al posto vostro.</p>
       </div>
     </div>
     <p class="note">Il permesso SIAE per la festa lo richiedono gli sposi: vi guido nella richiesta. Il costo dipende dal numero di invitati e dal tipo di musica, ed è indicato sul <a href="https://www.siae.it/it/utilizzatori/feste-private/matrimonio" target="_blank" rel="noopener" aria-label="sito della SIAE (si apre in una nuova scheda)">sito della SIAE</a>.</p>
@@ -381,8 +417,8 @@ footer.piede-unico .firma{color:var(--grey)}
     <div class="split" style="align-items:center;margin-bottom:clamp(40px,6vw,64px)">
     <div class="head" style="margin-bottom:0">
       <span class="badge">In fase di prova</span>
-      <h2 id="h-festa">Alla festa, le canzoni le scelgono gli invitati.</h2>
-      <p class="lead">Vicino alla pista c’è una postazione con uno schermo. Chi vuole si alza, cerca una canzone e la mette in coda, oppure la fa partire subito: il brano in corso sfuma in pochi secondi. Niente animatore: la festa la fanno i vostri amici.</p>
+      <h2 id="h-festa">La festa: gli invitati scelgono le canzoni.</h2>
+      <p class="lead">Accanto alla pista c’è uno schermo touch. Chi vuole si alza, cerca una canzone e la mette in coda. Sotto c’è sempre la vostra playlist: quando nessuno chiede niente, suona quella. Niente animatore: la festa la fanno i vostri amici.</p>
     </div>
     <figure class="ill">
       <img src="/matrimoni/disegno-postazione.webp" width="1200" height="900" alt="Disegno a mano: un invitato di spalle tocca lo schermo della postazione, su un piedistallo accanto alla pista, mentre dietro di lui altri ospiti ballano sotto le lucine." loading="lazy">
@@ -401,15 +437,18 @@ footer.piede-unico .firma{color:var(--grey)}
         </figure>
         <figure class="shot">
           <div class="frame"><img src="/matrimoni/postazione-conferma.webp" width="1100" height="764" alt="Finestra di conferma: «Suonarla adesso?», con la spiegazione che il brano in corso sfuma e il nuovo parte subito." loading="lazy"></div>
-          <figcaption>Prima di interrompere un brano, la postazione chiede conferma.</figcaption>
+          <figcaption>Prima di interrompere un brano, lo schermo chiede conferma.</figcaption>
         </figure>
       </div>
     </div>
 
     <ul class="rules">
       <li><strong>Una postazione, non un QR</strong><span>Per scegliere ci si alza e si va allo schermo. È un gesto che si vede e si fa con gli amici: niente richieste anonime da ogni tavolo.</span></li>
-      <li><strong>Regole contro il caos</strong><span>Fra due «suonala adesso» c’è un’attesa. Lo stesso brano non torna due volte. Durante balli, discorsi e musica dal vivo si può solo mettere in coda.</span></li>
-      <li><strong>Io sono lì</strong><span>Posso togliere un brano dalla coda, saltarlo, fermare la festa per un momento speciale. L’ultima parola è sempre della regia.</span></li>
+      <li><strong>Un’attesa fra due «adesso»</strong><span>Una canzone si può far partire subito: quella in corso sfuma in pochi secondi. Dopo, per qualche minuto, si può solo mettere in coda.</span></li>
+      <li><strong>Niente doppioni</strong><span>Una canzone appena suonata o già in coda non si può chiedere di nuovo.</span></li>
+      <li><strong>Pausa per i momenti vostri</strong><span>Durante il vostro ballo, i discorsi e la musica dal vivo le richieste si fermano. Si riaprono subito dopo.</span></li>
+      <li><strong>La vostra playlist resta vostra</strong><span>Suona dal vostro account, non dal mio. Le richieste degli invitati passano davanti, poi si torna lì.</span></li>
+      <li><strong>Io sono lì</strong><span>Posso togliere un brano dalla coda, saltarlo o fermare tutto per un momento speciale. L’ultima parola è della regia.</span></li>
     </ul>
 
     <div class="control">
@@ -419,37 +458,14 @@ footer.piede-unico .firma{color:var(--grey)}
       </figure>
       <div>
         <h3 style="font-size:clamp(1.35rem,2.4vw,1.75rem);letter-spacing:-.02em;line-height:1.2;max-width:24ch">Gli invitati scelgono. Le regole le tengo io.</h3>
-        <p class="prose" style="margin-top:14px">Dalla regia vedo cosa è in coda e cosa è stato chiesto. Quando arriva il vostro ballo blocco le richieste immediate; quando finisce le riapro. Se un brano non c’entra, lo tolgo dalla coda.</p>
+        <p class="prose" style="margin-top:14px">Dalla regia vedo cosa è in coda e cosa è stato chiesto. Quando arriva il vostro ballo fermo le richieste; quando finisce le riapro. Se un brano non c’entra, lo tolgo dalla coda.</p>
       </div>
     </div>
 
     <div class="honest">
-      <p><b>Detto con chiarezza:</b> la postazione è in fase di prova. Non è un prodotto che si noleggia: la porto io e resta sotto il mio controllo per tutta la sera. Le schermate qui sopra vengono dalla versione di prova, con brani di esempio.</p>
-      <p>La postazione usa l’abbonamento di musica in streaming degli sposi (non il mio) e ha bisogno di una connessione internet stabile: la verifichiamo insieme prima del matrimonio.</p>
+      <p><b>Detto con chiarezza:</b> lo schermo con la coda e le regole è in fase di prova, e le schermate qui sopra vengono dalla versione di prova, con brani di esempio. Lo porto a un matrimonio solo dopo averlo collaudato con la musica vera. Se per la vostra data non è pronto, gli invitati scelgono da un tablet vicino alla regia e le regole le tengo io, a mano.</p>
+      <p>La musica passa dal vostro account Spotify Premium, non dal mio. Serve una connessione internet stabile nella location: la verifichiamo insieme prima del matrimonio.</p>
     </div>
-  </div>
-</section>
-
-<section class="block" id="regia" aria-labelledby="h-regia">
-  <div class="wrap">
-    <div class="split" style="align-items:center;margin-bottom:clamp(40px,6vw,64px)">
-      <div class="head" style="margin-bottom:0">
-        <h2 id="h-regia">Voi vi divertite. Io controllo il resto.</h2>
-        <p class="lead">Sono il responsabile audio della giornata. Resto dall’inizio alla fine, dietro il mixer, senza mettermi in mezzo.</p>
-      </div>
-      <figure class="ill">
-        <img src="/matrimoni/disegno-regia.webp" width="1200" height="900" alt="Disegno a mano: un tecnico di spalle al mixer sotto un gazebo in giardino, accanto una cassa su stativo e i tavoli apparecchiati." loading="lazy">
-      </figure>
-    </div>
-    <div class="groups">
-      <div><h3>L’impianto</h3><p>Lo progetto per la vostra location, lo porto, lo monto e lo provo prima degli invitati. A fine festa lo smonto.</p></div>
-      <div><h3>Più zone</h3><p>Esterno, sala, pista e altri ambienti si gestiscono dallo stesso mixer, ognuno con il suo volume. Le zone possibili dipendono dalla location: lo vediamo insieme.</p></div>
-      <div><h3>Microfoni</h3><p>Discorsi, letture, brindisi, annunci. I microfoni li provo prima degli invitati, nel punto in cui verranno usati, così sono pronti quando serve.</p></div>
-      <div><h3>Livelli e continuità</h3><p>Tengo la musica a un volume che permette di parlare a tavola, e controllo che non si fermi.</p></div>
-      <div><h3>Cambi di scena</h3><p>Il tramonto e le foto sono la pausa naturale per preparare la sera, senza che nessuno aspetti.</p></div>
-      <div><h3>Imprevisti</h3><p>Se il programma cambia, mi adeguo io. Le decisioni tecniche le prendo io.</p></div>
-    </div>
-    <p class="quote">Non parlo per ore al microfono e non decido cosa deve piacere agli invitati. <span>Faccio in modo che tutto si senta bene.</span></p>
   </div>
 </section>
 
@@ -466,6 +482,7 @@ footer.piede-unico .firma{color:var(--grey)}
         </div>
         <p class="prose">Un gruppo con il suo mixer mi passa il segnale e io lo porto in tutta la sala. Un coro con pianoforte digitale ha i suoi microfoni, provati prima. Il video della sera esce con l’audio sull’impianto, non dalle casse del proiettore.</p>
         <p class="prose">I musicisti li scegliete voi: io mi occupo che si sentano come devono.</p>
+        <p class="prose"><b style="color:var(--ink)">Non parlo per ore al microfono e non decido cosa deve piacere agli invitati.</b> Faccio in modo che tutto si senta bene.</p>
       </div>
     </div>
   </div>
@@ -480,9 +497,9 @@ footer.piede-unico .firma{color:var(--grey)}
     <ol class="steps">
       <li><span class="n">01</span><h3>Ci conosciamo</h3><p>Mi raccontate data, location, invitati e cosa avete in mente. Se serve, vengo a vedere il posto.</p></li>
       <li><span class="n">02</span><h3>Costruiamo la musica</h3><p>Il piano musicale momento per momento, gli annunci e la scaletta della giornata con l’ora del tramonto.</p></li>
-      <li><span class="n">03</span><h3>Preparo il sistema</h3><p>Impianto, zone, microfoni, musicisti, video e, se la volete, la postazione per gli invitati.</p></li>
+      <li><span class="n">03</span><h3>Preparo il sistema</h3><p>Impianto, zone, microfoni, musicisti, video e lo schermo per gli invitati, se lo volete.</p></li>
       <li><span class="n">04</span><h3>Il giorno del matrimonio</h3><p>Arrivo ore prima. Tutto è pronto prima degli invitati e seguo ogni momento.</p></li>
-      <li><span class="n">05</span><h3>La festa è vostra</h3><p>Gli invitati scelgono le canzoni, io tengo le regole. A fine serata smonto e vado.</p></li>
+      <li><span class="n">05</span><h3>La festa è vostra</h3><p>Gli invitati mettono in coda le loro canzoni, io tengo le regole. A fine serata smonto e porto via tutto.</p></li>
     </ol>
   </div>
 </section>
@@ -527,15 +544,37 @@ footer.piede-unico .firma{color:var(--grey)}
       <div>
         <ul class="claims">
           <li>Prima del primo matrimonio facciamo insieme un sopralluogo della sala e del giardino.</li>
+          <li>Porto tutta l’attrezzatura e resto per tutta la giornata, dalla cerimonia alla festa.</li>
           <li>Agli sposi date un unico riferimento per l’audio.</li>
           <li>Voi pensate al resto: l’audio non diventa un problema vostro.</li>
         </ul>
         <div class="ctas">
-          <a class="btn primary" href="mailto:castellansimone@gmail.com?subject=Collaborazione%20audio%20per%20matrimoni&amp;body=Location%20o%20agenzia%3A%0AZona%3A%0AQuanti%20matrimoni%20all%E2%80%99anno%20(indicativo)%3A%0ACome%20gestite%20l%E2%80%99audio%20oggi%3A%0ATelefono%3A%0A">Scrivimi</a>
+          <a class="btn primary" href="mailto:simone@stageplot.it?subject=Collaborazione%20audio%20per%20matrimoni&amp;body=Location%20o%20agenzia%3A%0AZona%3A%0AQuanti%20matrimoni%20all%E2%80%99anno%20(indicativo)%3A%0ACome%20gestite%20l%E2%80%99audio%20oggi%3A%0ATelefono%3A%0A">Scrivimi</a>
           <a class="btn ghost" href="https://wa.me/393404579244?text=Ciao%20Simone%2C%20ti%20scrivo%20dalla%20pagina%20matrimoni%3A%20sono%20una%20location%20%2F%20un%20wedding%20planner." target="_blank" rel="noopener" aria-label="Scrivimi su WhatsApp — si apre in una nuova scheda">Scrivimi su WhatsApp</a>
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- Parere degli sposi: testo integrale scritto da Lucia (29/10/2026), consenso a pubblicarlo confermato da Simone l'11/11/2026. Non cambiare le parole. -->
+<section class="block parere" id="parere" aria-labelledby="h-parere">
+  <div class="wrap">
+    <div class="head" style="margin-bottom:28px">
+      <h2 id="h-parere">Cosa dicono gli sposi.</h2>
+    </div>
+    <figure>
+      <blockquote>
+        <p>Siamo stati molto soddisfatti della scelta di affidarci a questo servizio per il nostro matrimonio, perché desideravamo che la musica rispecchiasse pienamente i nostri gusti e accompagnasse i diversi momenti della giornata, senza necessariamente prevedere la presenza di un DJ.</p>
+        <p>Abbiamo avuto la possibilità di creare personalmente le nostre playlist e di organizzare una vera e propria scaletta musicale, associando brani specifici ai momenti più significativi del ricevimento.</p>
+        <p>Il valore aggiunto è stato poter vivere tutto questo con serenità, sapendo di avere una persona competente che si occupasse della gestione dell’audio, del coordinamento musicale e della supervisione tecnica durante l’intero evento.</p>
+        <p>Un aspetto che abbiamo particolarmente apprezzato è stata la possibilità, durante la festa, di lasciare anche agli invitati la libertà di scegliere e riprodurre le proprie canzoni. Questo ha contribuito a creare un’atmosfera spontanea, coinvolgente e partecipativa, senza la necessità di un intrattenimento musicale strutturato.</p>
+        <p>La presenza di un professionista dedicato ci ha permesso di mantenere la libertà di personalizzare ogni momento, senza doverci preoccupare degli aspetti organizzativi e tecnici.</p>
+        <p>Non abbiamo avvertito la mancanza di un DJ, perché cercavamo un’esperienza diversa: una festa costruita attorno alle nostre preferenze musicali, lasciando spazio anche alla spontaneità degli ospiti.</p>
+        <p>Riteniamo quindi che questo servizio rappresenti un’ottima alternativa per le coppie che desiderano curare personalmente la colonna sonora del proprio matrimonio, senza rinunciare alla tranquillità e alla sicurezza di un’assistenza professionale durante tutta la giornata.</p>
+      </blockquote>
+      <figcaption><b>Lucia</b>, sposa, ottobre 2026</figcaption>
+    </figure>
   </div>
 </section>
 
@@ -550,7 +589,7 @@ footer.piede-unico .firma{color:var(--grey)}
           <li>Se la location non è ancora scelta, scrivetelo lo stesso.</li>
           <li>Lavoro in Veneto, con base fra Bassano del Grappa e Castelfranco Veneto.</li>
         </ul>
-        <p class="mail">Oppure scrivete a <code id="email">castellansimone@gmail.com</code> <button class="copy" type="button" id="copia">Copia indirizzo</button></p>
+        <p class="mail">Oppure scrivete a <code id="email">simone@stageplot.it</code> <button class="copy" type="button" id="copia">Copia indirizzo</button></p>
       </div>
       <form id="modulo" novalidate aria-describedby="nota-privacy">
         <div class="field"><label for="f-nome">Nome</label><input id="f-nome" name="nome" type="text" autocomplete="name" required aria-required="true"></div>
@@ -593,7 +632,7 @@ footer.piede-unico .firma{color:var(--grey)}
 
 <script>
 (function(){
-  var EMAIL = 'castellansimone@gmail.com';
+  var EMAIL = 'simone@stageplot.it';
   var WA = '393404579244';
 
   document.getElementById('copia').addEventListener('click', function(){
