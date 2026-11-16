@@ -150,10 +150,16 @@ def controlla_profilo_non_incorporato(home):
     # profilo venga ricopiato qui, e 520 resta lontanissimo dalle sue 4.300.
     # Il controllo ha già fatto il suo lavoro due volte oggi, e tutte e due le
     # volte quello che andava tolto era una RIPETIZIONE, non un contenuto.
+    #
+    # ALZATA da 520 a 850 il 16/11/2026. La home è diventata anche la pagina dei
+    # servizi di direzione di produzione (quattro voci, l'elenco dei teatri, lo
+    # stage plot, i contatti): contenuto che chi vuole produrre un concerto cerca
+    # proprio lì e che Simone ha approvato dal mockup. Il profilo (4.300 parole)
+    # resta un'altra pagina; 850 impedisce comunque di ricopiarlo qui.
     testo_home = re.sub(r"<!--.*?-->", " ", home, flags=re.S)
     testo_home = re.sub(r"<(script|style).*?</\1>", " ", testo_home, flags=re.S | re.I)
     parole_home = len(re.sub(r"<[^>]+>", " ", testo_home).split())
-    if parole_home > 520:
+    if parole_home > 850:
         errore(f"la home è arrivata a {parole_home} parole di testo: probabile ritorno di "
                f"contenuto che dovrebbe stare in /profilo/ o in llms.txt")
     else:
