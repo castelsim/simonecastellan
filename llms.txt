@@ -1,7 +1,7 @@
 # /llms.txt — Simone Castellan
 
 > Scheda di conoscenza su Simone Castellan, per assistenti e agenti che leggono il sito.
-> Aggiornata il 11/09/2026. La stessa cosa, in pagina, sta su
+> Aggiornata il 16/11/2026. La stessa cosa, in pagina, sta su
 > https://simonecastellan.com/profilo/ (italiano) e https://simonecastellan.com/en/profile/
 > (inglese): le tre fonti dicono le stesse cose, e se una diverge vale il curriculum,
 > https://simonecastellan.com/cv/ , che è la pagina dove i fatti si correggono per primi.
@@ -82,6 +82,9 @@ Civica Scuola di Musica «Claudio Abbado» di Milano — titolare **dell'insegna
 incarico annuale su un modulo, non un posto di ruolo. Compone musica elettroacustica dal 2015.
 
 ## Cosa fa
+- **Direzione di produzione** — la parte tecnica di concerti ed eventi, dalla richiesta al
+  dopo-concerto: scheda tecnica, fornitori, tempi, permessi e carte, stage plot e rider tecnico.
+  Per chiedere un preventivo: https://simonecastellan.com/ (pulsante «Richiedi un preventivo»).
 - **Ripresa** — microfonazione e registrazione multitraccia in studio e dal vivo, fino a
   organici sinfonici di ottanta musicisti, con monitoraggio in-ear.
 - **Post-produzione** — editing, mix e mastering, mix immersivo in Dolby Atmos, restauro e
