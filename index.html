@@ -520,13 +520,15 @@
     /* ── Nuova home del 16/11/2026: servizi, luoghi, stage plot, contatti ── */
     .cta-hero{width:auto; min-width:var(--largo-tasto); padding:0 28px}
     .sub{max-width:640px}
-    .luoghi-elenco{display:block; font-size:13.5px; line-height:1.9; color:#3c4043}
-    .luoghi-elenco em{font-style:normal; color:#9aa0a6; margin:0 5px}
+    .crediti ul.luoghi-elenco{display:block; font-size:13.5px; line-height:1.9; color:#3c4043}
+    .crediti ul.luoghi-elenco li{display:inline; margin:0}
+    .crediti ul.luoghi-elenco li:not(:last-child)::after{content:"·"; color:#9aa0a6; margin:0 7px}
     .nota-luoghi{margin-top:12px; font-size:13px; color:#5f6368; line-height:1.55}
     .crediti .testo{display:block; font-size:14px; line-height:1.65; color:#3c4043}
     .crediti .testo a{color:#3c4043; text-decoration:underline; text-underline-offset:2px}
     .crediti .testo a:hover{color:#0a7d72}
     .sp-fig{margin:14px 0 0; border:1px solid #e3e5e8; border-radius:12px; background:#fff; padding:8px}
+    .sp-fig a.sp-zoom{display:block}
     .sp-fig img{display:block; width:100%; height:auto; border-radius:6px}
     .sp-fig figcaption{font-size:12px; color:#68716d; margin-top:8px; line-height:1.5}
     .sp-fig a{color:#5f6368; text-decoration:underline; text-underline-offset:2px}
@@ -581,7 +583,7 @@
          registrazione, mix (anche Atmos), audio live — e per chi. Ogni parola
          corrisponde a un fatto in CARRIERA AFAM/FATTI_CONFERMATI.md. -->
     <h1>Simone Castellan<span class="lead">Sound engineer e direttore di produzione di concerti ed eventi</span></h1>
-    <p class="sub">Audio dal vivo, registrazione e direzione di produzione per concerti con orchestra ed eventi.<br>Cassola (VI) · tecnico di un’orchestra ritmico sinfonica · sala Dolby Atmos 7.1.4 a Castelfranco Veneto</p>
+    <p class="sub">Audio dal vivo, registrazione e organizzazione tecnica per orchestre, band ed eventi.<br>Cassola (VI) · con un’orchestra ritmico sinfonica dal&nbsp;2019 · sala Dolby Atmos 7.1.4 a Castelfranco&nbsp;Veneto</p>
 
     <!-- ── LA FASCIA DELLE CREDENZIALI ──────────────────────────────────────
          Stavano tutte nel paragrafo in fondo, sotto la piega: chi guardava la
@@ -660,21 +662,21 @@
       <h2>Per un concerto o un evento</h2>
       <ul>
         <li><b>Direzione di produzione</b>
-          <span>Dalla richiesta al dopo-concerto: scheda tecnica, fornitori, tempi, permessi e carte, checklist per ogni fase. Ci sono io a coordinare.</span></li>
+          <span>Dalla richiesta al dopo-concerto: scheda tecnica, fornitori, tempi, permessi e carte, checklist per ogni fase. Un solo referente per teatro, service e musicisti.</span></li>
         <li><b>Audio dal vivo</b>
           <span>Impianto, mixer, monitor e in-ear, per orchestre, band e cori; mix in sala e per la diretta.</span></li>
         <li><b>Stage plot, channel list e rider</b>
           <span>Pianta del palco in scala, input list, lista monitor e rider tecnico in PDF, pronti da mandare al teatro o al service.</span></li>
         <li><b>Registrazione multitraccia in concerto</b>
-          <span>Ripresa, editing, mix e master, anche in Dolby Atmos.</span></li>
+          <span>Ripresa, editing, mix e mastering, anche in Dolby Atmos.</span></li>
       </ul>
-      <p class="nota-luoghi">Raccontami l’evento: data, luogo, quanti musicisti. Ti dico cosa serve.</p>
+      <p class="nota-luoghi">Raccontami l’evento e ti dico cosa serve.</p>
     </section>
 
     <section class="crediti" aria-label="Dove ho lavorato">
-      <h2>Teatri e luoghi dove ho lavorato con l’orchestra</h2>
-      <span class="luoghi-elenco">Arena di Verona<em>·</em>Teatro Ariston, Sanremo<em>·</em>Teatro Verdi, Padova<em>·</em>Gran Teatro Geox, Padova<em>·</em>Teatro Malibran, Venezia<em>·</em>Teatro Ristori, Verona<em>·</em>Teatro Romano, Verona<em>·</em>Teatro Salieri, Legnago<em>·</em>Teatro Lirico Giorgio Gaber, Milano<em>·</em>Teatro Vittorio Emanuele, Messina<em>·</em>Teatro Donizetti, Bergamo<em>·</em>Teatro Regio, Parma<em>·</em>Teatro Carlo Felice, Genova<em>·</em>Teatro Nazionale dell’Opera, Tirana<em>·</em>Palazzo dei Congressi, Lugano</span>
-      <p class="nota-luoghi">Con un’orchestra ritmico sinfonica, dal 2019. Più eventi aziendali e privati.</p>
+      <h2>Teatri e luoghi dove ho lavorato</h2>
+      <ul class="luoghi-elenco"><li>Arena di Verona</li><li>Teatro Ariston, Sanremo</li><li>Teatro Verdi, Padova</li><li>Gran Teatro Geox, Padova</li><li>Teatro Malibran, Venezia</li><li>Teatro Ristori, Verona</li><li>Teatro Romano, Verona</li><li>Teatro Salieri, Legnago</li><li>Teatro Lirico Giorgio Gaber, Milano</li><li>Teatro Vittorio Emanuele, Messina</li><li>Teatro Donizetti, Bergamo</li><li>Teatro Regio, Parma</li><li>Teatro Carlo Felice, Genova</li><li>Teatro Nazionale dell’Opera, Tirana</li><li>Palazzo dei Congressi, Lugano</li></ul>
+      <p class="nota-luoghi">In tournée con un’orchestra ritmico sinfonica, dal 2019. Oltre ai concerti, eventi aziendali e privati.</p>
     </section>
 
     
@@ -723,13 +725,13 @@
       </ul>
     </section>
 
-    <section class="crediti" aria-label="StagePlot">
-      <h2>Lo stage plot lo disegno io</h2>
-      <span class="testo">L’ho trasformato in un programma gratuito. <a href="https://stageplot.it/" target="_blank" rel="noopener">StagePlot.it</a> disegna il palco in scala e ne ricava input list, lista monitor, carichi elettrici e rider tecnico in PDF. Lo uso per ogni concerto; lo può usare chiunque.</span>
+    <section class="crediti" aria-label="Stage plot">
+      <h2>Stage plot e rider tecnico</h2>
+      <span class="testo">Per disegnarli ho scritto un programma gratuito, <a href="https://stageplot.it/" target="_blank" rel="noopener">stageplot.it</a>: pianta del palco in scala, input list, lista monitor, carichi elettrici e rider tecnico in PDF. Lo uso per ogni concerto e lo può usare chiunque.</span>
       <figure class="sp-fig">
-        <img src="/img/esempio-stage-plot.jpg" width="1200" height="849" loading="lazy" decoding="async"
-             alt="Pianta di un palco 8 per 6 metri vista dall’alto, in scala 1:50, con batteria su pedana, tastiere, tromba, sax, basso, chitarra, voce solista e le spie di ascolto, ciascuna con il proprio nome.">
-        <figcaption>Esempio di pianta del palco fatta con StagePlot.it, con una band inventata. · <a href="https://stageplot.it/guida/cos-e-uno-stage-plot/" target="_blank" rel="noopener">Cos’è uno stage plot</a></figcaption>
+        <a href="/img/esempio-stage-plot.jpg" class="sp-zoom" aria-label="Apri l’esempio di stage plot a grandezza piena"><img src="/img/esempio-stage-plot.jpg" width="1200" height="849" loading="lazy" decoding="async"
+             alt="Pianta di un palco 8 per 6 metri vista dall’alto, in scala 1:50, con batteria su pedana, tastiere, tromba, sax, basso, chitarra, voce solista e le spie di ascolto, ciascuna con il proprio nome."></a>
+        <figcaption>Esempio di pianta del palco fatta con stageplot.it, per una band inventata. · <a href="https://stageplot.it/guida/cos-e-uno-stage-plot/" target="_blank" rel="noopener">Cos’è uno stage plot</a></figcaption>
       </figure>
     </section>
 
@@ -753,12 +755,12 @@
           <span class="p-nome">Crastel</span><span class="p-cosa">musica per immagini</span>
         </a>
         <a class="progetto" href="https://stageplot.it/" target="_blank" rel="noopener"
-           data-p="StagePlot" aria-label="StagePlot.it, il tuo palco in scala — si apre in una nuova scheda">
+           data-p="StagePlot" aria-label="stageplot.it, il tuo palco in scala — si apre in una nuova scheda">
           <!-- «in scala» torna: è il fatto tecnico che distingue StagePlot da un
                disegno qualsiasi, e stava già in due punti del sito («disegnare
                stage plot in scala reale» nel profilo, «stage plot in scala» in
                /tools/). Era uscito dalla home nella riscrittura del 15/08. -->
-          <span class="p-nome">StagePlot</span><span class="p-cosa">il tuo palco in scala</span>
+          <span class="p-nome">stageplot.it</span><span class="p-cosa">il tuo palco in scala</span>
         </a>
         <a class="progetto" href="/tools/" data-p="Tools"
            aria-label="Tools, strumenti utili in locale">
@@ -802,7 +804,7 @@
            in coda (testo ridotto a metà); richiudibile — scartata: a un
            contenuto che si apre con un clic i motori danno meno peso di uno
            visibile, e qui è proprio il testo che serviva. -->
-      <p>Simone Castellan è un <strong>sound engineer e direttore di produzione</strong> di concerti ed eventi. Lavora dal 2019 con un’orchestra ritmico sinfonica e cura la parte tecnica, dallo stage plot al palco, dal mixer alla registrazione: ripresa multitraccia, editing, mix stereo e in Dolby Atmos, mastering per discografia, televisione e broadcast. Dal 2019 è responsabile operativo di una sala di mix Dolby Atmos 7.1.4 certificata a Castelfranco Veneto. È diplomato in Musica elettronica al Conservatorio di Castelfranco Veneto (110 e lode) ed è idoneo nella procedura comparativa del Conservatorio di Rovigo per l’a.a. 2025/26. Vive e lavora a Cassola, in provincia di Vicenza.</p>
+      <p>Simone Castellan è un <strong>sound engineer e direttore di produzione</strong> di concerti ed eventi. Dal 2019 lavora con un’orchestra ritmico sinfonica e ne cura la parte tecnica, dallo stage plot al palco, dal mixer alla registrazione: ripresa multitraccia, editing, mix stereo e in Dolby Atmos, mastering per discografia, televisione e broadcast. Dallo stesso anno è responsabile operativo di una sala di mix Dolby Atmos 7.1.4 certificata a Castelfranco Veneto. Ha il diploma accademico di II livello in Musica elettronica del Conservatorio «A. Steffani» di Castelfranco Veneto (110/110 e lode) ed è idoneo nella procedura comparativa pubblica del Conservatorio «F. Venezze» di Rovigo per l’a.a. 2025/26. Vive e lavora a Cassola, in provincia di Vicenza.</p>
 
       <p>Dal vivo: referente tecnico per le produzioni complete, registrazione multitraccia in concerto,
         sonorizzazione di eventi e produzioni televisive,
@@ -825,7 +827,7 @@
          momento in cui una domanda diretta costa meno di un modulo. -->
     <section class="contatti-blocco" id="contatti" aria-label="Contatti">
       <h2>Contatti</h2>
-      <p class="dom">Hai un concerto o un evento da produrre? Scrivimi data, luogo e quanti musicisti.</p>
+      <p class="dom">Hai un concerto o un evento da produrre? Scrivimi data, luogo e quanti musicisti: ti mando un preventivo.</p>
       <a class="cta cta-hero" id="ctaFine"
          href="https://wa.me/393404579244?text=Ciao%20Simone%2C%20ti%20scrivo%20dal%20tuo%20sito%3A%20vorrei%20organizzare%20un%20concerto%20o%20un%20evento%20il%20%E2%80%A6%20a%20%E2%80%A6"
          target="_blank" rel="noopener"
@@ -835,11 +837,11 @@
         <a id="vcard" href="/simone-castellan.vcf" download>Scarica la scheda contatto (vCard)</a>
       </div>
       <p class="askline">Preferisci farti raccontare chi sono? La domanda è già pronta.</p>
-    <div class="pills" id="pills"></div>
-    <noscript>
-      <p class="ns">Il pulsante di ChatGPT richiede JavaScript. Il profilo completo è leggibile qui:
-        <a href="/profilo/">simonecastellan.com/profilo</a></p>
-    </noscript>
+      <div class="pills" id="pills"></div>
+      <noscript>
+        <p class="ns">Il pulsante di ChatGPT richiede JavaScript. Il profilo completo è leggibile qui:
+          <a href="/profilo/">simonecastellan.com/profilo</a></p>
+      </noscript>
     </section>
     </div><!-- /.sotto -->
 
