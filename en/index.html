@@ -15,8 +15,8 @@
     lingua. Le formule che contano sono le stesse delle altre pagine, e
     tools/verifica.py le controlla qui come là.
   -->
-  <title>Simone Castellan — Sound engineer and production manager</title>
-  <meta name="description" content="Sound engineer and production manager for concerts and events, based in Italy: live sound, orchestral recording, mixing, Dolby Atmos.">
+  <title>Simone Castellan — Stage manager · stageplot.it</title>
+  <meta name="description" content="Stage manager and sound engineer for concerts with orchestra and band, based in Italy: technical advance, stage plots and stage, with stageplot.it.">
   <meta name="author" content="Simone Castellan">
   <link rel="canonical" href="https://simonecastellan.com/en/">
   <link rel="alternate" hreflang="en" href="https://simonecastellan.com/en/">
@@ -29,17 +29,17 @@
   <meta property="og:locale" content="en_GB">
   <meta property="og:locale:alternate" content="it_IT">
   <meta property="og:site_name" content="Simone Castellan">
-  <meta property="og:title" content="Simone Castellan — Sound engineer and production manager">
-  <meta property="og:description" content="Production management and live sound for orchestral concerts and events. Recording, mixing and Dolby Atmos.">
+  <meta property="og:title" content="Simone Castellan — Stage manager · stageplot.it">
+  <meta property="og:description" content="Stage manager and sound engineer for concerts with orchestra and band: technical advance, stage plots and stage, with stageplot.it.">
   <meta property="og:url" content="https://simonecastellan.com/en/">
-  <meta property="og:image" content="https://simonecastellan.com/og-image.png?v=2">
+  <meta property="og:image" content="https://simonecastellan.com/img/og-stage-manager-en.png?v=1">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Simone Castellan">
+  <meta property="og:image:alt" content="Simone Castellan — Stage manager · stageplot.it">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Simone Castellan — Sound engineer and production manager">
-  <meta name="twitter:description" content="Production management and live sound for orchestral concerts and events. Recording, mixing and Dolby Atmos.">
-  <meta name="twitter:image" content="https://simonecastellan.com/og-image.png?v=2">
+  <meta name="twitter:title" content="Simone Castellan — Stage manager · stageplot.it">
+  <meta name="twitter:description" content="Stage manager and sound engineer for concerts with orchestra and band: technical advance, stage plots and stage, with stageplot.it.">
+  <meta name="twitter:image" content="https://simonecastellan.com/img/og-stage-manager-en.png?v=1">
   <!-- La persona si nomina, non si ridefinisce: premi, titoli e scuole stanno
        solo in /profilo/, perché tutte le pagine usano lo stesso @id e i motori
        fondono i nodi — due elenchi di premi si sommerebbero. -->
@@ -61,7 +61,7 @@
         "@id": "https://simonecastellan.com/#person",
         "name": "Simone Castellan",
         "url": "https://simonecastellan.com/",
-        "jobTitle": "Sound engineer and production manager for concerts and events",
+        "jobTitle": "Stage manager and sound engineer for orchestral concerts",
         "mainEntityOfPage": "https://simonecastellan.com/profilo/"
       }
     ]
@@ -96,6 +96,16 @@
     /* Il paese, in una riga sola: per chi scrive dall'estero è la prima domanda
        pratica, e sulla home italiana non serve perché lì si dà per scontato. */
     .dove{margin-top:12px; font-size:14px; color:#5f6368}
+    /* Il sottotitolo come nella home italiana (17/11/2026): la figura e lo strumento. */
+    .lead.ruolo{
+      max-width:none; margin-top:14px;
+      font-size:clamp(21px,3.6vw,27px); font-weight:600; color:#0f1614;
+      letter-spacing:-.35px; line-height:1.25;
+    }
+    .lead.ruolo a{color:#0a7d72; text-decoration:none; border-bottom:2px solid rgba(10,125,114,.35)}
+    .lead.ruolo a:hover{border-bottom-color:#0a7d72}
+    .lead.ruolo .punto{color:#b5bab8; font-weight:400; margin:0 .32em}
+    .riga2{max-width:560px; margin:10px auto 0; font-size:clamp(15px,2.1vw,17px); color:#3c4043; line-height:1.5}
 
     :root{--largo-tasto:230px}
     .cta{
@@ -189,6 +199,14 @@
     @media (max-width:680px){
       .cta{width:var(--largo-tasto); max-width:82%}
     }
+    /* Bersaglio da dito per il link del sottotitolo (17/11/2026), come nella home italiana. */
+    @media (max-width:620px), (pointer:coarse){
+      .lead.ruolo a{position:relative}
+      .lead.ruolo a::after{
+        content:""; position:absolute; left:50%; top:50%;
+        width:calc(100% + 14px); min-width:44px; height:44px;
+        transform:translate(-50%,-50%)}
+    }
   </style>
   <link rel="stylesheet" href="/comune/piede.css" />
 </head>
@@ -199,7 +217,8 @@
   </nav>
 
   <main>
-    <h1>Simone Castellan<span class="lead">Sound engineer and production manager for concerts and events</span></h1>
+    <h1>Simone Castellan<span class="lead ruolo">Stage manager<span class="punto" aria-hidden="true">·</span><a href="https://stageplot.it/" target="_blank" rel="noopener" hreflang="it">stageplot.it</a></span></h1>
+    <p class="riga2">Concerts with orchestra and band · sound engineer</p>
     <p class="dove">Based in Italy, working in Italy and abroad</p>
 
     <!-- «Contact me» per coerenza con «Contattami» della home, parola scelta da
@@ -248,12 +267,14 @@
       </section>
 
       <section class="inbreve" aria-label="About Simone Castellan">
-        <p>Simone Castellan is a <strong>sound engineer</strong> and electroacoustic
-          composer. He works across the whole sound chain, from microphone to master:
+        <p>Simone Castellan is a <strong>stage manager and sound engineer</strong> for
+          concerts with orchestra and band, and the author of
+          <a href="https://stageplot.it/" hreflang="it">stageplot.it</a>, the tool he
+          prepares stages with. He is also an electroacoustic composer, and works across the whole sound chain, from microphone to master:
           multitrack recording, editing, mixing and mastering for records, television and
           broadcast. Since 2019 he has been the operations manager of a Dolby-certified
           Dolby Atmos 7.1.4 mixing room in Castelfranco Veneto.</p>
-        <p>Live: technical point of contact for complete productions, multitrack concert
+        <p>Live: stage management and technical advance, multitrack concert
           recording, sound for events and television productions. He teaches
           Electroacoustic Music 2 at the Civica Scuola di Musica Claudio Abbado in Milan,
           and builds <a href="/tools/" hreflang="it">audio tools that run in the browser</a>
