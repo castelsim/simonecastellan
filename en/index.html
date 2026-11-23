@@ -120,10 +120,7 @@
     .cta:active{transform:scale(.985)}
     .cta:focus-visible{outline:2px solid #0a7d72; outline-offset:3px}
 
-    .contact{margin-top:22px; font-size:13px; color:#5f6368}
-    .contact a{color:#5f6368; text-decoration:none; border-bottom:1px solid #c2c6cc; padding-bottom:1px}
-    .contact a:hover{color:#1a1a1a}
-
+    .cta-hero{width:auto; min-width:var(--largo-tasto); padding:0 28px}
     .sotto{
       max-width:620px; width:100%; margin:44px auto 0; padding-top:26px;
       border-top:1px solid #eef0f2;
@@ -167,14 +164,6 @@
     .inbreve a:hover{color:#1a1a1a}
     @media (max-width:620px){ .inbreve{font-size:13.5px} }
 
-    .cta-finale{
-      margin-top:30px; padding-top:22px;
-      border-top:1px solid #eef0f2;
-      text-align:left; font-size:14px; line-height:1.6; color:#5f6368;
-    }
-    .cta-finale a{color:#0f1614; font-weight:600; text-decoration:underline; text-underline-offset:3px}
-    .cta-finale a:hover{color:#0a7d72}
-
     .nav{border-bottom:1px solid #eef0f2; padding:19px 24px; text-align:center;
       font-size:13px; line-height:1; letter-spacing:.1px}
     .nav a{color:#68716d; text-decoration:none; transition:color .15s ease}
@@ -186,14 +175,68 @@
     .credit a{color:#6b7075; text-decoration:none; border-bottom:1px solid #d6d9de}
     .credit a:hover{color:#1a1a1a}
 
+    /* Home of 23/11/2026: same rules as the Italian home. */
+    .crediti{margin-top:34px}
+    .sotto > .crediti:first-child{margin-top:0}
+    .crediti ul.luoghi-elenco{display:block; font-size:13.5px; line-height:1.9; color:#3c4043}
+    .crediti ul.luoghi-elenco li{display:inline; margin:0}
+    .crediti ul.luoghi-elenco li:not(:last-child)::after{content:"·"; content:"·" / ""; color:#9aa0a6; margin:0 7px}
+    .nota-luoghi{margin-top:12px; font-size:13px; color:#5f6368; line-height:1.55}
+    .crediti .piu{margin-top:14px; font-size:13.5px; color:#5f6368}
+    .crediti .piu a{position:relative; color:#0a7d72; text-decoration:underline; text-underline-offset:2px}
+    .tre{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:12px}
+    .tasto2{display:inline-flex; align-items:center; justify-content:center; min-height:48px; padding:0 22px;
+      border:1px solid #cfd6d3; border-radius:26px; color:#0f1614; text-decoration:none;
+      font-size:15px; font-weight:600; background:#fff}
+    .tasto2:hover{border-color:#0a7d72}
+    #progetti, #cosa{scroll-margin-top:16px}
+    .progetti{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; text-align:left}
+    .progetto{
+      display:flex; flex-direction:column; gap:3px; padding:13px 16px;
+      border:1px solid #e0e5e3; border-radius:16px;
+      text-decoration:none; transition:border-color .15s ease, transform .15s ease}
+    .progetto:hover{border-color:#0a7d72}
+    .progetto:active{transform:translateY(1px)}
+    .p-nome{display:block; font-size:14px; font-weight:600; color:#0f1614; letter-spacing:-.01em; line-height:1.25}
+    .p-cosa{display:block; font-size:13px; font-weight:400; color:#5f6368; line-height:1.4}
+    .progetto:hover .p-cosa{color:#0f1614}
+    .progetto.grande{grid-column:1 / -1; flex-direction:row; align-items:center; gap:16px; padding:12px}
+    .progetto.grande img{width:46%; height:auto; border-radius:8px; border:1px solid #e3e5e8; flex:0 0 auto}
+    .progetto .t{display:flex; flex-direction:column; gap:4px}
+    .progetto .vai{margin-top:6px; font-size:12.5px; color:#0a7d72}
+    .contatti-blocco{margin-top:44px; text-align:center}
+    .contatti-blocco h2{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#0a7d72; font-weight:500; margin-bottom:8px}
+    .contatti-blocco .dom{font-size:15px; color:#3c4043; max-width:460px; margin:0 auto}
+    .altri-modi{margin-top:20px; font-size:13px; color:#5f6368; display:flex; gap:6px 18px; justify-content:center; flex-wrap:wrap}
+    .altri-modi a{position:relative; color:#5f6368; text-decoration:none; border-bottom:1px solid #c2c6cc; padding-bottom:1px}
+    .altri-modi a:hover{color:#1a1a1a}
+    .fisso{display:none}
+    @media (max-width:620px){
+      .progetto.grande{flex-direction:column; align-items:stretch}
+      .progetto.grande img{width:100%}
+      .fisso{display:flex; position:fixed; left:0; right:0; bottom:0; z-index:40; justify-content:center;
+        padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+        background:linear-gradient(rgba(255,255,255,0),#fff 40%); transition:opacity .2s, visibility .2s}
+      .fisso.nascosto{opacity:0; visibility:hidden; pointer-events:none}
+      .fisso .cta{margin-top:0; width:100%; max-width:340px}
+      body{padding-bottom:78px}
+    }
+    @media (max-width:620px), (pointer:coarse){
+      .progetto{min-height:44px}
+      .crediti .piu a::after, .altri-modi a::after{
+        content:""; position:absolute; left:50%; top:50%;
+        width:calc(100% + 14px); min-width:44px; height:44px;
+        transform:translate(-50%,-50%)}
+    }
+
     /* Bersagli: 24 px col mouse, 44 col dito. Cresce l'area, non il testo. */
-    .nav a, .contact a, .credit a{position:relative; display:inline-block}
-    .nav a::after, .contact a::after, .credit a::after{
+    .nav a, .credit a{position:relative; display:inline-block}
+    .nav a::after, .credit a::after{
       content:""; position:absolute; left:50%; top:50%;
       width:calc(100% + 8px); min-width:24px; height:24px;
       transform:translate(-50%,-50%)}
     @media (max-width:620px), (pointer:coarse){
-      .nav a::after, .contact a::after, .credit a::after{
+      .nav a::after, .credit a::after{
         width:calc(100% + 14px); min-width:44px; height:44px}
     }
     @media (max-width:680px){
@@ -225,74 +268,105 @@
          Simone. Dove porta lo dice l'etichetta accessibile, e lo dice la riga
          in fondo alla pagina. L'indirizzo sta nell'HTML: il pulsante principale
          deve funzionare anche se il JavaScript non parte. -->
-    <a class="cta" id="ctaWa"
+    <a class="cta cta-hero" id="ctaWa"
        href="https://wa.me/393404579244?text=Hi%20Simone%2C%20I%27m%20writing%20from%20your%20website."
        target="_blank" rel="noopener"
        aria-label="Contact me on WhatsApp — opens in a new tab">Contact me</a>
-
-    <div class="contact">
-      Prefer email?
-      <a href="mailto:castellansimone@gmail.com">Write to me</a>
+    <div class="tre">
+      <a class="tasto2" href="#progetti" data-salto="Projects">Projects</a>
+      <a class="tasto2" href="#cosa" data-salto="What I do">What I do</a>
     </div>
 
+    <!-- Home of 23/11/2026: same structure as the Italian home (variant C). -->
     <div class="sotto">
+      <section class="crediti" id="progetti" aria-label="Projects">
+        <h2>Projects</h2>
+        <div class="progetti">
+          <a class="progetto grande" href="https://stageplot.it/" target="_blank" rel="noopener" hreflang="it"
+             data-p="StagePlot" aria-label="stageplot.it, your stage to scale — opens in a new tab">
+            <img src="/img/esempio-stage-plot.jpg" width="1200" height="849" decoding="async"
+                 alt="Top view of an 8 by 6 metre stage plot, scale 1:50, with a drum riser, keyboards, trumpet, sax, bass, guitar, lead vocal and monitor wedges, each labelled.">
+            <span class="t"><span class="p-nome">stageplot.it</span><span class="p-cosa">Stage plot to scale, input list, monitor list and rider in PDF. Free.</span><span class="vai">Open the tool →</span></span>
+          </a>
+          <a class="progetto" href="https://crastelstudio.com" target="_blank" rel="noopener"
+             data-p="Crastel" aria-label="Crastelstudio.com, music for picture — opens in a new tab">
+            <span class="p-nome">Crastel</span><span class="p-cosa">Composition, live electronics, installations and audiovisual production.</span>
+          </a>
+          <a class="progetto" href="/tools/" hreflang="it" data-p="Tools"
+             aria-label="Tools, free audio tools (in Italian)">
+            <span class="p-nome">Tools</span><span class="p-cosa">Free audio tools that run in the browser.</span>
+          </a>
+          <a class="progetto" href="/prompt/" hreflang="it" data-p="Prompt"
+             aria-label="Prompt, for getting an AI agent to work on a project (in Italian)">
+            <span class="p-nome">Prompt</span><span class="p-cosa">For getting an AI agent to work on a project (in Italian).</span>
+          </a>
+          <a class="progetto" href="https://www.avasoundlivemusic.eu/" target="_blank" rel="noopener"
+             data-p="AVA" aria-label="AVA Sound Live Music, the mixing room I run — opens in a new tab">
+            <span class="p-nome">AVA Sound</span><span class="p-cosa">The Dolby Atmos 7.1.4 mixing room I am operations manager of, in Castelfranco Veneto.</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="crediti" id="cosa" aria-label="What I do for a concert or an event">
+        <h2>What I do for a concert or an event</h2>
+        <ul>
+          <li><b>Stage management and technical advance</b>
+            <span>The stage agreed with the theatre before arriving: plan to scale, risers and gear, timings, sheets for the crew.</span></li>
+          <li><b>Stage plot, channel list and rider</b>
+            <span>With stageplot.it: stage plot to scale, input list, monitor list and rider in PDF.</span></li>
+          <li><b>Live sound and recording</b>
+            <span>PA, mixer, monitors and in-ears for orchestras, bands and choirs; multitrack recording, mixing and mastering, also in Dolby Atmos.</span></li>
+          <li><b>Production management</b>
+            <span>For municipalities, local associations and companies: from the request to the day after the concert.</span></li>
+        </ul>
+        <p class="nota-luoghi">Tell me about the event and I will tell you what it needs.</p>
+      </section>
+
+      <section class="crediti" aria-label="Theatres and venues where I have worked">
+        <h2>Theatres and venues where I have worked</h2>
+        <ul class="luoghi-elenco"><li>Arena di Verona</li><li>Teatro Ariston, Sanremo</li><li>Teatro Verdi, Padova</li><li>Gran Teatro Geox, Padova</li><li>Teatro Malibran, Venezia</li><li>Teatro Ristori, Verona</li><li>Teatro Romano, Verona</li><li>Teatro Salieri, Legnago</li><li>Teatro Lirico Giorgio Gaber, Milano</li><li>Teatro Vittorio Emanuele, Messina</li><li>Teatro Donizetti, Bergamo</li><li>Teatro Regio, Parma</li><li>Teatro Carlo Felice, Genova</li><li>Teatro Nazionale dell’Opera, Tirana</li><li>Palazzo dei Congressi, Lugano</li></ul>
+        <p class="nota-luoghi">Besides concerts, corporate and private events.</p>
+      </section>
+
       <section class="crediti" aria-label="Where you can hear my work">
         <h2>Where you can hear my work</h2>
         <ul>
           <li><b>Arena di Verona, live on Rai 1</b> <i>2021 · 2022</i>
-            <span>Recording the backing tracks for Andrea Bocelli (<em>Nessun dorma</em>,
-              SEAT Music Awards 2021) and Mika (<em>Underwater</em>, TIM Music Awards
-              2022)</span></li>
+            <span>Recording the backing tracks for Andrea Bocelli and Mika</span></li>
           <li><b>Griminelli plays Morricone</b> <i>2021</i>
-            <span>Orchestral recording and editing — Andrea Griminelli, conducted by Diego
-              Basso, with Sting, Zucchero and Nek · distributed by Sony Music</span>
-            <a class="ascolta" href="https://open.spotify.com/album/4xjuXCGpPebDFLYcquDnso" target="_blank" rel="noopener"
-               aria-label="Listen on Spotify: Griminelli plays Morricone (opens in a new tab)">Listen on Spotify</a></li>
-          <li><b>EVO — a track from the Netflix series <em>Running for My Truth</em></b> <i>2023</i>
-            <span>Original composer · published by Sounzone</span></li>
-          <li><b>La Geografia del Buio</b> <i>2021</i>
-            <span>Musical assistance in the studio and with the orchestra — Michele Bravi ·
-              Virgin Records / Universal Music Italy</span>
-            <a class="ascolta" href="https://open.spotify.com/album/0SFjLCLRbtMaVaMGuF0PUQ" target="_blank" rel="noopener"
-               aria-label="Listen on Spotify: La Geografia del Buio (opens in a new tab)">Listen on Spotify</a></li>
-          <li><b>Italian national anthem for Rai</b> <i>2022 · 2024 · 2025 · 2026</i>
-            <span>On 2 June 2022 at the Arena di Verona, live on Rai 1: recording engineer
-              for Gianni Morandi’s performance. In 2024, 2025 and 2026: recording, editing
-              and final preparation of the audio for the Republic Day broadcast</span></li>
-          <li><b>Antonio Vivaldi — Lost Concertos for Anna Maria</b> <i>2020</i>
-            <span>Sound engineer and recording assistant — Federico Maria Sardelli</span>
-            <a class="ascolta" href="https://open.spotify.com/album/77jBsBvHeJXkc336mDpPef" target="_blank" rel="noopener"
-               aria-label="Listen on Spotify: Antonio Vivaldi — Lost Concertos for Anna Maria (opens in a new tab)">Listen on Spotify</a></li>
+            <span>Orchestral recording and editing · distributed by Sony Music</span></li>
+          <li><b>EVO, Netflix series <em>Running for My Truth</em></b> <i>2023</i>
+            <span>Original composer</span></li>
+          <li><b>Italian national anthem for Rai</b> <i>2022–2026</i>
+            <span>Recording, editing and final preparation for the Republic Day broadcast</span></li>
         </ul>
+        <p class="piu">The verifiable credits, with catalogue codes, are in the <a href="/en/profile/">full profile</a>.</p>
       </section>
 
       <section class="inbreve" aria-label="About Simone Castellan">
-        <p>Simone Castellan is a <strong>stage manager and sound engineer</strong> for
-          concerts with orchestra and band, and the author of
-          <a href="https://stageplot.it/" hreflang="it">stageplot.it</a>, the tool he
-          prepares stages with. He is also an electroacoustic composer, and works across the whole sound chain, from microphone to master:
-          multitrack recording, editing, mixing and mastering for records, television and
-          broadcast. Since 2019 he has been the operations manager of a Dolby-certified
-          Dolby Atmos 7.1.4 mixing room in Castelfranco Veneto.</p>
-        <p>Live: stage management and technical advance, multitrack concert
-          recording, sound for events and television productions. He teaches
-          Electroacoustic Music 2 at the Civica Scuola di Musica Claudio Abbado in Milan,
-          and builds <a href="/tools/" hreflang="it">audio tools that run in the browser</a>
-          (in Italian) — acoustic measurement, system tuning, conversion — available free
-          of charge.</p>
-        <p><a href="/en/profile/">The full profile</a> lists the verifiable record
-          credits with their catalogue codes, the electroacoustic works and the awards; the
-          <a href="/cv/" hreflang="it">CV</a> is in Italian and downloads as a PDF.</p>
+        <p>Simone Castellan is a <strong>stage manager and sound engineer</strong> for concerts with orchestra and band, and the author of <a href="https://stageplot.it/" hreflang="it">stageplot.it</a>, the tool he prepares stages with. Since 2019 he has been the operations manager of a Dolby-certified Dolby Atmos 7.1.4 mixing room in Castelfranco Veneto.</p>
+        <p>He teaches Electroacoustic Music 2 at the Civica Scuola di Musica Claudio Abbado in Milan.</p>
+        <p>The <a href="/en/profile/">full profile</a> lists the credits, works and awards; the <a href="/cv/" hreflang="it">CV</a> (Italian) downloads as a PDF.</p>
       </section>
 
-      <p class="cta-finale">
-        A project to produce, or a role to fill?
-        <a href="https://wa.me/393404579244?text=Hi%20Simone%2C%20I%27m%20writing%20from%20your%20website."
-           target="_blank" rel="noopener" id="ctaFine"
-           aria-label="Contact me on WhatsApp — opens in a new tab">Contact me on WhatsApp</a>.
-      </p>
+      <section class="contatti-blocco" id="contatti" aria-label="Contact">
+        <h2>Contact</h2>
+        <p class="dom">A concert or an event? Write me the date, the venue and how many musicians.</p>
+        <a class="cta cta-hero" id="ctaFine"
+           href="https://wa.me/393404579244?text=Hi%20Simone%2C%20I%27m%20writing%20from%20your%20website."
+           target="_blank" rel="noopener"
+           aria-label="Contact me on WhatsApp — opens in a new tab">Contact me</a>
+        <div class="altri-modi">
+          <a id="email" href="mailto:castellansimone@gmail.com">Write to me by email</a>
+          <a id="vcard" href="/simone-castellan.vcf" download>Download the contact card (vCard)</a>
+        </div>
+      </section>
     </div>
   </main>
+
+  <!-- Fixed bar on phones only; hidden while one of the two big buttons is in view. -->
+  <div class="fisso" id="fisso"><a class="cta" id="ctaFisso" href="https://wa.me/393404579244?text=Hi%20Simone%2C%20I%27m%20writing%20from%20your%20website." target="_blank" rel="noopener"
+     aria-label="Contact me on WhatsApp — opens in a new tab">Contact me</a></div>
 
   <footer class="piede-unico">
     <a href="/en/">Simone Castellan</a><span class="sep">·</span><a href="/tools/" hreflang="it">Tools</a><span class="sep">·</span><a href="/cv/" hreflang="it">CV</a><span class="sep">·</span><a href="/privacy/" hreflang="it">Privacy</a>
@@ -310,6 +384,24 @@
       }
       segna('ctaWa', 'EN:WhatsApp');
       segna('ctaFine', 'EN:WhatsApp fondo');
+      segna('ctaFisso', 'EN:WhatsApp fissa');
+      segna('email', 'EN:Email');
+      segna('vcard', 'EN:vCard');
+      Array.prototype.forEach.call(document.querySelectorAll('.progetto'), function(a){
+        a.addEventListener('click', function(){ if (window.track) window.track('click', 'EN:Progetto:' + a.dataset.p); });
+      });
+      Array.prototype.forEach.call(document.querySelectorAll('[data-salto]'), function(a){
+        a.addEventListener('click', function(){ if (window.track) window.track('click', 'EN:Salto:' + a.dataset.salto); });
+      });
+      var fisso = document.getElementById('fisso');
+      if (fisso && 'IntersectionObserver' in window) {
+        var visti = {};
+        var io = new IntersectionObserver(function(voci){
+          voci.forEach(function(v){ visti[v.target.id] = v.isIntersecting; });
+          fisso.classList.toggle('nascosto', !!(visti.ctaWa || visti.ctaFine));
+        });
+        ['ctaWa', 'ctaFine'].forEach(function(id){ var el = document.getElementById(id); if (el) io.observe(el); });
+      }
     })();
   </script>
 </body>
