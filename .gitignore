@@ -8,6 +8,8 @@ simone_castellan_modificato.pdf
 *.png
 !og-image.png
 !apple-touch-icon.png
+!img/og-stage-manager.png
+!img/og-stage-manager-en.png
 !posizione/icona-*.png
 !live-production-os/assets/stageplot-preview.png
 .DS_Store
